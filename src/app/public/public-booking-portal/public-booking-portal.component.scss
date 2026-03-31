@@ -1,0 +1,743 @@
+/* ═══════════════════════════════════════════════════════
+   PUBLIC BOOKING PORTAL — Diseño mobile-first, conversión
+   ═══════════════════════════════════════════════════════ */
+
+// ─── Tokens de color (sincronizados con tailwind.config) ──────────────────────
+$primary:  #4F46E5;
+$accent:   #06B6D4;
+$success:  #10B981;
+$warning:  #F59E0B;
+$surface:  #F9FAFB;
+$border:   #E5E7EB;
+$text:     #111827;
+$muted:    #6B7280;
+
+// ─── Mixins ──────────────────────────────────────────────────────────────────
+@mixin card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba($primary, .15);
+  border-color: $primary;
+}
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
+.portal-root {
+  min-height: 100dvh;
+  background: linear-gradient(135deg, rgba($primary,.04) 0%, #fff 50%, rgba($accent,.04) 100%);
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.portal-header {
+  background: #fff;
+  border-bottom: 1px solid $border;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.prof-info {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+}
+
+.prof-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background: $primary;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba($primary, .35);
+}
+
+.prof-name      { font-size: 1.0625rem; font-weight: 800; color: $text; margin: 0; }
+.prof-specialty { font-size: .8125rem;  color: $muted;    margin: 0; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  background: #ECFDF5;
+  color: #065F46;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .375rem .875rem;
+  border-radius: 999px;
+  border: 1px solid #A7F3D0;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: #10B981;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+
+// ─── Main ────────────────────────────────────────────────────────────────────
+.portal-main {
+  flex: 1;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+// ─── Stepper ─────────────────────────────────────────────────────────────────
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-bottom: 2rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+}
+
+.step-bubble {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #F3F4F6;
+  color: $muted;
+  font-size: .8125rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, color .2s, box-shadow .2s;
+
+  &.active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba($primary, .35);
+  }
+
+  &.done {
+    background: $success;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba($success, .3);
+  }
+}
+
+.step-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: $muted;
+  display: none;
+  transition: color .2s;
+
+  @media (min-width: 480px) { display: block; }
+
+  &.active { color: $primary; }
+}
+
+.step-line {
+  width: 2.5rem;
+  height: 2px;
+  background: $border;
+  border-radius: 999px;
+  transition: background .3s;
+
+  &.active { background: $primary; }
+}
+
+// ─── Step content ────────────────────────────────────────────────────────────
+.step-content {
+  @include card;
+  padding: 1.75rem 1.5rem;
+}
+
+.step-header {
+  margin-bottom: 1.5rem;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: $text;
+  margin: 0 0 .25rem;
+}
+
+.step-desc {
+  font-size: .875rem;
+  color: $muted;
+  margin: 0;
+}
+
+// ─── Services grid ───────────────────────────────────────────────────────────
+.services-grid {
+  display: grid;
+  gap: .875rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.service-card {
+  @include card;
+  position: relative;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  border-width: 2px;
+  border-color: transparent;
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+  background: $surface;
+
+  &:hover {
+    border-color: rgba($primary, .3);
+    background: #fff;
+    box-shadow: 0 4px 16px rgba($primary, .1);
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba($primary, .18);
+    transform: translateY(-1px);
+
+    .service-check { opacity: 1; transform: scale(1); }
+    .service-name  { color: $primary; }
+  }
+}
+
+.service-check {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: $primary;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(.5);
+  transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.service-body    { display: flex; flex-direction: column; gap: .375rem; }
+.service-name    { font-size: .9375rem; font-weight: 800; color: $text; transition: color .2s; }
+.service-desc    { font-size: .8125rem; color: $muted; line-height: 1.4; }
+.service-meta    { display: flex; align-items: center; justify-content: space-between; margin-top: .25rem; }
+
+.service-duration {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: $muted;
+}
+
+.service-price {
+  font-size: .9375rem;
+  font-weight: 800;
+  color: $primary;
+}
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+.calendar-section { margin-bottom: 1.5rem; }
+
+.section-label {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: $muted;
+  margin-bottom: .875rem;
+}
+
+.selected-date-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+  color: $primary;
+}
+
+// Days strip
+.days-strip {
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+  padding-bottom: .5rem;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.day-btn {
+  flex-shrink: 0;
+  width: 3.5rem;
+  padding: .75rem .5rem;
+  border-radius: .875rem;
+  border: 1.5px solid $border;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .125rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s, transform .1s;
+
+  &:hover {
+    border-color: rgba($primary, .4);
+    background: rgba($primary, .03);
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: $primary;
+    box-shadow: 0 6px 16px rgba($primary, .35);
+    transform: scale(1.05);
+
+    .day-weekday, .day-number, .day-month { color: #fff; }
+  }
+}
+
+.day-weekday { font-size: .6rem;  font-weight: 700; color: $muted; letter-spacing: .04em; }
+.day-number  { font-size: 1.2rem; font-weight: 800; color: $text; line-height: 1; }
+.day-month   { font-size: .6rem;  font-weight: 700; color: $muted; letter-spacing: .04em; }
+
+// Time slots
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .625rem;
+
+  @media (min-width: 480px) { grid-template-columns: repeat(4, 1fr); }
+  @media (min-width: 640px) { grid-template-columns: repeat(5, 1fr); }
+}
+
+.slot-btn {
+  padding: .875rem .5rem;
+  border-radius: .875rem;
+  border: 1.5px solid $border;
+  background: #fff;
+  font-size: .9375rem;
+  font-weight: 700;
+  color: $text;
+  cursor: pointer;
+  transition: all .15s;
+
+  &:hover {
+    border-color: $accent;
+    color: $accent;
+    background: rgba($accent, .05);
+  }
+
+  &.selected {
+    background: $accent;
+    border-color: $accent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba($accent, .4);
+    transform: scale(1.04);
+  }
+}
+
+// ─── Step 3 grid ─────────────────────────────────────────────────────────────
+.step-3-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+
+  @media (min-width: 680px) {
+    grid-template-columns: 1fr 280px;
+  }
+}
+
+// ─── Form ────────────────────────────────────────────────────────────────────
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.autofill-banner {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: .75rem;
+  font-size: .8125rem;
+  color: #1E40AF;
+  font-weight: 500;
+}
+
+.portal-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 480px) { grid-template-columns: 1fr 1fr; }
+}
+
+.field { display: flex; flex-direction: column; gap: .375rem; }
+
+.field-label {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: $muted;
+}
+
+.optional { text-transform: none; letter-spacing: normal; font-weight: 400; }
+
+.field-input {
+  width: 100%;
+  padding: .9rem 1rem;
+  background: $surface;
+  border: 1.5px solid $border;
+  border-radius: .875rem;
+  font-size: .9375rem;
+  color: $text;
+  transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
+
+  &:focus   { @include focus-ring; }
+  &.error   { border-color: #FCA5A5; background: #FFF5F5; }
+  &.textarea { resize: none; font-family: inherit; }
+}
+
+.field-error { font-size: .75rem; color: #EF4444; margin-left: .25rem; }
+
+// Email wrapper
+.email-wrapper { position: relative; }
+
+.email-status {
+  position: absolute;
+  right: .875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.checking { color: $muted; }
+  &.ok       { background: $success; color: #fff; }
+}
+
+// Login hint banner
+.login-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: 1rem 1.125rem;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: .875rem;
+  font-size: .875rem;
+  color: #92400E;
+
+  svg { flex-shrink: 0; margin-top: 2px; color: $warning; }
+  p   { margin: 0 0 .5rem; line-height: 1.45; }
+}
+
+.hint-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.hint-link {
+  font-weight: 700;
+  color: $primary;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+.hint-or       { color: $muted; font-size: .8125rem; }
+.hint-continue { font-size: .8125rem; color: $muted; font-style: italic; cursor: default; }
+
+// ─── Summary aside ───────────────────────────────────────────────────────────
+.summary-aside { display: flex; flex-direction: column; }
+
+.summary-card {
+  @include card;
+  padding: 1.25rem;
+  position: sticky;
+  top: 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.summary-title {
+  font-size: .875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: $muted;
+  margin: 0;
+}
+
+.summary-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+}
+
+.detail-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: .625rem;
+  background: rgba($primary, .08);
+  color: $primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-label { font-size: .75rem; color: $muted; margin: 0 0 .125rem; }
+.detail-value { font-size: .9rem; font-weight: 700; color: $text; margin: 0; line-height: 1.4; }
+.detail-sub   { font-size: .75rem; color: $muted; margin: 0; }
+
+.summary-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: .75rem;
+  border-top: 1px solid $border;
+  font-size: .875rem;
+  color: $muted;
+  font-weight: 500;
+}
+
+.price-amount {
+  font-size: 1.375rem;
+  font-weight: 900;
+  color: $primary;
+}
+
+.cancel-notice {
+  font-size: .75rem;
+  color: $muted;
+  background: $surface;
+  border-radius: .625rem;
+  padding: .625rem .75rem;
+  line-height: 1.4;
+  border: 1px solid $border;
+}
+
+// ─── Actions ─────────────────────────────────────────────────────────────────
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  gap: .75rem;
+
+  &.space-between { justify-content: space-between; }
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .9rem 2rem;
+  border-radius: 1rem;
+  background: $primary;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba($primary, .4);
+  transition: background .15s, box-shadow .15s, transform .1s;
+
+  &:hover:not(:disabled) {
+    background: darken($primary, 5%);
+    box-shadow: 0 6px 20px rgba($primary, .5);
+  }
+
+  &:active:not(:disabled) { transform: scale(.98); }
+
+  &:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.btn-confirm {
+  @extend .btn-primary;
+  background: $success;
+  box-shadow: 0 4px 14px rgba($success, .4);
+
+  &:hover:not(:disabled) {
+    background: darken($success, 5%);
+    box-shadow: 0 6px 20px rgba($success, .5);
+  }
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: .75rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: $muted;
+  font-size: .9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: .875rem;
+  transition: color .15s, background .15s;
+
+  &:hover { color: $text; background: $surface; }
+}
+
+// ─── Success screen ──────────────────────────────────────────────────────────
+.success-card {
+  max-width: 440px;
+  margin: 0 auto;
+  @include card;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.success-icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: #D1FAE5;
+  color: $success;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-title { font-size: 1.5rem; font-weight: 800; color: $text; margin: 0; }
+.success-sub   { font-size: .9rem;  color: $muted; margin: 0; }
+
+.booking-summary {
+  width: 100%;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: .875rem;
+  color: $muted;
+
+  span:last-child, strong { color: $text; font-weight: 700; }
+}
+
+.ref-code { font-family: monospace; color: $primary !important; font-size: 1rem; font-weight: 900 !important; }
+
+.upsell-banner {
+  width: 100%;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: .875rem;
+  padding: 1rem 1.125rem;
+  font-size: .875rem;
+  color: #1E3A8A;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  align-items: center;
+
+  p { margin: 0; }
+}
+
+.btn-upsell {
+  display: inline-flex;
+  align-items: center;
+  padding: .65rem 1.5rem;
+  background: $primary;
+  color: #fff;
+  font-size: .875rem;
+  font-weight: 700;
+  border-radius: .75rem;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba($primary, .35);
+  transition: background .15s, box-shadow .15s;
+
+  &:hover { background: darken($primary, 5%); box-shadow: 0 5px 14px rgba($primary, .45); }
+}
+
+.cancel-policy { font-size: .75rem; color: $muted; max-width: 320px; line-height: 1.5; }
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+.portal-footer {
+  border-top: 1px solid $border;
+  padding: 1.25rem;
+  text-align: center;
+  font-size: .75rem;
+  color: $muted;
+
+  strong { color: $primary; }
+}
+
+// ─── Spin animation ──────────────────────────────────────────────────────────
+.spin {
+  animation: spin-anim .8s linear infinite;
+}
+
+@keyframes spin-anim {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

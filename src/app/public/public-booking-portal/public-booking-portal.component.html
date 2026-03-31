@@ -1,0 +1,377 @@
+<div class="portal-root">
+
+  <!-- ══════════════════ HEADER ══════════════════ -->
+  <header class="portal-header">
+    <div class="header-inner">
+      <div class="prof-info">
+        <div class="prof-avatar">D</div>
+        <div>
+          <h1 class="prof-name">Dr. Diego Bascur</h1>
+          <p class="prof-specialty">Odontología · Santiago, Chile</p>
+        </div>
+      </div>
+      <span class="status-badge">
+        <span class="status-dot"></span>
+        Disponible
+      </span>
+    </div>
+  </header>
+
+  <main class="portal-main">
+
+    <!-- ══════════════════ CONFIRMACIÓN FINAL ══════════════════ -->
+    @if (isBooked()) {
+      <div @fadeSlide class="success-card">
+        <div class="success-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h2 class="success-title">¡Reserva Confirmada!</h2>
+        <p class="success-sub">Te enviamos un email con todos los detalles.</p>
+
+        <div class="booking-summary">
+          <div class="summary-row">
+            <span>Código</span>
+            <span class="ref-code">{{ bookingRef() }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Fecha</span>
+            <strong>{{ formatDate(selectedDate()) }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Hora</span>
+            <strong>{{ selectedHour() }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Servicio</span>
+            <strong>{{ selectedService()?.name }}</strong>
+          </div>
+        </div>
+
+        @if (isGuest()) {
+          <div class="upsell-banner">
+            <p><strong>¿Quieres acumular historial y puntos?</strong> Crea tu cuenta gratis y vincula esta reserva.</p>
+            <a routerLink="/registro" class="btn-upsell">Crear cuenta gratis</a>
+          </div>
+        }
+
+        <p class="cancel-policy">Puedes cancelar o reagendar con al menos 24 horas de anticipación sin costo.</p>
+      </div>
+    } @else {
+
+      <!-- ══════════════════ STEPPER ══════════════════ -->
+      <div class="stepper">
+        @for (s of [1, 2, 3]; track s) {
+          <div class="step-item">
+            <div class="step-bubble" [class.active]="step() >= s" [class.done]="step() > s">
+              @if (step() > s) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              } @else {
+                {{ s }}
+              }
+            </div>
+            <span class="step-label" [class.active]="step() >= s">
+              {{ s === 1 ? 'Servicio' : s === 2 ? 'Fecha y Hora' : 'Tus datos' }}
+            </span>
+          </div>
+          @if (s < 3) {
+            <div class="step-line" [class.active]="step() > s"></div>
+          }
+        }
+      </div>
+
+      <!-- ══════════════════ PASO 1: SELECCIÓN DE SERVICIO ══════════════════ -->
+      @if (step() === 1) {
+        <div @fadeSlide class="step-content">
+          <div class="step-header">
+            <h2 class="step-title">¿Qué servicio necesitas?</h2>
+            <p class="step-desc">Selecciona el tratamiento que deseas agendar.</p>
+          </div>
+
+          <div class="services-grid">
+            @for (service of activeServices; track service.id) {
+              <button class="service-card" (click)="selectService(service)"
+                [class.selected]="selectedService()?.id === service.id">
+                <div class="service-check">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="service-body">
+                  <h3 class="service-name">{{ service.name }}</h3>
+                  <p class="service-desc">{{ service.description }}</p>
+                  <div class="service-meta">
+                    <span class="service-duration">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      {{ service.duration }} min
+                    </span>
+                    <span class="service-price">{{ formatCLP(service.price) }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          </div>
+
+          <div class="step-actions">
+            <button class="btn-primary" [disabled]="!canGoToStep2()" (click)="goTo(2)">
+              Continuar
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ══════════════════ PASO 2: FECHA Y HORA ══════════════════ -->
+      @if (step() === 2) {
+        <div @fadeSlide class="step-content">
+          <div class="step-header">
+            <h2 class="step-title">Elige tu horario</h2>
+            <p class="step-desc">Solo se muestran horarios disponibles para <strong>{{ selectedService()?.name }}</strong>.</p>
+          </div>
+
+          <!-- Selector de días -->
+          <section class="calendar-section">
+            <h3 class="section-label">Selecciona el día</h3>
+            <div class="days-strip">
+              @for (date of days; track date.toISOString()) {
+                <button class="day-btn" (click)="selectDate(date)"
+                  [class.selected]="isSameDay(date, selectedDate())">
+                  <span class="day-weekday">{{ formatShortDay(date) }}</span>
+                  <span class="day-number">{{ date.getDate() }}</span>
+                  <span class="day-month">{{ formatMonth(date) }}</span>
+                </button>
+              }
+            </div>
+          </section>
+
+          <!-- Selector de horas -->
+          <section class="calendar-section">
+            <h3 class="section-label">
+              Horas disponibles —
+              <span class="selected-date-label">{{ formatDate(selectedDate()) }}</span>
+            </h3>
+            <div class="slots-grid">
+              @for (slot of availableSlots; track slot.time) {
+                <button class="slot-btn" (click)="selectHour(slot.time)"
+                  [class.selected]="selectedHour() === slot.time">
+                  {{ slot.time }}
+                </button>
+              }
+            </div>
+          </section>
+
+          <div class="step-actions space-between">
+            <button class="btn-ghost" (click)="goTo(1)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              Volver
+            </button>
+            <button class="btn-primary" [disabled]="!canGoToStep3()" (click)="goTo(3)">
+              Continuar
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ══════════════════ PASO 3: DATOS + CONFIRMACIÓN ══════════════════ -->
+      @if (step() === 3) {
+        <div @fadeSlide class="step-content step-3-grid">
+
+          <!-- Formulario -->
+          <div class="form-card">
+            <h2 class="step-title">Tus datos de contacto</h2>
+
+            @if (!isGuest()) {
+              <div @pulse class="autofill-banner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Datos completados automáticamente desde tu perfil.
+              </div>
+            }
+
+            <form [formGroup]="form" class="portal-form">
+
+              <!-- Nombre + Teléfono -->
+              <div class="form-row">
+                <div class="field">
+                  <label class="field-label">Nombre completo</label>
+                  <input formControlName="name" type="text" placeholder="Juan Pérez" class="field-input"
+                    [class.error]="f['name'].invalid && f['name'].touched" />
+                  @if (f['name'].invalid && f['name'].touched) {
+                    <span class="field-error">Nombre requerido (mín. 3 caracteres)</span>
+                  }
+                </div>
+                <div class="field">
+                  <label class="field-label">Teléfono</label>
+                  <input formControlName="phone" type="tel" placeholder="+56 9 1234 5678" class="field-input"
+                    [class.error]="f['phone'].invalid && f['phone'].touched" />
+                  @if (f['phone'].invalid && f['phone'].touched) {
+                    <span class="field-error">Teléfono requerido</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Email con verificación -->
+              <div class="field">
+                <label class="field-label">Email</label>
+                <div class="email-wrapper">
+                  <input formControlName="email" type="email" placeholder="juan@email.com" class="field-input"
+                    [class.error]="f['email'].invalid && f['email'].touched" />
+                  @if (emailCheckState() === 'checking') {
+                    <span class="email-status checking">
+                      <svg class="spin" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                      </svg>
+                    </span>
+                  }
+                  @if (emailCheckState() === 'not-found') {
+                    <span class="email-status ok">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                  }
+                </div>
+                @if (f['email'].invalid && f['email'].touched) {
+                  <span class="field-error">Email inválido</span>
+                }
+              </div>
+
+              <!-- Sugerencia de login (no bloqueante) -->
+              @if (showLoginHint()) {
+                <div @pulse class="login-hint">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <div>
+                    <p><strong>¡Ya tienes una cuenta!</strong> Inicia sesión para acumular historial y puntos.</p>
+                    <div class="hint-actions">
+                      <a routerLink="/login" class="hint-link">Iniciar sesión</a>
+                      <span class="hint-or">o</span>
+                      <span class="hint-continue">continuar como invitado</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Notas -->
+              <div class="field">
+                <label class="field-label">Notas adicionales <span class="optional">(Opcional)</span></label>
+                <textarea formControlName="notes" rows="3"
+                  placeholder="¿Algo que el profesional deba saber antes de tu cita?"
+                  class="field-input textarea"></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Resumen lateral -->
+          <aside class="summary-aside">
+            <div class="summary-card">
+              <h3 class="summary-title">Tu reserva</h3>
+
+              <div class="summary-detail">
+                <div class="detail-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="detail-label">Fecha y hora</p>
+                  <p class="detail-value">{{ formatDate(selectedDate()) }}</p>
+                  <p class="detail-value">{{ selectedHour() }}</p>
+                </div>
+              </div>
+
+              <div class="summary-detail">
+                <div class="detail-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="detail-label">Servicio</p>
+                  <p class="detail-value">{{ selectedService()?.name }}</p>
+                  <p class="detail-sub">{{ selectedService()?.duration }} min</p>
+                </div>
+              </div>
+
+              <div class="summary-price">
+                <span>Precio estimado</span>
+                <span class="price-amount">{{ formatCLP(selectedService()?.price || 0) }}</span>
+              </div>
+
+              <div class="cancel-notice">
+                Cancelación gratuita con 24 hs de anticipación.
+              </div>
+            </div>
+          </aside>
+
+        </div>
+
+        <!-- Acciones paso 3 -->
+        <div class="step-actions space-between" style="margin-top: 1.5rem;">
+          <button class="btn-ghost" (click)="goTo(2)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Volver
+          </button>
+          <button class="btn-confirm" (click)="confirmBooking()" [disabled]="isSubmitting()">
+            @if (isSubmitting()) {
+              <svg class="spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              Confirmando...
+            } @else {
+              Confirmar Reserva
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            }
+          </button>
+        </div>
+      }
+
+    }
+  </main>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="portal-footer">
+    Powered by <strong>PRO Dashboard CRM</strong> · Agendamiento profesional en línea
+  </footer>
+
+</div>
