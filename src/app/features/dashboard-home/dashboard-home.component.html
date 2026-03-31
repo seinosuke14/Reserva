@@ -1,0 +1,118 @@
+<div class="space-y-8">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-blue-50 rounded-xl text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center gap-1">
+          +12%
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </span>
+      </div>
+      <h3 class="text-gray-500 text-sm font-medium">Citas de Hoy</h3>
+      <p class="text-3xl font-bold text-secondary mt-1">{{ stats.totalCitas }}</p>
+      <p class="text-xs text-gray-400 mt-2">Programadas para hoy</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-green-50 rounded-xl text-green-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center gap-1">
+          Hoy
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </span>
+      </div>
+      <h3 class="text-gray-500 text-sm font-medium">Ingresos (CLP)</h3>
+      <p class="text-3xl font-bold text-secondary mt-1">{{ formatCLP(stats.ingresos) }}</p>
+      <p class="text-xs text-gray-400 mt-2">Solo pagos confirmados</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-orange-50 rounded-xl text-orange-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">Atención</span>
+      </div>
+      <h3 class="text-gray-500 text-sm font-medium">Pendientes de Pago</h3>
+      <p class="text-3xl font-bold text-secondary mt-1">{{ stats.pendientes }}</p>
+      <p class="text-xs text-gray-400 mt-2">Citas por cobrar hoy</p>
+    </div>
+  </div>
+
+  <!-- Appointments table -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-bold text-secondary">Próximas Citas</h2>
+        <p class="text-sm text-gray-400">Listado detallado para el día de hoy</p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider">
+          <tr>
+            <th class="px-6 py-4 font-semibold">Hora</th>
+            <th class="px-6 py-4 font-semibold">Cliente</th>
+            <th class="px-6 py-4 font-semibold">Servicio</th>
+            <th class="px-6 py-4 font-semibold">Monto</th>
+            <th class="px-6 py-4 font-semibold">Estado de Pago</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (app of todayAppointments; track app.id) {
+            <tr class="hover:bg-gray-50/50 transition-colors">
+              <td class="px-6 py-4"><span class="font-bold text-primary">{{ app.time }}</span></td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-primary text-xs font-bold">
+                    {{ app.clientName.charAt(0) }}
+                  </div>
+                  <span class="font-medium text-secondary">{{ app.clientName }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-gray-500">{{ app.service }}</td>
+              <td class="px-6 py-4 text-gray-500 font-medium">{{ formatCLP(app.amount) }}</td>
+              <td class="px-6 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold"
+                  [class]="app.paymentStatus === 'Pagado' ? 'bg-green-100 text-green-700'
+                          : app.paymentStatus === 'Pendiente' ? 'bg-orange-100 text-orange-700'
+                          : 'bg-red-100 text-red-700'">
+                  {{ app.paymentStatus }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (todayAppointments.length === 0) {
+            <tr>
+              <td colspan="5" class="px-6 py-16 text-center text-gray-400">No hay citas para hoy.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

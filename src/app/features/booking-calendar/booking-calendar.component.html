@@ -1,0 +1,152 @@
+<div class="max-w-4xl mx-auto space-y-8">
+  <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- Header -->
+    <div class="p-8 text-white transition-colors duration-300"
+      [class]="isBlockingMode() ? 'bg-orange-500' : 'bg-primary'">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/80">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <h2 class="text-2xl font-bold">
+            {{ isBlockingMode() ? 'Modo Bloqueo de Agenda' : 'Reserva tu Cita' }}
+          </h2>
+        </div>
+        @if (isProfessional()) {
+          <button (click)="toggleBlockingMode()"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all"
+            [class]="isBlockingMode() ? 'bg-white text-orange-600 hover:bg-orange-50' : 'bg-white/20 hover:bg-white/30 text-white'">
+            @if (isBlockingMode()) {
+              Salir del Modo Bloqueo
+            } @else {
+              Bloquear Horarios
+            }
+          </button>
+        }
+      </div>
+      <p class="text-white/70">
+        {{ isBlockingMode() ? 'Selecciona los horarios que deseas bloquear o desbloquear.' : 'Selecciona el día y la hora que mejor te acomode.' }}
+      </p>
+    </div>
+
+    <div class="p-8 space-y-8">
+
+      <!-- Selector de fecha -->
+      <section>
+        <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          1. Selecciona el Día
+        </h3>
+        <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
+          @for (date of days; track date.toISOString()) {
+            <button (click)="selectDate(date)"
+              class="flex-shrink-0 w-20 h-24 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 border"
+              [class]="isSameDay(date, selectedDate())
+                ? 'bg-primary text-white border-primary shadow-lg scale-105'
+                : 'bg-white text-gray-500 border-gray-100 hover:border-primary/30 hover:bg-primary/5'">
+              <span class="text-[10px] uppercase font-bold opacity-70 mb-1">
+                {{ date.toLocaleDateString('es-ES', { weekday: 'short' }) }}
+              </span>
+              <span class="text-xl font-bold">{{ date.getDate() }}</span>
+              <span class="text-[10px] uppercase font-bold opacity-70 mt-1">
+                {{ date.toLocaleDateString('es-ES', { month: 'short' }) }}
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Grid de horas -->
+      <section>
+        <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          2. Selecciona la Hora
+        </h3>
+
+        @if (isBlockingMode()) {
+          <div class="mb-4 p-3 bg-orange-50 border border-orange-100 rounded-lg flex items-start gap-3 text-orange-800 text-sm">
+            <svg class="text-orange-500 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p>Estás en <strong>Modo Bloqueo</strong>. Haz clic en un horario para bloquearlo o desbloquearlo.</p>
+          </div>
+        }
+
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          @for (slot of timeSlots; track slot.time) {
+            @let blocked = isBlocked(slot.time);
+            @let isSelected = selectedHour() === slot.time;
+            @let disabled = isBlockingMode() ? slot.isOccupied : (slot.isOccupied || blocked);
+
+            <button
+              [disabled]="disabled"
+              (click)="isBlockingMode() ? toggleBlock(slot.time) : selectedHour.set(slot.time)"
+              class="py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden border"
+              [class]="disabled && !isBlockingMode() ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed'
+                      : disabled && isBlockingMode() ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
+                      : blocked && isBlockingMode() ? 'bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200'
+                      : isSelected && !isBlockingMode() ? 'bg-accent text-white border-accent shadow-md scale-105'
+                      : 'bg-white text-secondary border-gray-100 hover:border-accent/50 hover:text-accent'">
+              {{ slot.time }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Resumen selección -->
+      @if (selectedHour() && !isBlockingMode()) {
+        <div @fadeSlide class="bg-accent/5 border border-accent/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-accent font-bold uppercase tracking-wider">Tu Selección</p>
+              <p class="text-secondary font-medium">
+                {{ formatDate(selectedDate()) }} a las <strong>{{ selectedHour() }}</strong>
+              </p>
+            </div>
+          </div>
+          <button (click)="handleConfirm()"
+            class="w-full sm:w-auto bg-accent text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:bg-accent/90 transition-all flex items-center justify-center gap-2">
+            Confirmar y Pagar
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      }
+
+      @if (!selectedHour() && !isBlockingMode()) {
+        <div class="flex items-center gap-2 text-gray-400 justify-center py-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p class="text-sm">Por favor selecciona una hora para continuar</p>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
