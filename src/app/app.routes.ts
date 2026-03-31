@@ -11,10 +11,15 @@ export const routes: Routes = [
     path: 'registro',
     loadComponent: () => import('./features/register/register.component').then(m => m.RegisterComponent)
   },
-  // Perfil público para clientes (link externo de agendamiento)
+  // Perfil público legacy
   {
     path: 'p/:slug',
     loadComponent: () => import('./public/booking-profile/booking-profile.component').then(m => m.BookingProfileComponent)
+  },
+  // Portal de reservas público (nuevo flujo con roles y email check)
+  {
+    path: 'reservar/:slug',
+    loadComponent: () => import('./public/public-booking-portal/public-booking-portal.component').then(m => m.PublicBookingPortalComponent)
   },
 
   // Rutas protegidas (Dashboard)
