@@ -1,10 +1,17 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom, Subscription } from 'rxjs';
+
+import { BookingHeaderComponent } from '../components/booking-header/booking-header.component';
+import { BookingStepIndicatorComponent } from '../components/booking-step-indicator/booking-step-indicator.component';
+import { BookingServiceSelectorComponent } from '../components/booking-service-selector/booking-service-selector.component';
+import { BookingDatetimeSelectorComponent } from '../components/booking-datetime-selector/booking-datetime-selector.component';
+import { BookingFormComponent } from '../components/booking-form/booking-form.component';
+import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
+import { BookingFooterComponent } from '../components/booking-footer/booking-footer.component';
 
 import { formatCLP } from '../../helpers/formatters';
 import { AuthService } from '../../core/services/auth.service';
@@ -36,26 +43,19 @@ type CalCell = { dateStr: string | null; day: number; state: CalCellState };
 @Component({
   selector: 'app-public-booking-portal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    BookingHeaderComponent,
+    BookingStepIndicatorComponent,
+    BookingServiceSelectorComponent,
+    BookingDatetimeSelectorComponent,
+    BookingFormComponent,
+    BookingActionsComponent,
+    BookingFooterComponent
+  ],
   templateUrl: './public-booking-portal.component.html',
-  styleUrl: './public-booking-portal.component.scss',
-  animations: [
-    trigger('fadeSlide', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(20px)' }),
-        animate('300ms cubic-bezier(0.4,0,0.2,1)', style({ opacity: 1, transform: 'translateY(0)' }))
-      ]),
-      transition(':leave', [
-        animate('180ms ease-in', style({ opacity: 0, transform: 'translateY(-8px)' }))
-      ])
-    ]),
-    trigger('pulse', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'scale(0.95)' }),
-        animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
-      ])
-    ])
-  ]
+  styleUrl: './public-booking-portal.component.scss'
 })
 export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly fb     = inject(FormBuilder);
@@ -234,8 +234,21 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.selectedHour.set(time);
   }
 
-  goTo(step: 1 | 2 | 3): void {
-    this.step.set(step);
+  goBack(): void {
+    const current = this.step();
+    if (current > 1) this.step.set((current - 1) as 1 | 2 | 3);
+  }
+
+  goNext(): void {
+    const current = this.step();
+    if (current < 3 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3);
+  }
+
+  getCanProceed(): boolean {
+    if (this.step() === 1) return !!this.selectedService();
+    if (this.step() === 2) return !!this.selectedHour();
+    if (this.step() === 3) return this.form.valid;
+    return false;
   }
 
   async confirmBooking(): Promise<void> {

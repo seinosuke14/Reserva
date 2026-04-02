@@ -1,0 +1,23 @@
+// ─── Tokens de color ─────────────────────────────────────
+$primary:  #4F46E5;
+$accent:   #06B6D4;
+$success:  #10B981;
+$warning:  #F59E0B;
+$surface:  #F9FAFB;
+$border:   #E5E7EB;
+$text:     #111827;
+$muted:    #6B7280;
+
+// ─── Mixins ──────────────────────────────────────────────
+@mixin card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba($primary, .15);
+  border-color: $primary;
+}

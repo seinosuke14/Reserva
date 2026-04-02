@@ -1,0 +1,66 @@
+$primary:  #4F46E5;
+$success:  #10B981;
+$muted:    #6B7280;
+$border:   #E5E7EB;
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-bottom: 2rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+}
+
+.step-bubble {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #F3F4F6;
+  color: $muted;
+  font-size: .8125rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, color .2s, box-shadow .2s;
+
+  &.active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba($primary, .35);
+  }
+
+  &.done {
+    background: $success;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba($success, .3);
+  }
+}
+
+.step-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: $muted;
+  display: none;
+  transition: color .2s;
+
+  @media (min-width: 480px) { display: block; }
+
+  &.active { color: $primary; }
+}
+
+.step-line {
+  width: 2.5rem;
+  height: 2px;
+  background: $border;
+  border-radius: 999px;
+  transition: background .3s;
+
+  &.active { background: $primary; }
+}
