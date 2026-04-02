@@ -252,8 +252,15 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
           name, email, phone, notes,
         })
       );
-      this.bookingRef.set(res.bookingRef);
-      this.isBooked.set(true);
+
+      // Redirigir a Webpay para que el cliente pague
+      if (res.url && res.token) {
+        window.location.href = res.url;
+      } else {
+        // Fallback si no viene URL (no debería pasar)
+        this.bookingRef.set(res.bookingRef);
+        this.isBooked.set(true);
+      }
     } catch (err: any) {
       alert(err?.error?.message ?? 'No se pudo confirmar la reserva. Intenta de nuevo.');
     } finally {
