@@ -99,4 +99,29 @@ export class CustomerDirectoryComponent implements OnInit {
       this.isLoading.set(false);
     }
   }
+
+  async updateAppointmentStatus(appointmentId: string, newStatus: 'Pagado' | 'Cancelado'): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.patch(`${environment.apiUrl}/appointments/${appointmentId}/status`, { paymentStatus: newStatus })
+      );
+
+      // Recargar clientes para reflejar cambios
+      const data = await firstValueFrom(
+        this.http.get<ICustomer[]>(`${environment.apiUrl}/customers`)
+      );
+      this.customers.set(data);
+
+      // Actualizar el cliente seleccionado con los datos nuevos
+      const currentSelected = this.selectedCustomer();
+      if (currentSelected) {
+        const updatedCustomer = data.find(c => c.id === currentSelected.id);
+        if (updatedCustomer) {
+          this.selectedCustomer.set(updatedCustomer);
+        }
+      }
+    } catch (err: any) {
+      this.errorMsg.set('Error al actualizar el estado de la cita.');
+    }
+  }
 }

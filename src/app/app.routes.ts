@@ -16,6 +16,11 @@ export const routes: Routes = [
     path: 'p/:slug',
     loadComponent: () => import('./public/booking-profile/booking-profile.component').then(m => m.BookingProfileComponent)
   },
+  // Resultado de pago Webpay (DEBE ir antes de /reservar/:slug para ser específico)
+  {
+    path: 'reservar/pago-resultado',
+    loadComponent: () => import('./public/payment-result/payment-result.component').then(m => m.PaymentResultComponent)
+  },
   // Portal de reservas público (nuevo flujo con roles y email check)
   {
     path: 'reservar/:slug',

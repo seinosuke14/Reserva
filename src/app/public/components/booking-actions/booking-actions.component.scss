@@ -1,0 +1,79 @@
+$primary:  #4F46E5;
+$success:  #10B981;
+$muted:    #6B7280;
+$surface:  #F9FAFB;
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  gap: .75rem;
+
+  &.space-between { justify-content: space-between; }
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .9rem 2rem;
+  border-radius: 1rem;
+  background: $primary;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba($primary, .4);
+  transition: background .15s, box-shadow .15s, transform .1s;
+
+  &:hover:not(:disabled) {
+    background: darken($primary, 5%);
+    box-shadow: 0 6px 20px rgba($primary, .5);
+  }
+
+  &:active:not(:disabled) { transform: scale(.98); }
+
+  &:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.btn-confirm {
+  @extend .btn-primary;
+  background: $success;
+  box-shadow: 0 4px 14px rgba($success, .4);
+
+  &:hover:not(:disabled) {
+    background: darken($success, 5%);
+    box-shadow: 0 6px 20px rgba($success, .5);
+  }
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: .75rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: $muted;
+  font-size: .9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: .875rem;
+  transition: color .15s, background .15s;
+
+  &:hover { color: #111827; background: $surface; }
+}
+
+@function darken($color, $amount) {
+  @if $color == #4F46E5 {
+    @return #3730A3;
+  } @else if $color == #10B981 {
+    @return #059669;
+  }
+  @return $color;
+}

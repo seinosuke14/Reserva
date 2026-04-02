@@ -1,0 +1,242 @@
+@import '../../styles/shared.scss';
+
+.step-content {
+  @include card;
+  padding: 1.75rem 1.5rem;
+}
+
+.step-header { margin-bottom: 1.5rem; }
+.step-title  { font-size: 1.25rem; font-weight: 800; color: $text; margin: 0 0 .25rem; }
+.step-desc   { font-size: .875rem; color: $muted; margin: 0; }
+
+.calendar-section { margin-bottom: 1.5rem; }
+
+.section-label {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: $muted;
+  margin-bottom: .875rem;
+}
+
+.selected-date-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+  color: $primary;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .875rem;
+}
+
+.cal-month-label {
+  font-size: .9375rem;
+  font-weight: 700;
+  color: $text;
+  text-transform: capitalize;
+}
+
+.cal-nav-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: .625rem;
+  border: 1.5px solid $border;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $muted;
+  transition: all .15s;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: rgba($primary, .06);
+    border-color: rgba($primary, .3);
+    color: $primary;
+  }
+
+  &:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+  }
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: .25rem;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: $muted;
+  padding: .375rem 0;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: .25rem;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: .625rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: .875rem;
+  font-weight: 600;
+  position: relative;
+  border: 1.5px solid transparent;
+  background: transparent;
+
+  &.cal-past, &.cal-unavailable {
+    color: #D1D5DB;
+    cursor: default;
+  }
+
+  &.cal-selectable {
+    color: $text;
+    cursor: pointer;
+    transition: all .15s;
+
+    &:hover {
+      background: rgba($primary, .07);
+      border-color: rgba($primary, .25);
+      color: $primary;
+    }
+  }
+
+  &.cal-available, &.cal-full {
+    @extend .cal-selectable;
+  }
+
+  &.cal-today {
+    border-color: $primary !important;
+    color: $primary;
+    font-weight: 800;
+  }
+
+  &.cal-selected {
+    background: $primary !important;
+    border-color: $primary !important;
+    color: #fff !important;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba($primary, .4);
+
+    .cal-dot { background: rgba(#fff, .75); }
+  }
+
+  &.cal-full {
+    color: #9CA3AF;
+    &:hover { background: rgba(#000, .03); border-color: $border; color: #9CA3AF; }
+  }
+}
+
+.cal-dot {
+  position: absolute;
+  bottom: .2rem;
+  width: .35rem;
+  height: .35rem;
+  border-radius: 50%;
+  background: $primary;
+  transition: background .15s;
+}
+
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: .875rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .7rem;
+  font-weight: 600;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.legend-dot {
+  width: .625rem;
+  height: .625rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.available   { background: $primary; }
+  &.full        { background: #D1D5DB; border: 1.5px solid #9CA3AF; }
+  &.unavailable { background: #F3F4F6; border: 1.5px solid #E5E7EB; }
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .625rem;
+
+  @media (min-width: 480px) { grid-template-columns: repeat(4, 1fr); }
+  @media (min-width: 640px) { grid-template-columns: repeat(5, 1fr); }
+}
+
+.slot-btn {
+  padding: .75rem .5rem;
+  border-radius: .875rem;
+  border: 1.5px solid $border;
+  background: #fff;
+  font-size: .9375rem;
+  font-weight: 700;
+  color: $text;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+
+  &:hover:not(:disabled) {
+    border-color: $accent;
+    color: $accent;
+    background: rgba($accent, .05);
+  }
+
+  &.selected {
+    background: $accent;
+    border-color: $accent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba($accent, .4);
+    transform: scale(1.04);
+  }
+
+  &.occupied {
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+    color: #C4C4C4;
+    cursor: not-allowed;
+
+    &:hover { background: #F9FAFB; border-color: #E5E7EB; color: #C4C4C4; }
+  }
+}
+
+.slot-taken-label {
+  font-size: .55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #D1D5DB;
+}

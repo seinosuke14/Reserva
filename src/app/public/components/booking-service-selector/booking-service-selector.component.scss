@@ -1,0 +1,97 @@
+@import '../../styles/shared.scss';
+
+.step-content {
+  @include card;
+  padding: 1.75rem 1.5rem;
+}
+
+.step-header { margin-bottom: 1.5rem; }
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: $text;
+  margin: 0 0 .25rem;
+}
+
+.step-desc {
+  font-size: .875rem;
+  color: $muted;
+  margin: 0;
+}
+
+.services-grid {
+  display: grid;
+  gap: .875rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.service-card {
+  @include card;
+  position: relative;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  border-width: 2px;
+  border-color: transparent;
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+  background: $surface;
+
+  &:hover {
+    border-color: rgba($primary, .3);
+    background: #fff;
+    box-shadow: 0 4px 16px rgba($primary, .1);
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba($primary, .18);
+    transform: translateY(-1px);
+
+    .service-check { opacity: 1; transform: scale(1); }
+    .service-name  { color: $primary; }
+  }
+}
+
+.service-check {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: $primary;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(.5);
+  transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
+  font-weight: 900;
+}
+
+.service-body { display: flex; flex-direction: column; gap: .375rem; }
+.service-name { font-size: .9375rem; font-weight: 800; color: $text; transition: color .2s; margin: 0; }
+.service-desc { font-size: .8125rem; color: $muted; line-height: 1.4; margin: 0; }
+.service-meta { display: flex; align-items: center; justify-content: space-between; margin-top: .25rem; }
+
+.service-duration {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: $muted;
+}
+
+.service-price {
+  font-size: .9375rem;
+  font-weight: 800;
+  color: $primary;
+}
