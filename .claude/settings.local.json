@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/mini-projectos/api-crm/node_modules/transbank-sdk/tests/webpay/webpay_plus/**)",
+      "Read(//e/mini-projectos/api-crm/**)",
+      "Bash(npm start:*)"
+    ]
+  }
+}
