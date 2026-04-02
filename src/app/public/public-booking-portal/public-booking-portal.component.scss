@@ -298,48 +298,161 @@ $muted:    #6B7280;
   color: $primary;
 }
 
-// Days strip
-.days-strip {
+// ─── Monthly calendar ────────────────────────────────────────────────────────
+.cal-nav {
   display: flex;
-  gap: .5rem;
-  overflow-x: auto;
-  padding-bottom: .5rem;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .875rem;
 }
 
-.day-btn {
-  flex-shrink: 0;
-  width: 3.5rem;
-  padding: .75rem .5rem;
-  border-radius: .875rem;
+.cal-month-label {
+  font-size: .9375rem;
+  font-weight: 700;
+  color: $text;
+  text-transform: capitalize;
+}
+
+.cal-nav-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: .625rem;
   border: 1.5px solid $border;
   background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $muted;
+  transition: all .15s;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: rgba($primary, .06);
+    border-color: rgba($primary, .3);
+    color: $primary;
+  }
+
+  &:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+  }
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: .25rem;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: $muted;
+  padding: .375rem 0;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: .25rem;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: .625rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .125rem;
-  cursor: pointer;
-  transition: border-color .15s, background .15s, box-shadow .15s, transform .1s;
+  justify-content: center;
+  font-size: .875rem;
+  font-weight: 600;
+  position: relative;
+  border: 1.5px solid transparent;
+  background: transparent;
 
-  &:hover {
-    border-color: rgba($primary, .4);
-    background: rgba($primary, .03);
+  &.cal-past, &.cal-unavailable {
+    color: #D1D5DB;
+    cursor: default;
   }
 
-  &.selected {
-    border-color: $primary;
-    background: $primary;
-    box-shadow: 0 6px 16px rgba($primary, .35);
-    transform: scale(1.05);
+  &.cal-selectable {
+    color: $text;
+    cursor: pointer;
+    transition: all .15s;
 
-    .day-weekday, .day-number, .day-month { color: #fff; }
+    &:hover {
+      background: rgba($primary, .07);
+      border-color: rgba($primary, .25);
+      color: $primary;
+    }
+  }
+
+  &.cal-today {
+    border-color: $primary !important;
+    color: $primary;
+    font-weight: 800;
+  }
+
+  &.cal-selected {
+    background: $primary !important;
+    border-color: $primary !important;
+    color: #fff !important;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba($primary, .4);
+
+    .cal-dot { background: rgba(#fff, .75); }
+  }
+
+  &.cal-full {
+    color: #9CA3AF;
+    &:hover { background: rgba(#000, .03); border-color: $border; color: #9CA3AF; }
   }
 }
 
-.day-weekday { font-size: .6rem;  font-weight: 700; color: $muted; letter-spacing: .04em; }
-.day-number  { font-size: 1.2rem; font-weight: 800; color: $text; line-height: 1; }
-.day-month   { font-size: .6rem;  font-weight: 700; color: $muted; letter-spacing: .04em; }
+.cal-dot {
+  position: absolute;
+  bottom: .2rem;
+  width: .35rem;
+  height: .35rem;
+  border-radius: 50%;
+  background: $primary;
+  transition: background .15s;
+}
+
+// Leyenda
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: .875rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .7rem;
+  font-weight: 600;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.legend-dot {
+  width: .625rem;
+  height: .625rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.available   { background: $primary; }
+  &.full        { background: #D1D5DB; border: 1.5px solid #9CA3AF; }
+  &.unavailable { background: #F3F4F6; border: 1.5px solid #E5E7EB; }
+}
 
 // Time slots
 .slots-grid {
@@ -352,7 +465,7 @@ $muted:    #6B7280;
 }
 
 .slot-btn {
-  padding: .875rem .5rem;
+  padding: .75rem .5rem;
   border-radius: .875rem;
   border: 1.5px solid $border;
   background: #fff;
@@ -361,8 +474,12 @@ $muted:    #6B7280;
   color: $text;
   cursor: pointer;
   transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: $accent;
     color: $accent;
     background: rgba($accent, .05);
@@ -375,6 +492,23 @@ $muted:    #6B7280;
     box-shadow: 0 4px 14px rgba($accent, .4);
     transform: scale(1.04);
   }
+
+  &.occupied {
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+    color: #C4C4C4;
+    cursor: not-allowed;
+
+    &:hover { background: #F9FAFB; border-color: #E5E7EB; color: #C4C4C4; }
+  }
+}
+
+.slot-taken-label {
+  font-size: .55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #D1D5DB;
 }
 
 // ─── Step 3 grid ─────────────────────────────────────────────────────────────
@@ -731,6 +865,20 @@ $muted:    #6B7280;
 
   strong { color: $primary; }
 }
+
+// ─── Loading / error screen ──────────────────────────────────────────────────
+.state-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 40vh;
+  color: $muted;
+  font-size: .9375rem;
+}
+
+.state-error { color: #EF4444; font-weight: 600; }
 
 // ─── Spin animation ──────────────────────────────────────────────────────────
 .spin {

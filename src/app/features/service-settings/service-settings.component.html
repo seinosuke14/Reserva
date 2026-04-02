@@ -39,7 +39,7 @@
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </button>
-            <button (click)="toggleStatus(service.id)" [title]="service.isActive ? 'Desactivar' : 'Activar'"
+            <button (click)="toggleStatus(service)" [title]="service.isActive ? 'Desactivar' : 'Activar'"
               class="p-2 rounded-xl transition-all"
               [class]="service.isActive ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50' : 'text-gray-400 hover:text-green-500 hover:bg-green-50'">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
