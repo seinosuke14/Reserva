@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { PaymentService, PaymentMethod } from '../../core/services/payment.service';
 import { formatCLP } from '../../helpers/formatters';
@@ -18,7 +17,6 @@ import { formatCLP } from '../../helpers/formatters';
 })
 export class CheckoutPaymentComponent {
   private readonly paymentSvc = inject(PaymentService);
-  private readonly router     = inject(Router);
 
   readonly formatCLP = formatCLP;
 
@@ -37,7 +35,7 @@ export class CheckoutPaymentComponent {
 
   async handlePayment() {
     this.isLoading.set(true);
-    const result = await this.paymentSvc.processPayment(this.selectedMethod(), this.booking);
+    const result = await this.paymentSvc.processPayment(this.selectedMethod() as PaymentMethod, this.booking);
     this.isLoading.set(false);
     if (result.success) {
       this.transactionId.set(result.transactionId);

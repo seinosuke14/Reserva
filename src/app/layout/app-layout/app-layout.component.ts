@@ -38,6 +38,7 @@ export class AppLayoutComponent {
     { path: '/agenda',        label: 'Agenda',       icon: 'calendar' },
     { path: '/clientes',      label: 'Clientes',     icon: 'users' },
     { path: '/pagos',         label: 'Pagos',        icon: 'credit-card' },
+    { path: '/horario',       label: 'Horario',      icon: 'clock' },
     { path: '/bloqueos',      label: 'Bloqueos',     icon: 'shield-alert' },
     { path: '/configuracion', label: 'Configuración', icon: 'settings' },
   ];

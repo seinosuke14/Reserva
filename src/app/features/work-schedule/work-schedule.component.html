@@ -1,0 +1,137 @@
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <div>
+    <h2 class="text-2xl font-bold text-secondary">Configuración de Horario</h2>
+    <p class="text-sm text-gray-400 mt-1">
+      Define tu disponibilidad semanal. Los clientes solo podrán reservar en los días y rangos horarios que configures aquí.
+    </p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-20 text-gray-400">
+      <span class="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin mr-3"></span>
+      Cargando horario...
+    </div>
+  } @else {
+
+    <!-- Duración de cada cita -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <h3 class="text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Duración de cada cita
+      </h3>
+      <div class="flex gap-3 flex-wrap">
+        @for (dur of durations; track dur) {
+          <button (click)="setSlotDuration(dur)"
+            class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all border"
+            [class]="slotDuration() === dur
+              ? 'bg-primary text-white border-primary shadow-md'
+              : 'bg-white text-gray-500 border-gray-200 hover:border-primary/30 hover:bg-primary/5'">
+            {{ dur }} min
+          </button>
+        }
+      </div>
+      <p class="text-xs text-gray-400">
+        Cada cita ocupa <strong>{{ slotDuration() }} minutos</strong>.
+        Esto genera los bloques de tiempo disponibles dentro de tu horario de atención.
+      </p>
+    </div>
+
+    <!-- Días de la semana -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="divide-y divide-gray-50">
+        @for (day of days; track day.dayOfWeek) {
+          <div class="flex items-center gap-4 px-6 py-4 transition-all"
+            [class]="!day.isWorking ? 'bg-gray-50/50' : ''">
+
+            <!-- Nombre del día -->
+            <div class="w-24 shrink-0">
+              <span class="font-bold text-secondary text-sm">{{ dayLabels[day.dayOfWeek] }}</span>
+              @if (day.dayOfWeek >= 5) {
+                <span class="ml-2 text-[9px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-black uppercase">
+                  Fin
+                </span>
+              }
+            </div>
+
+            <!-- Toggle -->
+            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input type="checkbox" class="sr-only peer"
+                [(ngModel)]="day.isWorking"
+                (ngModelChange)="onToggle(day)">
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer
+                          peer-checked:bg-primary
+                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                          after:bg-white after:rounded-full after:h-5 after:w-5
+                          after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+
+            <!-- Rango horario o etiqueta -->
+            @if (day.isWorking) {
+              <div class="flex items-end gap-2 flex-1 flex-wrap">
+                <div class="flex flex-col gap-0.5">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desde</label>
+                  <input type="time" [(ngModel)]="day.startTime"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-secondary
+                           focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                           transition-all w-32">
+                </div>
+                <span class="text-gray-300 font-bold pb-2 text-lg">—</span>
+                <div class="flex flex-col gap-0.5">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Hasta</label>
+                  <input type="time" [(ngModel)]="day.endTime"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-secondary
+                           focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                           transition-all w-32">
+                </div>
+              </div>
+            } @else {
+              <span class="text-sm text-gray-400 italic">No laborable</span>
+            }
+
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Footer: guardar -->
+    <div class="flex items-center justify-between">
+      <div class="h-8">
+        @if (savedOk()) {
+          <span @fadeSlide class="flex items-center gap-2 text-green-600 text-sm font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Cambios guardados correctamente
+          </span>
+        }
+      </div>
+
+      <button (click)="saveSchedule()" [disabled]="isSaving()"
+        class="bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg
+               hover:shadow-xl hover:bg-primary/90 transition-all
+               disabled:opacity-60 disabled:cursor-not-allowed
+               flex items-center gap-2">
+        @if (isSaving()) {
+          <span class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+          Guardando...
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar Cambios
+        }
+      </button>
+    </div>
+
+  }
+</div>

@@ -1,15 +1,28 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ScheduleBlockService } from '../../core/services/schedule-block.service';
-import { MOCK_TIME_SLOTS } from '../../data/mock-time-slots';
+import { WorkScheduleService, jsToDow } from '../../core/services/work-schedule.service';
+import { environment } from '../../../environments/environment';
+
+interface IAppointment {
+  id: string;
+  date: string;
+  time: string;
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  customer: { id: string; name: string };
+  service:  { id: string; name: string };
+}
+
 
 @Component({
   selector: 'app-booking-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './booking-calendar.component.html',
   animations: [
     trigger('fadeSlide', [
@@ -18,30 +31,102 @@ import { MOCK_TIME_SLOTS } from '../../data/mock-time-slots';
     ])
   ]
 })
-export class BookingCalendarComponent {
-  private readonly router     = inject(Router);
-  private readonly auth       = inject(AuthService);
-  private readonly blockSvc   = inject(ScheduleBlockService);
+export class BookingCalendarComponent implements OnInit {
+  private readonly router    = inject(Router);
+  private readonly http      = inject(HttpClient);
+  private readonly auth      = inject(AuthService);
+  private readonly blockSvc  = inject(ScheduleBlockService);
+  private readonly workSvc   = inject(WorkScheduleService);
 
-  readonly timeSlots    = MOCK_TIME_SLOTS;
-  readonly selectedDate = signal<Date>(new Date());
-  readonly selectedHour = signal<string | null>(null);
+  readonly selectedDate   = signal<Date>(new Date());
+  readonly selectedHour   = signal<string | null>(null);
   readonly isBlockingMode = signal(false);
+  readonly isLoading      = signal(true);
+
+  private appointments = signal<IAppointment[]>([]);
 
   readonly isProfessional = computed(() => {
     const role = this.auth.currentUser()?.role;
     return role === 'professional' || role === 'admin';
   });
 
-  readonly days = (() => {
-    const arr: Date[] = [];
-    for (let i = 0; i < 14; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      arr.push(d);
-    }
-    return arr;
-  })();
+  readonly currentMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+
+  readonly monthLabel = computed(() =>
+    this.currentMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+  );
+
+  readonly calendarGrid = computed(() => {
+    const first = this.currentMonth();
+    const year  = first.getFullYear();
+    const month = first.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let startDow = first.getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0 … Sun=6
+    const grid: (Date | null)[] = [];
+    for (let i = 0; i < startDow; i++) grid.push(null);
+    for (let d = 1; d <= daysInMonth; d++) grid.push(new Date(year, month, d));
+    while (grid.length % 7 !== 0) grid.push(null);
+    return grid;
+  });
+
+  prevMonth(): void {
+    const d = this.currentMonth();
+    this.currentMonth.set(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  }
+
+  nextMonth(): void {
+    const d = this.currentMonth();
+    this.currentMonth.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  }
+
+  hasAppointment(date: Date): boolean {
+    const dateStr = this._toDateStr(date);
+    return this.appointments().some(a => a.date === dateStr && a.paymentStatus !== 'Cancelado');
+  }
+
+  readonly isWorkingDay = computed(() =>
+    this.workSvc.isWorkingDay(jsToDow(this.selectedDate().getDay()))
+  );
+
+  /** Slots del día seleccionado generados desde el horario configurado */
+  readonly timeSlots = computed(() => {
+    const date    = this.selectedDate();
+    const dow     = jsToDow(date.getDay());
+    const dateStr = this._toDateStr(date);
+
+    const slotTimes    = this.workSvc.generateSlots(dow);
+    const dayAppts     = this.appointments().filter(a => a.date === dateStr);
+    const occupiedTimes = new Set(
+      dayAppts.filter(a => a.paymentStatus !== 'Cancelado').map(a => a.time)
+    );
+    return slotTimes.map(time => ({ time, isOccupied: occupiedTimes.has(time) }));
+  });
+
+  async ngOnInit(): Promise<void> {
+    await Promise.all([
+      this._loadAppointments(),
+      this.blockSvc.load(),
+      this.workSvc.load(),
+    ]);
+    this.isLoading.set(false);
+  }
+
+  private async _loadAppointments(): Promise<void> {
+    try {
+      const data = await firstValueFrom(
+        this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`)
+      );
+      this.appointments.set(data);
+    } catch { /* continúa con lista vacía */ }
+  }
+
+  private _toDateStr(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 
   formatDate(date: Date): string {
     return new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).format(date);
@@ -51,7 +136,7 @@ export class BookingCalendarComponent {
     return d1.toDateString() === d2.toDateString();
   }
 
-  selectDate(date: Date) {
+  selectDate(date: Date): void {
     this.selectedDate.set(date);
     this.selectedHour.set(null);
   }
@@ -60,29 +145,31 @@ export class BookingCalendarComponent {
     return this.blockSvc.isBlocked(this.selectedDate(), time);
   }
 
-  toggleBlock(time: string) {
+  async toggleBlock(time: string): Promise<void> {
     const id = this.blockSvc.getBlockId(this.selectedDate(), time);
     if (id) {
-      this.blockSvc.remove(id);
+      await this.blockSvc.remove(id);
     } else {
-      const date = this.selectedDate();
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      const dateStr = `${y}-${m}-${d}`;
+      const date     = this.selectedDate();
+      const dateStr  = this._toDateStr(date);
+      const duration = this.workSvc.getSlotDuration(jsToDow(date.getDay()));
       const [h, min] = time.split(':').map(Number);
       const end = new Date(date);
-      end.setHours(h, min + 30);
+      end.setHours(h, min + duration);
       const endTime = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
-      this.blockSvc.add({ id: Math.random().toString(36).substr(2, 9), startDate: dateStr, startTime: time, endDate: dateStr, endTime, reason: 'Bloqueo rápido desde agenda' });
+      await this.blockSvc.add({
+        startDate: dateStr, startTime: time,
+        endDate: dateStr,   endTime,
+        reason: 'Bloqueo rápido desde agenda',
+      });
     }
   }
 
-  handleConfirm() {
+  handleConfirm(): void {
     if (this.selectedHour()) this.router.navigate(['/pagos']);
   }
 
-  toggleBlockingMode() {
+  toggleBlockingMode(): void {
     this.isBlockingMode.update(v => !v);
     this.selectedHour.set(null);
   }

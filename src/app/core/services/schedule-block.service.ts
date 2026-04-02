@@ -1,17 +1,47 @@
-import { Injectable, signal } from '@angular/core';
-import { IScheduleBlock, MOCK_SCHEDULE_BLOCKS } from '../../data/mock-schedule-blocks';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+export interface IScheduleBlock {
+  id: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  reason?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleBlockService {
-  private readonly _blocks = signal<IScheduleBlock[]>([...MOCK_SCHEDULE_BLOCKS]);
+  private readonly http = inject(HttpClient);
+  private readonly _blocks = signal<IScheduleBlock[]>([]);
 
   readonly blocks = this._blocks.asReadonly();
 
-  add(block: IScheduleBlock): void {
-    this._blocks.update(list => [...list, block]);
+  async load(): Promise<void> {
+    try {
+      const data = await firstValueFrom(
+        this.http.get<IScheduleBlock[]>(`${environment.apiUrl}/schedule-blocks`)
+      );
+      this._blocks.set(data);
+    } catch {
+      // Si la API no responde, parte con lista vacía
+      this._blocks.set([]);
+    }
   }
 
-  remove(id: string): void {
+  async add(block: Omit<IScheduleBlock, 'id'>): Promise<void> {
+    const created = await firstValueFrom(
+      this.http.post<IScheduleBlock>(`${environment.apiUrl}/schedule-blocks`, block)
+    );
+    this._blocks.update(list => [...list, created]);
+  }
+
+  async remove(id: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete(`${environment.apiUrl}/schedule-blocks/${id}`)
+    );
     this._blocks.update(list => list.filter(b => b.id !== id));
   }
 
