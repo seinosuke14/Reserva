@@ -43,7 +43,17 @@
                 </div>
               </td>
               <td class="px-8 py-5 text-sm text-gray-500">{{ customer.email }}</td>
-              <td class="px-8 py-5 text-sm text-gray-500">{{ customer.lastAppointment }}</td>
+              <td class="px-8 py-5 text-sm text-gray-500">
+                @let appt = nextAppointment(customer);
+                @if (appt) {
+                  <span class="font-medium text-secondary">{{ formatAppointment(appt) }}</span>
+                  @if (appt.service) {
+                    <span class="block text-[11px] text-gray-400">{{ appt.service.name }}</span>
+                  }
+                } @else {
+                  <span class="text-gray-300">—</span>
+                }
+              </td>
               <td class="px-8 py-5">
                 @if (customer.status === 'paid') {
                   <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs font-bold">Al día</span>
@@ -113,6 +123,51 @@
           </div>
           <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 text-sm text-gray-600 leading-relaxed italic">
             "{{ selectedCustomer()!.notes }}"
+          </div>
+        </div>
+
+        <!-- Citas -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-secondary font-bold">
+            <svg class="text-primary" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Citas
+          </div>
+          <div class="space-y-2">
+            @for (appt of selectedCustomer()!.appointments; track appt.id) {
+              @if (appt.paymentStatus !== 'Cancelado') {
+                <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                      [class]="appt.date >= today ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-secondary">{{ formatAppointment(appt) }}</p>
+                      @if (appt.service) {
+                        <p class="text-[11px] text-gray-400">{{ appt.service.name }}</p>
+                      }
+                    </div>
+                  </div>
+                  <span class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg"
+                    [class]="appt.paymentStatus === 'Pagado' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'">
+                    {{ appt.paymentStatus }}
+                  </span>
+                </div>
+              }
+            }
+            @if (!selectedCustomer()!.appointments.length) {
+              <p class="text-sm text-gray-400 text-center py-4">Sin citas registradas.</p>
+            }
           </div>
         </div>
 

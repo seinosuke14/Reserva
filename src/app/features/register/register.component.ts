@@ -26,6 +26,7 @@ export class RegisterComponent {
 
   isSubmitting = signal(false);
   success      = signal(false);
+  errorMsg     = signal('');
 
   form = this.fb.group({
     name:      ['', [Validators.required, Validators.minLength(3)]],
@@ -40,11 +41,14 @@ export class RegisterComponent {
   async onSubmit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
+    this.errorMsg.set('');
     const result = await this.svc.register(this.form.value as any);
     this.isSubmitting.set(false);
     if (result.success) {
       this.success.set(true);
       setTimeout(() => this.router.navigate(['/login']), 2000);
+    } else {
+      this.errorMsg.set(result.message);
     }
   }
 }

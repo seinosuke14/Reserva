@@ -1,10 +1,20 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
-import { IService, MOCK_SERVICES } from '../../data/mock-services';
+import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
+import { environment } from '../../../environments/environment';
+
+interface IService {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  isActive: boolean;
+}
 
 @Component({
   selector: 'app-service-settings',
@@ -26,13 +36,17 @@ import { formatCLP } from '../../helpers/formatters';
     ])
   ]
 })
-export class ServiceSettingsComponent {
-  private readonly fb = inject(FormBuilder);
-  readonly formatCLP = formatCLP;
+export class ServiceSettingsComponent implements OnInit {
+  private readonly fb   = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
+  readonly formatCLP    = formatCLP;
 
-  services       = signal<IService[]>([...MOCK_SERVICES]);
+  services       = signal<IService[]>([]);
   isFormOpen     = signal(false);
   editingService = signal<IService | null>(null);
+  isLoading      = signal(true);
+  isSaving       = signal(false);
+  errorMsg       = signal<string | null>(null);
 
   form = this.fb.group({
     name:        ['', [Validators.required, Validators.minLength(3)]],
@@ -43,36 +57,81 @@ export class ServiceSettingsComponent {
 
   get f() { return this.form.controls; }
 
-  openAddForm() {
+  async ngOnInit(): Promise<void> {
+    await this.loadServices();
+  }
+
+  async loadServices(): Promise<void> {
+    this.isLoading.set(true);
+    try {
+      const data = await firstValueFrom(
+        this.http.get<IService[]>(`${environment.apiUrl}/services`)
+      );
+      this.services.set(data);
+    } catch {
+      this.errorMsg.set('No se pudieron cargar los servicios.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  openAddForm(): void {
     this.editingService.set(null);
     this.form.reset({ duration: 30, price: 0 });
     this.isFormOpen.set(true);
   }
 
-  openEditForm(service: IService) {
+  openEditForm(service: IService): void {
     this.editingService.set(service);
     this.form.patchValue(service);
     this.isFormOpen.set(true);
   }
 
-  deleteService(id: string) {
-    this.services.update(list => list.filter(s => s.id !== id));
+  async deleteService(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.http.delete(`${environment.apiUrl}/services/${id}`));
+      this.services.update(list => list.filter(s => s.id !== id));
+    } catch {
+      this.errorMsg.set('No se pudo eliminar el servicio.');
+    }
   }
 
-  toggleStatus(id: string) {
-    this.services.update(list => list.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
+  async toggleStatus(service: IService): Promise<void> {
+    try {
+      const updated = await firstValueFrom(
+        this.http.put<IService>(`${environment.apiUrl}/services/${service.id}`, {
+          isActive: !service.isActive
+        })
+      );
+      this.services.update(list => list.map(s => s.id === updated.id ? updated : s));
+    } catch {
+      this.errorMsg.set('No se pudo actualizar el estado.');
+    }
   }
 
-  handleSubmit() {
+  async handleSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    this.isSaving.set(true);
     const val = this.form.value;
     const editing = this.editingService();
-    if (editing) {
-      this.services.update(list => list.map(s => s.id === editing.id ? { ...s, ...val } as IService : s));
-    } else {
-      const newService: IService = { id: Date.now().toString(), isActive: true, ...val } as IService;
-      this.services.update(list => [...list, newService]);
+
+    try {
+      if (editing) {
+        const updated = await firstValueFrom(
+          this.http.put<IService>(`${environment.apiUrl}/services/${editing.id}`, val)
+        );
+        this.services.update(list => list.map(s => s.id === updated.id ? updated : s));
+      } else {
+        const created = await firstValueFrom(
+          this.http.post<IService>(`${environment.apiUrl}/services`, val)
+        );
+        this.services.update(list => [...list, created]);
+      }
+      this.isFormOpen.set(false);
+    } catch {
+      this.errorMsg.set('No se pudo guardar el servicio.');
+    } finally {
+      this.isSaving.set(false);
     }
-    this.isFormOpen.set(false);
   }
 }

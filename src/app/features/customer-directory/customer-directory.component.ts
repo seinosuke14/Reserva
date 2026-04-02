@@ -1,9 +1,40 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
-import { ICustomer, MOCK_CUSTOMERS } from '../../data/mock-customers';
+import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
+import { environment } from '../../../environments/environment';
+
+interface IPaymentHistory {
+  id: string;
+  date: string;
+  amount: number;
+  status: 'paid' | 'pending';
+  service: string;
+}
+
+interface IAppointment {
+  id: string;
+  date: string;   // 'YYYY-MM-DD'
+  time: string;   // 'HH:mm'
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  service: { id: string; name: string } | null;
+}
+
+interface ICustomer {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  lastAppointment: string | null;
+  status: 'paid' | 'debt';
+  debtAmount?: number;
+  notes: string;
+  paymentHistory: IPaymentHistory[];
+  appointments: IAppointment[];
+}
 
 @Component({
   selector: 'app-customer-directory',
@@ -21,17 +52,51 @@ import { formatCLP } from '../../helpers/formatters';
     ])
   ]
 })
-export class CustomerDirectoryComponent {
-  readonly formatCLP = formatCLP;
+export class CustomerDirectoryComponent implements OnInit {
+  private readonly http = inject(HttpClient);
+  readonly formatCLP    = formatCLP;
 
+  readonly today = new Date().toISOString().slice(0, 10);
+
+  customers        = signal<ICustomer[]>([]);
   searchTerm       = signal('');
   selectedCustomer = signal<ICustomer | null>(null);
+  isLoading        = signal(true);
+  errorMsg         = signal<string | null>(null);
 
   readonly filteredCustomers = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    if (!term) return MOCK_CUSTOMERS;
-    return MOCK_CUSTOMERS.filter(c =>
-      c.name.toLowerCase().includes(term) || c.email.toLowerCase().includes(term)
+    if (!term) return this.customers();
+    return this.customers().filter(c =>
+      c.name.toLowerCase().includes(term) ||
+      (c.email ?? '').toLowerCase().includes(term)
     );
   });
+
+  /** Devuelve la próxima cita futura (o la más reciente si no hay futuras) */
+  nextAppointment(customer: ICustomer): IAppointment | null {
+    const active = customer.appointments?.filter(a => a.paymentStatus !== 'Cancelado') ?? [];
+    if (!active.length) return null;
+    const today = new Date().toISOString().slice(0, 10);
+    const future = active.filter(a => a.date >= today);
+    return future.length ? future[0] : active[active.length - 1];
+  }
+
+  formatAppointment(appt: IAppointment): string {
+    const [y, m, d] = appt.date.split('-');
+    return `${d}/${m}/${y} ${appt.time}`;
+  }
+
+  async ngOnInit(): Promise<void> {
+    try {
+      const data = await firstValueFrom(
+        this.http.get<ICustomer[]>(`${environment.apiUrl}/customers`)
+      );
+      this.customers.set(data);
+    } catch {
+      this.errorMsg.set('No se pudieron cargar los clientes.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
 }
