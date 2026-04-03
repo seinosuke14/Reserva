@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://tu-api-en-produccion.com/api',
+  apiUrl: 'https://reserva-api-production-095e.up.railway.app',
 };
