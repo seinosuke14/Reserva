@@ -13,9 +13,10 @@ interface IAppointment {
   id: string;
   date: string;
   time: string;
+  notes: string | null;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
-  customer: { id: string; name: string };
-  service:  { id: string; name: string };
+  customer: { id: string; name: string; email?: string };
+  service:  { id: string; name: string; duration?: number };
 }
 
 
@@ -28,6 +29,14 @@ interface IAppointment {
     trigger('fadeSlide', [
       transition(':enter', [style({ opacity: 0, transform: 'translateY(20px)' }), animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))]),
       transition(':leave', [animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(20px)' }))])
+    ]),
+    trigger('slidePanel', [
+      transition(':enter', [style({ transform: 'translateX(100%)' }), animate('250ms ease-out', style({ transform: 'translateX(0)' }))]),
+      transition(':leave', [animate('200ms ease-in', style({ transform: 'translateX(100%)' }))])
+    ]),
+    trigger('backdrop', [
+      transition(':enter', [style({ opacity: 0 }), animate('200ms', style({ opacity: 1 }))]),
+      transition(':leave', [animate('150ms', style({ opacity: 0 }))])
     ])
   ]
 })
@@ -38,10 +47,11 @@ export class BookingCalendarComponent implements OnInit {
   private readonly blockSvc  = inject(ScheduleBlockService);
   private readonly workSvc   = inject(WorkScheduleService);
 
-  readonly selectedDate   = signal<Date>(new Date());
-  readonly selectedHour   = signal<string | null>(null);
-  readonly isBlockingMode = signal(false);
-  readonly isLoading      = signal(true);
+  readonly selectedDate        = signal<Date>(new Date());
+  readonly selectedHour        = signal<string | null>(null);
+  readonly isBlockingMode      = signal(false);
+  readonly isLoading           = signal(true);
+  readonly selectedAppointment = signal<IAppointment | null>(null);
 
   private appointments = signal<IAppointment[]>([]);
 
@@ -136,9 +146,28 @@ export class BookingCalendarComponent implements OnInit {
     return d1.toDateString() === d2.toDateString();
   }
 
+  getAppointmentAt(time: string): IAppointment | undefined {
+    const dateStr = this._toDateStr(this.selectedDate());
+    return this.appointments().find(a => a.date === dateStr && a.time === time && a.paymentStatus !== 'Cancelado');
+  }
+
+  selectSlot(time: string, isOccupied: boolean): void {
+    if (isOccupied) {
+      const appt = this.getAppointmentAt(time);
+      if (appt) {
+        this.selectedAppointment.set(appt);
+        this.selectedHour.set(null);
+      }
+    } else {
+      this.selectedHour.set(time);
+      this.selectedAppointment.set(null);
+    }
+  }
+
   selectDate(date: Date): void {
     this.selectedDate.set(date);
     this.selectedHour.set(null);
+    this.selectedAppointment.set(null);
   }
 
   isBlocked(time: string): boolean {
