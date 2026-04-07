@@ -29,6 +29,7 @@ export class DashboardHomeComponent implements OnInit {
   readonly today        = new Date().toISOString().split('T')[0];
 
   todayAppointments = signal<IAppointment[]>([]);
+  allAppointments   = signal<IAppointment[]>([]);
   isLoading         = signal(true);
   copied            = signal(false);
 
@@ -49,19 +50,35 @@ export class DashboardHomeComponent implements OnInit {
     const appts = this.todayAppointments();
     return {
       totalCitas:  appts.length,
-      ingresos:    appts.filter(a => a.paymentStatus === 'Pagado').reduce((s, a) => s + +a.amount, 0),
+      ingresosHoy: appts.filter(a => a.paymentStatus === 'Pagado').reduce((s, a) => s + +a.amount, 0),
       pendientes:  appts.filter(a => a.paymentStatus === 'Pendiente').length,
     };
   });
 
+  readonly monthlyIncome = computed(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const monthPrefix = `${y}-${m}`;
+    return this.allAppointments()
+      .filter(a => a.paymentStatus === 'Pagado' && a.date.startsWith(monthPrefix))
+      .reduce((s, a) => s + +a.amount, 0);
+  });
+
+  readonly totalIncome = computed(() =>
+    this.allAppointments()
+      .filter(a => a.paymentStatus === 'Pagado')
+      .reduce((s, a) => s + +a.amount, 0)
+  );
+
   async ngOnInit(): Promise<void> {
     try {
-      const data = await firstValueFrom(
-        this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`, {
-          params: { date: this.today },
-        })
-      );
-      this.todayAppointments.set(data);
+      const [today, all] = await Promise.all([
+        firstValueFrom(this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`, { params: { date: this.today } })),
+        firstValueFrom(this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`)),
+      ]);
+      this.todayAppointments.set(today);
+      this.allAppointments.set(all);
     } finally {
       this.isLoading.set(false);
     }
