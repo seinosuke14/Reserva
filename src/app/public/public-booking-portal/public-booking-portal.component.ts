@@ -35,6 +35,18 @@ export interface IDayAvailability {
   slots: ITimeSlot[];
 }
 
+export interface IPublicPaymentMethod {
+  provider: 'webpay' | 'mercadopago' | 'transfer';
+  transferInfo?: {
+    bankName: string;
+    accountType: string;
+    accountNumber: string;
+    rut: string;
+    holderName: string;
+    email: string;
+  };
+}
+
 type EmailCheckState = 'idle' | 'checking' | 'exists' | 'not-found';
 type LoadState = 'loading' | 'ready' | 'error';
 type CalCellState = 'empty' | 'past' | 'unavailable' | 'available' | 'full';
@@ -65,17 +77,19 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly auth           = inject(AuthService);
   readonly formatCLP      = formatCLP;
 
-  // ─── Perfil del profesional (cargado desde la API) ──────────────────────────
+  // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');
   readonly professional = signal<{ id: string; name: string; slug: string; specialty: string; phone: string } | null>(null);
   readonly services     = signal<IPublicService[]>([]);
   readonly availability = signal<IDayAvailability[]>([]);
+  readonly paymentMethods = signal<IPublicPaymentMethod[]>([]);
 
-  // ─── Stepper ────────────────────────────────────────────────────────────────
-  readonly step            = signal<1 | 2 | 3>(1);
+  // ─── Stepper (4 pasos) ──────────────────────────────────────────────────────
+  readonly step            = signal<1 | 2 | 3 | 4>(1);
   readonly selectedService = signal<IPublicService | null>(null);
   readonly selectedDate    = signal<string>('');
   readonly selectedHour    = signal<string | null>(null);
+  readonly selectedPayment = signal<IPublicPaymentMethod | null>(null);
   readonly isSubmitting    = signal(false);
   readonly isBooked        = signal(false);
   readonly bookingRef      = signal('');
@@ -89,10 +103,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly today         = new Date().toISOString().slice(0, 10);
   readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
   readonly showLoginHint = computed(() => this.emailCheckState() === 'exists' && this.isGuest());
-  readonly canGoToStep2  = computed(() => !!this.selectedService());
-  readonly canGoToStep3  = computed(() => !!this.selectedHour());
 
-  /** Todos los slots del día seleccionado (disponibles y ocupados) */
   readonly daySlots = computed(() => {
     const day = this.availability().find(d => d.date === this.selectedDate());
     return day ? day.slots : [];
@@ -117,7 +128,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const month       = first.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let   startDow    = first.getDay();
-    startDow = startDow === 0 ? 6 : startDow - 1; // 0=Lun … 6=Dom
+    startDow = startDow === 0 ? 6 : startDow - 1;
 
     const availMap = new Map(this.availability().map(d => [d.date, d]));
     const grid: CalCell[] = [];
@@ -169,13 +180,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     await this._loadProfile(slug);
 
-    // Autocompletar si está logueado
     const user = this.auth.currentUser();
     if (user) {
       this.form.patchValue({ name: user.name, email: user.email, phone: user.phone ?? '' });
     }
 
-    // Verificar email con debounce (solo invitados)
     this.sub = this.f['email'].valueChanges.subscribe(email => {
       if (!email || this.f['email'].invalid || !this.isGuest()) {
         this.emailCheckState.set('idle');
@@ -205,9 +214,14 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.professional.set(data.professional);
       this.services.set(data.services);
       this.availability.set(data.availability);
-      // Preseleccionar el primer día disponible
+      this.paymentMethods.set(data.paymentMethods ?? []);
+
       if (data.availability.length > 0) {
         this.selectedDate.set(data.availability[0].date);
+      }
+      // Si solo hay un método de pago, preseleccionarlo
+      if (data.paymentMethods?.length === 1) {
+        this.selectedPayment.set(data.paymentMethods[0]);
       }
       this.loadState.set('ready');
     } catch (err: any) {
@@ -234,25 +248,57 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.selectedHour.set(time);
   }
 
+  selectPayment(method: IPublicPaymentMethod): void {
+    this.selectedPayment.set(method);
+  }
+
   goBack(): void {
     const current = this.step();
-    if (current > 1) this.step.set((current - 1) as 1 | 2 | 3);
+    if (current > 1) this.step.set((current - 1) as 1 | 2 | 3 | 4);
   }
 
   goNext(): void {
     const current = this.step();
-    if (current < 3 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3);
+    if (current < 4 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3 | 4);
   }
 
   getCanProceed(): boolean {
     if (this.step() === 1) return !!this.selectedService();
     if (this.step() === 2) return !!this.selectedHour();
     if (this.step() === 3) return this.form.valid;
+    if (this.step() === 4) return !!this.selectedPayment();
     return false;
+  }
+
+  getWhatsappLink(): string {
+    const phone = this.professional()?.phone?.replace(/\D/g, '') ?? '';
+    const service = this.selectedService()?.name ?? '';
+    const date = this.selectedDate() ? this.formatDate(this.selectedDate()) : '';
+    const hour = this.selectedHour() ?? '';
+    const name = this.form.value.name ?? '';
+    const msg = encodeURIComponent(
+      `Hola! Soy ${name}, he realizado una transferencia por la reserva de ${service} el ${date} a las ${hour}. Adjunto comprobante.`
+    );
+    return `https://wa.me/${phone}?text=${msg}`;
   }
 
   async confirmBooking(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (!this.selectedPayment()) return;
+
+    const provider = this.selectedPayment()!.provider;
+
+    // Para transferencia, no llamamos a la API de pago, solo creamos la cita
+    if (provider === 'transfer') {
+      await this._createBooking('transfer');
+      return;
+    }
+
+    // Para webpay y mercadopago, flujo con redirección
+    await this._createBooking(provider);
+  }
+
+  private async _createBooking(provider: string): Promise<void> {
     this.isSubmitting.set(true);
     try {
       const { name, email, phone, notes } = this.form.value;
@@ -263,14 +309,16 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
           date:      this.selectedDate(),
           time:      this.selectedHour(),
           name, email, phone, notes,
+          paymentProvider: provider,
         })
       );
 
-      // Redirigir a Webpay para que el cliente pague
-      if (res.url && res.token) {
+      if (provider === 'transfer') {
+        this.bookingRef.set(res.bookingRef ?? '');
+        this.isBooked.set(true);
+      } else if (res.url && res.token) {
         window.location.href = res.url;
       } else {
-        // Fallback si no viene URL (no debería pasar)
         this.bookingRef.set(res.bookingRef);
         this.isBooked.set(true);
       }

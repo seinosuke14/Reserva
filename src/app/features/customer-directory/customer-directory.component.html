@@ -110,7 +110,7 @@
           </div>
         </div>
 
-        <!-- Notas -->
+        <!-- Notas de reservas -->
         <div class="space-y-4">
           <div class="flex items-center gap-2 text-secondary font-bold">
             <svg class="text-primary" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -119,10 +119,25 @@
               <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
               <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
             </svg>
-            Notas Internas
+            Notas del Cliente
           </div>
-          <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 text-sm text-gray-600 leading-relaxed italic">
-            "{{ selectedCustomer()!.notes }}"
+          <div class="space-y-2">
+            @for (appt of selectedCustomer()!.appointments; track appt.id) {
+              @if (appt.notes) {
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-sm text-gray-600 leading-relaxed">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">{{ appt.date }} · {{ appt.time }}</span>
+                    @if (appt.service) {
+                      <span class="text-[10px] text-primary font-bold">{{ appt.service.name }}</span>
+                    }
+                  </div>
+                  <p class="italic">"{{ appt.notes }}"</p>
+                </div>
+              }
+            }
+            @if (!hasAnyNotes(selectedCustomer()!)) {
+              <p class="text-sm text-gray-400 text-center py-4 bg-gray-50 rounded-2xl border border-gray-100">Sin notas de reservas.</p>
+            }
           </div>
         </div>
 

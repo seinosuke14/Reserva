@@ -6,16 +6,16 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="step-actions" [class.space-between]="!isFirstStep()">
-      @if (!isFirstStep()) {
-        <button class="btn-ghost" (click)="onBack()">← Atrás</button>
+    <div class="step-actions" [class.space-between]="currentStep() > 1">
+      @if (currentStep() > 1) {
+        <button class="btn-ghost" (click)="onBack()">← Atras</button>
       }
-      @if (!isLastStep()) {
+      @if (currentStep() < 4) {
         <button class="btn-primary" (click)="onNext()" [disabled]="!canProceed()">
           Siguiente →
         </button>
       } @else {
-        <button class="btn-confirm" (click)="onConfirm()" [disabled]="!canProceed()">
+        <button class="btn-confirm" (click)="onConfirm()">
           Confirmar Reserva
         </button>
       }
@@ -24,20 +24,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './booking-actions.component.scss'
 })
 export class BookingActionsComponent {
-  readonly currentStep = input<1 | 2 | 3>(1);
+  readonly currentStep = input<1 | 2 | 3 | 4>(1);
   readonly canProceed = input(false);
 
   readonly back = output<void>();
   readonly next = output<void>();
   readonly confirm = output<void>();
-
-  get isFirstStep() {
-    return () => this.currentStep() === 1;
-  }
-
-  get isLastStep() {
-    return () => this.currentStep() === 3;
-  }
 
   onBack(): void {
     this.back.emit();
