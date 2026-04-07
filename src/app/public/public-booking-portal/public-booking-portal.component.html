@@ -2,7 +2,6 @@
   <app-booking-header [professional]="professional()"></app-booking-header>
 
   <main class="portal-main">
-    <!-- Loading state -->
     @switch (loadState()) {
       @case ('loading') {
         <div class="state-screen">
@@ -12,52 +11,215 @@
       }
       @case ('error') {
         <div class="state-screen">
-          <p class="state-error">❌ Error al cargar el perfil</p>
+          <p class="state-error">Error al cargar el perfil</p>
         </div>
       }
       @default {
-        <!-- Step indicator -->
-        <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
+        <!-- Booking confirmado (transferencia) -->
+        @if (isBooked()) {
+          <div class="booked-card">
+            <div class="booked-icon">✓</div>
+            <h2>Reserva Registrada</h2>
+            @if (selectedPayment()?.provider === 'transfer') {
+              <p>Tu reserva ha sido registrada. Realiza la transferencia y envia el comprobante por WhatsApp para confirmar.</p>
 
-        <!-- Step 1: Service selection -->
-        @if (step() === 1) {
-          <app-booking-service-selector
-            [services]="services()"
-            [selectedService]="selectedService()"
-            (serviceSelected)="selectService($event)">
-          </app-booking-service-selector>
+              <div class="transfer-details">
+                <h4>Datos para transferencia</h4>
+                <div class="transfer-row">
+                  <span>Banco</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.bankName }}</strong>
+                </div>
+                <div class="transfer-row">
+                  <span>Tipo de Cuenta</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.accountType }}</strong>
+                </div>
+                <div class="transfer-row">
+                  <span>N° Cuenta</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.accountNumber }}</strong>
+                </div>
+                <div class="transfer-row">
+                  <span>RUT</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.rut }}</strong>
+                </div>
+                <div class="transfer-row">
+                  <span>Titular</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.holderName }}</strong>
+                </div>
+                <div class="transfer-row">
+                  <span>Email</span>
+                  <strong>{{ selectedPayment()?.transferInfo?.email }}</strong>
+                </div>
+                <div class="transfer-row highlight">
+                  <span>Monto</span>
+                  <strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong>
+                </div>
+              </div>
+
+              <a [href]="getWhatsappLink()" target="_blank" class="btn-whatsapp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Enviar comprobante por WhatsApp
+              </a>
+            } @else {
+              <p>Tu reserva ha sido confirmada exitosamente.</p>
+            }
+
+            @if (bookingRef()) {
+              <div class="booking-ref">
+                Codigo: <strong>{{ bookingRef() }}</strong>
+              </div>
+            }
+          </div>
+        } @else {
+          <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
+
+          <!-- Step 1: Service -->
+          @if (step() === 1) {
+            <app-booking-service-selector
+              [services]="services()"
+              [selectedService]="selectedService()"
+              (serviceSelected)="selectService($event)">
+            </app-booking-service-selector>
+          }
+
+          <!-- Step 2: Date & Time -->
+          @if (step() === 2) {
+            <app-booking-datetime-selector
+              [availability]="availability()"
+              [selectedDate]="selectedDate()"
+              [selectedHour]="selectedHour()"
+              (dateSelected)="selectDate($event)"
+              (hourSelected)="selectHour($event)">
+            </app-booking-datetime-selector>
+          }
+
+          <!-- Step 3: Form & Summary -->
+          @if (step() === 3) {
+            <app-booking-form
+              [bookingForm]="form"
+              [selectedService]="selectedService()"
+              [selectedDate]="selectedDate()"
+              [selectedHour]="selectedHour()"
+              [emailStatus]="emailCheckState()"
+              [showLoginHint]="showLoginHint()">
+            </app-booking-form>
+          }
+
+          <!-- Step 4: Payment method -->
+          @if (step() === 4) {
+            <div class="step-content">
+              <div class="step-header">
+                <h3 class="step-title">Metodo de pago</h3>
+                <p class="step-desc">Selecciona como deseas pagar tu reserva</p>
+              </div>
+
+              @if (paymentMethods().length === 0) {
+                <div class="no-methods">
+                  <p>Este profesional aun no tiene metodos de pago configurados.</p>
+                </div>
+              } @else {
+                <div class="payment-options">
+                  @for (method of paymentMethods(); track method.provider) {
+                    <button class="payment-option"
+                      [class.selected]="selectedPayment()?.provider === method.provider"
+                      (click)="selectPayment(method)">
+                      <div class="payment-option-icon">
+                        @switch (method.provider) {
+                          @case ('webpay') {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                              <line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                          }
+                          @case ('mercadopago') {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                            </svg>
+                          }
+                          @case ('transfer') {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="3" y1="22" x2="21" y2="22"/>
+                              <line x1="6" y1="18" x2="6" y2="11"/>
+                              <line x1="10" y1="18" x2="10" y2="11"/>
+                              <line x1="14" y1="18" x2="14" y2="11"/>
+                              <line x1="18" y1="18" x2="18" y2="11"/>
+                              <polygon points="12 2 20 7 4 7"/>
+                            </svg>
+                          }
+                        }
+                      </div>
+                      <div class="payment-option-info">
+                        <h4>
+                          @switch (method.provider) {
+                            @case ('webpay') { Webpay Plus }
+                            @case ('mercadopago') { Mercado Pago }
+                            @case ('transfer') { Transferencia Bancaria }
+                          }
+                        </h4>
+                        <p>
+                          @switch (method.provider) {
+                            @case ('webpay') { Tarjeta de credito o debito }
+                            @case ('mercadopago') { Tarjetas, transferencia y mas }
+                            @case ('transfer') { Deposito directo a cuenta bancaria }
+                          }
+                        </p>
+                      </div>
+                      <div class="payment-option-radio">
+                        @if (selectedPayment()?.provider === method.provider) {
+                          <div class="radio-dot"></div>
+                        }
+                      </div>
+                    </button>
+
+                    <!-- Info de transferencia si esta seleccionada -->
+                    @if (method.provider === 'transfer' && selectedPayment()?.provider === 'transfer' && method.transferInfo) {
+                      <div class="transfer-preview">
+                        <div class="transfer-row">
+                          <span>Banco</span>
+                          <strong>{{ method.transferInfo.bankName }}</strong>
+                        </div>
+                        <div class="transfer-row">
+                          <span>Cuenta</span>
+                          <strong>{{ method.transferInfo.accountType }} - {{ method.transferInfo.accountNumber }}</strong>
+                        </div>
+                        <div class="transfer-row">
+                          <span>RUT</span>
+                          <strong>{{ method.transferInfo.rut }}</strong>
+                        </div>
+                        <div class="transfer-row">
+                          <span>Titular</span>
+                          <strong>{{ method.transferInfo.holderName }}</strong>
+                        </div>
+                        <div class="transfer-row highlight">
+                          <span>Monto a transferir</span>
+                          <strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong>
+                        </div>
+                        <p class="transfer-note">
+                          Al confirmar, deberas enviar el comprobante de transferencia por WhatsApp.
+                        </p>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Actions -->
+          <app-booking-actions
+            [currentStep]="step()"
+            [canProceed]="getCanProceed()"
+            (back)="goBack()"
+            (next)="goNext()"
+            (confirm)="confirmBooking()">
+          </app-booking-actions>
         }
-
-        <!-- Step 2: Date & Time selection -->
-        @if (step() === 2) {
-          <app-booking-datetime-selector
-            [availability]="availability()"
-            [selectedDate]="selectedDate()"
-            [selectedHour]="selectedHour()"
-            (dateSelected)="selectDate($event)"
-            (hourSelected)="selectHour($event)">
-          </app-booking-datetime-selector>
-        }
-
-        <!-- Step 3: Form & Summary -->
-        @if (step() === 3) {
-          <app-booking-form
-            [selectedService]="selectedService()"
-            [selectedDate]="selectedDate()"
-            [selectedHour]="selectedHour()"
-            [emailStatus]="emailCheckState()"
-            [showLoginHint]="showLoginHint()">
-          </app-booking-form>
-        }
-
-        <!-- Actions -->
-        <app-booking-actions
-          [currentStep]="step()"
-          [canProceed]="getCanProceed()"
-          (back)="goBack()"
-          (next)="goNext()"
-          (confirm)="confirmBooking()">
-        </app-booking-actions>
       }
     }
   </main>

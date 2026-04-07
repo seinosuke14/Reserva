@@ -1,45 +1,213 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { trigger, style, animate, transition } from '@angular/animations';
-import { PaymentService, PaymentMethod } from '../../core/services/payment.service';
-import { formatCLP } from '../../helpers/formatters';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+type Provider = 'webpay' | 'mercadopago' | 'transfer';
+
+interface IPaymentMethod {
+  id: string;
+  provider: Provider;
+  isActive: boolean;
+  credentials: Record<string, string>;
+}
+
+interface ProviderConfig {
+  provider: Provider;
+  label: string;
+  description: string;
+  icon: string;
+  fields: { key: string; label: string; placeholder: string; type: string }[];
+}
+
+const PROVIDERS: ProviderConfig[] = [
+  {
+    provider: 'webpay',
+    label: 'Webpay Plus',
+    description: 'Transbank - Tarjetas de credito y debito',
+    icon: 'credit-card',
+    fields: [
+      { key: 'commerceCode', label: 'Codigo de Comercio', placeholder: 'Ej: 597055555532', type: 'text' },
+      { key: 'apiKey', label: 'API Key', placeholder: 'API Key de Transbank', type: 'password' },
+    ],
+  },
+  {
+    provider: 'mercadopago',
+    label: 'Mercado Pago',
+    description: 'Tarjetas, transferencias y mas',
+    icon: 'wallet',
+    fields: [
+      { key: 'accessToken', label: 'Access Token', placeholder: 'APP_USR-...', type: 'password' },
+      { key: 'publicKey', label: 'Public Key', placeholder: 'APP_USR-...', type: 'text' },
+    ],
+  },
+  {
+    provider: 'transfer',
+    label: 'Transferencia Bancaria',
+    description: 'Pago directo a cuenta bancaria',
+    icon: 'bank',
+    fields: [
+      { key: 'bankName', label: 'Banco', placeholder: 'Ej: Banco Estado', type: 'text' },
+      { key: 'accountType', label: 'Tipo de Cuenta', placeholder: 'Ej: Cuenta Corriente', type: 'text' },
+      { key: 'accountNumber', label: 'Numero de Cuenta', placeholder: 'Ej: 12345678', type: 'text' },
+      { key: 'rut', label: 'RUT', placeholder: 'Ej: 12.345.678-9', type: 'text' },
+      { key: 'holderName', label: 'Titular', placeholder: 'Nombre del titular', type: 'text' },
+      { key: 'email', label: 'Email de notificacion', placeholder: 'pagos@email.com', type: 'email' },
+    ],
+  },
+];
 
 @Component({
   selector: 'app-checkout-payment',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './checkout-payment.component.html',
-  animations: [
-    trigger('fadeScale', [
-      transition(':enter', [style({ opacity: 0, transform: 'scale(0.95)' }), animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))])
-    ])
-  ]
+  styleUrls: ['./checkout-payment.component.scss'],
 })
-export class CheckoutPaymentComponent {
-  private readonly paymentSvc = inject(PaymentService);
+export class CheckoutPaymentComponent implements OnInit {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
-  readonly formatCLP = formatCLP;
+  readonly providers = PROVIDERS;
 
-  isLoading      = signal(false);
-  isPaid         = signal(false);
-  selectedMethod = signal<PaymentMethod>('card');
-  transactionId  = signal('');
+  isLoading = signal(true);
+  savedMethods = signal<IPaymentMethod[]>([]);
+  expandedProvider = signal<Provider | null>(null);
+  formData = signal<Record<string, string>>({});
+  isSaving = signal(false);
+  feedbackMsg = signal('');
+  feedbackType = signal<'success' | 'error' | ''>('');
+  visibleFields = signal<Set<string>>(new Set());
 
-  readonly booking = {
-    professional: 'Dr. Diego Bascur',
-    date: new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-    time: '10:30',
-    service: 'Consulta Médica',
-    price: 45000,
-  };
-
-  async handlePayment() {
-    this.isLoading.set(true);
-    const result = await this.paymentSvc.processPayment(this.selectedMethod() as PaymentMethod, this.booking);
+  async ngOnInit() {
+    await this.loadMethods();
     this.isLoading.set(false);
-    if (result.success) {
-      this.transactionId.set(result.transactionId);
-      this.isPaid.set(true);
+  }
+
+  private async loadMethods() {
+    try {
+      const data = await firstValueFrom(
+        this.http.get<IPaymentMethod[]>(`${this.apiUrl}/payment-methods`)
+      );
+      this.savedMethods.set(data);
+    } catch { /* sin metodos configurados */ }
+  }
+
+  getMethod(provider: Provider): IPaymentMethod | undefined {
+    return this.savedMethods().find(m => m.provider === provider);
+  }
+
+  isConfigured(provider: Provider): boolean {
+    return !!this.getMethod(provider);
+  }
+
+  isActive(provider: Provider): boolean {
+    return this.getMethod(provider)?.isActive ?? false;
+  }
+
+  toggleExpand(provider: Provider): void {
+    if (this.expandedProvider() === provider) {
+      this.expandedProvider.set(null);
+      return;
     }
+    const method = this.getMethod(provider);
+    this.formData.set(method?.credentials ? { ...method.credentials } : {});
+    this.expandedProvider.set(provider);
+  }
+
+  getFieldValue(key: string): string {
+    return this.formData()[key] ?? '';
+  }
+
+  setFieldValue(key: string, value: string): void {
+    this.formData.update(data => ({ ...data, [key]: value }));
+  }
+
+  toggleFieldVisibility(key: string): void {
+    this.visibleFields.update(set => {
+      const next = new Set(set);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  isFieldVisible(key: string): boolean {
+    return this.visibleFields().has(key);
+  }
+
+  getFieldType(field: { key: string; type: string }): string {
+    if (field.type === 'password') {
+      return this.isFieldVisible(field.key) ? 'text' : 'password';
+    }
+    return field.type;
+  }
+
+  async saveMethod(config: ProviderConfig): Promise<void> {
+    const credentials = this.formData();
+    const missing = config.fields.some(f => !credentials[f.key]?.trim());
+    if (missing) {
+      this.showFeedback('Todos los campos son obligatorios.', 'error');
+      return;
+    }
+
+    this.isSaving.set(true);
+    try {
+      const existing = this.getMethod(config.provider);
+      if (existing) {
+        await firstValueFrom(
+          this.http.put(`${this.apiUrl}/payment-methods/${existing.id}`, { credentials })
+        );
+      } else {
+        await firstValueFrom(
+          this.http.post(`${this.apiUrl}/payment-methods`, {
+            provider: config.provider,
+            credentials,
+          })
+        );
+      }
+      await this.loadMethods();
+      this.showFeedback('Credenciales guardadas correctamente.', 'success');
+    } catch (err: any) {
+      this.showFeedback(err?.error?.message ?? 'Error al guardar.', 'error');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  async toggleActive(provider: Provider): Promise<void> {
+    const method = this.getMethod(provider);
+    if (!method) return;
+    try {
+      await firstValueFrom(
+        this.http.put(`${this.apiUrl}/payment-methods/${method.id}`, {
+          isActive: !method.isActive,
+        })
+      );
+      await this.loadMethods();
+    } catch { /* silencioso */ }
+  }
+
+  async removeMethod(provider: Provider): Promise<void> {
+    const method = this.getMethod(provider);
+    if (!method) return;
+    try {
+      await firstValueFrom(
+        this.http.delete(`${this.apiUrl}/payment-methods/${method.id}`)
+      );
+      await this.loadMethods();
+      this.expandedProvider.set(null);
+      this.showFeedback('Metodo de pago eliminado.', 'success');
+    } catch { /* silencioso */ }
+  }
+
+  private showFeedback(msg: string, type: 'success' | 'error') {
+    this.feedbackMsg.set(msg);
+    this.feedbackType.set(type);
+    setTimeout(() => {
+      this.feedbackMsg.set('');
+      this.feedbackType.set('');
+    }, 4000);
   }
 }

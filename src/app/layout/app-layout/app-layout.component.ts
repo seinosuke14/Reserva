@@ -25,21 +25,21 @@ import { NotificationService } from '../../core/services/notification.service';
   ]
 })
 export class AppLayoutComponent {
-  private readonly auth   = inject(AuthService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  readonly notifSvc       = inject(NotificationService);
+  readonly notifSvc = inject(NotificationService);
 
-  isSidebarOpen      = signal(true);
+  isSidebarOpen = signal(true);
   isNotificationsOpen = signal(false);
-  currentPath         = signal('');
+  currentPath = signal('');
 
   readonly menuItems = [
-    { path: '/',              label: 'Dashboard',    icon: 'dashboard' },
-    { path: '/agenda',        label: 'Agenda',       icon: 'calendar' },
-    { path: '/clientes',      label: 'Clientes',     icon: 'users' },
-    { path: '/pagos',         label: 'Pagos',        icon: 'credit-card' },
-    { path: '/horario',       label: 'Horario',      icon: 'clock' },
-    { path: '/bloqueos',      label: 'Bloqueos',     icon: 'shield-alert' },
+    { path: '/', label: 'Dashboard', icon: 'dashboard' },
+    { path: '/agenda', label: 'Agenda', icon: 'calendar' },
+    { path: '/clientes', label: 'Clientes', icon: 'users' },
+    { path: '/pagos', label: 'Métodos de Pago', icon: 'credit-card' },
+    { path: '/horario', label: 'Horario', icon: 'clock' },
+    { path: '/bloqueos', label: 'Bloqueos', icon: 'shield-alert' },
     { path: '/configuracion', label: 'Configuración', icon: 'settings' },
   ];
 

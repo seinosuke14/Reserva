@@ -12,6 +12,8 @@ export interface IProfessional {
   phone: string;
   slug?: string;
   role?: 'professional' | 'admin' | 'client';
+  webpayCommerceCode?: string;
+  webpayApiKey?: string;
   createdAt?: string;
 }
 
@@ -28,6 +30,28 @@ export class ProfessionalService {
     } catch (err: any) {
       const message = err?.error?.message ?? 'Error al registrarse.';
       return { success: false, message };
+    }
+  }
+
+  async updateWebpay(data: { webpayCommerceCode: string; webpayApiKey: string }): Promise<{ success: boolean; message: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.put(`${environment.apiUrl}/professionals/webpay`, data)
+      );
+      return { success: true, message: res.message ?? 'Credenciales actualizadas correctamente.' };
+    } catch (err: any) {
+      const message = err?.error?.message ?? 'Error al actualizar credenciales.';
+      return { success: false, message };
+    }
+  }
+
+  async getProfile(): Promise<IProfessional | null> {
+    try {
+      return await firstValueFrom(
+        this.http.get<IProfessional>(`${environment.apiUrl}/professionals/profile`)
+      );
+    } catch {
+      return null;
     }
   }
 }
