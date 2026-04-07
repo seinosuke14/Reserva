@@ -20,6 +20,7 @@ interface IAppointment {
   date: string;   // 'YYYY-MM-DD'
   time: string;   // 'HH:mm'
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  notes: string | null;
   service: { id: string; name: string } | null;
 }
 
@@ -80,6 +81,10 @@ export class CustomerDirectoryComponent implements OnInit {
     const today = new Date().toISOString().slice(0, 10);
     const future = active.filter(a => a.date >= today);
     return future.length ? future[0] : active[active.length - 1];
+  }
+
+  hasAnyNotes(customer: ICustomer): boolean {
+    return customer.appointments?.some(a => !!a.notes) ?? false;
   }
 
   formatAppointment(appt: IAppointment): string {
