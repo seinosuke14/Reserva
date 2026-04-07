@@ -51,12 +51,15 @@ export class WorkScheduleService {
     const [startH, startM] = day.startTime.split(':').map(Number);
     const [endH,   endM]   = day.endTime.split(':').map(Number);
     const startMin = startH * 60 + startM;
-    const endMin   = endH   * 60 + endM;
+    let   endMin   = endH   * 60 + endM;
     const duration = day.slotDuration || 30;
+
+    // Si el fin es medianoche (00:00) o anterior al inicio, tratar como fin de día
+    if (endMin <= startMin) endMin = 24 * 60;
 
     const slots: string[] = [];
     for (let m = startMin; m < endMin; m += duration) {
-      const h   = Math.floor(m / 60);
+      const h   = Math.floor(m / 60) % 24;
       const min = m % 60;
       slots.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
     }
