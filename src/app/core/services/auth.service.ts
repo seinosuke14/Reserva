@@ -72,12 +72,12 @@ export class AuthService {
    */
   async checkEmailExists(email: string): Promise<boolean> {
     try {
-      await firstValueFrom(
+      const res: any = await firstValueFrom(
         this.http.get(`${API_BASE}/auth/check-email`, { params: { email } })
       );
-      return true;
+      return res.exists === true;
     } catch (err: any) {
-      // 404 = no existe, cualquier otro error lo tratamos como "no existe" para no bloquear
+      // 409 = email ya registrado como profesional
       return err?.status === 409;
     }
   }

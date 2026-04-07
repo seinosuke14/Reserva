@@ -45,3 +45,257 @@ $accent:   #06B6D4;
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
+// ─── Step 4: Payment options ──────────────────────────
+.step-content {
+  margin-bottom: 1.5rem;
+}
+
+.step-header {
+  margin-bottom: 1.5rem;
+
+  .step-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.25rem;
+  }
+
+  .step-desc {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin: 0;
+  }
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: rgba($primary, 0.03);
+  }
+}
+
+.payment-option-icon {
+  width: 52px;
+  height: 52px;
+  background: #f1f5f9;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  flex-shrink: 0;
+
+  .selected & {
+    background: $primary;
+    color: #fff;
+  }
+}
+
+.payment-option-info {
+  flex: 1;
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.125rem;
+  }
+
+  p {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin: 0;
+  }
+}
+
+.payment-option-radio {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .selected & {
+    border-color: $primary;
+  }
+}
+
+.radio-dot {
+  width: 12px;
+  height: 12px;
+  background: $primary;
+  border-radius: 50%;
+}
+
+// ─── Transfer info ────────────────────────────────────
+.transfer-preview,
+.transfer-details {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-top: 0.5rem;
+
+  h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.transfer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.8rem;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  span {
+    color: #64748b;
+  }
+
+  strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  &.highlight {
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: none;
+
+    strong {
+      color: $primary;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+  }
+}
+
+.transfer-note {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0.75rem 0 0;
+  font-style: italic;
+}
+
+.no-methods {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  border-radius: 1rem;
+  border: 1px dashed #cbd5e1;
+}
+
+// ─── Booked state ─────────────────────────────────────
+.booked-card {
+  max-width: 520px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem;
+  }
+
+  > p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+  }
+}
+
+.booked-icon {
+  width: 64px;
+  height: 64px;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}
+
+.booking-ref {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+
+  strong {
+    color: $primary;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+  }
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.875rem 1.5rem;
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1da851;
+  }
+}

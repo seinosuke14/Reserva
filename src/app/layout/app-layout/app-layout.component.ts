@@ -25,14 +25,14 @@ import { NotificationService } from '../../core/services/notification.service';
   ]
 })
 export class AppLayoutComponent {
-  private readonly auth   = inject(AuthService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  readonly notifSvc       = inject(NotificationService);
+  readonly notifSvc = inject(NotificationService);
 
   /** true = expanded, false = icons-only */
   isSidebarOpen      = signal(window.innerWidth >= 768);
   isNotificationsOpen = signal(false);
-  currentPath         = signal('');
+  currentPath = signal('');
 
   /** true when viewport < 768px */
   isMobile = signal(window.innerWidth < 768);

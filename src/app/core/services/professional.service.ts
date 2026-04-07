@@ -30,4 +30,14 @@ export class ProfessionalService {
       return { success: false, message };
     }
   }
+
+  async getProfile(): Promise<IProfessional | null> {
+    try {
+      return await firstValueFrom(
+        this.http.get<IProfessional>(`${environment.apiUrl}/professionals/profile`)
+      );
+    } catch {
+      return null;
+    }
+  }
 }
