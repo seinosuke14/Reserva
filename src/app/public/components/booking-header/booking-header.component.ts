@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
         <div class="prof-info">
           <div class="prof-avatar">{{ professional()?.name.charAt(0) }}</div>
           <div>
-            <p class="prof-name">{{ professional()?.name }}</p>
+            <p class="prof-name">{{ professional()?.slug || professional()?.name }}</p>
             <p class="prof-specialty">{{ professional()?.specialty }}</p>
           </div>
         </div>

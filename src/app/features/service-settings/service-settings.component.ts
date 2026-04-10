@@ -6,6 +6,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth.service';
 
 interface IService {
   id: string;
@@ -39,6 +40,7 @@ interface IService {
 export class ServiceSettingsComponent implements OnInit {
   private readonly fb   = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   readonly formatCLP    = formatCLP;
 
   services       = signal<IService[]>([]);
@@ -47,6 +49,11 @@ export class ServiceSettingsComponent implements OnInit {
   isLoading      = signal(true);
   isSaving       = signal(false);
   errorMsg       = signal<string | null>(null);
+
+  // Slug
+  slugValue      = signal(this.auth.currentUser()?.slug ?? '');
+  slugSaving     = signal(false);
+  slugMsg        = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   form = this.fb.group({
     name:        ['', [Validators.required, Validators.minLength(3)]],
@@ -132,6 +139,34 @@ export class ServiceSettingsComponent implements OnInit {
       this.errorMsg.set('No se pudo guardar el servicio.');
     } finally {
       this.isSaving.set(false);
+    }
+  }
+
+  async saveSlug(): Promise<void> {
+    const slug = this.slugValue().trim().toLowerCase();
+    if (!slug) { this.slugMsg.set({ type: 'error', text: 'El slug no puede estar vacío.' }); return; }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      this.slugMsg.set({ type: 'error', text: 'Solo letras minúsculas, números y guiones (ej: mi-consulta).' });
+      return;
+    }
+    if (slug === this.auth.currentUser()?.slug) {
+      this.slugMsg.set({ type: 'error', text: 'El slug es el mismo que el actual.' });
+      return;
+    }
+
+    this.slugSaving.set(true);
+    this.slugMsg.set(null);
+    try {
+      const updated: any = await firstValueFrom(
+        this.http.put(`${environment.apiUrl}/professionals/profile`, { slug })
+      );
+      this.auth.patchUser({ slug: updated.slug });
+      this.slugMsg.set({ type: 'success', text: 'Slug actualizado correctamente.' });
+    } catch (err: any) {
+      const msg = err?.error?.message ?? 'No se pudo actualizar el slug.';
+      this.slugMsg.set({ type: 'error', text: msg });
+    } finally {
+      this.slugSaving.set(false);
     }
   }
 }
