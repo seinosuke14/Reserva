@@ -1,4 +1,40 @@
 <div class="space-y-6">
+
+  <!-- Slug de reserva -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-1 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      Link de Reserva Personalizado
+    </h3>
+    <p class="text-xs text-gray-400 mb-4">Define la URL pública con la que tus clientes accederán a tu portal de reservas.</p>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="flex-1 flex items-center bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
+        <span class="px-3 text-xs text-gray-400 whitespace-nowrap border-r border-gray-100 py-3 bg-gray-100 font-mono">
+          /reservar/
+        </span>
+        <input type="text" [value]="slugValue()" (input)="slugValue.set($any($event.target).value)"
+          placeholder="mi-consulta"
+          class="flex-1 px-3 py-3 bg-transparent text-sm font-medium text-secondary focus:outline-none font-mono" />
+      </div>
+      <button (click)="saveSlug()" [disabled]="slugSaving()"
+        class="px-5 py-3 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 whitespace-nowrap">
+        {{ slugSaving() ? 'Guardando...' : 'Guardar Slug' }}
+      </button>
+    </div>
+
+    @if (slugMsg()) {
+      <p class="text-xs mt-2 ml-1 font-medium"
+        [class]="slugMsg()!.type === 'success' ? 'text-green-600' : 'text-red-500'">
+        {{ slugMsg()!.text }}
+      </p>
+    }
+  </div>
+
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h2 class="text-2xl font-bold text-secondary">Configuración de Servicios</h2>

@@ -130,6 +130,15 @@ export class AuthService {
     localStorage.removeItem(GUEST_KEY);
   }
 
+  /** Actualiza el usuario en memoria y en localStorage (ej: tras editar perfil) */
+  patchUser(partial: Partial<IProfessional>): void {
+    const current = this._user();
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    this._user.set(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  }
+
   logout(): void {
     this._user.set(null);
     localStorage.removeItem(STORAGE_KEY);
