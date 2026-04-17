@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
       @if (currentStep() > 1) {
         <button class="btn-ghost" (click)="onBack()">← Atras</button>
       }
-      @if (currentStep() < 4) {
+      @if (currentStep() < 3) {
         <button class="btn-primary" (click)="onNext()" [disabled]="!canProceed()">
           Siguiente →
         </button>
@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './booking-actions.component.scss'
 })
 export class BookingActionsComponent {
-  readonly currentStep = input<1 | 2 | 3 | 4>(1);
+  readonly currentStep = input<1 | 2 | 3>(1);
   readonly canProceed = input(false);
 
   readonly back = output<void>();

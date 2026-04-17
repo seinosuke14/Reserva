@@ -11,6 +11,7 @@ export interface IProfessional {
   password?: string;
   phone: string;
   slug?: string;
+  description?: string;
   role?: 'professional' | 'admin' | 'client';
   createdAt?: string;
 }
