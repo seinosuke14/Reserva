@@ -5,9 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { BookingHeaderComponent } from '../components/booking-header/booking-header.component';
 import { BookingStepIndicatorComponent } from '../components/booking-step-indicator/booking-step-indicator.component';
-import { BookingServiceSelectorComponent } from '../components/booking-service-selector/booking-service-selector.component';
 import { BookingDatetimeSelectorComponent } from '../components/booking-datetime-selector/booking-datetime-selector.component';
 import { BookingFormComponent } from '../components/booking-form/booking-form.component';
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
@@ -58,9 +56,7 @@ type CalCell = { dateStr: string | null; day: number; state: CalCellState };
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    BookingHeaderComponent,
     BookingStepIndicatorComponent,
-    BookingServiceSelectorComponent,
     BookingDatetimeSelectorComponent,
     BookingFormComponent,
     BookingActionsComponent,
@@ -79,13 +75,18 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');
-  readonly professional = signal<{ id: string; name: string; slug: string; specialty: string; phone: string } | null>(null);
+  readonly professional = signal<{ id: string; name: string; slug: string; specialty: string; phone: string; description?: string; ratingAvg?: number; ratingCount?: number } | null>(null);
+
+  readonly stars = [1, 2, 3, 4, 5];
   readonly services     = signal<IPublicService[]>([]);
   readonly availability = signal<IDayAvailability[]>([]);
   readonly paymentMethods = signal<IPublicPaymentMethod[]>([]);
 
-  // ─── Stepper (4 pasos) ──────────────────────────────────────────────────────
-  readonly step            = signal<1 | 2 | 3 | 4>(1);
+  // ─── Modo de vista ──────────────────────────────────────────────────────────
+  readonly viewMode        = signal<'profile' | 'checkout'>('profile');
+
+  // ─── Stepper (3 pasos en checkout: Fecha, Datos, Pago) ─────────────────────
+  readonly step            = signal<1 | 2 | 3>(1);
   readonly selectedService = signal<IPublicService | null>(null);
   readonly selectedDate    = signal<string>('');
   readonly selectedHour    = signal<string | null>(null);
@@ -107,6 +108,31 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly daySlots = computed(() => {
     const day = this.availability().find(d => d.date === this.selectedDate());
     return day ? day.slots : [];
+  });
+
+  /** Resumen del horario laboral derivado de la disponibilidad (ej: "Lun - Vie · 09:00 - 18:00") */
+  readonly scheduleSummary = computed(() => {
+    const avail = this.availability();
+    if (!avail.length) return '';
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const workDays: number[] = [];
+    let firstSlot = '23:59';
+    let lastSlot = '00:00';
+    for (const day of avail) {
+      const d = new Date(day.date + 'T12:00:00');
+      const dow = d.getDay();
+      if (!workDays.includes(dow)) workDays.push(dow);
+      for (const s of day.slots) {
+        if (s.time < firstSlot) firstSlot = s.time;
+        if (s.time > lastSlot) lastSlot = s.time;
+      }
+    }
+    workDays.sort((a, b) => a - b);
+    if (!workDays.length) return '';
+    const first = dayNames[workDays[0]];
+    const last = dayNames[workDays[workDays.length - 1]];
+    const daysLabel = workDays.length === 1 ? first : `${first} - ${last}`;
+    return `${daysLabel} · ${firstSlot} - ${lastSlot}`;
   });
 
   // ─── Calendario mensual ─────────────────────────────────────────────────────
@@ -237,6 +263,16 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   selectService(service: IPublicService): void {
     this.selectedService.set(service);
+    this.step.set(1);
+    this.selectedHour.set(null);
+    this.viewMode.set('checkout');
+  }
+
+  backToProfile(): void {
+    this.viewMode.set('profile');
+    this.selectedService.set(null);
+    this.selectedHour.set(null);
+    this.step.set(1);
   }
 
   selectDate(date: string): void {
@@ -254,19 +290,22 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     const current = this.step();
-    if (current > 1) this.step.set((current - 1) as 1 | 2 | 3 | 4);
+    if (current === 1) {
+      this.backToProfile();
+    } else {
+      this.step.set((current - 1) as 1 | 2 | 3);
+    }
   }
 
   goNext(): void {
     const current = this.step();
-    if (current < 4 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3 | 4);
+    if (current < 3 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3);
   }
 
   getCanProceed(): boolean {
-    if (this.step() === 1) return !!this.selectedService();
-    if (this.step() === 2) return !!this.selectedHour();
-    if (this.step() === 3) return this.form.valid;
-    if (this.step() === 4) return !!this.selectedPayment();
+    if (this.step() === 1) return !!this.selectedHour();
+    if (this.step() === 2) return this.form.valid;
+    if (this.step() === 3) return !!this.selectedPayment();
     return false;
   }
 

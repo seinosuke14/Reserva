@@ -1,12 +1,11 @@
 <div class="portal-root">
-  <app-booking-header [professional]="professional()"></app-booking-header>
 
   <main class="portal-main">
     @switch (loadState()) {
       @case ('loading') {
         <div class="state-screen">
-          <div class="spin">⏳</div>
-          <p>Cargando...</p>
+          <div class="spinner"></div>
+          <p>Cargando perfil...</p>
         </div>
       }
       @case ('error') {
@@ -15,10 +14,15 @@
         </div>
       }
       @default {
-        <!-- Booking confirmado (transferencia) -->
+        <!-- Booking confirmado -->
         @if (isBooked()) {
           <div class="booked-card">
-            <div class="booked-icon">✓</div>
+            <div class="booked-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
             <h2>Reserva Registrada</h2>
             @if (selectedPayment()?.provider === 'transfer') {
               <p>Tu reserva ha sido registrada. Realiza la transferencia y envia el comprobante por WhatsApp para confirmar.</p>
@@ -71,20 +75,152 @@
               </div>
             }
           </div>
-        } @else {
-          <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
 
-          <!-- Step 1: Service -->
-          @if (step() === 1) {
-            <app-booking-service-selector
-              [services]="services()"
-              [selectedService]="selectedService()"
-              (serviceSelected)="selectService($event)">
-            </app-booking-service-selector>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  MODO PERFIL: Hero + Info + Servicios                         -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        } @else if (viewMode() === 'profile') {
+
+          <!-- Nombre del profesional arriba -->
+          <div class="profile-top-bar">
+            <span class="profile-top-name">{{ professional()?.slug || professional()?.name }}</span>
+            @if (auth.isAuthenticated()) {
+              <button class="btn-text-sm" (click)="auth.logout()">Cerrar sesion</button>
+            } @else {
+              <a href="/login" class="btn-text-sm">Iniciar sesion</a>
+            }
+          </div>
+
+          <!-- Hero + Info Card -->
+          <div class="profile-hero-section">
+            <div class="hero-image">
+              <div class="hero-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>Imagen del profesional</span>
+              </div>
+            </div>
+
+            <div class="hero-info-card">
+              <div class="info-avatar">{{ professional()?.name?.charAt(0) }}</div>
+              <h2 class="info-name">{{ professional()?.name }}</h2>
+              <p class="info-specialty">{{ professional()?.specialty }}</p>
+
+              <div class="info-rating">
+                <div class="rating-stars">
+                  @for (star of stars; track star) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      [attr.fill]="star <= (professional()?.ratingAvg ?? 0) ? '#FBBF24' : (star - 0.5 <= (professional()?.ratingAvg ?? 0) ? '#FBBF24' : 'none')"
+                      [attr.stroke]="star <= (professional()?.ratingAvg ?? 0) ? '#FBBF24' : '#D1D5DB'"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  }
+                </div>
+                @if (professional()?.ratingCount) {
+                  <span class="rating-text">{{ professional()?.ratingAvg }} ({{ professional()?.ratingCount }})</span>
+                } @else {
+                  <span class="rating-text">Sin valoraciones</span>
+                }
+              </div>
+
+              <div class="info-divider"></div>
+
+              <div class="info-row">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6
+                    19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7
+                    2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45
+                    12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span>{{ professional()?.phone }}</span>
+              </div>
+
+              @if (scheduleSummary()) {
+                <div class="info-row">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>{{ scheduleSummary() }}</span>
+                </div>
+              }
+
+              <div class="info-status">
+                <span class="status-dot"></span>
+                Disponible para agendar
+              </div>
+            </div>
+          </div>
+
+          <!-- Descripción del profesional -->
+          @if (professional()?.description) {
+            <div class="profile-description">
+              <p>{{ professional()!.description }}</p>
+            </div>
           }
 
-          <!-- Step 2: Date & Time -->
-          @if (step() === 2) {
+          <!-- Servicios -->
+          <div class="profile-services-section">
+            <h3 class="section-title">Servicios disponibles</h3>
+
+            <div class="profile-services-list">
+              @for (service of services(); track service.id) {
+                <div class="profile-service-card">
+                  <div class="psc-body">
+                    <h4 class="psc-name">{{ service.name }}</h4>
+                    <p class="psc-desc">{{ service.description }}</p>
+                    <div class="psc-meta">
+                      <span class="psc-duration">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        {{ service.duration }} min
+                      </span>
+                      <span class="psc-price">{{ formatCLP(service.price) }}</span>
+                    </div>
+                  </div>
+                  <button class="psc-book-btn" (click)="selectService(service)">
+                    Agendar servicio
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--  MODO CHECKOUT: Calendario + Form + Pago                      -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        } @else {
+
+          <!-- Checkout header compacto -->
+          <div class="checkout-header">
+            <button class="checkout-back" (click)="backToProfile()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              Volver
+            </button>
+            <div class="checkout-service-badge">
+              <span class="csb-name">{{ selectedService()?.name }}</span>
+              <span class="csb-sep">·</span>
+              <span class="csb-price">{{ formatCLP(selectedService()?.price ?? 0) }}</span>
+            </div>
+          </div>
+
+          <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
+
+          <!-- Step 1: Date & Time -->
+          @if (step() === 1) {
             <app-booking-datetime-selector
               [availability]="availability()"
               [selectedDate]="selectedDate()"
@@ -94,8 +230,8 @@
             </app-booking-datetime-selector>
           }
 
-          <!-- Step 3: Form & Summary -->
-          @if (step() === 3) {
+          <!-- Step 2: Form & Summary -->
+          @if (step() === 2) {
             <app-booking-form
               [bookingForm]="form"
               [selectedService]="selectedService()"
@@ -106,8 +242,8 @@
             </app-booking-form>
           }
 
-          <!-- Step 4: Payment method -->
-          @if (step() === 4) {
+          <!-- Step 3: Payment method -->
+          @if (step() === 3) {
             <div class="step-content">
               <div class="step-header">
                 <h3 class="step-title">Metodo de pago</h3>
@@ -177,7 +313,6 @@
                       </div>
                     </button>
 
-                    <!-- Info de transferencia si esta seleccionada -->
                     @if (method.provider === 'transfer' && selectedPayment()?.provider === 'transfer' && method.transferInfo) {
                       <div class="transfer-preview">
                         <div class="transfer-row">

@@ -36,6 +36,7 @@ export const routes: Routes = [
       { path: '', loadComponent: () => import('./features/dashboard-home/dashboard-home.component').then(m => m.DashboardHomeComponent) },
       { path: 'agenda', loadComponent: () => import('./features/booking-calendar/booking-calendar.component').then(m => m.BookingCalendarComponent) },
       { path: 'clientes', loadComponent: () => import('./features/customer-directory/customer-directory.component').then(m => m.CustomerDirectoryComponent) },
+      { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
       { path: 'configuracion', loadComponent: () => import('./features/service-settings/service-settings.component').then(m => m.ServiceSettingsComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },

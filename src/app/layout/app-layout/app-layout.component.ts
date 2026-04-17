@@ -40,6 +40,7 @@ export class AppLayoutComponent {
   readonly menuItems = [
     { path: '/',              label: 'Dashboard',    icon: 'dashboard' },
     { path: '/agenda',        label: 'Agenda',       icon: 'calendar' },
+    { path: '/servicios',     label: 'Servicios',    icon: 'package' },
     { path: '/clientes',      label: 'Clientes',     icon: 'users' },
     { path: '/pagos',         label: 'Métodos de Pago',        icon: 'credit-card' },
     { path: '/horario',       label: 'Horario',      icon: 'clock' },
