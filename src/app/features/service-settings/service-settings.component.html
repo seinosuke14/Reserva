@@ -1,5 +1,10 @@
 <div class="space-y-6">
 
+  <div>
+    <h2 class="text-2xl font-bold text-secondary">Configuración</h2>
+    <p class="text-sm text-gray-400">Personaliza tu perfil público y enlace de reservas.</p>
+  </div>
+
   <!-- Slug de reserva -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
     <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-1 flex items-center gap-2">
@@ -35,173 +40,40 @@
     }
   </div>
 
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div>
-      <h2 class="text-2xl font-bold text-secondary">Configuración de Servicios</h2>
-      <p class="text-sm text-gray-400">Gestiona los tratamientos y servicios que ofreces a tus clientes.</p>
-    </div>
-    <button (click)="openAddForm()"
-      class="bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  <!-- Descripción del perfil público -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-1 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
       </svg>
-      Nuevo Servicio
-    </button>
-  </div>
+      Descripción del Perfil
+    </h3>
+    <p class="text-xs text-gray-400 mb-4">Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.</p>
 
-  <!-- Lista de servicios -->
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-    @for (service of services(); track service.id) {
-      <div @cardAnim
-        class="bg-white p-6 rounded-3xl border transition-all"
-        [class]="service.isActive ? 'border-gray-100 shadow-sm' : 'border-gray-200 bg-gray-50/50 opacity-75'">
-        <div class="flex justify-between items-start mb-4">
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <h3 class="font-bold text-lg text-secondary">{{ service.name }}</h3>
-              @if (!service.isActive) {
-                <span class="text-[10px] font-black uppercase tracking-widest bg-gray-200 text-gray-500 px-2 py-0.5 rounded">Inactivo</span>
-              }
-            </div>
-            <p class="text-sm text-gray-400 line-clamp-2">{{ service.description }}</p>
-          </div>
-          <div class="flex items-center gap-1">
-            <button (click)="openEditForm(service)" title="Editar"
-              class="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button (click)="toggleStatus(service)" [title]="service.isActive ? 'Desactivar' : 'Activar'"
-              class="p-2 rounded-xl transition-all"
-              [class]="service.isActive ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50' : 'text-gray-400 hover:text-green-500 hover:bg-green-50'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                @if (service.isActive) {
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                } @else {
-                  <polyline points="9 12 11 14 15 10"/>
-                }
-              </svg>
-            </button>
-            <button (click)="deleteService(service.id)" title="Eliminar"
-              class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
-                <path d="M9 6V4h6v2"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="flex items-center justify-between pt-4 border-t border-gray-50">
-          <div class="flex items-center gap-1.5 text-gray-500 text-sm font-medium">
-            <svg class="text-primary/50" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            {{ service.duration }} min
-          </div>
-          <div class="text-xl font-black text-primary">{{ formatCLP(service.price) }}</div>
-        </div>
-      </div>
+    <textarea [value]="descriptionValue()" (input)="descriptionValue.set($any($event.target).value)"
+      placeholder="Ej: Soy especialista en cortes modernos con más de 10 años de experiencia..."
+      rows="4"
+      class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 resize-none"></textarea>
+
+    <div class="flex items-center justify-between mt-3">
+      <span class="text-xs text-gray-400">{{ descriptionValue().length }} / 500 caracteres</span>
+      <button (click)="saveDescription()" [disabled]="descSaving()"
+        class="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 whitespace-nowrap">
+        {{ descSaving() ? 'Guardando...' : 'Guardar Descripción' }}
+      </button>
+    </div>
+
+    @if (descMsg()) {
+      <p class="text-xs mt-2 ml-1 font-medium"
+        [class]="descMsg()!.type === 'success' ? 'text-green-600' : 'text-red-500'">
+        {{ descMsg()!.text }}
+      </p>
     }
   </div>
 
-  <!-- Modal -->
-  @if (isFormOpen()) {
-    <div @backdrop class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-secondary/20 backdrop-blur-sm">
-      <div @modalAnim class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-
-        <div class="p-6 border-b border-gray-50 flex items-center justify-between bg-primary text-white">
-          <div class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33
-                1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06
-                a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
-                A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9
-                4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06
-                a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
-                a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-            <h3 class="text-xl font-bold">{{ editingService() ? 'Editar Servicio' : 'Nuevo Servicio' }}</h3>
-          </div>
-          <button (click)="isFormOpen.set(false)" class="p-2 hover:bg-white/10 rounded-xl transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-
-        <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="p-8 space-y-6">
-
-          <div class="space-y-1">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Nombre del Servicio</label>
-            <input formControlName="name" type="text" placeholder="Ej: Limpieza Dental"
-              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-              [class]="f['name'].invalid && f['name'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-            @if (f['name'].invalid && f['name'].touched) {
-              <p class="text-xs text-red-500 ml-1">Mínimo 3 caracteres</p>
-            }
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Descripción</label>
-            <textarea formControlName="description" rows="3"
-              placeholder="Describe brevemente en qué consiste el servicio..."
-              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all resize-none"
-              [class]="f['description'].invalid && f['description'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'">
-            </textarea>
-            @if (f['description'].invalid && f['description'].touched) {
-              <p class="text-xs text-red-500 ml-1">Campo requerido</p>
-            }
-          </div>
-
-          <div class="grid grid-cols-2 gap-6">
-            <div class="space-y-1">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Duración (min)</label>
-              <input formControlName="duration" type="number" step="15"
-                class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-                [class]="f['duration'].invalid && f['duration'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-              @if (f['duration'].invalid && f['duration'].touched) {
-                <p class="text-xs text-red-500 ml-1">Mínimo 15 min</p>
-              }
-            </div>
-            <div class="space-y-1">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Precio (CLP)</label>
-              <input formControlName="price" type="number"
-                class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-                [class]="f['price'].invalid && f['price'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-              @if (f['price'].invalid && f['price'].touched) {
-                <p class="text-xs text-red-500 ml-1">Precio inválido</p>
-              }
-            </div>
-          </div>
-
-          <div class="pt-4 flex gap-4">
-            <button type="button" (click)="isFormOpen.set(false)"
-              class="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all border border-gray-100">
-              Cancelar
-            </button>
-            <button type="submit"
-              class="flex-1 bg-primary text-white px-6 py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              {{ editingService() ? 'Guardar Cambios' : 'Crear Servicio' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
 </div>

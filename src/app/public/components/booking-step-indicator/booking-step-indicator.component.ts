@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="stepper">
-      @for (stepNum of [1, 2, 3, 4]; track stepNum) {
+      @for (stepNum of [1, 2, 3]; track stepNum) {
         <div class="step-item">
           <div class="step-bubble" [ngClass]="getStepClass(stepNum)">
             {{ currentStep() >= stepNum ? '✓' : stepNum }}
@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
             {{ getStepLabel(stepNum) }}
           </span>
         </div>
-        @if (stepNum < 4) {
+        @if (stepNum < 3) {
           <div class="step-line" [ngClass]="{ active: currentStep() > stepNum }"></div>
         }
       }
@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './booking-step-indicator.component.scss'
 })
 export class BookingStepIndicatorComponent {
-  readonly currentStep = input<1 | 2 | 3 | 4>(1);
+  readonly currentStep = input<1 | 2 | 3>(1);
 
   getStepClass(step: number): string {
     if (this.currentStep() > step) return 'done';
@@ -34,6 +34,6 @@ export class BookingStepIndicatorComponent {
   }
 
   getStepLabel(step: number): string {
-    return ['Servicio', 'Fecha', 'Datos', 'Pago'][step - 1];
+    return ['Fecha y Hora', 'Tus Datos', 'Pago'][step - 1];
   }
 }
