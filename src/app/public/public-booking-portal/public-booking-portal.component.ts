@@ -11,44 +11,13 @@ import { BookingFormComponent } from '../components/booking-form/booking-form.co
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
 import { BookingFooterComponent } from '../components/booking-footer/booking-footer.component';
 
-import { formatCLP } from '../../helpers/formatters';
+import { formatCLP, formatDateLong } from '../../helpers/formatters';
+import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
 
-export interface IPublicService {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-}
-
-export interface ITimeSlot {
-  time: string;
-  available: boolean;
-}
-
-export interface IDayAvailability {
-  date: string;
-  slots: ITimeSlot[];
-}
-
-export interface IPublicPaymentMethod {
-  provider: 'webpay' | 'mercadopago' | 'transfer';
-  transferInfo?: {
-    bankName: string;
-    accountType: string;
-    accountNumber: string;
-    rut: string;
-    holderName: string;
-    email: string;
-  };
-}
-
 type EmailCheckState = 'idle' | 'checking' | 'exists' | 'not-found';
 type LoadState = 'loading' | 'ready' | 'error';
-type CalCellState = 'empty' | 'past' | 'unavailable' | 'available' | 'full';
-type CalCell = { dateStr: string | null; day: number; state: CalCellState };
 
 @Component({
   selector: 'app-public-booking-portal',
@@ -72,6 +41,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly http   = inject(HttpClient);
   readonly auth           = inject(AuthService);
   readonly formatCLP      = formatCLP;
+  readonly formatDate     = formatDateLong;
 
   // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');
@@ -101,14 +71,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private sub: Subscription | null = null;
 
   // ─── Computed ───────────────────────────────────────────────────────────────
-  readonly today         = new Date().toISOString().slice(0, 10);
   readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
   readonly showLoginHint = computed(() => this.emailCheckState() === 'exists' && this.isGuest());
-
-  readonly daySlots = computed(() => {
-    const day = this.availability().find(d => d.date === this.selectedDate());
-    return day ? day.slots : [];
-  });
 
   /** Resumen del horario laboral derivado de la disponibilidad (ej: "Lun - Vie · 09:00 - 18:00") */
   readonly scheduleSummary = computed(() => {
@@ -134,61 +98,6 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const daysLabel = workDays.length === 1 ? first : `${first} - ${last}`;
     return `${daysLabel} · ${firstSlot} - ${lastSlot}`;
   });
-
-  // ─── Calendario mensual ─────────────────────────────────────────────────────
-  readonly calendarMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-
-  readonly calendarMonthLabel = computed(() =>
-    this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
-  );
-
-  readonly isPrevMonthDisabled = computed(() => {
-    const now = new Date();
-    const cm  = this.calendarMonth();
-    return cm.getFullYear() === now.getFullYear() && cm.getMonth() === now.getMonth();
-  });
-
-  readonly calendarGrid = computed(() => {
-    const first       = this.calendarMonth();
-    const year        = first.getFullYear();
-    const month       = first.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    let   startDow    = first.getDay();
-    startDow = startDow === 0 ? 6 : startDow - 1;
-
-    const availMap = new Map(this.availability().map(d => [d.date, d]));
-    const grid: CalCell[] = [];
-
-    for (let i = 0; i < startDow; i++) grid.push({ dateStr: null, day: 0, state: 'empty' });
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      let state: CalCellState;
-      if (dateStr < this.today) {
-        state = 'past';
-      } else {
-        const avail = availMap.get(dateStr);
-        if (!avail)                               state = 'unavailable';
-        else if (avail.slots.some(s => s.available)) state = 'available';
-        else                                      state = 'full';
-      }
-      grid.push({ dateStr, day: d, state });
-    }
-
-    while (grid.length % 7 !== 0) grid.push({ dateStr: null, day: 0, state: 'empty' });
-    return grid;
-  });
-
-  prevCalMonth(): void {
-    if (this.isPrevMonthDisabled()) return;
-    const d = this.calendarMonth();
-    this.calendarMonth.set(new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  }
-
-  nextCalMonth(): void {
-    const d = this.calendarMonth();
-    this.calendarMonth.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
-  }
 
   // ─── Form ───────────────────────────────────────────────────────────────────
   readonly form = this.fb.group({
@@ -299,15 +208,15 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   goNext(): void {
     const current = this.step();
-    if (current < 3 && this.getCanProceed()) this.step.set((current + 1) as 1 | 2 | 3);
+    if (current < 3 && this.canProceed()) this.step.set((current + 1) as 1 | 2 | 3);
   }
 
-  getCanProceed(): boolean {
+  readonly canProceed = computed(() => {
     if (this.step() === 1) return !!this.selectedHour();
     if (this.step() === 2) return this.form.valid;
     if (this.step() === 3) return !!this.selectedPayment();
     return false;
-  }
+  });
 
   getWhatsappLink(): string {
     const phone = this.professional()?.phone?.replace(/\D/g, '') ?? '';
@@ -368,27 +277,4 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ─── Helpers de formato ──────────────────────────────────────────────────────
-
-  formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    }).format(new Date(dateStr + 'T12:00:00'));
-  }
-
-  formatShortDay(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', { weekday: 'short' })
-      .format(new Date(dateStr + 'T12:00:00'))
-      .toUpperCase();
-  }
-
-  formatDayNumber(dateStr: string): number {
-    return new Date(dateStr + 'T12:00:00').getDate();
-  }
-
-  formatMonth(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', { month: 'short' })
-      .format(new Date(dateStr + 'T12:00:00'))
-      .toUpperCase();
-  }
 }

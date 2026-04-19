@@ -1,12 +1,8 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-
-export interface IPublicService {
-  id: string;
-  name: string;
-  price: number;
-}
+import { formatCLP, formatDateLong } from '../../../helpers/formatters';
+import { IPublicService } from '../../../helpers/models';
 
 @Component({
   selector: 'app-booking-form',
@@ -96,7 +92,7 @@ export interface IPublicService {
 
           <div class="summary-price">
             <span>Total</span>
-            <span class="price-amount">{{ formatPrice(selectedService()?.price ?? 0) }}</span>
+            <span class="price-amount">{{ formatCLP(selectedService()?.price ?? 0) }}</span>
           </div>
 
           <p class="cancel-notice">Puedes cancelar hasta 24h antes sin costo</p>
@@ -107,6 +103,9 @@ export interface IPublicService {
   styleUrl: './booking-form.component.scss'
 })
 export class BookingFormComponent {
+  readonly formatCLP  = formatCLP;
+  readonly formatDate = formatDateLong;
+
   readonly bookingForm = input.required<FormGroup>();
   readonly selectedService = input<IPublicService | null>(null);
   readonly selectedDate = input<string>('');
@@ -114,17 +113,4 @@ export class BookingFormComponent {
   readonly emailStatus = input<string>('idle');
   readonly showLoginHint = input(false);
 
-  formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    }).format(new Date(dateStr + 'T12:00:00'));
-  }
-
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(price);
-  }
 }

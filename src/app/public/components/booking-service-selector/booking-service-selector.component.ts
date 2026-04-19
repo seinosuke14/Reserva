@@ -1,13 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface IPublicService {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-}
+import { formatCLP } from '../../../helpers/formatters';
+import { IPublicService } from '../../../helpers/models';
 
 @Component({
   selector: 'app-booking-service-selector',
@@ -32,7 +26,7 @@ export interface IPublicService {
                 <span class="service-duration">
                   ⏱ {{ service.duration }}min
                 </span>
-                <span class="service-price">{{ formatPrice(service.price) }}</span>
+                <span class="service-price">{{ formatCLP(service.price) }}</span>
               </div>
             </div>
           </div>
@@ -46,16 +40,9 @@ export class BookingServiceSelectorComponent {
   readonly services = input<IPublicService[]>([]);
   readonly selectedService = input<IPublicService | null>(null);
   readonly serviceSelected = output<IPublicService>();
+  readonly formatCLP = formatCLP;
 
   onServiceSelect(service: IPublicService): void {
     this.serviceSelected.emit(service);
-  }
-
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(price);
   }
 }

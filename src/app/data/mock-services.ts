@@ -1,11 +1,4 @@
-export interface IService {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  isActive: boolean;
-}
+import { IService } from '../helpers/models';
 
 export const MOCK_SERVICES: IService[] = [
   { id: '1', name: 'Consulta General',         description: 'Evaluación inicial y diagnóstico preventivo.',                  duration: 30, price: 35000,  isActive: true  },
