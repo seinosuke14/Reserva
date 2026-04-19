@@ -1,15 +1,7 @@
 import { Component, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface ITimeSlot {
-  time: string;
-  available: boolean;
-}
-
-export interface IDayAvailability {
-  date: string;
-  slots: ITimeSlot[];
-}
+import { formatDateLong } from '../../../helpers/formatters';
+import { IDayAvailability } from '../../../helpers/models';
 
 @Component({
   selector: 'app-booking-datetime-selector',
@@ -101,6 +93,7 @@ export class BookingDatetimeSelectorComponent {
 
   readonly dateSelected = output<string>();
   readonly hourSelected = output<string>();
+  readonly formatDate = formatDateLong;
 
   readonly calendarMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   readonly today = new Date().toISOString().slice(0, 10);
@@ -139,12 +132,6 @@ export class BookingDatetimeSelectorComponent {
 
   selectHour(time: string): void {
     this.hourSelected.emit(time);
-  }
-
-  formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    }).format(new Date(dateStr + 'T12:00:00'));
   }
 
   private _buildCalendarGrid() {

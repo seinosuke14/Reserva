@@ -90,9 +90,16 @@ export class BookingCalendarComponent implements OnInit {
     this.currentMonth.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
 
+  private readonly appointmentDates = computed(() => {
+    const dates = new Set<string>();
+    for (const a of this.appointments()) {
+      if (a.paymentStatus !== 'Cancelado') dates.add(a.date);
+    }
+    return dates;
+  });
+
   hasAppointment(date: Date): boolean {
-    const dateStr = this._toDateStr(date);
-    return this.appointments().some(a => a.date === dateStr && a.paymentStatus !== 'Cancelado');
+    return this.appointmentDates().has(this._toDateStr(date));
   }
 
   readonly isWorkingDay = computed(() =>

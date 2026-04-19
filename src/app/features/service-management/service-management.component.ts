@@ -5,16 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
+import { IService } from '../../helpers/models';
 import { environment } from '../../../environments/environment';
-
-interface IService {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  isActive: boolean;
-}
 
 @Component({
   selector: 'app-service-management',

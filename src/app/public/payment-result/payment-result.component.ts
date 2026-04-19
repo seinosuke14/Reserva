@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { formatCLP } from '../../helpers/formatters';
+import { formatCLP, formatDateLong } from '../../helpers/formatters';
 
 type PaymentState = 'checking' | 'success' | 'error';
 
@@ -367,7 +367,7 @@ export class PaymentResultComponent implements OnInit {
       );
 
       this.bookingRef.set(result.bookingRef);
-      this.appointmentDate.set(this.formatDate(result.appointment.date));
+      this.appointmentDate.set(formatDateLong(result.appointment.date));
       this.appointmentTime.set(result.appointment.time);
       this.appointmentAmount.set(result.appointment.amount);
       this.appointmentId = result.appointment.id;
@@ -411,11 +411,4 @@ export class PaymentResultComponent implements OnInit {
     }
   }
 
-  private formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    }).format(new Date(dateStr + 'T12:00:00'));
-  }
 }
