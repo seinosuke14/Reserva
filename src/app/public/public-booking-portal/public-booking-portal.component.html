@@ -349,7 +349,7 @@
           <!-- Actions -->
           <app-booking-actions
             [currentStep]="step()"
-            [canProceed]="getCanProceed()"
+            [canProceed]="canProceed()"
             (back)="goBack()"
             (next)="goNext()"
             (confirm)="confirmBooking()">
