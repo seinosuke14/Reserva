@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-type Provider = 'webpay' | 'mercadopago' | 'transfer';
+type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer';
 
 interface IPaymentMethod {
   id: string;
@@ -24,23 +24,13 @@ interface ProviderConfig {
 
 const PROVIDERS: ProviderConfig[] = [
   {
-    provider: 'webpay',
-    label: 'Webpay Plus',
-    description: 'Transbank - Tarjetas de credito y debito',
+    provider: 'flow',
+    label: 'Flow',
+    description: 'Tarjetas, debito y transferencia electronica',
     icon: 'credit-card',
     fields: [
-      { key: 'commerceCode', label: 'Codigo de Comercio', placeholder: 'Ej: 597055555532', type: 'text' },
-      { key: 'apiKey', label: 'API Key', placeholder: 'API Key de Transbank', type: 'password' },
-    ],
-  },
-  {
-    provider: 'mercadopago',
-    label: 'Mercado Pago',
-    description: 'Tarjetas, transferencias y mas',
-    icon: 'wallet',
-    fields: [
-      { key: 'accessToken', label: 'Access Token', placeholder: 'APP_USR-...', type: 'password' },
-      { key: 'publicKey', label: 'Public Key', placeholder: 'APP_USR-...', type: 'text' },
+      { key: 'apiKey', label: 'API Key', placeholder: 'API Key de Flow', type: 'text' },
+      { key: 'secretKey', label: 'Secret Key', placeholder: 'Secret Key de Flow', type: 'password' },
     ],
   },
   {

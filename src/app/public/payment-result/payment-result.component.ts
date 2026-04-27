@@ -344,39 +344,94 @@ export class PaymentResultComponent implements OnInit {
   private slug = '';
 
   async ngOnInit(): Promise<void> {
-    // Leer slug para volver a la reserva correcta
-    this.slug = this.route.snapshot.queryParamMap.get('slug') ?? '';
+    const params = this.route.snapshot.queryParamMap;
+    this.slug = params.get('slug') ?? '';
 
-    // Verificar si fue cancelado en Webpay
-    const cancelled = this.route.snapshot.queryParamMap.get('cancelled');
-    if (cancelled === 'true') {
+    if (params.get('cancelled') === 'true') {
       this.showError('Pago cancelado', 'Cancelaste el proceso de pago. Tu reserva ha sido liberada.');
       return;
     }
 
-    // Buscar token de confirmación
-    const tokenWs = this.route.snapshot.queryParamMap.get('token_ws');
-    if (!tokenWs) {
-      this.showError('Token inválido', 'No se encontró el token de pago.');
+    // Errores propagados desde flowReturn (token ausente o desconocido).
+    const error = params.get('error');
+    if (error) {
+      this.showError(
+        'Pago en verificación',
+        'No pudimos asociar tu pago a una reserva en este momento. Si ya pagaste, contacta al profesional con el comprobante.'
+      );
       return;
     }
 
+    // Webpay: vuelve con token_ws → confirmar via POST.
+    const tokenWs = params.get('token_ws');
+    if (tokenWs) {
+      await this.confirmWebpay(tokenWs);
+      return;
+    }
+
+    // Flow: vuelve con ref (bookingRef) → consultar estado actual.
+    // El webhook server-to-server marca 'Pagado' en BD; aquí solo leemos.
+    const ref = params.get('ref');
+    if (ref) {
+      await this.checkBookingByRef(ref);
+      return;
+    }
+
+    this.showError('Referencia inválida', 'No se encontró información del pago.');
+  }
+
+  private async confirmWebpay(tokenWs: string): Promise<void> {
     try {
       const result: any = await firstValueFrom(
         this.http.post(`${environment.apiUrl}/public/webpay/confirm`, { token_ws: tokenWs })
       );
-
-      this.bookingRef.set(result.bookingRef);
-      this.appointmentDate.set(formatDateLong(result.appointment.date));
-      this.appointmentTime.set(result.appointment.time);
-      this.appointmentAmount.set(result.appointment.amount);
-      this.appointmentId = result.appointment.id;
-
-      this.state.set('success');
+      this.applySuccess(result.bookingRef, result.appointment);
     } catch (err: any) {
       const message = err?.error?.message || 'Error al confirmar el pago. Intenta de nuevo.';
       this.showError('Pago rechazado', message);
     }
+  }
+
+  // El webhook de Flow puede tardar unos segundos; reintentamos hasta 5 veces.
+  private async checkBookingByRef(ref: string, attempt = 1): Promise<void> {
+    const MAX_ATTEMPTS = 5;
+    const RETRY_MS = 2000;
+
+    try {
+      const result: any = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/public/booking/${encodeURIComponent(ref)}`)
+      );
+      const status = result.appointment?.paymentStatus;
+
+      if (status === 'Pagado') {
+        this.applySuccess(result.bookingRef, result.appointment);
+        return;
+      }
+      if (status === 'Cancelado') {
+        this.showError('Pago rechazado', 'El pago no pudo completarse. Tu reserva ha sido liberada.');
+        return;
+      }
+      if (status === 'Pendiente' && attempt < MAX_ATTEMPTS) {
+        setTimeout(() => this.checkBookingByRef(ref, attempt + 1), RETRY_MS);
+        return;
+      }
+      this.showError(
+        'Pago en verificación',
+        'Aún estamos confirmando tu pago. Si ya pagaste, recarga esta página en unos segundos.'
+      );
+    } catch (err: any) {
+      const message = err?.error?.message || 'No se pudo verificar tu reserva. Intenta de nuevo.';
+      this.showError('Error de verificación', message);
+    }
+  }
+
+  private applySuccess(bookingRef: string, appointment: { id: string; date: string; time: string; amount: number }): void {
+    this.bookingRef.set(bookingRef);
+    this.appointmentDate.set(formatDateLong(appointment.date));
+    this.appointmentTime.set(appointment.time);
+    this.appointmentAmount.set(appointment.amount);
+    this.appointmentId = appointment.id;
+    this.state.set('success');
   }
 
   private showError(title: string, message: string): void {
