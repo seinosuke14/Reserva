@@ -4,7 +4,13 @@
       "Read(//e/mini-projectos/api-crm/node_modules/transbank-sdk/tests/webpay/webpay_plus/**)",
       "Read(//e/mini-projectos/api-crm/**)",
       "Bash(npm start:*)",
-      "Bash(npx ng:*)"
+      "Bash(npx ng:*)",
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/**)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"require\\('./src/routes/public.routes'\\)\")"
+    ],
+    "additionalDirectories": [
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes"
     ]
   }
 }

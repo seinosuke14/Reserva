@@ -149,14 +149,16 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.professional.set(data.professional);
       this.services.set(data.services);
       this.availability.set(data.availability);
-      this.paymentMethods.set(data.paymentMethods ?? []);
+      const visibleMethods: IPublicPaymentMethod[] = (data.paymentMethods ?? [])
+        .filter((m: IPublicPaymentMethod) => m.provider !== 'webpay' && m.provider !== 'mercadopago');
+      this.paymentMethods.set(visibleMethods);
 
       if (data.availability.length > 0) {
         this.selectedDate.set(data.availability[0].date);
       }
       // Si solo hay un método de pago, preseleccionarlo
-      if (data.paymentMethods?.length === 1) {
-        this.selectedPayment.set(data.paymentMethods[0]);
+      if (visibleMethods.length === 1) {
+        this.selectedPayment.set(visibleMethods[0]);
       }
       this.loadState.set('ready');
     } catch (err: any) {
