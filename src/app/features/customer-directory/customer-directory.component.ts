@@ -11,8 +11,15 @@ interface IPaymentHistory {
   id: string;
   date: string;
   amount: number;
-  status: 'paid' | 'pending';
+  status: 'paid' | 'pending' | 'cancelled';
   service: string;
+  appointmentId?: string | null;
+}
+
+type EffectiveStatus = 'paid' | 'pending' | 'cancelled';
+
+interface IPaymentRow extends IPaymentHistory {
+  effectiveStatus: EffectiveStatus;
 }
 
 interface IAppointment {
@@ -64,6 +71,31 @@ export class CustomerDirectoryComponent implements OnInit {
   selectedCustomer = signal<ICustomer | null>(null);
   isLoading        = signal(true);
   errorMsg         = signal<string | null>(null);
+  showHistory      = signal(false);
+  showPayments     = signal(false);
+  historyFrom      = signal<string>('');
+  historyTo        = signal<string>('');
+
+  openCustomer(customer: ICustomer): void {
+    this.selectedCustomer.set(customer);
+    this.showHistory.set(false);
+    this.showPayments.set(false);
+    this.historyFrom.set('');
+    this.historyTo.set('');
+  }
+
+  closeCustomer(): void {
+    this.selectedCustomer.set(null);
+    this.showHistory.set(false);
+    this.showPayments.set(false);
+    this.historyFrom.set('');
+    this.historyTo.set('');
+  }
+
+  clearHistoryFilters(): void {
+    this.historyFrom.set('');
+    this.historyTo.set('');
+  }
 
   readonly filteredCustomers = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -85,6 +117,69 @@ export class CustomerDirectoryComponent implements OnInit {
 
   hasAnyNotes(customer: ICustomer): boolean {
     return customer.appointments?.some(a => !!a.notes) ?? false;
+  }
+
+  /** Notas ordenadas por fecha desc, solo las más recientes (máx 2) */
+  recentNotes(customer: ICustomer, limit = 2): IAppointment[] {
+    return (customer.appointments ?? [])
+      .filter(a => !!a.notes)
+      .slice()
+      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+      .slice(0, limit);
+  }
+
+  /** Citas pasadas (anteriores a hoy) ordenadas de la más reciente a la más antigua */
+  pastAppointments(customer: ICustomer): IAppointment[] {
+    return (customer.appointments ?? [])
+      .filter(a => a.date < this.today && a.paymentStatus !== 'Cancelado')
+      .slice()
+      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  }
+
+  /**
+   * Pagos con estado efectivo (cruzando con la cita asociada) y ordenados:
+   * sin confirmar → aprobados → cancelados, por fecha desc dentro de cada grupo.
+   * Una cita cancelada deja su PaymentHistory en 'pending', así que se reclasifica como 'cancelled'.
+   */
+  sortedPaymentHistory(customer: ICustomer): IPaymentRow[] {
+    const apptById = new Map<string, IAppointment>();
+    for (const a of customer.appointments ?? []) apptById.set(a.id, a);
+
+    const priority: Record<EffectiveStatus, number> = { pending: 0, paid: 1, cancelled: 2 };
+
+    return (customer.paymentHistory ?? [])
+      .map<IPaymentRow>(p => {
+        let effective: EffectiveStatus = p.status;
+        if (p.status === 'pending' && p.appointmentId) {
+          const linked = apptById.get(p.appointmentId);
+          if (linked?.paymentStatus === 'Cancelado') effective = 'cancelled';
+          else if (linked?.paymentStatus === 'Pagado') effective = 'paid';
+        }
+        return { ...p, effectiveStatus: effective };
+      })
+      .sort((a, b) => {
+        const diff = priority[a.effectiveStatus] - priority[b.effectiveStatus];
+        return diff !== 0 ? diff : b.date.localeCompare(a.date);
+      });
+  }
+
+  /** Citas pasadas filtradas por rango de fechas */
+  filteredPastAppointments(customer: ICustomer): IAppointment[] {
+    const from = this.historyFrom();
+    const to   = this.historyTo();
+    return this.pastAppointments(customer).filter(a => {
+      if (from && a.date < from) return false;
+      if (to   && a.date > to)   return false;
+      return true;
+    });
+  }
+
+  /** Citas de hoy o futuras */
+  upcomingAppointments(customer: ICustomer): IAppointment[] {
+    return (customer.appointments ?? [])
+      .filter(a => a.date >= this.today && a.paymentStatus !== 'Cancelado')
+      .slice()
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   }
 
   formatAppointment(appt: IAppointment): string {

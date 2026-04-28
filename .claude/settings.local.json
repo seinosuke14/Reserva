@@ -10,7 +10,8 @@
       "Bash(node -e \"require\\('./src/routes/public.routes'\\)\")"
     ],
     "additionalDirectories": [
-      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes"
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\controllers"
     ]
   }
 }

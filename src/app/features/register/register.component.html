@@ -30,26 +30,75 @@
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
 
+        <!-- Nombre + Apellido -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Nombre</label>
+            <input formControlName="firstName" type="text" placeholder="Juan"
+              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
+              [class]="f['firstName'].invalid && f['firstName'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
+            @if (f['firstName'].invalid && f['firstName'].touched) {
+              @if (f['firstName'].errors?.['required']) {
+                <p class="text-xs text-red-500 ml-1">Nombre requerido</p>
+              } @else if (f['firstName'].errors?.['minlength']) {
+                <p class="text-xs text-red-500 ml-1">Mínimo 2 caracteres</p>
+              } @else if (f['firstName'].errors?.['pattern']) {
+                <p class="text-xs text-red-500 ml-1">Solo letras</p>
+              }
+            }
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Apellido</label>
+            <input formControlName="lastName" type="text" placeholder="Pérez"
+              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
+              [class]="f['lastName'].invalid && f['lastName'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
+            @if (f['lastName'].invalid && f['lastName'].touched) {
+              @if (f['lastName'].errors?.['required']) {
+                <p class="text-xs text-red-500 ml-1">Apellido requerido</p>
+              } @else if (f['lastName'].errors?.['minlength']) {
+                <p class="text-xs text-red-500 ml-1">Mínimo 2 caracteres</p>
+              } @else if (f['lastName'].errors?.['pattern']) {
+                <p class="text-xs text-red-500 ml-1">Solo letras</p>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- RUT -->
         <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Nombre Completo</label>
-          <input formControlName="name" type="text" placeholder="Dr. Juan Pérez"
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">RUT</label>
+          <input formControlName="rut" type="text" placeholder="12.345.678-9" maxlength="12"
+            (input)="onRutInput($event)"
             class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="f['name'].invalid && f['name'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-          @if (f['name'].invalid && f['name'].touched) {
-            <p class="text-xs text-red-500 ml-1">Mínimo 3 caracteres</p>
+            [class]="f['rut'].invalid && f['rut'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
+          @if (f['rut'].invalid && f['rut'].touched) {
+            @if (f['rut'].errors?.['required']) {
+              <p class="text-xs text-red-500 ml-1">RUT requerido</p>
+            } @else if (f['rut'].errors?.['rutInvalid']) {
+              <p class="text-xs text-red-500 ml-1">RUT inválido (verifica el formato y dígito verificador)</p>
+            }
           }
         </div>
 
+        <!-- Profesión -->
         <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Especialidad</label>
-          <input formControlName="specialty" type="text" placeholder="Odontología, Medicina General..."
-            class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="f['specialty'].invalid && f['specialty'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-          @if (f['specialty'].invalid && f['specialty'].touched) {
-            <p class="text-xs text-red-500 ml-1">Campo requerido</p>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Profesión</label>
+          <select formControlName="professionId"
+            class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all appearance-none"
+            [class]="f['professionId'].invalid && f['professionId'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'">
+            <option value="" disabled>
+              {{ professions().length ? 'Selecciona una profesión' : 'Cargando profesiones...' }}
+            </option>
+            @for (option of professions(); track option.id) {
+              <option [value]="option.id">{{ option.name }}</option>
+            }
+          </select>
+          @if (f['professionId'].invalid && f['professionId'].touched) {
+            <p class="text-xs text-red-500 ml-1">Selecciona una profesión</p>
           }
         </div>
 
+        <!-- Email + Teléfono -->
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Email</label>
@@ -57,27 +106,53 @@
               class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
               [class]="f['email'].invalid && f['email'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
             @if (f['email'].invalid && f['email'].touched) {
-              <p class="text-xs text-red-500 ml-1">Email inválido</p>
+              @if (f['email'].errors?.['required']) {
+                <p class="text-xs text-red-500 ml-1">Email requerido</p>
+              } @else if (f['email'].errors?.['emailInvalid']) {
+                <p class="text-xs text-red-500 ml-1">Formato de email inválido</p>
+              }
             }
           </div>
           <div class="space-y-1">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Teléfono</label>
-            <input formControlName="phone" type="tel" placeholder="+56 9 1234 5678"
+            <input formControlName="phone" type="tel" placeholder="+56912345678" maxlength="12"
+              (input)="onPhoneInput($event)"
               class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
               [class]="f['phone'].invalid && f['phone'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
             @if (f['phone'].invalid && f['phone'].touched) {
-              <p class="text-xs text-red-500 ml-1">Campo requerido</p>
+              @if (f['phone'].errors?.['required']) {
+                <p class="text-xs text-red-500 ml-1">Teléfono requerido</p>
+              } @else if (f['phone'].errors?.['phoneInvalid']) {
+                <p class="text-xs text-red-500 ml-1">Debe ser +569 seguido de 8 dígitos</p>
+              }
             }
           </div>
         </div>
 
+        <!-- Contraseña -->
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Contraseña</label>
           <input formControlName="password" type="password" placeholder="••••••••"
             class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
             [class]="f['password'].invalid && f['password'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
           @if (f['password'].invalid && f['password'].touched) {
-            <p class="text-xs text-red-500 ml-1">Mínimo 6 caracteres</p>
+            @if (f['password'].errors?.['required']) {
+              <p class="text-xs text-red-500 ml-1">Contraseña requerida</p>
+            } @else {
+              <ul class="text-xs text-red-500 ml-1 space-y-0.5">
+                @if (f['password'].errors?.['minLength']) {
+                  <li>• Mínimo 6 caracteres</li>
+                }
+                @if (f['password'].errors?.['noUppercase']) {
+                  <li>• Debe incluir al menos 1 mayúscula</li>
+                }
+                @if (f['password'].errors?.['noNumber']) {
+                  <li>• Debe incluir al menos 1 número</li>
+                }
+              </ul>
+            }
+          } @else {
+            <p class="text-[11px] text-gray-400 ml-1">Mínimo 6 caracteres, 1 mayúscula y 1 número.</p>
           }
         </div>
 
