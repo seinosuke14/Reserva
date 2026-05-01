@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -34,6 +34,8 @@ export class ServiceManagementComponent implements OnInit {
   readonly formatCLP    = formatCLP;
 
   services       = signal<IService[]>([]);
+  readonly activeCount   = computed(() => this.services().filter(s => s.isActive).length);
+  readonly inactiveCount = computed(() => this.services().filter(s => !s.isActive).length);
   isFormOpen     = signal(false);
   editingService = signal<IService | null>(null);
   isLoading      = signal(true);

@@ -1,50 +1,68 @@
-<div class="payment-page">
-  <div class="page-header">
-    <h1>Metodos de Pago</h1>
-    <p>Configura los metodos de pago disponibles para tus clientes</p>
+<div class="flex flex-col gap-[18px] animate-fade-up">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Métodos de Pago</h1>
+    <p class="text-[12.5px] text-ink-400 mt-0.5">Configura los métodos de pago disponibles para tus clientes.</p>
   </div>
 
+  <!-- Loading skeletons -->
   @if (isLoading()) {
-    <div class="methods-list">
+    <div class="flex flex-col gap-3">
       @for (i of [1, 2, 3]; track i) {
-        <div class="method-card">
-          <div class="method-header">
-            <div class="skeleton" style="width: 48px; height: 48px;"></div>
-            <div style="flex: 1;">
-              <div class="skeleton" style="width: 140px; height: 16px; margin-bottom: 6px;"></div>
-              <div class="skeleton" style="width: 200px; height: 12px;"></div>
-            </div>
+        <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] flex items-center gap-4">
+          <div class="w-[42px] h-[42px] rounded-[10px] bg-ink-100 animate-pulse shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3.5 bg-ink-100 rounded animate-pulse w-36"></div>
+            <div class="h-3 bg-ink-100 rounded animate-pulse w-52"></div>
           </div>
         </div>
       }
     </div>
   } @else {
-    <div class="methods-list">
-      @for (config of providers; track config.provider) {
-        <div class="method-card" [class.configured]="isConfigured(config.provider)" [class.expanded]="expandedProvider() === config.provider">
 
-          <!-- Header del metodo -->
-          <div class="method-header" (click)="toggleExpand(config.provider)">
-            <div class="method-icon" [class.active]="isActive(config.provider)">
+    <!-- Feedback banner -->
+    @if (feedbackMsg()) {
+      <div class="px-4 py-2.5 rounded-[10px] text-[12.5px] font-semibold"
+           [class]="feedbackType() === 'success'
+             ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+             : 'bg-red-50 border border-red-200 text-red-700'">
+        {{ feedbackMsg() }}
+      </div>
+    }
+
+    <!-- Provider cards -->
+    <div class="flex flex-col gap-3">
+      @for (config of providers; track config.provider) {
+        <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card overflow-hidden transition-all"
+             [class.opacity-70]="!isActive(config.provider) && isConfigured(config.provider)">
+
+          <!-- Card header -->
+          <div class="flex items-center gap-4 p-[14px_20px] cursor-pointer select-none"
+               (click)="toggleExpand(config.provider)">
+
+            <!-- Icon -->
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center shrink-0"
+                 [style.background]="isConfigured(config.provider) && isActive(config.provider)
+                   ? 'rgba(219,150,72,.13)' : 'rgba(100,116,139,.08)'"
+                 [style.color]="isConfigured(config.provider) && isActive(config.provider)
+                   ? '#db9648' : '#94a3b8'">
               @switch (config.icon) {
                 @case ('credit-card') {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                     <line x1="1" y1="10" x2="23" y2="10"/>
                   </svg>
                 }
                 @case ('wallet') {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
                     <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
                     <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
                   </svg>
                 }
                 @case ('bank') {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <line x1="3" y1="22" x2="21" y2="22"/>
                     <line x1="6" y1="18" x2="6" y2="11"/>
                     <line x1="10" y1="18" x2="10" y2="11"/>
@@ -55,52 +73,63 @@
                 }
               }
             </div>
-            <div class="method-info">
-              <h3>{{ config.label }}</h3>
-              <p>{{ config.description }}</p>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="text-[13.5px] font-bold text-ink tracking-tight">{{ config.label }}</div>
+              <div class="text-[12px] text-ink-400 truncate">{{ config.description }}</div>
             </div>
-            <div class="method-status">
+
+            <!-- Status + chevron -->
+            <div class="flex items-center gap-3 shrink-0">
               @if (isConfigured(config.provider)) {
-                <span class="status-badge" [class.active]="isActive(config.provider)" [class.inactive]="!isActive(config.provider)">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
+                      [style.background]="isActive(config.provider) ? 'rgba(34,197,94,.1)' : 'rgba(100,116,139,.1)'"
+                      [style.color]="isActive(config.provider) ? '#16a34a' : '#64748b'">
+                  <span class="w-1.5 h-1.5 rounded-full"
+                        [style.background]="isActive(config.provider) ? '#22c55e' : '#94a3b8'"></span>
                   {{ isActive(config.provider) ? 'Activo' : 'Inactivo' }}
                 </span>
               } @else {
-                <span class="status-badge pending">Sin configurar</span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
+                      style="background:rgba(245,158,11,.1);color:#d97706;">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  Sin configurar
+                </span>
               }
-              <svg class="chevron" [class.rotated]="expandedProvider() === config.provider"
-                xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"
+                   class="transition-transform duration-200"
+                   [class.rotate-180]="expandedProvider() === config.provider">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
             </div>
           </div>
 
-          <!-- Formulario expandible -->
+          <!-- Expandable form -->
           @if (expandedProvider() === config.provider) {
-            <div class="method-body">
+            <div class="border-t border-ink-100/60 p-[18px_20px] space-y-4">
               @for (field of config.fields; track field.key) {
-                <div class="form-group">
-                  <label>{{ field.label }}</label>
-                  <div class="input-wrapper">
+                <div class="space-y-1.5">
+                  <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">{{ field.label }}</label>
+                  <div class="relative">
                     <input
                       [type]="getFieldType(field)"
-                      class="form-input"
+                      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 transition-colors focus:border-gold"
                       [placeholder]="field.placeholder"
                       [value]="getFieldValue(field.key)"
-                      (input)="setFieldValue(field.key, $any($event.target).value)"
-                    />
+                      (input)="setFieldValue(field.key, $any($event.target).value)" />
                     @if (field.type === 'password') {
-                      <button type="button" class="toggle-visibility" (click)="toggleFieldVisibility(field.key)">
+                      <button type="button"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-300 hover:text-ink-500 transition-colors"
+                        (click)="toggleFieldVisibility(field.key)">
                         @if (isFieldVisible(field.key)) {
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
                             <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
                             <line x1="1" y1="1" x2="23" y2="23"/>
                           </svg>
                         } @else {
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
                           </svg>
@@ -111,11 +140,12 @@
                 </div>
               }
 
-              <div class="method-actions">
-                <button class="btn-save" (click)="saveMethod(config)" [disabled]="isSaving()">
+              <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                <button (click)="saveMethod(config)" [disabled]="isSaving()"
+                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                  style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
                   @if (isSaving()) {
-                    <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                       <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
                       <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
                       <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
@@ -128,14 +158,14 @@
                 </button>
 
                 @if (isConfigured(config.provider)) {
-                  <div class="secondary-actions">
-                    <button class="btn-toggle" (click)="toggleActive(config.provider); $event.stopPropagation()">
-                      {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
-                    </button>
-                    <button class="btn-delete" (click)="removeMethod(config.provider)">
-                      Eliminar
-                    </button>
-                  </div>
+                  <button (click)="toggleActive(config.provider); $event.stopPropagation()"
+                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 transition-all hover:bg-ink-50 text-ink-500">
+                    {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
+                  </button>
+                  <button (click)="removeMethod(config.provider)"
+                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+                    Eliminar
+                  </button>
                 }
               </div>
             </div>
@@ -143,11 +173,5 @@
         </div>
       }
     </div>
-
-    @if (feedbackMsg()) {
-      <div class="feedback" [class.success]="feedbackType() === 'success'" [class.error]="feedbackType() === 'error'">
-        {{ feedbackMsg() }}
-      </div>
-    }
   }
 </div>

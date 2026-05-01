@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,12 +24,18 @@
 
   --color-success: #10b981;
   --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #0ea5e9;
+  --color-danger:  #ef4444;
+  --color-info:    #0ea5e9;
 
   --color-background: #f3f4f6;
-  --color-surface: #ffffff;
-  --color-border: #e5e7eb;
+  --color-surface:    #ffffff;
+  --color-border:     #e5e7eb;
+
+  // Paleta Agendual
+  --color-gold:        #db9648;
+  --color-gold-soft:   #fdf7ee;
+  --color-ink:         #0f172a;
+  --color-canvas:      #f8fafc;
 }
 
 * { box-sizing: border-box; }
@@ -35,8 +43,16 @@
 html, body {
   height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+// Scrollbar custom (Agendual style)
+::-webkit-scrollbar         { width: 4px; height: 4px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: rgba(148,163,184,.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,.45); }
 
 .scrollbar-hide {
   -ms-overflow-style: none;

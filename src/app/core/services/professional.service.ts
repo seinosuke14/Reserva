@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 export interface IProfessional {
   id?: string;
   name: string;
+  rut?: string;
   specialty: string;
   email: string;
   password?: string;
