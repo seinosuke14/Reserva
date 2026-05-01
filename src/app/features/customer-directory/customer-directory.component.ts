@@ -46,7 +46,6 @@ interface ICustomer {
 
 @Component({
   selector: 'app-customer-directory',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './customer-directory.component.html',
   animations: [
@@ -62,19 +61,22 @@ interface ICustomer {
 })
 export class CustomerDirectoryComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  readonly formatCLP    = formatCLP;
+  readonly formatCLP = formatCLP;
+  readonly toNumber = Number;
 
   readonly today = new Date().toISOString().slice(0, 10);
 
-  customers        = signal<ICustomer[]>([]);
-  searchTerm       = signal('');
+  customers = signal<ICustomer[]>([]);
+  searchTerm = signal('');
+  statusFilter = signal<'todos' | 'paid' | 'debt'>('todos');
+  sortBy = signal<'name' | 'sessions' | 'debt'>('name');
   selectedCustomer = signal<ICustomer | null>(null);
-  isLoading        = signal(true);
-  errorMsg         = signal<string | null>(null);
-  showHistory      = signal(false);
-  showPayments     = signal(false);
-  historyFrom      = signal<string>('');
-  historyTo        = signal<string>('');
+  isLoading = signal(true);
+  errorMsg = signal<string | null>(null);
+  showHistory = signal(false);
+  showPayments = signal(false);
+  historyFrom = signal<string>('');
+  historyTo = signal<string>('');
 
   openCustomer(customer: ICustomer): void {
     this.selectedCustomer.set(customer);
@@ -99,12 +101,37 @@ export class CustomerDirectoryComponent implements OnInit {
 
   readonly filteredCustomers = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    if (!term) return this.customers();
-    return this.customers().filter(c =>
-      c.name.toLowerCase().includes(term) ||
-      (c.email ?? '').toLowerCase().includes(term)
-    );
+    const filter = this.statusFilter();
+    const sort = this.sortBy();
+
+    let result = this.customers().filter(c => {
+      if (filter !== 'todos' && c.status !== filter) return false;
+      if (!term) return true;
+      return c.name.toLowerCase().includes(term) || (c.email ?? '').toLowerCase().includes(term);
+    });
+
+    if (sort === 'name') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'sessions') {
+      result = [...result].sort((a, b) => (b.appointments?.length ?? 0) - (a.appointments?.length ?? 0));
+    } else if (sort === 'debt') {
+      result = [...result].sort((a, b) => Number(b.debtAmount ?? 0) - Number(a.debtAmount ?? 0));
+    }
+
+    return result;
   });
+
+  totalPaid(customer: ICustomer): number {
+    return (customer.paymentHistory ?? [])
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+  }
+
+  recentAppointments(customer: ICustomer, limit = 5): IAppointment[] {
+    return [...(customer.appointments ?? [])]
+      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+      .slice(0, limit);
+  }
 
   /** Devuelve la próxima cita futura (o la más reciente si no hay futuras) */
   nextAppointment(customer: ICustomer): IAppointment | null {
@@ -166,10 +193,10 @@ export class CustomerDirectoryComponent implements OnInit {
   /** Citas pasadas filtradas por rango de fechas */
   filteredPastAppointments(customer: ICustomer): IAppointment[] {
     const from = this.historyFrom();
-    const to   = this.historyTo();
+    const to = this.historyTo();
     return this.pastAppointments(customer).filter(a => {
       if (from && a.date < from) return false;
-      if (to   && a.date > to)   return false;
+      if (to && a.date > to) return false;
       return true;
     });
   }

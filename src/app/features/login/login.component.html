@@ -1,117 +1,130 @@
-<div class="min-h-screen flex items-center justify-center bg-background p-6">
-  <div @fadeSlide class="max-w-md w-full bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+<div class="min-h-screen flex items-center justify-center p-6 font-sans"
+     style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
 
-    <div class="text-center mb-10">
-      <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
+  <div @fadeSlide class="w-full max-w-md">
+
+    <!-- Brand -->
+    <div class="flex items-center justify-center gap-3 mb-7">
+      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
+           style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
+        <img src="Agendual.PNG" alt="Agendual" class="h-9 w-auto" />
       </div>
-      <h1 class="text-2xl font-bold text-secondary">Bienvenido de Nuevo</h1>
-      <p class="text-gray-400 mt-2">Ingresa a tu panel de gestión profesional.</p>
+      <div class="leading-none">
+        <div class="text-[18px] font-extrabold tracking-tight text-white">AGENDUAL</div>
+        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
+      </div>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Card -->
+    <div class="bg-white rounded-[20px] p-8 shadow-[0_28px_80px_rgba(0,0,0,.35)] border border-black/[.04]">
 
-      <!-- Email -->
-      <div class="space-y-1">
-        <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Email</label>
-        <div class="relative">
-          <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
-          <input formControlName="email" type="email" placeholder="ejemplo@clinica.com"
-            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="(email.invalid && email.touched) || error() ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-        </div>
-        @if (email.invalid && email.touched) {
-          <p class="text-xs text-red-500 font-medium mt-1 ml-1">Email inválido</p>
-        }
+      <div class="mb-7">
+        <h1 class="text-[20px] font-bold text-ink tracking-tight">Bienvenido de vuelta</h1>
+        <p class="text-[13px] text-ink-400 mt-1">Ingresa a tu panel de gestión profesional.</p>
       </div>
 
-      <!-- Password -->
-      <div class="space-y-1">
-        <div class="flex justify-between items-center ml-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Contraseña</label>
-          <a href="#" class="text-[10px] font-bold text-primary hover:underline">¿Olvidaste tu contraseña?</a>
-        </div>
-        <div class="relative">
-          <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <input formControlName="password" type="password" placeholder="••••••••"
-            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="(password.invalid && password.touched) || error() ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-        </div>
-        @if (password.invalid && password.touched) {
-          <p class="text-xs text-red-500 font-medium mt-1 ml-1">Mínimo 6 caracteres</p>
-        }
-      </div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
 
-      <!-- Error -->
-      @if (error()) {
-        <div @errorAnim class="bg-red-50 border border-red-100 p-4 rounded-2xl space-y-3">
-          <div class="flex items-start gap-3 text-red-600">
-            <svg class="shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+          <div class="relative">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15"
+              fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
             </svg>
-            <p class="text-sm font-medium leading-tight">{{ error() }}</p>
+            <input formControlName="email" type="email" placeholder="ejemplo@clinica.com"
+              class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              [class.border-red-300]="(email.invalid && email.touched) || error()"
+              [class.border-ink-200]="!((email.invalid && email.touched) || error())"
+              [class.focus:border-gold]="!((email.invalid && email.touched) || error())" />
           </div>
-          @if (error().includes('no se encuentra registrada')) {
-            <div class="pt-3 border-t border-red-100">
-              <p class="text-xs text-red-700 mb-2">¿Aún no tienes una cuenta profesional?</p>
-              <a routerLink="/registro" class="flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all">
-                Regístrate aquí ahora →
-              </a>
-            </div>
+          @if (email.invalid && email.touched) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Email inválido</p>
           }
         </div>
-      }
 
-      <button type="submit" [disabled]="isSubmitting()"
-        class="w-full bg-primary text-white py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed">
-        @if (isSubmitting()) {
-          <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-            <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
-          </svg>
-          Iniciando Sesión...
-        } @else {
-          Entrar al Sistema
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center ml-0.5">
+            <label class="text-[11.5px] font-semibold text-ink-600">Contraseña</label>
+            <a href="#" class="text-[10.5px] font-semibold text-gold hover:underline">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="relative">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15"
+              fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input formControlName="password" type="password" placeholder="••••••••"
+              class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              [class.border-red-300]="(password.invalid && password.touched) || error()"
+              [class.border-ink-200]="!((password.invalid && password.touched) || error())"
+              [class.focus:border-gold]="!((password.invalid && password.touched) || error())" />
+          </div>
+          @if (password.invalid && password.touched) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 6 caracteres</p>
+          }
+        </div>
+
+        <!-- Error -->
+        @if (error()) {
+          <div @errorAnim class="bg-red-50 border border-red-100 p-3.5 rounded-[12px] space-y-2.5">
+            <div class="flex items-start gap-2.5 text-red-600">
+              <svg class="shrink-0 mt-0.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <p class="text-[12.5px] font-medium leading-snug">{{ error() }}</p>
+            </div>
+            @if (error().includes('no se encuentra registrada')) {
+              <div class="pt-2.5 border-t border-red-100">
+                <p class="text-[11.5px] text-red-700 mb-1.5">¿Aún no tienes una cuenta profesional?</p>
+                <a routerLink="/registro" class="inline-flex items-center gap-1 text-[12.5px] font-bold text-gold hover:gap-2 transition-all">
+                  Regístrate aquí ahora →
+                </a>
+              </div>
+            }
+          </div>
         }
-      </button>
-    </form>
 
-    <div class="mt-6 text-center">
-      <p class="text-sm text-gray-500">
-        ¿Aún no tienes una cuenta profesional?
-        <a routerLink="/registro" class="font-bold text-primary hover:underline ml-1">
-          Crear cuenta
-        </a>
-      </p>
-    </div>
+        <button type="submit" [disabled]="isSubmitting()"
+          class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+          style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+          @if (isSubmitting()) {
+            <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+              <line x1="2" y1="12" x2="6" y2="12"/>
+              <line x1="18" y1="12" x2="22" y2="12"/>
+              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+              <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+            </svg>
+            Iniciando sesión...
+          } @else {
+            Entrar al sistema
+          }
+        </button>
+      </form>
 
-    <div class="mt-8 pt-8 border-t border-gray-50 flex items-center justify-center gap-2 text-gray-400">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <polyline points="9 12 11 14 15 10"/>
-      </svg>
-      <span class="text-xs font-medium uppercase tracking-widest">Acceso Seguro</span>
+      <div class="mt-5 text-center">
+        <p class="text-[12.5px] text-ink-500">
+          ¿Aún no tienes una cuenta profesional?
+          <a routerLink="/registro" class="font-bold text-gold hover:underline ml-0.5">Crear cuenta</a>
+        </p>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-ink-100 flex items-center justify-center gap-1.5 text-ink-400">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <span class="text-[10px] font-semibold uppercase tracking-[.15em]">Acceso seguro</span>
+      </div>
     </div>
   </div>
 </div>

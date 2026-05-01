@@ -7,11 +7,24 @@
       "Bash(npx ng:*)",
       "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/**)",
       "Bash(npx tsc *)",
-      "Bash(node -e \"require\\('./src/routes/public.routes'\\)\")"
+      "Bash(node -e \"require\\('./src/routes/public.routes'\\)\")",
+      "Read(//e/Downloads/**)",
+      "Bash(mkdir -p \"/tmp/agendual-ref\")",
+      "Read(//tmp/**)",
+      "Bash(unzip -o \"/e/Downloads/Agendamiento-profesional-perfil.zip\")",
+      "Read(//c/tmp/agendual-ref/**)",
+      "Bash(cygpath -w \"/tmp/agendual-ref\")",
+      "Bash(cp -r /tmp/agendual-ref/* \"$\\(pwd\\)/.tmp-ref/\")",
+      "Bash(ls *.zip)",
+      "Bash(ls *.ZIP)",
+      "Bash(unzip -l \"Agendamiento-profesional-perfil.zip\")",
+      "Bash(unzip -o \"Agendamiento-profesional-perfil.zip\" -d \"/tmp/agendamiento-ref\")",
+      "Read(//c/tmp/agendamiento-ref/**)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
-      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\controllers"
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\controllers",
+      "E:\\Downloads"
     ]
   }
 }
