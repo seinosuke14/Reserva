@@ -1,76 +1,81 @@
-<div class="space-y-6">
+<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
 
+  <!-- Header -->
   <div>
-    <h2 class="text-2xl font-bold text-secondary">Configuración</h2>
-    <p class="text-sm text-gray-400">Personaliza tu perfil público y enlace de reservas.</p>
+    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Configuración</h1>
+    <p class="text-[12.5px] text-ink-400 mt-0.5">Personaliza tu perfil público y enlace de reservas.</p>
   </div>
 
-  <!-- Slug de reserva -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-    <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-1 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-      Link de Reserva Personalizado
-    </h3>
-    <p class="text-xs text-gray-400 mb-4">Define la URL pública con la que tus clientes accederán a tu portal de reservas.</p>
+  <!-- Booking slug -->
+  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+    <div>
+      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        Link de Reserva Personalizado
+      </h3>
+      <p class="text-[11.5px] text-ink-400 mt-1">Define la URL pública con la que tus clientes accederán a tu portal de reservas.</p>
+    </div>
 
-    <div class="flex flex-col sm:flex-row gap-3">
-      <div class="flex-1 flex items-center bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
-        <span class="px-3 text-xs text-gray-400 whitespace-nowrap border-r border-gray-100 py-3 bg-gray-100 font-mono">
+    <div class="flex flex-col sm:flex-row gap-2.5">
+      <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-gold">
+        <span class="px-3 text-[12px] text-ink-400 whitespace-nowrap border-r border-ink-200 py-2.5 bg-ink-50 font-mono">
           /reservar/
         </span>
         <input type="text" [value]="slugValue()" (input)="slugValue.set($any($event.target).value)"
           placeholder="mi-consulta"
-          class="flex-1 px-3 py-3 bg-transparent text-sm font-medium text-secondary focus:outline-none font-mono" />
+          class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono" />
       </div>
       <button (click)="saveSlug()" [disabled]="slugSaving()"
-        class="px-5 py-3 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 whitespace-nowrap">
+        class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
+        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
         {{ slugSaving() ? 'Guardando...' : 'Guardar Slug' }}
       </button>
     </div>
 
     @if (slugMsg()) {
-      <p class="text-xs mt-2 ml-1 font-medium"
-        [class]="slugMsg()!.type === 'success' ? 'text-green-600' : 'text-red-500'">
+      <p class="text-[11.5px] ml-0.5 font-medium"
+         [class]="slugMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
         {{ slugMsg()!.text }}
       </p>
     }
   </div>
 
-  <!-- Descripción del perfil público -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-    <h3 class="text-sm font-bold text-secondary uppercase tracking-wider mb-1 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>
-      Descripción del Perfil
-    </h3>
-    <p class="text-xs text-gray-400 mb-4">Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.</p>
+  <!-- Public profile description -->
+  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+    <div>
+      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Descripción del Perfil
+      </h3>
+      <p class="text-[11.5px] text-ink-400 mt-1">Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.</p>
+    </div>
 
     <textarea [value]="descriptionValue()" (input)="descriptionValue.set($any($event.target).value)"
       placeholder="Ej: Soy especialista en cortes modernos con más de 10 años de experiencia..."
       rows="4"
-      class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 resize-none"></textarea>
+      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 resize-none transition-colors focus:border-gold">
+    </textarea>
 
-    <div class="flex items-center justify-between mt-3">
-      <span class="text-xs text-gray-400">{{ descriptionValue().length }} / 500 caracteres</span>
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] text-ink-400">{{ descriptionValue().length }} / 500 caracteres</span>
       <button (click)="saveDescription()" [disabled]="descSaving()"
-        class="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 whitespace-nowrap">
+        class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
+        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
         {{ descSaving() ? 'Guardando...' : 'Guardar Descripción' }}
       </button>
     </div>
 
     @if (descMsg()) {
-      <p class="text-xs mt-2 ml-1 font-medium"
-        [class]="descMsg()!.type === 'success' ? 'text-green-600' : 'text-red-500'">
+      <p class="text-[11.5px] ml-0.5 font-medium"
+         [class]="descMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
         {{ descMsg()!.text }}
       </p>
     }

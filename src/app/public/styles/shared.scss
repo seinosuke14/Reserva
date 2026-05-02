@@ -1,23 +1,23 @@
 // ─── Tokens de color ─────────────────────────────────────
-$primary:  #4F46E5;
-$accent:   #06B6D4;
+$primary:  #db9648;
+$accent:   #db9648;
 $success:  #10B981;
 $warning:  #F59E0B;
 $surface:  #F9FAFB;
 $border:   #E5E7EB;
-$text:     #111827;
-$muted:    #6B7280;
+$text:     #0f172a;
+$muted:    #64748b;
 
 // ─── Mixins ──────────────────────────────────────────────
 @mixin card {
   background: #fff;
   border: 1px solid $border;
   border-radius: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
 
 @mixin focus-ring {
   outline: none;
-  box-shadow: 0 0 0 3px rgba($primary, .15);
+  box-shadow: 0 0 0 3px rgba(219,150,72,.18);
   border-color: $primary;
 }
