@@ -271,6 +271,20 @@
                   [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
               {{ selectedAppointment()!.paymentStatus }}
             </span>
+            @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
+            <div class="flex gap-2 mt-3">
+              <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
+                class="flex-1 py-1.5 rounded-[9px] text-[12px] font-semibold text-white transition-all"
+                style="background:#10b981;">
+                ✓ Aprobar pago
+              </button>
+              <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Cancelado')"
+                class="flex-1 py-1.5 rounded-[9px] text-[12px] font-semibold transition-all border"
+                style="border-color:#ef4444;color:#ef4444;background:transparent;">
+                ✕ Rechazar
+              </button>
+            </div>
+            }
           </div>
         </div>
 
