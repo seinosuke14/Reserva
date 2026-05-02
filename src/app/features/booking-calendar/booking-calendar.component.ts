@@ -138,6 +138,17 @@ export class BookingCalendarComponent implements OnInit {
     } catch { /* continúa con lista vacía */ }
   }
 
+  async updateAppointmentStatus(id: string, status: 'Pagado' | 'Cancelado'): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.patch(`${environment.apiUrl}/appointments/${id}/status`, { paymentStatus: status })
+      );
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch { /* silencioso */ }
+  }
+
   private _toDateStr(date: Date): string {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
