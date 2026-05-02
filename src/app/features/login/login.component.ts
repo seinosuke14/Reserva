@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -27,6 +27,7 @@ export class LoginComponent {
   private readonly fb     = inject(FormBuilder);
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route  = inject(ActivatedRoute);
 
   isSubmitting = signal(false);
   error        = signal('');
@@ -46,7 +47,9 @@ export class LoginComponent {
     const result = await this.auth.login(this.form.value.email!, this.form.value.password!);
     this.isSubmitting.set(false);
     if (result.success) {
-      this.router.navigate(['/']);
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+      const target = returnUrl?.startsWith('/reservar/') ? returnUrl : '/';
+      this.router.navigateByUrl(target);
     } else {
       this.error.set(result.message);
     }

@@ -1,6 +1,7 @@
-import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, effect, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -14,6 +15,7 @@ import { BookingFooterComponent } from '../components/booking-footer/booking-foo
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
+import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
 type EmailCheckState = 'idle' | 'checking' | 'exists' | 'not-found';
@@ -102,23 +104,37 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   // ─── Form ───────────────────────────────────────────────────────────────────
   readonly form = this.fb.group({
     name:  ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: ['', Validators.required],
+    email: ['', [Validators.required, strictEmailValidator]],
+    phone: ['+569', [Validators.required, chileanPhoneValidator]],
     notes: [''],
   });
 
+  // form.valid no es una signal — toSignal hace que canProceed reaccione cuando el formulario se valida
+  private readonly _formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
+
   get f() { return this.form.controls; }
+
+  constructor() {
+    // Reacciona a cambios de sesión: pre-rellena si hay usuario, limpia si cierra sesión
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (user) {
+        this.form.patchValue({
+          name:  user.name,
+          email: user.email,
+          phone: this._normalizePhone(user.phone ?? ''),
+        });
+      } else {
+        this.form.reset({ name: '', email: '', phone: '+569', notes: '' });
+      }
+    });
+  }
 
   // ─── Lifecycle ──────────────────────────────────────────────────────────────
 
   async ngOnInit(): Promise<void> {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     await this._loadProfile(slug);
-
-    const user = this.auth.currentUser();
-    if (user) {
-      this.form.patchValue({ name: user.name, email: user.email, phone: user.phone ?? '' });
-    }
 
     this.sub = this.f['email'].valueChanges.subscribe(email => {
       if (!email || this.f['email'].invalid || !this.isGuest()) {
@@ -215,10 +231,19 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   readonly canProceed = computed(() => {
     if (this.step() === 1) return !!this.selectedHour();
-    if (this.step() === 2) return this.form.valid;
+    if (this.step() === 2) return this._formStatus() === 'VALID';
     if (this.step() === 3) return !!this.selectedPayment();
     return false;
   });
+
+  goToLogin(): void {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+  }
+
+  private _normalizePhone(value: string): string {
+    const digits = value.replace(/\D/g, '').replace(/^569/, '');
+    return '+569' + digits.slice(0, 8);
+  }
 
   getWhatsappLink(): string {
     const phone = this.professional()?.phone?.replace(/\D/g, '') ?? '';

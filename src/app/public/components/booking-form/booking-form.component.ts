@@ -39,17 +39,19 @@ import { IPublicService } from '../../../helpers/models';
               <label class="field-label">Email</label>
               <input type="email" formControlName="email" class="field-input" placeholder="tu@email.com">
               @if (bookingForm().controls['email'].invalid && bookingForm().controls['email'].touched) {
-                <span class="field-error">Email valido requerido</span>
+                <span class="field-error">Ingresa un email válido (ej: nombre&#64;dominio.com)</span>
               }
             </div>
           </div>
 
           <div class="form-row">
             <div class="field">
-              <label class="field-label">Telefono</label>
-              <input type="tel" formControlName="phone" class="field-input" placeholder="+56 9 XXXX XXXX">
+              <label class="field-label">Teléfono</label>
+              <input type="tel" formControlName="phone" class="field-input"
+                     placeholder="+569 XXXX XXXX"
+                     (input)="onPhoneInput($event)">
               @if (bookingForm().controls['phone'].invalid && bookingForm().controls['phone'].touched) {
-                <span class="field-error">Requerido</span>
+                <span class="field-error">Formato requerido: +569XXXXXXXX (8 dígitos)</span>
               }
             </div>
           </div>
@@ -106,11 +108,18 @@ export class BookingFormComponent {
   readonly formatCLP  = formatCLP;
   readonly formatDate = formatDateLong;
 
-  readonly bookingForm = input.required<FormGroup>();
+  readonly bookingForm     = input.required<FormGroup>();
   readonly selectedService = input<IPublicService | null>(null);
-  readonly selectedDate = input<string>('');
-  readonly selectedHour = input<string | null>(null);
-  readonly emailStatus = input<string>('idle');
-  readonly showLoginHint = input(false);
+  readonly selectedDate    = input<string>('');
+  readonly selectedHour    = input<string | null>(null);
+  readonly emailStatus     = input<string>('idle');
+  readonly showLoginHint   = input(false);
 
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').replace(/^569/, '');
+    const formatted = '+569' + digits.slice(0, 8);
+    this.bookingForm().controls['phone'].setValue(formatted, { emitEvent: true });
+    input.value = formatted;
+  }
 }

@@ -60,9 +60,16 @@
           <div class="profile-top-bar">
             <span class="profile-top-name">{{ professional()?.slug || professional()?.name }}</span>
             @if (auth.isAuthenticated()) {
-              <button class="btn-text-sm" (click)="auth.logout()">Cerrar sesión</button>
+              <button class="btn-text-sm" (click)="auth.logout()" style="display:inline-flex;align-items:center;gap:.375rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Cerrar sesión
+              </button>
             } @else {
-              <a href="/login" class="btn-text-sm">Iniciar sesión</a>
+              <button class="btn-text-sm" (click)="goToLogin()">Iniciar sesión</button>
             }
           </div>
 
@@ -187,6 +194,18 @@
               <span class="csb-sep">·</span>
               <span class="csb-price">{{ formatCLP(selectedService()?.price ?? 0) }}</span>
             </div>
+            @if (auth.isAuthenticated()) {
+              <button class="btn-text-sm" (click)="auth.logout()" style="display:inline-flex;align-items:center;gap:.375rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Cerrar sesión
+              </button>
+            } @else {
+              <button class="btn-text-sm" (click)="goToLogin()">Iniciar sesión</button>
+            }
           </div>
 
           <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
