@@ -1,113 +1,215 @@
-<div class="min-h-screen flex items-center justify-center bg-background p-6">
-  <div @fadeSlide class="max-w-lg w-full bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+<div class="min-h-screen flex items-center justify-center p-6 font-sans"
+     style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
 
-    @if (success()) {
-      <div class="text-center py-10">
-        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-        </div>
-        <h2 class="text-2xl font-bold text-secondary mb-2">¡Registro Exitoso!</h2>
-        <p class="text-gray-400">Redirigiendo al inicio de sesión...</p>
+  <div @fadeSlide class="w-full max-w-lg">
+
+    <!-- Brand -->
+    <div class="flex items-center justify-center gap-3 mb-7">
+      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
+           style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
+        <img src="Agendual.PNG" alt="Agendual" class="h-9 w-auto" />
       </div>
-    } @else {
-
-      <div class="text-center mb-10">
-        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="8.5" cy="7" r="4"/>
-            <line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-          </svg>
-        </div>
-        <h1 class="text-2xl font-bold text-secondary">Registro Profesional</h1>
-        <p class="text-gray-400 mt-2">Crea tu cuenta para gestionar tu agenda.</p>
+      <div class="leading-none">
+        <div class="text-[18px] font-extrabold tracking-tight text-white">AGENDUAL</div>
+        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
       </div>
+    </div>
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+    <!-- Card -->
+    <div class="bg-white rounded-[20px] p-8 shadow-[0_28px_80px_rgba(0,0,0,.35)] border border-black/[.04]">
 
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Nombre Completo</label>
-          <input formControlName="name" type="text" placeholder="Dr. Juan Pérez"
-            class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="f['name'].invalid && f['name'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-          @if (f['name'].invalid && f['name'].touched) {
-            <p class="text-xs text-red-500 ml-1">Mínimo 3 caracteres</p>
-          }
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Especialidad</label>
-          <input formControlName="specialty" type="text" placeholder="Odontología, Medicina General..."
-            class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="f['specialty'].invalid && f['specialty'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-          @if (f['specialty'].invalid && f['specialty'].touched) {
-            <p class="text-xs text-red-500 ml-1">Campo requerido</p>
-          }
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Email</label>
-            <input formControlName="email" type="email" placeholder="email@clinica.com"
-              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-              [class]="f['email'].invalid && f['email'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-            @if (f['email'].invalid && f['email'].touched) {
-              <p class="text-xs text-red-500 ml-1">Email inválido</p>
-            }
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Teléfono</label>
-            <input formControlName="phone" type="tel" placeholder="+56 9 1234 5678"
-              class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-              [class]="f['phone'].invalid && f['phone'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-            @if (f['phone'].invalid && f['phone'].touched) {
-              <p class="text-xs text-red-500 ml-1">Campo requerido</p>
-            }
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Contraseña</label>
-          <input formControlName="password" type="password" placeholder="••••••••"
-            class="w-full px-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 transition-all"
-            [class]="f['password'].invalid && f['password'].touched ? 'border-red-200 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/10 focus:border-primary/30'" />
-          @if (f['password'].invalid && f['password'].touched) {
-            <p class="text-xs text-red-500 ml-1">Mínimo 6 caracteres</p>
-          }
-        </div>
-
-        @if (errorMsg()) {
-          <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-            {{ errorMsg() }}
-          </div>
-        }
-
-        <button type="submit" [disabled]="isSubmitting()"
-          class="w-full bg-primary text-white py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-2">
-          @if (isSubmitting()) {
-            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-              <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+      @if (success()) {
+        <div class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            Registrando...
-          } @else {
-            Crear Cuenta Profesional
-          }
-        </button>
+          </div>
+          <h2 class="text-[20px] font-bold text-ink tracking-tight mb-1.5">¡Registro exitoso!</h2>
+          <p class="text-[13px] text-ink-400">Redirigiendo al inicio de sesión...</p>
+        </div>
+      } @else {
 
-        <p class="text-center text-sm text-gray-400">
-          ¿Ya tienes cuenta?
-          <a routerLink="/login" class="text-primary font-bold hover:underline ml-1">Iniciar Sesión</a>
-        </p>
-      </form>
-    }
+        <div class="mb-6">
+          <h1 class="text-[20px] font-bold text-ink tracking-tight">Registro Profesional</h1>
+          <p class="text-[13px] text-ink-400 mt-1">Crea tu cuenta para gestionar tu agenda.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+
+          <!-- Nombre + Apellido -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1.5">
+              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Nombre</label>
+              <input formControlName="firstName" type="text" placeholder="Juan"
+                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                [class.border-red-300]="f['firstName'].invalid && f['firstName'].touched"
+                [class.border-ink-200]="!(f['firstName'].invalid && f['firstName'].touched)"
+                [class.focus:border-gold]="!(f['firstName'].invalid && f['firstName'].touched)" />
+              @if (f['firstName'].invalid && f['firstName'].touched) {
+                @if (f['firstName'].errors?.['required']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Nombre requerido</p>
+                } @else if (f['firstName'].errors?.['minlength']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 2 caracteres</p>
+                } @else if (f['firstName'].errors?.['pattern']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Solo letras</p>
+                }
+              }
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Apellido</label>
+              <input formControlName="lastName" type="text" placeholder="Pérez"
+                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                [class.border-red-300]="f['lastName'].invalid && f['lastName'].touched"
+                [class.border-ink-200]="!(f['lastName'].invalid && f['lastName'].touched)"
+                [class.focus:border-gold]="!(f['lastName'].invalid && f['lastName'].touched)" />
+              @if (f['lastName'].invalid && f['lastName'].touched) {
+                @if (f['lastName'].errors?.['required']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Apellido requerido</p>
+                } @else if (f['lastName'].errors?.['minlength']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 2 caracteres</p>
+                } @else if (f['lastName'].errors?.['pattern']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Solo letras</p>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- RUT -->
+          <div class="space-y-1.5">
+            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">RUT</label>
+            <input formControlName="rut" type="text" placeholder="12.345.678-9" maxlength="12"
+              (input)="onRutInput($event)"
+              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              [class.border-red-300]="f['rut'].invalid && f['rut'].touched"
+              [class.border-ink-200]="!(f['rut'].invalid && f['rut'].touched)"
+              [class.focus:border-gold]="!(f['rut'].invalid && f['rut'].touched)" />
+            @if (f['rut'].invalid && f['rut'].touched) {
+              @if (f['rut'].errors?.['required']) {
+                <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT requerido</p>
+              } @else if (f['rut'].errors?.['rutInvalid']) {
+                <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT inválido (verifica formato y dígito verificador)</p>
+              }
+            }
+          </div>
+
+          <!-- Profesión -->
+          <div class="space-y-1.5">
+            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Profesión</label>
+            <select formControlName="professionId"
+              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white appearance-none"
+              [class.border-red-300]="f['professionId'].invalid && f['professionId'].touched"
+              [class.border-ink-200]="!(f['professionId'].invalid && f['professionId'].touched)"
+              [class.focus:border-gold]="!(f['professionId'].invalid && f['professionId'].touched)">
+              <option value="" disabled>
+                {{ professions().length ? 'Selecciona una profesión' : 'Cargando profesiones...' }}
+              </option>
+              @for (option of professions(); track option.id) {
+                <option [value]="option.id">{{ option.name }}</option>
+              }
+            </select>
+            @if (f['professionId'].invalid && f['professionId'].touched) {
+              <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Selecciona una profesión</p>
+            }
+          </div>
+
+          <!-- Email + Teléfono -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1.5">
+              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+              <input formControlName="email" type="email" placeholder="email@clinica.com"
+                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                [class.border-red-300]="f['email'].invalid && f['email'].touched"
+                [class.border-ink-200]="!(f['email'].invalid && f['email'].touched)"
+                [class.focus:border-gold]="!(f['email'].invalid && f['email'].touched)" />
+              @if (f['email'].invalid && f['email'].touched) {
+                @if (f['email'].errors?.['required']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Email requerido</p>
+                } @else if (f['email'].errors?.['emailInvalid']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Formato inválido</p>
+                }
+              }
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Teléfono</label>
+              <input formControlName="phone" type="tel" placeholder="+56912345678" maxlength="12"
+                (input)="onPhoneInput($event)"
+                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                [class.border-red-300]="f['phone'].invalid && f['phone'].touched"
+                [class.border-ink-200]="!(f['phone'].invalid && f['phone'].touched)"
+                [class.focus:border-gold]="!(f['phone'].invalid && f['phone'].touched)" />
+              @if (f['phone'].invalid && f['phone'].touched) {
+                @if (f['phone'].errors?.['required']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Teléfono requerido</p>
+                } @else if (f['phone'].errors?.['phoneInvalid']) {
+                  <p class="text-[11.5px] text-red-500 font-medium ml-0.5">+569 + 8 dígitos</p>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="space-y-1.5">
+            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Contraseña</label>
+            <input formControlName="password" type="password" placeholder="••••••••"
+              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              [class.border-red-300]="f['password'].invalid && f['password'].touched"
+              [class.border-ink-200]="!(f['password'].invalid && f['password'].touched)"
+              [class.focus:border-gold]="!(f['password'].invalid && f['password'].touched)" />
+            @if (f['password'].invalid && f['password'].touched) {
+              @if (f['password'].errors?.['required']) {
+                <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Contraseña requerida</p>
+              } @else {
+                <ul class="text-[11.5px] text-red-500 font-medium ml-0.5 space-y-0.5">
+                  @if (f['password'].errors?.['minLength']) {
+                    <li>• Mínimo 6 caracteres</li>
+                  }
+                  @if (f['password'].errors?.['noUppercase']) {
+                    <li>• Al menos 1 mayúscula</li>
+                  }
+                  @if (f['password'].errors?.['noNumber']) {
+                    <li>• Al menos 1 número</li>
+                  }
+                </ul>
+              }
+            } @else {
+              <p class="text-[10.5px] text-ink-400 ml-0.5">Mínimo 6 caracteres, 1 mayúscula y 1 número.</p>
+            }
+          </div>
+
+          @if (errorMsg()) {
+            <div class="bg-red-50 border border-red-200 text-red-700 text-[12.5px] px-3.5 py-2.5 rounded-[10px]">
+              {{ errorMsg() }}
+            </div>
+          }
+
+          <button type="submit" [disabled]="isSubmitting()"
+            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+            style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+            @if (isSubmitting()) {
+              <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="12" y1="2" x2="12" y2="6"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                <line x1="2" y1="12" x2="6" y2="12"/>
+                <line x1="18" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+              </svg>
+              Registrando...
+            } @else {
+              Crear cuenta profesional
+            }
+          </button>
+
+          <p class="text-center text-[12.5px] text-ink-500">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login" class="font-bold text-gold hover:underline ml-0.5">Iniciar sesión</a>
+          </p>
+        </form>
+      }
+    </div>
   </div>
 </div>

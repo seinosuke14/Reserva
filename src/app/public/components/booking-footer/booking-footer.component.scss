@@ -1,13 +1,8 @@
-$primary: #4F46E5;
-$muted:   #6B7280;
-$border:  #E5E7EB;
-
 .portal-footer {
-  border-top: 1px solid $border;
+  border-top: 1px solid #e2e8f0;
   padding: 1.25rem;
   text-align: center;
   font-size: .75rem;
-  color: $muted;
-
-  strong { color: $primary; }
+  color: #94a3b8;
+  strong { color: #db9648; }
 }

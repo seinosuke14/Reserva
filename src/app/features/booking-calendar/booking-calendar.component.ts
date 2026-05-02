@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -23,7 +23,7 @@ interface IAppointment {
 @Component({
   selector: 'app-booking-calendar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './booking-calendar.component.html',
   animations: [
     trigger('fadeSlide', [
@@ -199,6 +199,72 @@ export class BookingCalendarComponent implements OnInit {
         reason: 'Bloqueo rápido desde agenda',
       });
     }
+  }
+
+  readonly today = new Date();
+
+  readonly hours = computed(() => {
+    const dow     = jsToDow(this.selectedDate().getDay());
+    const slots   = this.workSvc.generateSlots(dow);
+    const dayApts = this.dayAppointments();
+
+    let minH = 7;
+    let maxH = 19;
+
+    if (slots.length) {
+      minH = Math.min(minH, parseInt(slots[0].split(':')[0]));
+      maxH = Math.max(maxH, parseInt(slots[slots.length - 1].split(':')[0]));
+    }
+
+    for (const a of dayApts) {
+      const h = parseInt(a.time.split(':')[0]);
+      if (h < minH) minH = h;
+      if (h > maxH) maxH = h;
+    }
+
+    return Array.from({ length: maxH - minH + 1 }, (_, i) => minH + i);
+  });
+
+  readonly dayLabel = computed(() =>
+    this.selectedDate().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+  );
+
+  readonly dayAppointments = computed(() => {
+    const dateStr = this._toDateStr(this.selectedDate());
+    return this.appointments().filter(a => a.date === dateStr && a.paymentStatus !== 'Cancelado');
+  });
+
+  readonly dayStats = computed(() => {
+    const apts = this.dayAppointments();
+    return {
+      total: apts.length,
+      pagadas: apts.filter(a => a.paymentStatus === 'Pagado').length,
+      pendientes: apts.filter(a => a.paymentStatus === 'Pendiente').length,
+    };
+  });
+
+  getAppointmentsAtHour(h: number): IAppointment[] {
+    return this.dayAppointments().filter(a => parseInt(a.time.split(':')[0]) === h);
+  }
+
+  isCurrentHour(h: number): boolean {
+    return new Date().getHours() === h && this.isSameDay(this.selectedDate(), new Date());
+  }
+
+  prevDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() - 1);
+    this.selectDate(d);
+  }
+
+  nextDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() + 1);
+    this.selectDate(d);
+  }
+
+  goToToday(): void {
+    this.selectDate(new Date());
   }
 
   handleConfirm(): void {

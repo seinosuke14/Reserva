@@ -1,60 +1,69 @@
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
 
   <!-- Header -->
   <div>
-    <h2 class="text-2xl font-bold text-secondary">Configuración de Horario</h2>
-    <p class="text-sm text-gray-400 mt-1">
+    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Configuración de Horario</h1>
+    <p class="text-[12.5px] text-ink-400 mt-0.5">
       Define tu disponibilidad semanal. Los clientes solo podrán reservar en los días y rangos horarios que configures aquí.
     </p>
   </div>
 
   @if (isLoading()) {
-    <div class="flex items-center justify-center py-20 text-gray-400">
-      <span class="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin mr-3"></span>
-      Cargando horario...
+    <div class="flex items-center justify-center py-20 text-[13px] text-ink-400">
+      <span class="inline-flex items-center gap-2">
+        <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+          <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+        </svg>
+        Cargando horario...
+      </span>
     </div>
   } @else {
 
-    <!-- Duración de cada cita -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
-      <h3 class="text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+    <!-- Slot duration -->
+    <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         Duración de cada cita
       </h3>
-      <div class="flex gap-3 flex-wrap">
+      <div class="flex gap-2 flex-wrap">
         @for (dur of durations; track dur) {
           <button (click)="setSlotDuration(dur)"
-            class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all border"
-            [class]="slotDuration() === dur
-              ? 'bg-primary text-white border-primary shadow-md'
-              : 'bg-white text-gray-500 border-gray-200 hover:border-primary/30 hover:bg-primary/5'">
+            class="px-4 py-2 rounded-[9px] text-[12.5px] font-bold transition-all border"
+            [style.background]="slotDuration() === dur ? '#db9648' : ''"
+            [style.color]="slotDuration() === dur ? '#fff' : ''"
+            [style.borderColor]="slotDuration() === dur ? '#db9648' : ''"
+            [style.boxShadow]="slotDuration() === dur ? '0 2px 8px rgba(219,150,72,.35)' : ''"
+            [class.border-ink-200]="slotDuration() !== dur"
+            [class.text-ink-500]="slotDuration() !== dur"
+            [class.hover:border-gold]="slotDuration() !== dur">
             {{ dur }} min
           </button>
         }
       </div>
-      <p class="text-xs text-gray-400">
-        Cada cita ocupa <strong>{{ slotDuration() }} minutos</strong>.
+      <p class="text-[11.5px] text-ink-400">
+        Cada cita ocupa <strong class="text-ink">{{ slotDuration() }} minutos</strong>.
         Esto genera los bloques de tiempo disponibles dentro de tu horario de atención.
       </p>
     </div>
 
-    <!-- Días de la semana -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="divide-y divide-gray-50">
+    <!-- Days of week -->
+    <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card overflow-hidden">
+      <div class="divide-y divide-ink-100/60">
         @for (day of days; track day.dayOfWeek) {
-          <div class="flex items-center gap-4 px-6 py-4 transition-all"
-            [class]="!day.isWorking ? 'bg-gray-50/50' : ''">
+          <div class="flex items-center gap-4 px-5 py-3.5 transition-all"
+               [style.background]="!day.isWorking ? 'rgba(248,250,252,.5)' : ''">
 
-            <!-- Nombre del día -->
-            <div class="w-24 shrink-0">
-              <span class="font-bold text-secondary text-sm">{{ dayLabels[day.dayOfWeek] }}</span>
+            <!-- Day name -->
+            <div class="w-24 shrink-0 flex items-center gap-1.5">
+              <span class="text-[13px] font-bold text-ink">{{ dayLabels[day.dayOfWeek] }}</span>
               @if (day.dayOfWeek >= 5) {
-                <span class="ml-2 text-[9px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-black uppercase">
-                  Fin
-                </span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-px rounded"
+                      style="background:rgba(245,158,11,.1);color:#d97706;">Fin</span>
               }
             </div>
 
@@ -63,35 +72,34 @@
               <input type="checkbox" class="sr-only peer"
                 [(ngModel)]="day.isWorking"
                 (ngModelChange)="onToggle(day)">
-              <div class="w-11 h-6 bg-gray-200 rounded-full peer
-                          peer-checked:bg-primary
+              <div class="w-10 h-[22px] bg-ink-200 rounded-full peer
+                          peer-checked:bg-gold
                           after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:rounded-full after:h-5 after:w-5
-                          after:transition-all peer-checked:after:translate-x-full">
+                          after:bg-white after:rounded-full after:h-[18px] after:w-[18px]
+                          after:transition-all peer-checked:after:translate-x-[18px]
+                          transition-colors">
               </div>
             </label>
 
-            <!-- Rango horario o etiqueta -->
+            <!-- Time range -->
             @if (day.isWorking) {
               <div class="flex items-end gap-2 flex-1 flex-wrap">
                 <div class="flex flex-col gap-0.5">
-                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desde</label>
+                  <label class="text-[10px] text-ink-400 font-bold uppercase tracking-wider">Desde</label>
                   <input type="time" [(ngModel)]="day.startTime"
-                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-secondary
-                           focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
-                           transition-all w-32">
+                    class="border-[1.5px] border-ink-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-ink
+                           focus:outline-none focus:border-gold transition-all w-30" />
                 </div>
-                <span class="text-gray-300 font-bold pb-2 text-lg">—</span>
+                <span class="text-ink-300 font-bold pb-1.5 text-base">—</span>
                 <div class="flex flex-col gap-0.5">
-                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Hasta</label>
+                  <label class="text-[10px] text-ink-400 font-bold uppercase tracking-wider">Hasta</label>
                   <input type="time" [(ngModel)]="day.endTime"
-                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-secondary
-                           focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
-                           transition-all w-32">
+                    class="border-[1.5px] border-ink-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-ink
+                           focus:outline-none focus:border-gold transition-all w-30" />
                 </div>
               </div>
             } @else {
-              <span class="text-sm text-gray-400 italic">No laborable</span>
+              <span class="text-[12.5px] text-ink-400 italic">No laborable</span>
             }
 
           </div>
@@ -99,13 +107,12 @@
       </div>
     </div>
 
-    <!-- Footer: guardar -->
+    <!-- Footer -->
     <div class="flex items-center justify-between">
-      <div class="h-8">
+      <div class="h-7">
         @if (savedOk()) {
-          <span @fadeSlide class="flex items-center gap-2 text-green-600 text-sm font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <span @fadeSlide class="flex items-center gap-1.5 text-emerald-600 text-[12.5px] font-bold">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
             Cambios guardados correctamente
@@ -114,16 +121,18 @@
       </div>
 
       <button (click)="saveSchedule()" [disabled]="isSaving()"
-        class="bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg
-               hover:shadow-xl hover:bg-primary/90 transition-all
-               disabled:opacity-60 disabled:cursor-not-allowed
-               flex items-center gap-2">
+        class="inline-flex items-center gap-2 px-5 py-[9px] rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
+        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
         @if (isSaving()) {
-          <span class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+          <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+            <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+          </svg>
           Guardando...
         } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/>
             <polyline points="7 3 7 8 15 8"/>
