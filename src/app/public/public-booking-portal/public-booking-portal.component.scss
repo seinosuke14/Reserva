@@ -340,6 +340,11 @@ $canvas:  #f8fafc;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid $border;
+  flex-wrap: wrap;
+
+  @media (max-width: 599px) {
+    gap: .75rem;
+  }
 }
 
 .checkout-back {
@@ -369,6 +374,11 @@ $canvas:  #f8fafc;
   border-radius: .75rem;
   flex: 1;
   min-width: 0;
+
+  @media (max-width: 599px) {
+    flex-basis: 100%;
+    order: 3;
+  }
 }
 
 .csb-name {
@@ -378,10 +388,19 @@ $canvas:  #f8fafc;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: 599px) {
+    flex: 1;
+  }
 }
 
 .csb-sep   { color: #cbd5e1; }
-.csb-price { font-size: .875rem; font-weight: 800; color: $gold; white-space: nowrap; }
+.csb-price {
+  font-size: .875rem;
+  font-weight: 800;
+  color: $gold;
+  white-space: nowrap;
+}
 
 // ─── Payment options ──────────────────────────────────
 .step-content { margin-bottom: 1.5rem; }

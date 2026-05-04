@@ -1,7 +1,16 @@
 <div class="flex h-full overflow-hidden" style="background:#f8fafc;">
 
-  <!-- ── Left panel ───────────────────────────────────────────────────── -->
-  <div class="w-[252px] shrink-0 bg-white border-r border-ink-100 flex flex-col overflow-y-auto">
+  <!-- ── Left panel ─────────────────────────────────────── -->
+  @if (isMobile() && isLeftPanelOpen()) {
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+         (click)="isLeftPanelOpen.set(false)"></div>
+  }
+  <div [class]="isMobile()
+      ? (isLeftPanelOpen()
+          ? 'fixed left-0 top-0 h-full w-[252px] bg-white z-40 flex flex-col overflow-y-auto'
+          : 'hidden')
+      : 'w-[252px] shrink-0 bg-white border-r border-ink-100 flex flex-col overflow-y-auto'"
+       [style.box-shadow]="isMobile() && isLeftPanelOpen() ? '4px 0 32px rgba(0,0,0,.15)' : 'none'">
 
     <!-- Mini calendar -->
     <div class="p-4 border-b border-ink-100">
@@ -86,34 +95,48 @@
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Day header -->
-    <div class="bg-white border-b border-ink-100 px-6 py-3.5 flex items-center justify-between shrink-0">
-      <div>
-        <h2 class="text-[15px] font-bold text-ink tracking-tight capitalize">{{ dayLabel() }}</h2>
-        <p class="text-[11.5px] text-ink-400 mt-0.5">
-          {{ dayStats().pagadas }} pagadas · {{ dayStats().pendientes }} pendientes
-        </p>
+    <div class="bg-white border-b border-ink-100 px-4 md:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 md:gap-0 shrink-0">
+      <!-- Title + calendar button (first row, or left side on desktop) -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        @if (isMobile()) {
+          <button (click)="toggleLeftPanel()"
+            class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-600 shrink-0 transition-colors">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M8 2v4M16 2v4"/>
+            </svg>
+          </button>
+        }
+        <div class="min-w-0">
+          <h2 class="text-[15px] font-bold text-ink tracking-tight capitalize truncate">{{ dayLabel() }}</h2>
+          <p class="text-[11.5px] text-ink-400 mt-0.5">
+            {{ dayStats().pagadas }} pagadas · {{ dayStats().pendientes }} pendientes
+          </p>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
+
+      <!-- Navigation buttons (second row on mobile, right side on desktop) -->
+      <div class="flex items-center gap-2 flex-wrap">
         <button (click)="prevDay()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors">
+          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button (click)="goToToday()"
-          class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors"
+          class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors whitespace-nowrap"
           style="border:1.5px solid #db9648;background:rgba(219,150,72,.08);color:#db9648;">
           Hoy
         </button>
         <button (click)="nextDay()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors">
+          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </button>
 
         @if (isProfessional()) {
           <button (click)="toggleBlockingMode()"
-            class="ml-2 px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-all"
+            class="md:ml-2 px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-all whitespace-nowrap"
             [style.background]="isBlockingMode() ? '#c2410c' : 'rgba(100,116,139,.1)'"
             [style.color]="isBlockingMode() ? '#fff' : '#64748b'">
-            {{ isBlockingMode() ? 'Salir del bloqueo' : 'Bloquear horarios' }}
+            {{ isBlockingMode() ? 'Salir' : 'Bloquear' }}
           </button>
         }
       </div>
@@ -187,7 +210,7 @@
 
                 @for (apt of getAppointmentsAtHour(h); track apt.id) {
                   <div
-                    class="w-[200px] shrink-0 bg-white rounded-[13px] p-[10px_12px] flex flex-col gap-1.5 cursor-pointer transition-all hover:-translate-y-0.5"
+                    class="w-full sm:w-[200px] shrink-0 bg-white rounded-[13px] p-[10px_12px] flex flex-col gap-1.5 cursor-pointer transition-all hover:-translate-y-0.5"
                     style="border:1.5px solid rgba(219,150,72,.25);border-top:3px solid #db9648;box-shadow:0 2px 10px rgba(0,0,0,.07);"
                     (click)="selectedAppointment.set(apt)">
 
