@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -59,7 +59,7 @@ interface ICustomer {
     ])
   ]
 })
-export class CustomerDirectoryComponent implements OnInit {
+export class CustomerDirectoryComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   readonly formatCLP = formatCLP;
   readonly toNumber = Number;
@@ -77,6 +77,9 @@ export class CustomerDirectoryComponent implements OnInit {
   showPayments = signal(false);
   historyFrom = signal<string>('');
   historyTo = signal<string>('');
+
+  isMobile = signal(window.innerWidth < 768);
+  private readonly _resizeListener = () => this.isMobile.set(window.innerWidth < 768);
 
   openCustomer(customer: ICustomer): void {
     this.selectedCustomer.set(customer);
@@ -215,6 +218,7 @@ export class CustomerDirectoryComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    window.addEventListener('resize', this._resizeListener);
     try {
       const data = await firstValueFrom(
         this.http.get<ICustomer[]>(`${environment.apiUrl}/customers`)
@@ -225,6 +229,10 @@ export class CustomerDirectoryComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this._resizeListener);
   }
 
   async updateAppointmentStatus(appointmentId: string, newStatus: 'Pagado' | 'Cancelado'): Promise<void> {
