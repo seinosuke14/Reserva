@@ -232,26 +232,16 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   readonly today = new Date();
 
-  readonly hours = computed(() => {
-    const dow     = jsToDow(this.selectedDate().getDay());
-    const slots   = this.workSvc.generateSlots(dow);
-    const dayApts = this.dayAppointments();
+  readonly slots = computed(() => {
+    const dow       = jsToDow(this.selectedDate().getDay());
+    const workSlots = this.workSvc.generateSlots(dow);
 
-    let minH = 7;
-    let maxH = 19;
+    // Citas del día que caigan fuera del horario configurado (para no ocultarlas)
+    const aptSlots = this.dayAppointments().map(a => a.time);
+    const extra    = aptSlots.filter(t => !workSlots.includes(t));
 
-    if (slots.length) {
-      minH = Math.min(minH, parseInt(slots[0].split(':')[0]));
-      maxH = Math.max(maxH, parseInt(slots[slots.length - 1].split(':')[0]));
-    }
-
-    for (const a of dayApts) {
-      const h = parseInt(a.time.split(':')[0]);
-      if (h < minH) minH = h;
-      if (h > maxH) maxH = h;
-    }
-
-    return Array.from({ length: maxH - minH + 1 }, (_, i) => minH + i);
+    const all = [...workSlots, ...extra];
+    return [...new Set(all)].sort();
   });
 
   readonly dayLabel = computed(() =>
@@ -272,12 +262,18 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     };
   });
 
-  getAppointmentsAtHour(h: number): IAppointment[] {
-    return this.dayAppointments().filter(a => parseInt(a.time.split(':')[0]) === h);
+  getAppointmentsAtSlot(slot: string): IAppointment[] {
+    return this.dayAppointments().filter(a => a.time === slot);
   }
 
-  isCurrentHour(h: number): boolean {
-    return new Date().getHours() === h && this.isSameDay(this.selectedDate(), new Date());
+  isCurrentSlot(slot: string): boolean {
+    if (!this.isSameDay(this.selectedDate(), new Date())) return false;
+    const now = new Date();
+    const [h, m] = slot.split(':').map(Number);
+    const nowMin  = now.getHours() * 60 + now.getMinutes();
+    const slotMin = h * 60 + m;
+    const dur     = this.workSvc.getSlotDuration(jsToDow(this.selectedDate().getDay()));
+    return nowMin >= slotMin && nowMin < slotMin + dur;
   }
 
   prevDay(): void {
