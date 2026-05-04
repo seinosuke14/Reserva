@@ -19,8 +19,32 @@ interface ProviderConfig {
   label: string;
   description: string;
   icon: string;
-  fields: { key: string; label: string; placeholder: string; type: string }[];
+  fields: { key: string; label: string; placeholder: string; type: string; options?: string[] }[];
 }
+
+const CHILEAN_BANKS = [
+  'Banco de Chile',
+  'Banco Estado',
+  'Banco Santander',
+  'Banco BCI',
+  'Banco Itaú',
+  'Banco Security',
+  'Banco Falabella',
+  'Banco Ripley',
+  'Banco BICE',
+  'Banco Internacional',
+  'Scotiabank',
+  'Coopeuch',
+  'HSBC Bank',
+  'Banco BTG Pactual',
+];
+
+const ACCOUNT_TYPES = [
+  'Cuenta Corriente',
+  'Cuenta Vista / RUT',
+  'Cuenta de Ahorro',
+  'Cuenta Empresa',
+];
 
 const PROVIDERS: ProviderConfig[] = [
   {
@@ -39,8 +63,8 @@ const PROVIDERS: ProviderConfig[] = [
     description: 'Pago directo a cuenta bancaria',
     icon: 'bank',
     fields: [
-      { key: 'bankName', label: 'Banco', placeholder: 'Ej: Banco Estado', type: 'text' },
-      { key: 'accountType', label: 'Tipo de Cuenta', placeholder: 'Ej: Cuenta Corriente', type: 'text' },
+      { key: 'bankName', label: 'Banco', placeholder: 'Selecciona un banco', type: 'select', options: CHILEAN_BANKS },
+      { key: 'accountType', label: 'Tipo de Cuenta', placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
       { key: 'accountNumber', label: 'Numero de Cuenta', placeholder: 'Ej: 12345678', type: 'text' },
       { key: 'rut', label: 'RUT', placeholder: 'Ej: 12.345.678-9', type: 'text' },
       { key: 'holderName', label: 'Titular', placeholder: 'Nombre del titular', type: 'text' },
