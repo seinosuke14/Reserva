@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -40,7 +40,7 @@ interface IAppointment {
     ])
   ]
 })
-export class BookingCalendarComponent implements OnInit {
+export class BookingCalendarComponent implements OnInit, OnDestroy {
   private readonly router    = inject(Router);
   private readonly http      = inject(HttpClient);
   private readonly auth      = inject(AuthService);
@@ -52,6 +52,15 @@ export class BookingCalendarComponent implements OnInit {
   readonly isBlockingMode      = signal(false);
   readonly isLoading           = signal(true);
   readonly selectedAppointment = signal<IAppointment | null>(null);
+
+  isMobile        = signal(window.innerWidth < 768);
+  isLeftPanelOpen = signal(window.innerWidth >= 768);
+
+  private readonly _resizeListener = () => {
+    const mobile = window.innerWidth < 768;
+    this.isMobile.set(mobile);
+    if (!mobile) this.isLeftPanelOpen.set(true);
+  };
 
   private appointments = signal<IAppointment[]>([]);
 
@@ -121,12 +130,21 @@ export class BookingCalendarComponent implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    window.addEventListener('resize', this._resizeListener);
     await Promise.all([
       this._loadAppointments(),
       this.blockSvc.load(),
       this.workSvc.load(),
     ]);
     this.isLoading.set(false);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this._resizeListener);
+  }
+
+  toggleLeftPanel(): void {
+    this.isLeftPanelOpen.update(v => !v);
   }
 
   private async _loadAppointments(): Promise<void> {
