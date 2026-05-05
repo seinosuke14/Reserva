@@ -147,10 +147,10 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Form ───────────────────────────────────────────────────────────────────
   readonly form = this.fb.group({
-    name:  ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, strictEmailValidator]],
+    name:  ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16), Validators.pattern(/^\S+$/)]],
+    email: ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
     phone: ['+569', [Validators.required, chileanPhoneValidator]],
-    notes: [''],
+    notes: ['', [Validators.maxLength(200)]],
   });
 
   // form.valid no es una signal — toSignal hace que canProceed reaccione cuando el formulario se valida

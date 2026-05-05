@@ -59,7 +59,7 @@
 
     <!-- Nueva Cita button -->
     <div class="px-4 py-3 border-b border-ink-100">
-      <button
+      <button (click)="openNewAppt()"
         class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90"
         style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
         <svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
@@ -294,6 +294,188 @@
     }
   </div>
 
+  <!-- ── Nueva Cita panel ─────────────────────────────────────── -->
+  @if (showNewAppt()) {
+    <div @backdrop class="fixed inset-0 z-40"
+         style="background:rgba(15,23,42,.45);backdrop-filter:blur(6px);"
+         (click)="closeNewAppt()"></div>
+
+    <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
+         style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
+
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-ink-100 flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-[16px] font-bold text-ink tracking-tight">Nueva Cita</h3>
+          <p class="text-[11.5px] text-ink-400 mt-0.5">Registro manual desde agenda</p>
+        </div>
+        <button (click)="closeNewAppt()"
+          class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-4">
+
+        <!-- Servicio -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Servicio *</label>
+          @if (services().length === 0) {
+            <p class="text-[12px] text-ink-400 italic">Sin servicios configurados</p>
+          } @else {
+            <select [value]="na_serviceId()"
+                    (change)="onServiceChange($any($event.target).value)"
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
+                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+              @for (s of services(); track s.id) {
+                <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
+              }
+            </select>
+          }
+        </div>
+
+        <!-- Fecha + Hora -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Fecha *</label>
+            <input type="date" [value]="na_date()" [min]="todayStr"
+                   (input)="onModalDateChange($any($event.target).value)"
+                   class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none"
+                   style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Hora *</label>
+            @if (na_availableSlots().length === 0) {
+              <p class="text-[12px] text-ink-400 italic pt-2">Sin horario configurado</p>
+            } @else {
+              <select [value]="na_time()"
+                      (change)="na_time.set($any($event.target).value)"
+                      class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
+                      style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                @for (slot of na_availableSlots(); track slot) {
+                  <option [value]="slot" [selected]="slot === na_time()">{{ slot }}</option>
+                }
+              </select>
+            }
+          </div>
+        </div>
+
+        <!-- Divisor cliente -->
+        <div class="border-t border-ink-100 pt-2">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-ink-400">Cliente</p>
+        </div>
+
+        <!-- Nombre con sugerencias -->
+        <div class="relative">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Nombre *</label>
+          <input type="text" [value]="na_name()"
+                 (input)="onNameInput($any($event.target).value)"
+                 placeholder="Busca o escribe el nombre"
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
+                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+          <!-- Sugerencias de clientes existentes -->
+          @if (na_suggestions().length > 0) {
+            <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-ink-200 rounded-[10px] shadow-lg z-10 overflow-hidden">
+              @for (c of na_suggestions(); track c.id) {
+                <button type="button"
+                        (click)="selectSuggestedCustomer(c)"
+                        class="w-full px-3 py-2 text-left hover:bg-ink-50 transition-colors flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                       style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+                    {{ c.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div class="text-[12.5px] font-semibold text-ink">{{ c.name }}</div>
+                    @if (c.email) {
+                      <div class="text-[10.5px] text-ink-400">{{ c.email }}</div>
+                    }
+                  </div>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Email</label>
+          <input type="email" [value]="na_email()"
+                 (input)="na_email.set($any($event.target).value)"
+                 placeholder="cliente@email.com"
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
+                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+          <p class="text-[10.5px] text-ink-400 mt-1">Si el cliente ya existe con este email, se vincula automáticamente</p>
+        </div>
+
+        <!-- Teléfono -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Teléfono</label>
+          <input type="tel" [value]="na_phone()"
+                 (input)="na_phone.set($any($event.target).value)"
+                 placeholder="+56 9 1234 5678"
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
+                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+        </div>
+
+        <!-- Notas -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Notas</label>
+          <textarea [value]="na_notes()"
+                    (input)="na_notes.set($any($event.target).value)"
+                    rows="2"
+                    placeholder="Observaciones opcionales..."
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300 resize-none"
+                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);"></textarea>
+        </div>
+
+        <!-- Estado de pago -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Estado de pago</label>
+          <div class="flex gap-2">
+            <button type="button" (click)="na_status.set('Pendiente')"
+              class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
+              [style.background]="na_status() === 'Pendiente' ? 'rgba(245,158,11,.12)' : 'transparent'"
+              [style.color]="na_status() === 'Pendiente' ? '#d97706' : '#94a3b8'"
+              [style.border-color]="na_status() === 'Pendiente' ? '#f59e0b' : '#e2e8f0'">
+              Pendiente
+            </button>
+            <button type="button" (click)="na_status.set('Pagado')"
+              class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
+              [style.background]="na_status() === 'Pagado' ? 'rgba(34,197,94,.12)' : 'transparent'"
+              [style.color]="na_status() === 'Pagado' ? '#16a34a' : '#94a3b8'"
+              [style.border-color]="na_status() === 'Pagado' ? '#22c55e' : '#e2e8f0'">
+              Pagado
+            </button>
+          </div>
+        </div>
+
+        <!-- Error -->
+        @if (na_error()) {
+          <div class="px-3 py-2.5 rounded-[9px] bg-red-50 border border-red-200 text-red-600 text-[12px]">
+            {{ na_error() }}
+          </div>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-ink-100 flex gap-3 shrink-0">
+        <button (click)="closeNewAppt()"
+          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 text-ink-600 hover:bg-ink-50 transition-colors">
+          Cancelar
+        </button>
+        <button (click)="submitNewAppt()" [disabled]="na_submitting()"
+          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
+          style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
+          {{ na_submitting() ? 'Guardando...' : 'Crear Cita' }}
+        </button>
+      </div>
+    </div>
+  }
+
   <!-- Appointment detail panel (fixed overlay) -->
   @if (selectedAppointment()) {
     <div @backdrop class="fixed inset-0 z-40"
@@ -360,7 +542,7 @@
         @if (selectedAppointment()!.notes) {
           <div class="bg-ink-50 rounded-[12px] p-4">
             <div class="text-[10px] font-bold uppercase tracking-wider text-ink-400 mb-2">Notas</div>
-            <p class="text-[13px] text-ink-600 leading-relaxed">{{ selectedAppointment()!.notes }}</p>
+            <p class="text-[13px] text-ink-600 leading-relaxed break-words whitespace-pre-wrap">{{ selectedAppointment()!.notes }}</p>
           </div>
         }
       </div>

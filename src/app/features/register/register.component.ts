@@ -39,13 +39,13 @@ export class RegisterComponent implements OnInit {
   errorMsg     = signal('');
 
   form = this.fb.group({
-    firstName:    ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[A-Za-zÀ-ÿñÑ\s]+$/)]],
-    lastName:     ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[A-Za-zÀ-ÿñÑ\s]+$/)]],
+    firstName:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(16), Validators.pattern(/^[A-Za-zÀ-ÿñÑ]+$/)]],
+    lastName:     ['', [Validators.required, Validators.minLength(2), Validators.maxLength(16), Validators.pattern(/^[A-Za-zÀ-ÿñÑ]+$/)]],
     rut:          ['', [Validators.required, rutValidator]],
     professionId: ['', Validators.required],
-    email:        ['', [Validators.required, strictEmailValidator]],
+    email:        ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
     phone:        ['+569', [Validators.required, chileanPhoneValidator]],
-    password:     ['', [Validators.required, strongPasswordValidator]],
+    password:     ['', [Validators.required, Validators.maxLength(16), strongPasswordValidator]],
   });
 
   async ngOnInit(): Promise<void> {

@@ -72,8 +72,7 @@ export class AppLayoutComponent {
       items: [
         { path: '/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
         { path: '/horario',       label: 'Horario',         icon: 'clock' },
-        { path: '/bloqueos',      label: 'Bloqueos',        icon: 'shield-alert' },
-        { path: '/configuracion', label: 'Configuración',   icon: 'settings' },
+{ path: '/configuracion', label: 'Configuración',   icon: 'settings' },
       ],
     },
   ];
@@ -85,8 +84,7 @@ export class AppLayoutComponent {
     '/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
     '/pagos':         { title: 'Métodos de Pago', sub: 'Configura tus formas de cobro' },
     '/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
-    '/bloqueos':      { title: 'Bloqueos',       sub: 'Gestiona tus bloqueos de horario' },
-    '/configuracion': { title: 'Configuración',  sub: 'Ajustes de tu cuenta' },
+'/configuracion': { title: 'Configuración',  sub: 'Ajustes de tu cuenta' },
     '/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
   };
 
@@ -113,6 +111,7 @@ export class AppLayoutComponent {
   };
 
   constructor() {
+    this.notifSvc.load();
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.currentPath.set(e.urlAfterRedirects);
       if (this.isMobile()) this.isSidebarOpen.set(false);
