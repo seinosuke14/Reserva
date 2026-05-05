@@ -13,7 +13,7 @@ import { BookingActionsComponent } from '../components/booking-actions/booking-a
 import { BookingFooterComponent } from '../components/booking-footer/booking-footer.component';
 
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
-import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
+import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
 import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
@@ -76,6 +76,50 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
   readonly showLoginHint = computed(() => this.emailCheckState() === 'exists' && this.isGuest());
 
+  /**
+   * Disponibilidad filtrada según la duración del servicio seleccionado.
+   * Un slot solo está disponible si hay suficientes bloques consecutivos libres
+   * para completar el servicio (ej: 90min = 3 bloques de 30min seguidos).
+   */
+  readonly filteredAvailability = computed((): IDayAvailability[] => {
+    const service = this.selectedService();
+    const avail   = this.availability();
+    if (!service) return avail;
+
+    return avail.map(day => {
+      const slotDur     = this._inferSlotDuration(day.slots);
+      const blocksNeeded = Math.ceil(service.duration / slotDur);
+      if (blocksNeeded <= 1) return day;
+
+      const slotMap = new Map(day.slots.map(s => [s.time, s.available]));
+
+      const filteredSlots = day.slots.map(slot => {
+        if (!slot.available) return slot;
+
+        const [h, m]   = slot.time.split(':').map(Number);
+        const startMin = h * 60 + m;
+        let canBook    = true;
+
+        for (let b = 1; b < blocksNeeded; b++) {
+          const nextMin  = startMin + b * slotDur;
+          const nextTime = `${String(Math.floor(nextMin / 60)).padStart(2, '0')}:${String(nextMin % 60).padStart(2, '0')}`;
+          if (!slotMap.get(nextTime)) { canBook = false; break; }
+        }
+
+        return canBook ? slot : { ...slot, available: false };
+      });
+
+      return { ...day, slots: filteredSlots };
+    });
+  });
+
+  private _inferSlotDuration(slots: ITimeSlot[]): number {
+    if (slots.length < 2) return 30;
+    const [h1, m1] = slots[0].time.split(':').map(Number);
+    const [h2, m2] = slots[1].time.split(':').map(Number);
+    return (h2 * 60 + m2) - (h1 * 60 + m1);
+  }
+
   /** Resumen del horario laboral derivado de la disponibilidad (ej: "Lun - Vie · 09:00 - 18:00") */
   readonly scheduleSummary = computed(() => {
     const avail = this.availability();
@@ -103,10 +147,10 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Form ───────────────────────────────────────────────────────────────────
   readonly form = this.fb.group({
-    name:  ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, strictEmailValidator]],
+    name:  ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16), Validators.pattern(/^\S+$/)]],
+    email: ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
     phone: ['+569', [Validators.required, chileanPhoneValidator]],
-    notes: [''],
+    notes: ['', [Validators.maxLength(200)]],
   });
 
   // form.valid no es una signal — toSignal hace que canProceed reaccione cuando el formulario se valida

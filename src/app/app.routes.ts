@@ -40,8 +40,7 @@ export const routes: Routes = [
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
       { path: 'configuracion', loadComponent: () => import('./features/service-settings/service-settings.component').then(m => m.ServiceSettingsComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
-      { path: 'bloqueos', loadComponent: () => import('./features/schedule-blocker/schedule-blocker.component').then(m => m.ScheduleBlockerComponent) },
-      { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
+{ path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: '**', redirectTo: '' }
     ]
   },

@@ -30,14 +30,20 @@ import { IPublicService } from '../../../helpers/models';
           <div class="form-row">
             <div class="field">
               <label class="field-label">Nombre</label>
-              <input type="text" formControlName="name" class="field-input" placeholder="Tu nombre completo">
+              <input type="text" formControlName="name" class="field-input" placeholder="Tu nombre" maxlength="16">
               @if (bookingForm().controls['name'].invalid && bookingForm().controls['name'].touched) {
-                <span class="field-error">Requerido (3+ caracteres)</span>
+                @if (bookingForm().controls['name'].errors?.['required'] || bookingForm().controls['name'].errors?.['minlength']) {
+                  <span class="field-error">Requerido (3–16 caracteres, sin espacios)</span>
+                } @else if (bookingForm().controls['name'].errors?.['maxlength']) {
+                  <span class="field-error">Máximo 16 caracteres</span>
+                } @else if (bookingForm().controls['name'].errors?.['pattern']) {
+                  <span class="field-error">Sin espacios</span>
+                }
               }
             </div>
             <div class="field">
               <label class="field-label">Email</label>
-              <input type="email" formControlName="email" class="field-input" placeholder="tu@email.com">
+              <input type="email" formControlName="email" class="field-input" placeholder="tu@email.com" maxlength="254">
               @if (bookingForm().controls['email'].invalid && bookingForm().controls['email'].touched) {
                 <span class="field-error">Ingresa un email válido (ej: nombre&#64;dominio.com)</span>
               }
@@ -57,8 +63,18 @@ import { IPublicService } from '../../../helpers/models';
           </div>
 
           <div class="field">
-            <label class="field-label"><span class="optional">Notas (opcional)</span></label>
-            <textarea formControlName="notes" class="field-input textarea" rows="3" placeholder="Cuentanos si tienes alguna solicitud especial..."></textarea>
+            <label class="field-label">
+              <span class="optional">Notas (opcional)</span>
+              <span class="notes-counter" [class.notes-counter--limit]="(bookingForm().controls['notes'].value?.length ?? 0) >= 180">
+                {{ bookingForm().controls['notes'].value?.length ?? 0 }}/200
+              </span>
+            </label>
+            <textarea formControlName="notes" class="field-input textarea" rows="3"
+                      placeholder="Cuentanos si tienes alguna solicitud especial..."
+                      maxlength="200"></textarea>
+            @if (bookingForm().controls['notes'].errors?.['maxlength']) {
+              <span class="field-error">Máximo 200 caracteres</span>
+            }
           </div>
         </form>
       </div>

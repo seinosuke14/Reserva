@@ -119,14 +119,17 @@
     </div>
   }
 
-  <!-- Modal -->
-  @if (isFormOpen()) {
-    <div @backdrop class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         style="background:rgba(15,23,42,.55);backdrop-filter:blur(4px);">
-      <div @modalAnim class="bg-white w-full max-w-lg rounded-[20px] shadow-[0_24px_64px_rgba(0,0,0,.28)] overflow-hidden border border-black/[.06]">
+</div>
+
+<!-- Modal -->
+@if (isFormOpen()) {
+  <div @backdrop class="fixed inset-0 z-50 overflow-y-auto"
+       style="background:rgba(15,23,42,.55);backdrop-filter:blur(4px);">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div @modalAnim class="bg-white w-full max-w-lg rounded-[20px] shadow-[0_24px_64px_rgba(0,0,0,.28)] border border-black/[.06]">
 
         <!-- Modal header -->
-        <div class="p-[16px_22px] flex items-center justify-between"
+        <div class="p-[16px_22px] flex items-center justify-between shrink-0 rounded-t-[20px]"
              style="background:linear-gradient(120deg,#0f172a,#1e293b);border-bottom:1px solid rgba(255,255,255,.07);">
           <div class="flex items-center gap-3">
             <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0"
@@ -182,27 +185,45 @@
             }
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1.5">
-              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Duración (min)</label>
-              <input formControlName="duration" type="number" step="15"
-                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white"
-                [class.border-red-300]="f['duration'].invalid && f['duration'].touched"
-                [class.border-ink-200]="!(f['duration'].invalid && f['duration'].touched)" />
-              @if (f['duration'].invalid && f['duration'].touched) {
-                <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 15 min</p>
+          <!-- Duración por bloques -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-[11.5px] font-semibold text-ink-600">
+                Duración del servicio
+              </label>
+              <span class="text-[11.5px] font-bold px-2.5 py-px rounded-full"
+                    style="background:rgba(219,150,72,.12);color:#db9648;">
+                {{ blocksCount() }} {{ blocksCount() === 1 ? 'bloque' : 'bloques' }} · {{ durationMinutes() }} min
+              </span>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              @for (n of blockOptions; track n) {
+                <button type="button" (click)="setBlocks(n)"
+                  class="flex flex-col items-center justify-center w-[52px] py-2 rounded-[9px] text-[12px] font-bold transition-all border"
+                  [style.background]="blocksCount() === n ? '#db9648' : ''"
+                  [style.color]="blocksCount() === n ? '#fff' : ''"
+                  [style.borderColor]="blocksCount() === n ? '#db9648' : '#e2e8f0'"
+                  [style.boxShadow]="blocksCount() === n ? '0 2px 8px rgba(219,150,72,.35)' : ''">
+                  <span>{{ n }}</span>
+                  <span class="text-[9.5px] font-medium opacity-70">{{ n * slotDuration() }}m</span>
+                </button>
               }
             </div>
-            <div class="space-y-1.5">
-              <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Precio (CLP)</label>
-              <input formControlName="price" type="number"
-                class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white"
-                [class.border-red-300]="f['price'].invalid && f['price'].touched"
-                [class.border-ink-200]="!(f['price'].invalid && f['price'].touched)" />
-              @if (f['price'].invalid && f['price'].touched) {
-                <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Precio inválido</p>
-              }
-            </div>
+            <p class="text-[11px] text-ink-400">
+              Bloque base: <strong class="text-ink">{{ slotDuration() }} min</strong>
+              (definido en configuración de horario).
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Precio (CLP)</label>
+            <input formControlName="price" type="number"
+              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white"
+              [class.border-red-300]="f['price'].invalid && f['price'].touched"
+              [class.border-ink-200]="!(f['price'].invalid && f['price'].touched)" />
+            @if (f['price'].invalid && f['price'].touched) {
+              <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Precio inválido</p>
+            }
           </div>
 
           <div class="flex gap-3 pt-1">
@@ -231,6 +252,6 @@
           </div>
         </form>
       </div>
+      </div>
     </div>
   }
-</div>

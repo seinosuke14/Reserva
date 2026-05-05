@@ -55,8 +55,8 @@ export class ServiceSettingsComponent {
 
   async saveDescription(): Promise<void> {
     const description = this.descriptionValue().trim();
-    if (description.length > 500) {
-      this.descMsg.set({ type: 'error', text: 'La descripción no puede superar los 500 caracteres.' });
+    if (description.length > 200) {
+      this.descMsg.set({ type: 'error', text: 'La descripción no puede superar los 200 caracteres.' });
       return;
     }
 
