@@ -159,26 +159,50 @@
 
     <!-- Hour grid -->
     @if (!isLoading()) {
-      <div class="flex-1 overflow-y-auto px-5 py-4" style="background:#f8fafc;">
-        <div class="flex flex-col gap-2">
-          @for (slot of slots(); track slot) {
-            <div class="flex gap-3 items-start">
+      <div class="flex-1 overflow-hidden flex flex-col">
 
-              <!-- Slot label -->
-              <div class="w-11 shrink-0 pt-3 text-right"
+        <!-- ── Cabecera por profesional (sticky) ── -->
+        <div class="flex shrink-0 border-b border-ink-100 bg-white z-10">
+          <div class="w-[68px] shrink-0"></div>
+          <!-- Una columna por profesional — añadir más aquí cuando haya más profesionales -->
+          <div class="w-[340px] shrink-0 border-l border-ink-100 px-3 py-2 flex items-center gap-2.5">
+            <div class="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0"
+                 style="background:linear-gradient(135deg,#db9648ee,#db964877);
+                        box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
+              {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}
+            </div>
+            <div>
+              <div class="text-[13px] font-bold text-ink leading-none">{{ auth.currentUser()?.name }}</div>
+              <div class="text-[10.5px] text-ink-400 mt-px">{{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Grilla scrolleable ── -->
+        <div class="flex-1 overflow-y-auto overflow-x-auto" style="background:#f8fafc;">
+          <div class="flex flex-col gap-2 py-3 pl-0">
+          @for (slot of slots(); track slot) {
+
+            <!-- Saltar slots de continuación — la card del slot inicial ya los cubre visualmente -->
+            @if (!getContinuationFor(slot)) {
+            <!-- ── Slot normal ── -->
+            <div class="flex items-start">
+
+              <!-- Slot label (gutter fijo) -->
+              <div class="w-[68px] shrink-0 pt-3 pr-3 text-right"
                    [style.color]="isCurrentSlot(slot) ? '#db9648' : '#94a3b8'">
-                <div class="text-[11.5px] font-semibold tabular-nums">{{ slot }}</div>
+                <div class="text-[11px] font-semibold tabular-nums">{{ slot }}</div>
                 @if (isCurrentSlot(slot)) {
-                  <div class="w-[6px] h-[6px] rounded-full ml-auto mt-1" style="background:#db9648;"></div>
+                  <div class="w-[5px] h-[5px] rounded-full ml-auto mt-1" style="background:#db9648;"></div>
                 }
               </div>
 
-              <!-- Slot cell -->
-              <div class="flex-1 min-h-[76px] flex gap-2 flex-wrap items-start"
+              <!-- Columna del profesional (ancho fijo, fácil de duplicar) -->
+              <div class="w-[340px] shrink-0 flex gap-2 flex-wrap items-start"
                    [class]="getAppointmentsAtSlot(slot).length === 0
                      ? (isBlocked(slot) && !isBlockingMode()
-                         ? 'bg-red-50 rounded-[12px] border-[1.5px] border-red-200 p-2 items-center transition-colors'
-                         : 'bg-white rounded-[12px] border-[1.5px] border-dashed border-ink-200 p-2 items-center cursor-pointer hover:border-gold/40 transition-colors')
+                         ? 'min-h-[76px] bg-red-50 rounded-[12px] border-[1.5px] border-red-200 p-2 items-center transition-colors'
+                         : 'min-h-[76px] bg-white rounded-[12px] border-[1.5px] border-dashed border-ink-200 p-2 items-center cursor-pointer hover:border-gold/40 transition-colors')
                      : 'rounded-[12px] p-0'"
                    (click)="getAppointmentsAtSlot(slot).length === 0 && !isBlockingMode() && !isBlocked(slot) && selectSlot(slot, false)"
                    (click)="getAppointmentsAtSlot(slot).length === 0 && isBlockingMode() && toggleBlock(slot)">
@@ -226,13 +250,19 @@
                   <div
                     class="w-full sm:w-[200px] shrink-0 bg-white rounded-[13px] p-[10px_12px] flex flex-col gap-1.5 cursor-pointer transition-all hover:-translate-y-0.5"
                     style="border:1.5px solid rgba(219,150,72,.25);border-top:3px solid #db9648;box-shadow:0 2px 10px rgba(0,0,0,.07);"
+                    [style.min-height.px]="getAppointmentBlocks(apt) * 84 - 8"
                     (click)="selectedAppointment.set(apt)">
 
-                    <!-- Time + status -->
+                    <!-- Time + bloques + status -->
                     <div class="flex items-center justify-between gap-2">
                       <span class="text-[10.5px] font-bold tabular-nums" style="color:#db9648;">
-                        {{ apt.time }}
-                        @if (apt.service.duration) { · {{ apt.service.duration }}min }
+                        {{ apt.time }} → {{ getAppointmentEndTime(apt) }}
+                        @if (getAppointmentBlocks(apt) > 1) {
+                          <span class="ml-1 px-1 py-px rounded text-[9px] font-black"
+                                style="background:rgba(219,150,72,.15);color:#db9648;">
+                            {{ getAppointmentBlocks(apt) }} bloques
+                          </span>
+                        }
                       </span>
                       <span class="text-[10.5px] font-semibold px-2 py-px rounded-full"
                             [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : 'rgba(245,158,11,.1)'"
@@ -256,7 +286,9 @@
                 }
               </div>
             </div>
+            }
           }
+          </div>
         </div>
       </div>
     }

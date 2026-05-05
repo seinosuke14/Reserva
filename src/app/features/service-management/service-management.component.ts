@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
 import { IService } from '../../helpers/models';
 import { environment } from '../../../environments/environment';
+import { WorkScheduleService } from '../../core/services/work-schedule.service';
 
 @Component({
   selector: 'app-service-management',
@@ -31,6 +32,7 @@ import { environment } from '../../../environments/environment';
 export class ServiceManagementComponent implements OnInit {
   private readonly fb   = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly scheduleSvc = inject(WorkScheduleService);
   readonly formatCLP    = formatCLP;
 
   services       = signal<IService[]>([]);
@@ -42,17 +44,39 @@ export class ServiceManagementComponent implements OnInit {
   isSaving       = signal(false);
   errorMsg       = signal<string | null>(null);
 
+  slotDuration   = signal(30);
+  blocksCount    = signal(1);
+  readonly maxBlocks = 8;
+  readonly blockOptions = Array.from({ length: this.maxBlocks }, (_, i) => i + 1);
+
+  readonly durationMinutes = computed(() => this.blocksCount() * this.slotDuration());
+
   form = this.fb.group({
     name:        ['', [Validators.required, Validators.minLength(3)]],
     description: ['', Validators.required],
-    duration:    [30, [Validators.required, Validators.min(15)]],
+    duration:    [30, [Validators.required, Validators.min(1)]],
     price:       [0,  [Validators.required, Validators.min(1000)]],
   });
 
   get f() { return this.form.controls; }
 
   async ngOnInit(): Promise<void> {
-    await this.loadServices();
+    await Promise.all([this.loadServices(), this.loadSlotDuration()]);
+  }
+
+  private async loadSlotDuration(): Promise<void> {
+    if (!this.scheduleSvc.isLoaded()) {
+      await this.scheduleSvc.load();
+    }
+    const schedule = this.scheduleSvc.schedule();
+    if (schedule.length) {
+      this.slotDuration.set(schedule[0].slotDuration || 30);
+    }
+  }
+
+  setBlocks(n: number): void {
+    this.blocksCount.set(n);
+    this.form.controls['duration'].setValue(n * this.slotDuration());
   }
 
   async loadServices(): Promise<void> {
@@ -71,13 +95,16 @@ export class ServiceManagementComponent implements OnInit {
 
   openAddForm(): void {
     this.editingService.set(null);
-    this.form.reset({ duration: 30, price: 0 });
+    this.blocksCount.set(1);
+    this.form.reset({ duration: this.slotDuration(), price: 0 });
     this.isFormOpen.set(true);
   }
 
   openEditForm(service: IService): void {
     this.editingService.set(service);
-    this.form.patchValue(service);
+    const blocks = Math.max(1, Math.round(service.duration / this.slotDuration()));
+    this.blocksCount.set(blocks);
+    this.form.patchValue({ ...service, duration: blocks * this.slotDuration() });
     this.isFormOpen.set(true);
   }
 

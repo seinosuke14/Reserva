@@ -43,7 +43,7 @@ interface IAppointment {
 export class BookingCalendarComponent implements OnInit, OnDestroy {
   private readonly router    = inject(Router);
   private readonly http      = inject(HttpClient);
-  private readonly auth      = inject(AuthService);
+  readonly auth              = inject(AuthService);
   private readonly blockSvc  = inject(ScheduleBlockService);
   private readonly workSvc   = inject(WorkScheduleService);
 
@@ -252,6 +252,44 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const dateStr = this._toDateStr(this.selectedDate());
     return this.appointments().filter(a => a.date === dateStr && a.paymentStatus !== 'Cancelado');
   });
+
+  readonly slotDuration = computed(() =>
+    this.workSvc.getSlotDuration(jsToDow(this.selectedDate().getDay()))
+  );
+
+  readonly continuationSlots = computed(() => {
+    const slotDur = this.slotDuration();
+    const map = new Map<string, IAppointment>();
+    for (const apt of this.dayAppointments()) {
+      const duration = apt.service.duration ?? slotDur;
+      const blocks = Math.ceil(duration / slotDur);
+      if (blocks <= 1) continue;
+      const [h, m] = apt.time.split(':').map(Number);
+      let minutesCursor = h * 60 + m;
+      for (let b = 1; b < blocks; b++) {
+        minutesCursor += slotDur;
+        const hh = Math.floor(minutesCursor / 60) % 24;
+        const mm = minutesCursor % 60;
+        map.set(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`, apt);
+      }
+    }
+    return map;
+  });
+
+  getContinuationFor(slot: string): IAppointment | null {
+    return this.continuationSlots().get(slot) ?? null;
+  }
+
+  getAppointmentBlocks(apt: IAppointment): number {
+    return Math.max(1, Math.ceil((apt.service.duration ?? this.slotDuration()) / this.slotDuration()));
+  }
+
+  getAppointmentEndTime(apt: IAppointment): string {
+    const duration = apt.service.duration ?? this.slotDuration();
+    const [h, m]   = apt.time.split(':').map(Number);
+    const endMin   = h * 60 + m + duration;
+    return `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+  }
 
   readonly dayStats = computed(() => {
     const apts = this.dayAppointments();
