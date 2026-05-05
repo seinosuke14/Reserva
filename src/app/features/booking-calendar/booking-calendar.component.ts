@@ -19,6 +19,20 @@ interface IAppointment {
   service:  { id: string; name: string; duration?: number };
 }
 
+interface IService {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
+}
+
+interface ICustomer {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
 
 @Component({
   selector: 'app-booking-calendar',
@@ -43,7 +57,7 @@ interface IAppointment {
 export class BookingCalendarComponent implements OnInit, OnDestroy {
   private readonly router    = inject(Router);
   private readonly http      = inject(HttpClient);
-  private readonly auth      = inject(AuthService);
+  readonly auth              = inject(AuthService);
   private readonly blockSvc  = inject(ScheduleBlockService);
   private readonly workSvc   = inject(WorkScheduleService);
 
@@ -64,6 +78,80 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   private appointments = signal<IAppointment[]>([]);
 
+  // ── Nueva Cita ────────────────────────────────────────────────
+  readonly showNewAppt     = signal(false);
+  readonly services        = signal<IService[]>([]);
+  private readonly customers = signal<ICustomer[]>([]);
+
+  readonly na_serviceId    = signal('');
+  readonly na_date         = signal('');
+  readonly na_time         = signal('');
+  readonly na_name         = signal('');
+  readonly na_email        = signal('');
+  readonly na_phone        = signal('');
+  readonly na_notes        = signal('');
+  readonly na_status       = signal<'Pendiente' | 'Pagado'>('Pendiente');
+  readonly na_error        = signal('');
+  readonly na_submitting   = signal(false);
+
+  private readonly na_existingCustomerId = signal<string | null>(null);
+
+  readonly na_suggestions = computed(() => {
+    const q = this.na_name().trim().toLowerCase();
+    if (q.length < 2 || this.na_existingCustomerId()) return [];
+    return this.customers()
+      .filter(c => c.name.toLowerCase().includes(q))
+      .slice(0, 5);
+  });
+
+  readonly na_availableSlots = computed(() => {
+    const dateStr = this.na_date();
+    if (!dateStr) return [];
+
+    const date     = new Date(dateStr + 'T00:00:00');
+    const dow      = jsToDow(date.getDay());
+    const allSlots = this.workSvc.generateSlots(dow);
+    const slotDur  = this.workSvc.getSlotDuration(dow);
+
+    // Slots ocupados por citas existentes (inicio + continuaciones)
+    const dayAppts = this.appointments().filter(
+      a => a.date === dateStr && a.paymentStatus !== 'Cancelado'
+    );
+    const occupied = new Set<string>();
+    for (const apt of dayAppts) {
+      const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      const [h, m] = apt.time.split(':').map(Number);
+      let cursor   = h * 60 + m;
+      for (let b = 0; b < blocks; b++) {
+        occupied.add(
+          `${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`
+        );
+        cursor += slotDur;
+      }
+    }
+
+    // Bloques que necesita el servicio seleccionado
+    const newService  = this.services().find(s => s.id === this.na_serviceId());
+    const newBlocks   = Math.ceil((newService?.duration ?? slotDur) / slotDur);
+
+    const isToday   = dateStr === this._toDateStr(new Date());
+    const nowMinutes = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1;
+
+    return allSlots.filter(slot => {
+      const [h, m] = slot.split(':').map(Number);
+      if (isToday && h * 60 + m <= nowMinutes) return false;
+      if (occupied.has(slot) || this.blockSvc.isBlocked(date, slot)) return false;
+      let cursor = h * 60 + m + slotDur;
+      for (let b = 1; b < newBlocks; b++) {
+        const cont = `${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`;
+        if (occupied.has(cont) || this.blockSvc.isBlocked(date, cont)) return false;
+        cursor += slotDur;
+      }
+      return true;
+    });
+  });
+  // ─────────────────────────────────────────────────────────────
+
   readonly isProfessional = computed(() => {
     const role = this.auth.currentUser()?.role;
     return role === 'professional' || role === 'admin';
@@ -81,7 +169,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const month = first.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let startDow = first.getDay();
-    startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0 … Sun=6
+    startDow = startDow === 0 ? 6 : startDow - 1;
     const grid: (Date | null)[] = [];
     for (let i = 0; i < startDow; i++) grid.push(null);
     for (let d = 1; d <= daysInMonth; d++) grid.push(new Date(year, month, d));
@@ -115,7 +203,6 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     this.workSvc.isWorkingDay(jsToDow(this.selectedDate().getDay()))
   );
 
-  /** Slots del día seleccionado generados desde el horario configurado */
   readonly timeSlots = computed(() => {
     const date    = this.selectedDate();
     const dow     = jsToDow(date.getDay());
@@ -133,6 +220,8 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     window.addEventListener('resize', this._resizeListener);
     await Promise.all([
       this._loadAppointments(),
+      this._loadServices(),
+      this._loadCustomers(),
       this.blockSvc.load(),
       this.workSvc.load(),
     ]);
@@ -154,6 +243,20 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       );
       this.appointments.set(data);
     } catch { /* continúa con lista vacía */ }
+  }
+
+  private async _loadServices(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.http.get<IService[]>(`${environment.apiUrl}/services`));
+      this.services.set(data);
+    } catch { }
+  }
+
+  private async _loadCustomers(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.http.get<ICustomer[]>(`${environment.apiUrl}/customers`));
+      this.customers.set(data);
+    } catch { }
   }
 
   async updateAppointmentStatus(id: string, status: 'Pagado' | 'Cancelado'): Promise<void> {
@@ -197,6 +300,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     } else {
       this.selectedHour.set(time);
       this.selectedAppointment.set(null);
+      this.openNewAppt();
     }
   }
 
@@ -230,13 +334,13 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     }
   }
 
-  readonly today = new Date();
+  readonly today    = new Date();
+  readonly todayStr = this._toDateStr(new Date());
 
   readonly slots = computed(() => {
     const dow       = jsToDow(this.selectedDate().getDay());
     const workSlots = this.workSvc.generateSlots(dow);
 
-    // Citas del día que caigan fuera del horario configurado (para no ocultarlas)
     const aptSlots = this.dayAppointments().map(a => a.time);
     const extra    = aptSlots.filter(t => !workSlots.includes(t));
 
@@ -252,6 +356,44 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const dateStr = this._toDateStr(this.selectedDate());
     return this.appointments().filter(a => a.date === dateStr && a.paymentStatus !== 'Cancelado');
   });
+
+  readonly slotDuration = computed(() =>
+    this.workSvc.getSlotDuration(jsToDow(this.selectedDate().getDay()))
+  );
+
+  readonly continuationSlots = computed(() => {
+    const slotDur = this.slotDuration();
+    const map = new Map<string, IAppointment>();
+    for (const apt of this.dayAppointments()) {
+      const duration = apt.service.duration ?? slotDur;
+      const blocks = Math.ceil(duration / slotDur);
+      if (blocks <= 1) continue;
+      const [h, m] = apt.time.split(':').map(Number);
+      let minutesCursor = h * 60 + m;
+      for (let b = 1; b < blocks; b++) {
+        minutesCursor += slotDur;
+        const hh = Math.floor(minutesCursor / 60) % 24;
+        const mm = minutesCursor % 60;
+        map.set(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`, apt);
+      }
+    }
+    return map;
+  });
+
+  getContinuationFor(slot: string): IAppointment | null {
+    return this.continuationSlots().get(slot) ?? null;
+  }
+
+  getAppointmentBlocks(apt: IAppointment): number {
+    return Math.max(1, Math.ceil((apt.service.duration ?? this.slotDuration()) / this.slotDuration()));
+  }
+
+  getAppointmentEndTime(apt: IAppointment): string {
+    const duration = apt.service.duration ?? this.slotDuration();
+    const [h, m]   = apt.time.split(':').map(Number);
+    const endMin   = h * 60 + m + duration;
+    return `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+  }
 
   readonly dayStats = computed(() => {
     const apts = this.dayAppointments();
@@ -299,5 +441,135 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   toggleBlockingMode(): void {
     this.isBlockingMode.update(v => !v);
     this.selectedHour.set(null);
+  }
+
+  // ── Nueva Cita: métodos ───────────────────────────────────────
+
+  openNewAppt(): void {
+    const d       = this.selectedDate();
+    const dateStr = this._toDateStr(d);
+    const dow     = jsToDow(d.getDay());
+    const slotDur = this.workSvc.getSlotDuration(dow);
+
+    // Slots ocupados en ese día
+    const dayAppts = this.appointments().filter(
+      a => a.date === dateStr && a.paymentStatus !== 'Cancelado'
+    );
+    const occupied = new Set<string>();
+    for (const apt of dayAppts) {
+      const duration = apt.service.duration ?? slotDur;
+      const blocks   = Math.ceil(duration / slotDur);
+      const [h, m]   = apt.time.split(':').map(Number);
+      let cursor     = h * 60 + m;
+      for (let b = 0; b < blocks; b++) {
+        const hh = Math.floor(cursor / 60) % 24;
+        const mm = cursor % 60;
+        occupied.add(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
+        cursor += slotDur;
+      }
+    }
+
+    const hour     = this.selectedHour();
+    const validHour = hour && !occupied.has(hour) && !this.blockSvc.isBlocked(d, hour) ? hour : '';
+
+    this.na_date.set(dateStr);
+    this.na_time.set(validHour);
+    this.na_serviceId.set(this.services()[0]?.id ?? '');
+    this.na_name.set('');
+    this.na_email.set('');
+    this.na_phone.set('');
+    this.na_notes.set('');
+    this.na_status.set('Pendiente');
+    this.na_error.set('');
+    this.na_existingCustomerId.set(null);
+    this.showNewAppt.set(true);
+  }
+
+  closeNewAppt(): void {
+    this.showNewAppt.set(false);
+  }
+
+  selectSuggestedCustomer(c: ICustomer): void {
+    this.na_name.set(c.name);
+    this.na_email.set(c.email ?? '');
+    this.na_phone.set(c.phone ?? '');
+    this.na_existingCustomerId.set(c.id);
+  }
+
+  onServiceChange(id: string): void {
+    this.na_serviceId.set(id);
+    if (!this.na_availableSlots().includes(this.na_time())) {
+      this.na_time.set('');
+    }
+  }
+
+  onNameInput(value: string): void {
+    this.na_name.set(value);
+    this.na_existingCustomerId.set(null);
+  }
+
+  onModalDateChange(value: string): void {
+    this.na_date.set(value);
+    const date = new Date(value + 'T00:00:00');
+    const slots = this.workSvc.generateSlots(jsToDow(date.getDay()));
+    if (!slots.includes(this.na_time())) {
+      this.na_time.set(slots[0] ?? '');
+    }
+  }
+
+  async submitNewAppt(): Promise<void> {
+    if (!this.na_serviceId() || !this.na_date() || !this.na_time() || !this.na_name().trim()) {
+      this.na_error.set('Completa los campos requeridos (servicio, fecha, hora y nombre).');
+      return;
+    }
+
+    this.na_submitting.set(true);
+    this.na_error.set('');
+
+    try {
+      let customerId = this.na_existingCustomerId();
+
+      if (!customerId) {
+        const email = this.na_email().trim().toLowerCase();
+        const found = email
+          ? this.customers().find(c => c.email?.toLowerCase() === email)
+          : undefined;
+
+        if (found) {
+          customerId = found.id;
+        } else {
+          const created = await firstValueFrom(
+            this.http.post<ICustomer>(`${environment.apiUrl}/customers`, {
+              name:  this.na_name().trim(),
+              email: this.na_email().trim() || undefined,
+              phone: this.na_phone().trim() || undefined,
+            })
+          );
+          customerId = created.id;
+          this.customers.update(list => [...list, created]);
+        }
+      }
+
+      const service = this.services().find(s => s.id === this.na_serviceId());
+
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments`, {
+          date:          this.na_date(),
+          time:          this.na_time(),
+          amount:        Math.round(Number(service?.price ?? 0)),
+          customerId,
+          serviceId:     this.na_serviceId(),
+          paymentStatus: this.na_status(),
+          notes:         this.na_notes().trim() || undefined,
+        })
+      );
+
+      this.showNewAppt.set(false);
+      await this._loadAppointments();
+    } catch (err: any) {
+      this.na_error.set(err?.error?.message ?? 'Error al crear la cita. Intenta de nuevo.');
+    } finally {
+      this.na_submitting.set(false);
+    }
   }
 }

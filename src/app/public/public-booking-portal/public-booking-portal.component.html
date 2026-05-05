@@ -213,7 +213,7 @@
           <!-- Step 1: Date & Time -->
           @if (step() === 1) {
             <app-booking-datetime-selector
-              [availability]="availability()"
+              [availability]="filteredAvailability()"
               [selectedDate]="selectedDate()"
               [selectedHour]="selectedHour()"
               (dateSelected)="selectDate($event)"

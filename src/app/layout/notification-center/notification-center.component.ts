@@ -1,8 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { NotificationService } from '../../core/services/notification.service';
-import { NotificationType } from '../../data/mock-notifications';
+import { NotificationService, NotificationType } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-notification-center',

@@ -187,7 +187,8 @@
             style="border-color:#db9648;color:#db9648;background:transparent;">
             Mensaje
           </button>
-          <button class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold text-white transition-all"
+          <button (click)="openBookingModal()"
+            class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold text-white transition-all"
             style="background:#db9648;box-shadow:0 2px 8px rgba(219,150,72,.35);">
             Agendar
           </button>
@@ -210,42 +211,69 @@
         }
       </div>
 
-      <!-- Recent appointments -->
-      <div class="px-4 py-3">
-        <div class="text-[10px] font-bold uppercase tracking-[.07em] text-ink-400 mb-2.5">Últimas citas</div>
-
-        @for (apt of recentAppointments(selectedCustomer()!); track apt.id) {
-        <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-ink-50 flex flex-col gap-1.5">
-          <div class="flex items-center justify-between gap-2">
-            <div>
-              <div class="text-[12.5px] font-semibold text-ink">{{ formatAppointment(apt) }}</div>
-              <div class="text-[11.5px] text-ink-400">{{ apt.service?.name ?? '—' }}</div>
-            </div>
-            <span class="text-[10.5px] font-semibold px-2 py-px rounded-full shrink-0"
-              [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : apt.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
-              [style.color]="apt.paymentStatus === 'Pagado' ? '#16a34a' : apt.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
-              {{ apt.paymentStatus }}
+      <!-- Appointments tabs -->
+      <div class="px-4 pt-3 pb-1 border-b border-ink-100">
+        <div class="flex gap-0.5 bg-ink-100 rounded-[9px] p-[3px]">
+          <button (click)="aptTab.set('recientes')"
+            class="flex-1 py-1 rounded-[7px] text-[11.5px] font-medium transition-all"
+            [class.bg-white]="aptTab() === 'recientes'"
+            [class.text-ink]="aptTab() === 'recientes'"
+            [class.shadow-sm]="aptTab() === 'recientes'"
+            [class.text-ink-400]="aptTab() !== 'recientes'">
+            Recientes
+          </button>
+          <button (click)="aptTab.set('todas')"
+            class="flex-1 py-1 rounded-[7px] text-[11.5px] font-medium transition-all flex items-center justify-center gap-1.5"
+            [class.bg-white]="aptTab() === 'todas'"
+            [class.text-ink]="aptTab() === 'todas'"
+            [class.shadow-sm]="aptTab() === 'todas'"
+            [class.text-ink-400]="aptTab() !== 'todas'">
+            Ver todas
+            <span class="text-[10px] font-bold px-1.5 py-px rounded-full"
+                  [style.background]="aptTab() === 'todas' ? 'rgba(219,150,72,.15)' : 'rgba(100,116,139,.12)'"
+                  [style.color]="aptTab() === 'todas' ? '#db9648' : '#64748b'">
+              {{ selectedCustomer()!.appointments.length }}
             </span>
-          </div>
-          @if (apt.paymentStatus === 'Pendiente') {
-          <div class="flex gap-1.5 pt-0.5">
-            <button (click)="updateAppointmentStatus(apt.id, 'Pagado')"
-              class="flex-1 py-1 rounded-[7px] text-[11px] font-semibold text-white transition-all"
-              style="background:#10b981;">
-              ✓ Aprobar
-            </button>
-            <button (click)="updateAppointmentStatus(apt.id, 'Cancelado')"
-              class="flex-1 py-1 rounded-[7px] text-[11px] font-semibold transition-all border"
-              style="border-color:#ef4444;color:#ef4444;background:transparent;">
-              ✕ Rechazar
-            </button>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-4 py-3">
+        @if (selectedCustomer()!.appointments.length === 0) {
+          <div class="text-[12.5px] text-ink-300 text-center py-3">Sin historial</div>
+        } @else {
+          @for (apt of (aptTab() === 'recientes'
+              ? recentAppointments(selectedCustomer()!)
+              : allAppointmentsSorted(selectedCustomer()!));
+            track apt.id) {
+          <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-ink-50 flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <div class="text-[12.5px] font-semibold text-ink">{{ formatAppointment(apt) }}</div>
+                <div class="text-[11.5px] text-ink-400">{{ apt.service?.name ?? '—' }}</div>
+              </div>
+              <span class="text-[10.5px] font-semibold px-2 py-px rounded-full shrink-0"
+                [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : apt.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
+                [style.color]="apt.paymentStatus === 'Pagado' ? '#16a34a' : apt.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
+                {{ apt.paymentStatus }}
+              </span>
+            </div>
+            @if (apt.paymentStatus === 'Pendiente') {
+            <div class="flex gap-1.5 pt-0.5">
+              <button (click)="updateAppointmentStatus(apt.id, 'Pagado')"
+                class="flex-1 py-1 rounded-[7px] text-[11px] font-semibold text-white transition-all"
+                style="background:#10b981;">
+                ✓ Aprobar
+              </button>
+              <button (click)="updateAppointmentStatus(apt.id, 'Cancelado')"
+                class="flex-1 py-1 rounded-[7px] text-[11px] font-semibold transition-all border"
+                style="border-color:#ef4444;color:#ef4444;background:transparent;">
+                ✕ Rechazar
+              </button>
+            </div>
+            }
           </div>
           }
-        </div>
-        }
-
-        @if ((selectedCustomer()!.appointments).length === 0) {
-        <div class="text-[12.5px] text-ink-300 text-center py-3">Sin historial</div>
         }
       </div>
 
@@ -253,3 +281,142 @@
   </div>
   }
 </div>
+
+<!-- ── Modal Agendar ──────────────────────────────────────────────── -->
+@if (showBookingModal()) {
+  <div @backdrop class="fixed inset-0 z-50"
+       style="background:rgba(15,23,42,.45);backdrop-filter:blur(6px);"
+       (click)="closeBookingModal()"></div>
+
+  <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[60] flex flex-col"
+       style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
+
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-ink-100 flex items-center justify-between shrink-0">
+      <div>
+        <h3 class="text-[16px] font-bold text-ink tracking-tight">Nueva Cita</h3>
+        <p class="text-[11.5px] text-ink-400 mt-0.5">Registro manual desde clientes</p>
+      </div>
+      <button (click)="closeBookingModal()"
+        class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+
+      <!-- Cliente (solo lectura) -->
+      <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-ink-50 border border-ink-100">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[12px] font-bold shrink-0"
+             style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+          {{ selectedCustomer()!.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="min-w-0">
+          <div class="text-[13.5px] font-bold text-ink truncate">{{ selectedCustomer()!.name }}</div>
+          <div class="text-[11.5px] text-ink-400 truncate">{{ selectedCustomer()!.email }}</div>
+        </div>
+        <span class="ml-auto text-[10px] font-bold uppercase tracking-wider text-ink-400 shrink-0">Cliente</span>
+      </div>
+
+      <!-- Servicio -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Servicio *</label>
+        @if (bk_services().length === 0) {
+          <p class="text-[12px] text-ink-400 italic">Sin servicios configurados</p>
+        } @else {
+          <select [value]="bk_serviceId()"
+                  (change)="onBkServiceChange($any($event.target).value)"
+                  class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
+                  style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+            @for (s of bk_services(); track s.id) {
+              <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
+            }
+          </select>
+        }
+      </div>
+
+      <!-- Fecha + Hora -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Fecha *</label>
+          <input type="date" [value]="bk_date()" [min]="today"
+                 (input)="onBkDateChange($any($event.target).value)"
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none"
+                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Hora *</label>
+          @if (bk_availableSlots().length === 0) {
+            <p class="text-[12px] text-ink-400 italic pt-2">Sin horario disponible</p>
+          } @else {
+            <select [value]="bk_time()"
+                    (change)="bk_time.set($any($event.target).value)"
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
+                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+              <option value="">Selecciona una hora</option>
+              @for (slot of bk_availableSlots(); track slot) {
+                <option [value]="slot" [selected]="slot === bk_time()">{{ slot }}</option>
+              }
+            </select>
+          }
+        </div>
+      </div>
+
+      <!-- Notas -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Notas</label>
+        <textarea [value]="bk_notes()"
+                  (input)="bk_notes.set($any($event.target).value)"
+                  rows="2"
+                  placeholder="Observaciones opcionales..."
+                  class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300 resize-none"
+                  style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);"></textarea>
+      </div>
+
+      <!-- Estado de pago -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Estado de pago</label>
+        <div class="flex gap-2">
+          <button type="button" (click)="bk_status.set('Pendiente')"
+            class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
+            [style.background]="bk_status() === 'Pendiente' ? 'rgba(245,158,11,.12)' : 'transparent'"
+            [style.color]="bk_status() === 'Pendiente' ? '#d97706' : '#94a3b8'"
+            [style.border-color]="bk_status() === 'Pendiente' ? '#f59e0b' : '#e2e8f0'">
+            Pendiente
+          </button>
+          <button type="button" (click)="bk_status.set('Pagado')"
+            class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
+            [style.background]="bk_status() === 'Pagado' ? 'rgba(34,197,94,.12)' : 'transparent'"
+            [style.color]="bk_status() === 'Pagado' ? '#16a34a' : '#94a3b8'"
+            [style.border-color]="bk_status() === 'Pagado' ? '#22c55e' : '#e2e8f0'">
+            Pagado
+          </button>
+        </div>
+      </div>
+
+      <!-- Error -->
+      @if (bk_error()) {
+        <div class="px-3 py-2.5 rounded-[9px] bg-red-50 border border-red-200 text-red-600 text-[12px]">
+          {{ bk_error() }}
+        </div>
+      }
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-ink-100 flex gap-3 shrink-0">
+      <button (click)="closeBookingModal()"
+        class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 text-ink-600 hover:bg-ink-50 transition-colors">
+        Cancelar
+      </button>
+      <button (click)="submitBooking()" [disabled]="bk_submitting()"
+        class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
+        style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
+        {{ bk_submitting() ? 'Guardando...' : 'Crear Cita' }}
+      </button>
+    </div>
+  </div>
+}

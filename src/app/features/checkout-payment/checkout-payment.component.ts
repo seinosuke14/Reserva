@@ -19,7 +19,7 @@ interface ProviderConfig {
   label: string;
   description: string;
   icon: string;
-  fields: { key: string; label: string; placeholder: string; type: string; options?: string[] }[];
+  fields: { key: string; label: string; placeholder: string; type: string; maxlength?: number; inputmode?: string; options?: string[] }[];
 }
 
 const CHILEAN_BANKS = [
@@ -53,8 +53,8 @@ const PROVIDERS: ProviderConfig[] = [
     description: 'Tarjetas, debito y transferencia electronica',
     icon: 'credit-card',
     fields: [
-      { key: 'apiKey', label: 'API Key', placeholder: 'API Key de Flow', type: 'text' },
-      { key: 'secretKey', label: 'Secret Key', placeholder: 'Secret Key de Flow', type: 'password' },
+      { key: 'apiKey',     label: 'API Key',    placeholder: 'API Key de Flow',    type: 'text',     maxlength: 128 },
+      { key: 'secretKey',  label: 'Secret Key', placeholder: 'Secret Key de Flow', type: 'password', maxlength: 128 },
     ],
   },
   {
@@ -63,12 +63,12 @@ const PROVIDERS: ProviderConfig[] = [
     description: 'Pago directo a cuenta bancaria',
     icon: 'bank',
     fields: [
-      { key: 'bankName', label: 'Banco', placeholder: 'Selecciona un banco', type: 'select', options: CHILEAN_BANKS },
-      { key: 'accountType', label: 'Tipo de Cuenta', placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
-      { key: 'accountNumber', label: 'Numero de Cuenta', placeholder: 'Ej: 12345678', type: 'text' },
-      { key: 'rut', label: 'RUT', placeholder: 'Ej: 12.345.678-9', type: 'text' },
-      { key: 'holderName', label: 'Titular', placeholder: 'Nombre del titular', type: 'text' },
-      { key: 'email', label: 'Email de notificacion', placeholder: 'pagos@email.com', type: 'email' },
+      { key: 'bankName',      label: 'Banco',               placeholder: 'Selecciona un banco',          type: 'select', options: CHILEAN_BANKS },
+      { key: 'accountType',   label: 'Tipo de Cuenta',      placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
+      { key: 'accountNumber', label: 'Numero de Cuenta',    placeholder: 'Ej: 12345678',                 type: 'text',  maxlength: 20, inputmode: 'numeric' },
+      { key: 'rut',           label: 'RUT',                 placeholder: 'Ej: 12.345.678-9',             type: 'text',  maxlength: 12 },
+      { key: 'holderName',    label: 'Titular',             placeholder: 'Nombre del titular',           type: 'text',  maxlength: 60 },
+      { key: 'email',         label: 'Email de notificacion', placeholder: 'pagos@email.com',            type: 'email', maxlength: 254 },
     ],
   },
 ];
@@ -160,9 +160,14 @@ export class CheckoutPaymentComponent implements OnInit {
 
   async saveMethod(config: ProviderConfig): Promise<void> {
     const credentials = this.formData();
-    const missing = config.fields.some(f => !credentials[f.key]?.trim());
+    const missing = config.fields.some(f => f.type !== 'select' && !credentials[f.key]?.trim() || f.type === 'select' && !credentials[f.key]);
     if (missing) {
       this.showFeedback('Todos los campos son obligatorios.', 'error');
+      return;
+    }
+    const exceeded = config.fields.find(f => f.maxlength && (credentials[f.key]?.length ?? 0) > f.maxlength);
+    if (exceeded) {
+      this.showFeedback(`"${exceeded.label}" supera el límite de ${exceeded.maxlength} caracteres.`, 'error');
       return;
     }
 
