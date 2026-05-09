@@ -146,9 +146,9 @@
 
     <!-- Bottom: User + Logout -->
     <div class="px-2 pt-2.5 pb-3 border-t border-white/[.055] shrink-0">
-      <div class="flex items-center rounded-[10px] cursor-pointer transition-colors hover:bg-white/[.05]"
+      <a routerLink="/perfil" class="flex items-center rounded-[10px] cursor-pointer transition-colors hover:bg-white/[.05]"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '8px 10px' : '8px 0'"
-        [style.gap]="isSidebarOpen() ? '9px' : '0'">
+        [style.gap]="isSidebarOpen() ? '9px' : '0'" [title]="!isSidebarOpen() ? 'Mi perfil' : ''">
         <div
           class="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[10px] font-bold tracking-tight shrink-0"
           style="background:linear-gradient(135deg,#db9648ee,#db964877);
@@ -162,7 +162,7 @@
         </div>
         <div @sidebarLabel class="w-[7px] h-[7px] rounded-full bg-emerald-500 shrink-0"></div>
         }
-      </div>
+      </a>
 
       <a routerLink="/registro"
         class="w-full flex items-center rounded-[10px] mt-1.5 transition-colors hover:bg-white/[.05] text-white/40 hover:text-white/80"
@@ -239,12 +239,12 @@
         </button>
 
         <!-- Avatar -->
-        <div
-          class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-[11px] font-bold tracking-tight"
+        <a routerLink="/perfil" title="Mi perfil"
+          class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-[11px] font-bold tracking-tight cursor-pointer transition-opacity hover:opacity-80"
           style="background:linear-gradient(135deg,#db9648ee,#db964877);
                     box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
           {{ userInitials() }}
-        </div>
+        </a>
       </div>
     </header>
 

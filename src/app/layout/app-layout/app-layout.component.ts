@@ -72,7 +72,6 @@ export class AppLayoutComponent {
       items: [
         { path: '/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
         { path: '/horario',       label: 'Horario',         icon: 'clock' },
-{ path: '/configuracion', label: 'Configuración',   icon: 'settings' },
       ],
     },
   ];
@@ -84,8 +83,8 @@ export class AppLayoutComponent {
     '/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
     '/pagos':         { title: 'Métodos de Pago', sub: 'Configura tus formas de cobro' },
     '/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
-'/configuracion': { title: 'Configuración',  sub: 'Ajustes de tu cuenta' },
     '/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
+    '/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
   };
 
   readonly user = this.auth.currentUser;
