@@ -3,47 +3,10 @@
   <!-- Header -->
   <div>
     <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Configuración</h1>
-    <p class="text-[12.5px] text-ink-400 mt-0.5">Personaliza tu perfil público y enlace de reservas.</p>
+    <p class="text-[12.5px] text-ink-400 mt-0.5">Personaliza tu perfil público visible en el portal de reservas.</p>
   </div>
 
-  <!-- Booking slug -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
-    <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-        </svg>
-        Link de Reserva Personalizado
-      </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Define la URL pública con la que tus clientes accederán a tu portal de reservas.</p>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-2.5">
-      <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-gold">
-        <span class="px-3 text-[12px] text-ink-400 whitespace-nowrap border-r border-ink-200 py-2.5 bg-ink-50 font-mono">
-          /reservar/
-        </span>
-        <input type="text" [value]="slugValue()" (input)="slugValue.set($any($event.target).value)"
-          placeholder="mi-consulta"
-          class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono" />
-      </div>
-      <button (click)="saveSlug()" [disabled]="slugSaving()"
-        class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
-        {{ slugSaving() ? 'Guardando...' : 'Guardar Slug' }}
-      </button>
-    </div>
-
-    @if (slugMsg()) {
-      <p class="text-[11.5px] ml-0.5 font-medium"
-         [class]="slugMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
-        {{ slugMsg()!.text }}
-      </p>
-    }
-  </div>
-
-  <!-- Public profile description -->
+  <!-- Descripción del perfil público -->
   <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
     <div>
       <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
@@ -55,7 +18,9 @@
         </svg>
         Descripción del Perfil
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.</p>
+      <p class="text-[11.5px] text-ink-400 mt-1">
+        Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.
+      </p>
     </div>
 
     <textarea [value]="descriptionValue()" (input)="descriptionValue.set($any($event.target).value)"
