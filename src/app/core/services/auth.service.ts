@@ -84,7 +84,7 @@ export class AuthService {
 
   // ─── Autenticación ──────────────────────────────────────────────────────────
 
-  async login(email: string, password: string): Promise<{ success: boolean; message: string; user?: IProfessional }> {
+  async login(email: string, password: string): Promise<{ success: boolean; message: string; needsVerification?: boolean; user?: IProfessional }> {
     try {
       const res: any = await firstValueFrom(
         this.http.post(`${API_BASE}/auth/login`, { email, password })
@@ -96,7 +96,8 @@ export class AuthService {
       return { success: true, message: res.message, user };
     } catch (err: any) {
       const message = err?.error?.message ?? 'Error al iniciar sesión.';
-      return { success: false, message };
+      const needsVerification = err?.error?.needsVerification === true;
+      return { success: false, message, needsVerification };
     }
   }
 
@@ -128,6 +129,37 @@ export class AuthService {
     // En producción: llamar a POST /api/appointments/link-guest { guestId, userId }
     console.log(`[AuthService] Vinculando citas del invitado [${guestId}] al usuario [${newUserId}]`);
     localStorage.removeItem(GUEST_KEY);
+  }
+
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${API_BASE}/auth/forgot-password`, { email })
+      );
+      return { success: true, message: res.message };
+    } catch (err: any) {
+      const message = err?.error?.message ?? 'Error al procesar la solicitud.';
+      return { success: false, message };
+    }
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${API_BASE}/auth/change-password`, { currentPassword, newPassword })
+      );
+      return { success: true, message: res.message };
+    } catch (err: any) {
+      const message = err?.error?.message ?? 'Error al cambiar la contraseña.';
+      return { success: false, message };
+    }
+  }
+
+  /** Establece sesión completa (token + usuario) — usado tras verificación de email */
+  setSession(token: string, user: IProfessional): void {
+    this._user.set(user);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    localStorage.setItem(TOKEN_KEY, token);
   }
 
   /** Actualiza el usuario en memoria y en localStorage (ej: tras editar perfil) */

@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { ProfessionalService } from '../../core/services/professional.service';
 import { ProfessionService, IProfession } from '../../core/services/profession.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   rutValidator,
   chileanPhoneValidator,
@@ -24,19 +25,34 @@ import {
         style({ opacity: 0, transform: 'translateY(20px)' }),
         animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
+    ]),
+    trigger('stepAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(16px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
     ])
   ]
 })
 export class RegisterComponent implements OnInit {
-  private readonly fb   = inject(FormBuilder);
-  private readonly svc  = inject(ProfessionalService);
+  private readonly fb           = inject(FormBuilder);
+  private readonly svc          = inject(ProfessionalService);
   private readonly professionSvc = inject(ProfessionService);
-  private readonly router = inject(Router);
+  private readonly authSvc      = inject(AuthService);
+  private readonly router       = inject(Router);
 
-  professions = signal<IProfession[]>([]);
+  professions  = signal<IProfession[]>([]);
   isSubmitting = signal(false);
-  success      = signal(false);
   errorMsg     = signal('');
+
+  // Verification step
+  step              = signal<'register' | 'verify'>('register');
+  pendingEmail      = signal('');
+  verificationCode  = signal('');
+  verifyError       = signal('');
+  isVerifying       = signal(false);
+  isResending       = signal(false);
+  resendMsg         = signal('');
 
   form = this.fb.group({
     firstName:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(16), Validators.pattern(/^[A-Za-zÀ-ÿñÑ]+$/)]],
@@ -71,7 +87,14 @@ export class RegisterComponent implements OnInit {
     this.f.phone.setValue(value, { emitEvent: false });
   }
 
-  async onSubmit() {
+  onCodeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 6);
+    this.verificationCode.set(digits);
+    input.value = digits;
+  }
+
+  async onSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
     this.errorMsg.set('');
@@ -89,10 +112,34 @@ export class RegisterComponent implements OnInit {
     const result = await this.svc.register(payload as any);
     this.isSubmitting.set(false);
     if (result.success) {
-      this.success.set(true);
-      setTimeout(() => this.router.navigate(['/login']), 2000);
+      this.pendingEmail.set(result.email ?? email!);
+      this.step.set('verify');
     } else {
       this.errorMsg.set(result.message);
     }
+  }
+
+  async onVerify(): Promise<void> {
+    const code = this.verificationCode().trim();
+    if (code.length !== 6) { this.verifyError.set('Ingresa los 6 dígitos del código.'); return; }
+    this.isVerifying.set(true);
+    this.verifyError.set('');
+
+    const result = await this.svc.verifyEmail(this.pendingEmail(), code);
+    this.isVerifying.set(false);
+    if (result.success && result.token && result.user) {
+      this.authSvc.setSession(result.token, result.user);
+      this.router.navigate(['/']);
+    } else {
+      this.verifyError.set(result.message);
+    }
+  }
+
+  async onResend(): Promise<void> {
+    this.isResending.set(true);
+    this.resendMsg.set('');
+    const result = await this.svc.resendVerification(this.pendingEmail());
+    this.isResending.set(false);
+    this.resendMsg.set(result.message);
   }
 }
