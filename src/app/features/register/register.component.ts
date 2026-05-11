@@ -41,9 +41,10 @@ export class RegisterComponent implements OnInit {
   private readonly authSvc      = inject(AuthService);
   private readonly router       = inject(Router);
 
-  professions  = signal<IProfession[]>([]);
-  isSubmitting = signal(false);
-  errorMsg     = signal('');
+  professions    = signal<IProfession[]>([]);
+  isSubmitting   = signal(false);
+  errorMsg       = signal('');
+  acceptedTerms  = signal(false);
 
   // Verification step
   step              = signal<'register' | 'verify'>('register');
@@ -107,6 +108,7 @@ export class RegisterComponent implements OnInit {
       email: email!,
       phone: phone!,
       password: password!,
+      termsAcceptedAt: new Date().toISOString(),
     };
 
     const result = await this.svc.register(payload as any);

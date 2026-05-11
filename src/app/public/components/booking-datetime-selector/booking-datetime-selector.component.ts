@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { formatDateLong } from '../../../helpers/formatters';
 import { IDayAvailability } from '../../../helpers/models';
@@ -38,7 +38,7 @@ import { IDayAvailability } from '../../../helpers/models';
         <div class="cal-grid">
           @for (cell of calendarGrid(); track cell.dateStr) {
             <button class="cal-day"
-              [ngClass]="'cal-' + cell.state"
+              [ngClass]="['cal-' + cell.state, cell.dateStr === selectedDate() ? 'cal-selected' : '']"
               [disabled]="cell.state === 'past' || cell.state === 'unavailable'"
               (click)="selectDate(cell.dateStr!)">
               @if (cell.dateStr) {
@@ -65,7 +65,7 @@ import { IDayAvailability } from '../../../helpers/models';
       </div>
 
       <!-- Time slots -->
-      <div class="calendar-section">
+      <div class="calendar-section" #slotsSection>
         <label class="section-label">Horarios disponibles</label>
         <div class="slots-grid">
           @for (slot of daySlots(); track slot.time) {
@@ -87,6 +87,8 @@ import { IDayAvailability } from '../../../helpers/models';
   styleUrl: './booking-datetime-selector.component.scss'
 })
 export class BookingDatetimeSelectorComponent {
+  @ViewChild('slotsSection') slotsSection!: ElementRef;
+
   readonly availability = input<IDayAvailability[]>([]);
   readonly selectedDate = input<string>('');
   readonly selectedHour = input<string | null>(null);
@@ -128,6 +130,9 @@ export class BookingDatetimeSelectorComponent {
 
   selectDate(date: string): void {
     this.dateSelected.emit(date);
+    setTimeout(() => {
+      this.slotsSection?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   selectHour(time: string): void {

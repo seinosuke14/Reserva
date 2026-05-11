@@ -36,6 +36,23 @@
                 <div class="transfer-row"><span>Titular</span><strong>{{ selectedPayment()?.transferInfo?.holderName }}</strong></div>
                 <div class="transfer-row"><span>Email</span><strong>{{ selectedPayment()?.transferInfo?.email }}</strong></div>
                 <div class="transfer-row highlight"><span>Monto</span><strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong></div>
+                <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
+                  (click)="copyTransferData(selectedService()?.price)">
+                  @if (copiedTransfer()) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    ¡Datos copiados!
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    Copiar datos para transferencia
+                  }
+                </button>
               </div>
               <a [href]="getWhatsappLink()" target="_blank" class="btn-whatsapp">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -321,12 +338,43 @@
                         <div class="transfer-row"><span>RUT</span><strong>{{ method.transferInfo.rut }}</strong></div>
                         <div class="transfer-row"><span>Titular</span><strong>{{ method.transferInfo.holderName }}</strong></div>
                         <div class="transfer-row highlight"><span>Monto a transferir</span><strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong></div>
+                        <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
+                          (click)="copyTransferData(selectedService()?.price)">
+                          @if (copiedTransfer()) {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            ¡Datos copiados!
+                          } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Copiar datos para transferencia
+                          }
+                        </button>
                         <p class="transfer-note">Al confirmar, deberás enviar el comprobante de transferencia por WhatsApp.</p>
                       </div>
                     }
                   }
                 </div>
               }
+            </div>
+          }
+
+          @if (step() === 3) {
+            <div class="terms-check-row">
+              <label class="terms-check-label">
+                <input type="checkbox" [checked]="acceptedClientTerms()"
+                  (change)="acceptedClientTerms.set(!acceptedClientTerms())"
+                  class="terms-checkbox" />
+                <span>
+                  Al confirmar acepto que: la cita queda sujeta a disponibilidad y confirmación del profesional; la política de cancelación es definida por el profesional; los pagos con tarjeta son procesados por terceros (Webpay, Flow); en transferencias, la reserva se activa al confirmar el comprobante.
+                  <a href="/terminos" target="_blank" class="terms-link">Ver términos completos</a>
+                </span>
+              </label>
             </div>
           }
 
