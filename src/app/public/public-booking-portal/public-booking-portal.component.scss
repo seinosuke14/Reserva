@@ -496,6 +496,72 @@ $canvas:  #f8fafc;
 
 .transfer-note { font-size: .75rem; color: #64748b; margin: .75rem 0 0; font-style: italic; }
 
+.copy-transfer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 100%;
+  margin-top: .875rem;
+  padding: .625rem 1rem;
+  border-radius: .75rem;
+  border: 1.5px solid rgba(219,150,72,.4);
+  background: rgba(219,150,72,.06);
+  color: $gold;
+  font-size: .8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+
+  &:hover:not(.copied) {
+    background: rgba(219,150,72,.12);
+    border-color: $gold;
+  }
+
+  &.copied {
+    border-color: #10b981;
+    background: rgba(16,185,129,.08);
+    color: #059669;
+    cursor: default;
+  }
+}
+
+.terms-check-row {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.terms-check-label {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  cursor: pointer;
+  font-size: .8rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.terms-checkbox {
+  margin-top: .2rem;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: #db9648;
+  cursor: pointer;
+}
+
+.terms-link {
+  font-weight: 600;
+  color: #db9648;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: .25rem;
+  &:hover { color: #c4873e; }
+}
+
 .no-methods {
   text-align: center;
   padding: 3rem 1rem;

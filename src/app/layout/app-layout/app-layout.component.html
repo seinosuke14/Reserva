@@ -164,22 +164,6 @@
         }
       </a>
 
-      <a routerLink="/registro"
-        class="w-full flex items-center rounded-[10px] mt-1.5 transition-colors hover:bg-white/[.05] text-white/40 hover:text-white/80"
-        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
-        [style.gap]="isSidebarOpen() ? '9px' : '0'">
-        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"
-          class="shrink-0">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="8.5" cy="7" r="4" />
-          <line x1="20" y1="8" x2="20" y2="14" />
-          <line x1="23" y1="11" x2="17" y2="11" />
-        </svg>
-        @if (isSidebarOpen()) {
-        <span @sidebarLabel class="text-[13.5px] font-medium tracking-tight">Nuevo registro</span>
-        }
-      </a>
-
       <button (click)="handleLogout()"
         class="w-full flex items-center rounded-[10px] mt-px transition-colors hover:bg-white/[.05] text-white/40 hover:text-white/80"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"

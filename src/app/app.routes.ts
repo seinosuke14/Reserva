@@ -21,6 +21,10 @@ export const routes: Routes = [
     path: 'reservar/pago-resultado',
     loadComponent: () => import('./public/payment-result/payment-result.component').then(m => m.PaymentResultComponent)
   },
+  {
+    path: 'terminos',
+    loadComponent: () => import('./public/terminos/terminos.component').then(m => m.TerminosComponent)
+  },
   // Portal de reservas público (nuevo flujo con roles y email check)
   {
     path: 'reservar/:slug',

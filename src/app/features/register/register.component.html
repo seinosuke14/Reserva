@@ -231,13 +231,26 @@
           }
         </div>
 
+        <!-- Términos y condiciones -->
+        <label class="flex items-start gap-2.5 cursor-pointer group">
+          <input type="checkbox" [checked]="acceptedTerms()" (change)="acceptedTerms.set(!acceptedTerms())"
+            class="mt-[3px] w-4 h-4 shrink-0 accent-[#db9648] cursor-pointer" />
+          <span class="text-[12px] text-ink-500 leading-relaxed">
+            He leído y acepto los
+            <a href="/terminos" target="_blank" class="font-semibold text-[#db9648] hover:underline">
+              Términos y Condiciones
+            </a>
+            de Citema, incluyendo las condiciones de uso del panel profesional y el tratamiento de datos conforme a la Ley N° 19.628.
+          </span>
+        </label>
+
         @if (errorMsg()) {
         <div class="bg-red-50 border border-red-200 text-red-700 text-[12.5px] px-3.5 py-2.5 rounded-[10px]">
           {{ errorMsg() }}
         </div>
         }
 
-        <button type="submit" [disabled]="isSubmitting()"
+        <button type="submit" [disabled]="isSubmitting() || !acceptedTerms()"
           class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
           style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
           @if (isSubmitting()) {

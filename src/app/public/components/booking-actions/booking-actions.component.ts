@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
           Siguiente →
         </button>
       } @else {
-        <button class="btn-confirm" (click)="onConfirm()">
+        <button class="btn-confirm" (click)="onConfirm()" [disabled]="!canProceed()">
           Confirmar Reserva
         </button>
       }
