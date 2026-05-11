@@ -6,3 +6,11 @@
   color: #94a3b8;
   strong { color: #db9648; }
 }
+
+.footer-terms {
+  color: #94a3b8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .15s;
+  &:hover { color: #db9648; }
+}

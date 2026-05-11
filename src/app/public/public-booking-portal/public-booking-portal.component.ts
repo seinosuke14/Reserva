@@ -66,6 +66,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly isSubmitting    = signal(false);
   readonly isBooked        = signal(false);
   readonly bookingRef      = signal('');
+  readonly copiedTransfer       = signal(false);
+  readonly acceptedClientTerms  = signal(false);
 
   // ─── Email check ────────────────────────────────────────────────────────────
   readonly emailCheckState = signal<EmailCheckState>('idle');
@@ -147,7 +149,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Form ───────────────────────────────────────────────────────────────────
   readonly form = this.fb.group({
-    name:  ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16), Validators.pattern(/^\S+$/)]],
+    name:  ['', [Validators.required, Validators.minLength(3), Validators.maxLength(60), Validators.pattern(/^[A-Za-zÀ-ÿñÑ]+(\s[A-Za-zÀ-ÿñÑ]+)*$/)]],
     email: ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
     phone: ['+569', [Validators.required, chileanPhoneValidator]],
     notes: ['', [Validators.maxLength(200)]],
@@ -276,7 +278,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly canProceed = computed(() => {
     if (this.step() === 1) return !!this.selectedHour();
     if (this.step() === 2) return this._formStatus() === 'VALID';
-    if (this.step() === 3) return !!this.selectedPayment();
+    if (this.step() === 3) return !!this.selectedPayment() && this.acceptedClientTerms();
     return false;
   });
 
@@ -301,6 +303,26 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     return `https://wa.me/${phone}?text=${msg}`;
   }
 
+  copyTransferData(amount?: number): void {
+    const info = this.selectedPayment()?.transferInfo;
+    if (!info) return;
+
+    const lines = [
+      `Banco: ${info.bankName}`,
+      `Tipo de cuenta: ${info.accountType}`,
+      `Número de cuenta: ${info.accountNumber}`,
+      `RUT: ${info.rut}`,
+      `Nombre: ${info.holderName}`,
+      `Email: ${info.email}`,
+    ];
+    if (amount != null) lines.push(`Monto: ${this.formatCLP(amount)}`);
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      this.copiedTransfer.set(true);
+      setTimeout(() => this.copiedTransfer.set(false), 2500);
+    });
+  }
+
   async confirmBooking(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (!this.selectedPayment()) return;
@@ -323,8 +345,9 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       const { name, email, phone, notes } = this.form.value;
       const res: any = await firstValueFrom(
         this.http.post(`${environment.apiUrl}/public/book`, {
-          slug:      this.professional()?.slug,
-          serviceId: this.selectedService()!.id,
+          slug:             this.professional()?.slug,
+          serviceId:        this.selectedService()!.id,
+          termsAcceptedAt:  new Date().toISOString(),
           date:      this.selectedDate(),
           time:      this.selectedHour(),
           name, email, phone, notes,

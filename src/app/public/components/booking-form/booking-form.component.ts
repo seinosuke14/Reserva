@@ -30,14 +30,14 @@ import { IPublicService } from '../../../helpers/models';
           <div class="form-row">
             <div class="field">
               <label class="field-label">Nombre</label>
-              <input type="text" formControlName="name" class="field-input" placeholder="Tu nombre" maxlength="16">
+              <input type="text" formControlName="name" class="field-input" placeholder="Tu nombre completo" maxlength="60">
               @if (bookingForm().controls['name'].invalid && bookingForm().controls['name'].touched) {
                 @if (bookingForm().controls['name'].errors?.['required'] || bookingForm().controls['name'].errors?.['minlength']) {
-                  <span class="field-error">Requerido (3–16 caracteres, sin espacios)</span>
+                  <span class="field-error">Mínimo 3 caracteres</span>
                 } @else if (bookingForm().controls['name'].errors?.['maxlength']) {
-                  <span class="field-error">Máximo 16 caracteres</span>
+                  <span class="field-error">Máximo 60 caracteres</span>
                 } @else if (bookingForm().controls['name'].errors?.['pattern']) {
-                  <span class="field-error">Sin espacios</span>
+                  <span class="field-error">Solo letras y espacios, sin números ni símbolos</span>
                 }
               }
             </div>
