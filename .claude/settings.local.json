@@ -19,12 +19,15 @@
       "Bash(ls *.ZIP)",
       "Bash(unzip -l \"Agendamiento-profesional-perfil.zip\")",
       "Bash(unzip -o \"Agendamiento-profesional-perfil.zip\" -d \"/tmp/agendamiento-ref\")",
-      "Read(//c/tmp/agendamiento-ref/**)"
+      "Read(//c/tmp/agendamiento-ref/**)",
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/**)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\controllers",
-      "E:\\Downloads"
+      "E:\\Downloads",
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\models",
+      "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src"
     ]
   }
 }
