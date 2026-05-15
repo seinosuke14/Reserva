@@ -59,6 +59,17 @@ export class SubscriptionService {
     }
   }
 
+  async activateFree(): Promise<{ success: boolean; plan?: PlanType; subscriptionStatus?: string; subscriptionEndDate?: string | null; message?: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${API}/subscription/activate-free`, {})
+      );
+      return { success: true, plan: res.plan, subscriptionStatus: res.subscriptionStatus, subscriptionEndDate: res.subscriptionEndDate };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al activar el plan gratuito.' };
+    }
+  }
+
   async confirmWebpay(token_ws: string): Promise<{ success: boolean; plan?: PlanType; endDate?: string; message?: string }> {
     try {
       const res: any = await firstValueFrom(
