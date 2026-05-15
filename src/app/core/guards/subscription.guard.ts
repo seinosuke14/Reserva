@@ -12,21 +12,23 @@ export const subscriptionGuard: CanActivateFn = async () => {
   const user = auth.currentUser();
   if (!user) return router.createUrlTree(['/login']);
 
-  let { plan, subscriptionStatus } = user;
+  // Siempre consultar la API para tener el estado real del servidor
+  const status = await subscriptionSvc.getStatus();
+  let plan: PlanType | null | undefined;
+  let subscriptionStatus: SubscriptionStatus | null | undefined;
 
-  // Si no hay datos de plan en sesión local, consultar la API para obtener estado real
-  if (!plan || !subscriptionStatus) {
-    const status = await subscriptionSvc.getStatus();
-    if (status.hasPlan && status.plan && status.status) {
-      plan               = status.plan as PlanType;
-      subscriptionStatus = status.status as SubscriptionStatus;
-      // Actualizar sesión local con datos frescos
-      auth.patchUser({
-        plan,
-        subscriptionStatus,
-        subscriptionEndDate: status.endDate ?? null,
-      });
-    }
+  if (status.hasPlan && status.plan && status.status) {
+    plan               = status.plan as PlanType;
+    subscriptionStatus = status.status as SubscriptionStatus;
+    auth.patchUser({
+      plan,
+      subscriptionStatus,
+      subscriptionEndDate: status.endDate ?? null,
+    });
+  } else {
+    // Fallback a datos locales si la API no responde
+    plan               = user.plan;
+    subscriptionStatus = user.subscriptionStatus;
   }
 
   if (!plan || !subscriptionStatus || subscriptionStatus === 'suspended' || subscriptionStatus === 'expired') {
