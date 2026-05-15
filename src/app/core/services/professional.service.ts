@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export type PlanType = 'free' | 'basic' | 'team' | 'pro_max';
+export type SubscriptionStatus = 'active' | 'suspended' | 'expired';
+
 export interface IProfessional {
   id?: string;
   name: string;
@@ -15,6 +18,10 @@ export interface IProfessional {
   description?: string;
   role?: 'professional' | 'admin' | 'client';
   createdAt?: string;
+  plan?: PlanType | null;
+  subscriptionStatus?: SubscriptionStatus | null;
+  subscriptionEndDate?: string | null;
+  planActivatedAt?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { subscriptionGuard } from './core/guards/subscription.guard';
 
 export const routes: Routes = [
   // Rutas públicas
@@ -22,6 +23,14 @@ export const routes: Routes = [
     loadComponent: () => import('./public/payment-result/payment-result.component').then(m => m.PaymentResultComponent)
   },
   {
+    path: 'planes',
+    loadComponent: () => import('./features/plan-selection/plan-selection.component').then(m => m.PlanSelectionComponent)
+  },
+  {
+    path: 'suscripcion/pago-resultado',
+    loadComponent: () => import('./public/subscription-payment-result/subscription-payment-result.component').then(m => m.SubscriptionPaymentResultComponent)
+  },
+  {
     path: 'terminos',
     loadComponent: () => import('./public/terminos/terminos.component').then(m => m.TerminosComponent)
   },
@@ -38,7 +47,7 @@ export const routes: Routes = [
   // Rutas protegidas (Dashboard)
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, subscriptionGuard],
     loadComponent: () => import('./layout/app-layout/app-layout.component').then(m => m.AppLayoutComponent),
     children: [
       { path: '', loadComponent: () => import('./features/dashboard-home/dashboard-home.component').then(m => m.DashboardHomeComponent) },

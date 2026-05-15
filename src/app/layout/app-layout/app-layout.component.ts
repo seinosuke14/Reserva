@@ -6,6 +6,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationCenterComponent } from '../notification-center/notification-center.component';
 import { NotificationService } from '../../core/services/notification.service';
+import { SubscriptionService } from '../../core/services/subscription.service';
 
 interface NavItem {
   path: string;
@@ -87,7 +88,25 @@ export class AppLayoutComponent {
     '/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
   };
 
+  private readonly subscriptionSvc = inject(SubscriptionService);
+
   readonly user = this.auth.currentUser;
+
+  readonly subscriptionBanner = computed(() => {
+    const user = this.user();
+    if (!user?.plan || !user.subscriptionStatus) return null;
+    if (user.subscriptionStatus !== 'active') return null;
+
+    const days = this.subscriptionSvc.daysLeft(user.subscriptionEndDate);
+
+    if (user.plan === 'free' && days <= 14) {
+      return { type: 'free' as const, days };
+    }
+    if (user.plan !== 'free' && days <= 5) {
+      return { type: 'expiring' as const, days };
+    }
+    return null;
+  });
 
   readonly userInitials = computed(() => {
     const name = this.user()?.name ?? '';
