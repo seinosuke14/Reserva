@@ -25,16 +25,20 @@ export class PlanSelectionComponent implements OnInit {
   private readonly authSvc         = inject(AuthService);
   private readonly router          = inject(Router);
 
-  plans          = signal<IPlan[]>([]);
-  activating     = signal<PlanType | null>(null);
-  errorMsg       = signal('');
-  isSuspended    = signal(false);
+  plans           = signal<IPlan[]>([]);
+  activating      = signal<PlanType | null>(null);
+  errorMsg        = signal('');
+  isSuspended     = computed(() => this.authSvc.currentUser()?.subscriptionStatus === 'suspended');
   isAuthenticated = computed(() => this.authSvc.isAuthenticated());
-  userName       = computed(() => this.authSvc.currentUser()?.name ?? '');
+  userName        = computed(() => this.authSvc.currentUser()?.name ?? '');
+
+  /** Onboarding: usuario autenticado pero sin plan aún (recién verificó email) */
+  isOnboarding = computed(() => {
+    const user = this.authSvc.currentUser();
+    return !!user && !user.plan;
+  });
 
   ngOnInit(): void {
-    const user = this.authSvc.currentUser();
-    this.isSuspended.set(user?.subscriptionStatus === 'suspended');
     this.subscriptionSvc.getPlans().then(p => this.plans.set(p));
   }
 
@@ -45,15 +49,32 @@ export class PlanSelectionComponent implements OnInit {
 
   async selectPlan(plan: IPlan): Promise<void> {
     if (!plan.available || plan.comingSoon) return;
-    if (plan.id === 'free') return;
+
+    // Plan gratuito solo seleccionable en modo onboarding
+    if (plan.id === 'free') {
+      if (!this.isOnboarding()) return;
+      this.activating.set('free');
+      this.errorMsg.set('');
+      const result = await this.subscriptionSvc.activateFree();
+      if (result.success) {
+        this.authSvc.patchUser({
+          plan:               result.plan!,
+          subscriptionStatus: result.subscriptionStatus as any,
+          subscriptionEndDate: result.subscriptionEndDate ?? null,
+        });
+        this.router.navigate(['/']);
+      } else {
+        this.errorMsg.set(result.message ?? 'Error al activar el plan gratuito.');
+        this.activating.set(null);
+      }
+      return;
+    }
 
     this.activating.set(plan.id);
     this.errorMsg.set('');
-
     const result = await this.subscriptionSvc.checkout(plan.id);
 
     if (result.success && result.url) {
-      // Redirigir a Webpay (salida del SPA)
       window.location.href = result.url;
     } else {
       this.errorMsg.set(result.message ?? 'Error al iniciar el pago.');
@@ -76,7 +97,9 @@ export class PlanSelectionComponent implements OnInit {
       return base + 'bg-gradient-to-b from-amber-500/20 to-amber-900/10 border-amber-500/40 cursor-pointer hover:border-amber-400/60 hover:scale-[1.02]';
     }
     if (plan.id === 'free') {
-      return base + 'bg-white/[.06] border-white/15 cursor-default';
+      return base + (this.isOnboarding()
+        ? 'bg-white/[.06] border-white/15 cursor-pointer hover:bg-white/10 hover:border-white/25 hover:scale-[1.02]'
+        : 'bg-white/[.06] border-white/15 cursor-default');
     }
     return base + 'bg-white/[.06] border-white/15 cursor-pointer hover:bg-white/10 hover:border-white/25 hover:scale-[1.02]';
   }
@@ -84,7 +107,9 @@ export class PlanSelectionComponent implements OnInit {
   getPlanButtonClass(plan: IPlan): string {
     const base = 'w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ';
     if (plan.id === 'free') {
-      return base + 'bg-white/10 text-white/40 cursor-default';
+      return base + (this.isOnboarding()
+        ? 'bg-white text-slate-900 hover:bg-white/90 disabled:opacity-60'
+        : 'bg-white/10 text-white/40 cursor-default');
     }
     if (plan.id === 'pro_max') {
       return base + 'bg-amber-400 text-amber-900 hover:bg-amber-300 disabled:opacity-60';

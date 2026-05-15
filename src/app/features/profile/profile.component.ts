@@ -2,15 +2,24 @@ import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
+import { SubscriptionService } from '../../core/services/subscription.service';
 import { environment } from '../../../environments/environment';
+
+const PLAN_LABELS: Record<string, string> = {
+  free:    'Gratuito',
+  basic:   'Básico',
+  team:    'Equipo',
+  pro_max: 'Pro Max',
+};
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './profile.component.html',
   animations: [
     trigger('fadeUp', [
@@ -22,16 +31,70 @@ import { environment } from '../../../environments/environment';
   ]
 })
 export class ProfileComponent {
-  private readonly auth = inject(AuthService);
-  private readonly http = inject(HttpClient);
+  private readonly auth            = inject(AuthService);
+  private readonly http            = inject(HttpClient);
+  private readonly subscriptionSvc = inject(SubscriptionService);
 
   readonly user = this.auth.currentUser;
+
+  readonly planName = computed(() => {
+    const plan = this.user()?.plan;
+    return plan ? (PLAN_LABELS[plan] ?? plan) : 'Sin plan';
+  });
+
+  readonly daysLeft = computed(() => {
+    return this.subscriptionSvc.daysLeft(this.user()?.subscriptionEndDate);
+  });
+
+  readonly subscriptionStatus = computed(() => this.user()?.subscriptionStatus ?? null);
+
+  readonly planBadgeStyle = computed(() => {
+    const plan = this.user()?.plan;
+    if (plan === 'pro_max') return 'bg-amber-100 text-amber-700 border border-amber-300';
+    if (plan === 'basic')   return 'bg-blue-50 text-blue-700 border border-blue-200';
+    if (plan === 'free')    return 'bg-slate-100 text-slate-600 border border-slate-200';
+    return 'bg-red-50 text-red-600 border border-red-200';
+  });
+
+  readonly daysLeftStyle = computed(() => {
+    const days = this.daysLeft();
+    if (days <= 3)  return 'text-red-500 font-bold';
+    if (days <= 7)  return 'text-amber-500 font-semibold';
+    return 'text-emerald-600 font-semibold';
+  });
 
   readonly userInitials = computed(() => {
     const name = this.user()?.name ?? '';
     const parts = name.trim().split(/\s+/);
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'P';
   });
+
+  /** Muestra "Renovar" si el plan es de pago y está vencido/suspendido o quedan ≤7 días */
+  readonly showRenew = computed(() => {
+    const plan   = this.user()?.plan;
+    const status = this.subscriptionStatus();
+    if (!plan || plan === 'free') return false;
+    if (status === 'suspended' || status === 'expired') return true;
+    return status === 'active' && this.daysLeft() <= 7;
+  });
+
+  // ── Renovar plan ─────────────────────────────────────────────────────────────
+  renewSaving = signal(false);
+  renewMsg    = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  async renewPlan(): Promise<void> {
+    const plan = this.user()?.plan;
+    if (!plan || plan === 'free') return;
+    this.renewSaving.set(true);
+    this.renewMsg.set(null);
+    const result = await this.subscriptionSvc.checkout(plan);
+    this.renewSaving.set(false);
+    if (result.success && result.url) {
+      window.location.href = result.url;
+    } else {
+      this.renewMsg.set({ type: 'error', text: result.message ?? 'No se pudo iniciar el pago.' });
+    }
+  }
 
   // ── Descripción ─────────────────────────────────────────────────────────────
   descriptionValue = signal(this.auth.currentUser()?.description ?? '');

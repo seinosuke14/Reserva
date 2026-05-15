@@ -35,10 +35,22 @@
         Tu cuenta está suspendida
       </div>
     }
-    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">Elige tu plan</h1>
+    @if (isOnboarding()) {
+      <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-4 py-2 rounded-full mb-4">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        ¡Cuenta verificada exitosamente!
+      </div>
+    }
+    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">
+      {{ isOnboarding() ? 'Bienvenido, elige tu plan' : 'Elige tu plan' }}
+    </h1>
     <p class="text-white/50 text-sm max-w-sm mx-auto">
       @if (isSuspended()) {
         Tu período ha vencido. Selecciona un plan para reactivar tu cuenta.
+      } @else if (isOnboarding()) {
+        Puedes empezar con 14 días gratis o contratar un plan desde ahora.
       } @else if (isAuthenticated()) {
         Tu período gratuito ha finalizado. Selecciona un plan para continuar.
       } @else {
@@ -112,12 +124,14 @@
         <!-- Botón -->
         @if (!plan.comingSoon) {
           <button
-            [disabled]="!plan.available || activating() === plan.id || plan.id === 'free'"
+            [disabled]="!plan.available || !!activating() || (plan.id === 'free' && !isOnboarding())"
             [class]="getPlanButtonClass(plan)"
             (click)="$event.stopPropagation(); selectPlan(plan)">
             @if (activating() === plan.id) {
               <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
-              Procesando…
+              Activando…
+            } @else if (plan.id === 'free' && isOnboarding()) {
+              Comenzar gratis (14 días)
             } @else if (plan.id === 'free') {
               Incluido al registrarse
             } @else {
