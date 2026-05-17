@@ -67,6 +67,12 @@ export class RegisterComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.professions.set(await this.professionSvc.getActive());
+
+    const state = history.state as { step?: string; email?: string };
+    if (state?.step === 'verify' && state?.email) {
+      this.pendingEmail.set(state.email);
+      this.step.set('verify');
+    }
   }
 
   get f() { return this.form.controls; }
