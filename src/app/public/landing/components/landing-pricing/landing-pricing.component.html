@@ -1,0 +1,109 @@
+<section id="precios" class="section pricing">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Precios</div>
+      <h2 class="h2">Lo que ves <span class="serif">es lo que pagas.</span></h2>
+      <p class="lead">Sin sorpresas. Sin add-ons escondidos. Cancela cuando quieras.</p>
+    </div>
+
+    <div class="plans">
+      @for (p of plans; track p.name) {
+      <div [class]="'plan' + (p.primary ? ' featured' : '') + (p.comingSoon ? ' coming-soon' : '')">
+
+        @if (p.badge) {
+        <div class="plan-badge">{{ p.badge }}</div>
+        }
+        @if (p.comingSoon) {
+        <div class="plan-badge plan-badge--soon">Próximamente</div>
+        }
+
+        <div class="plan-name">{{ p.name }}</div>
+
+        <!-- Precio -->
+        <div class="plan-price">
+          @if (!p.comingSoon && p.price !== null) {
+          <span class="cur">$</span>
+          <span class="num">{{ displayPrice(p).toLocaleString('es-CL') }}</span>
+          <span class="per">
+            CLP
+            @if (p.id !== 'pro_max') { {{ p.suffix ?? '/ mes' }} }
+            @else { / mes }
+          </span>
+          }
+          @if (p.comingSoon) {
+          <span class="price-soon">—</span>
+          }
+        </div>
+
+        <!-- Selector de usuarios: básico y pro (estático, 1 usuario) -->
+        @if (p.id === 'basic' || p.id === 'pro') {
+        <div class="plan-users">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
+          <span>1 usuario incluido</span>
+        </div>
+        }
+
+        <!-- Selector de usuarios: pro_max (interactivo 4–10) -->
+        @if (p.id === 'pro_max') {
+        <div class="plan-users plan-users--selector">
+          <span class="users-label">Usuarios (8000$ c/u)</span>
+          <div class="users-control">
+            <button class="users-btn" (click)="decrementUsers()" [disabled]="proMaxUsers() <= PRO_MAX_MIN"
+              aria-label="Quitar usuario">−</button>
+            <span class="users-count">{{ proMaxUsers() }}</span>
+            <button class="users-btn" (click)="incrementUsers()" [disabled]="proMaxUsers() >= PRO_MAX_MAX"
+              aria-label="Agregar usuario">+</button>
+          </div>
+          <span class="users-note">mín. {{ PRO_MAX_MIN }} · máx. {{ PRO_MAX_MAX }}</span>
+        </div>
+        }
+
+        <p class="plan-tag">{{ p.tag }}</p>
+
+        <ul class="plan-features">
+          @for (f of p.features; track f) {
+          <li><span class="check">✓</span><span>{{ f }}</span></li>
+          }
+        </ul>
+
+        <div class="plan-cta">
+          @if (p.comingSoon) {
+            <span class="btn btn-soon" aria-disabled="true">Próximamente</span>
+          } @else if (p.id === 'free') {
+            @if (isAuthenticated()) {
+              <span [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline') + ' btn-disabled'" aria-disabled="true">
+                Ya tienes una cuenta
+              </span>
+            } @else {
+              <a routerLink="/registro" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+                {{ p.cta }}
+              </a>
+            }
+          } @else if (isAuthenticated()) {
+            <a routerLink="/planes" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+              Contratar plan
+            </a>
+          } @else {
+            <a routerLink="/registro" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+              Crear cuenta
+            </a>
+            <div class="plan-cta-login">
+              ¿Ya tienes cuenta?
+              <a routerLink="/login" class="plan-cta-login-link">Iniciar sesión</a>
+            </div>
+          }
+        </div>
+
+      </div>
+      }
+    </div>
+
+    <div class="pricing-note">
+      Todos los planes incluyen <strong>trial de 2 semanas</strong> sin tarjeta de crédito.
+    </div>
+  </div>
+</section>

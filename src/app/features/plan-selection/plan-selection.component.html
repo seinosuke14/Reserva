@@ -1,161 +1,171 @@
-<div class="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-  style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
+<div class="ps-page">
 
   <!-- Volver al dashboard (solo si está autenticado) -->
   @if (isAuthenticated()) {
-    <div class="w-full max-w-5xl mb-4">
-      <a routerLink="/" class="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm transition-colors">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-        Volver al dashboard
-      </a>
-    </div>
+  <div class="ps-back-row">
+    <a routerLink="/app" class="ps-back-link">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 5l-7 7 7 7" />
+      </svg>
+      Volver al dashboard
+    </a>
+  </div>
   }
 
   <!-- Brand -->
-  <div class="flex items-center gap-3 mb-8">
-    <div class="w-10 h-10 rounded-xl bg-white/95 flex items-center justify-center overflow-hidden"
-      style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
-      <img src="citema.webp" alt="citema" class="h-8 w-auto" />
+  <div class="ps-brand">
+    <div class="ps-brand-mark">
+      <img src="citema.webp" alt="citema" class="ps-brand-img" />
     </div>
-    <div class="leading-none">
-      <div class="text-[17px] font-extrabold tracking-tight text-white">CITEMA</div>
-      <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
+    <div>
+      <div class="ps-brand-name">CITEMA</div>
+      <div class="ps-brand-sub">PROFESSIONAL</div>
     </div>
   </div>
 
   <!-- Título -->
-  <div @fadeIn class="text-center mb-10">
+  <div @fadeIn class="ps-header">
     @if (isSuspended()) {
-      <div class="inline-flex items-center gap-2 bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold px-4 py-2 rounded-full mb-4">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        Tu cuenta está suspendida
-      </div>
+    <div class="ps-badge ps-badge--danger">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      Tu cuenta está suspendida
+    </div>
     }
     @if (isOnboarding()) {
-      <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-4 py-2 rounded-full mb-4">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        ¡Cuenta verificada exitosamente!
-      </div>
+    <div class="ps-badge ps-badge--success">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      ¡Cuenta verificada exitosamente!
+    </div>
     }
-    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">
+    <h1 class="ps-title">
       {{ isOnboarding() ? 'Bienvenido, elige tu plan' : 'Elige tu plan' }}
     </h1>
-    <p class="text-white/50 text-sm max-w-sm mx-auto">
+    <p class="ps-subtitle">
       @if (isSuspended()) {
-        Tu período ha vencido. Selecciona un plan para reactivar tu cuenta.
+      Tu período ha vencido. Selecciona un plan para reactivar tu cuenta.
       } @else if (isOnboarding()) {
-        Puedes empezar con 14 días gratis o contratar un plan desde ahora.
+      Puedes empezar con 14 días gratis o contratar un plan desde ahora.
       } @else if (isAuthenticated()) {
-        Tu período gratuito ha finalizado. Selecciona un plan para continuar.
+      Tu período gratuito ha finalizado. Selecciona un plan para continuar.
       } @else {
-        Crea tu cuenta y comienza con 14 días gratis.
+      Crea tu cuenta y comienza con 14 días gratis.
       }
     </p>
 
     <!-- Acciones de sesión -->
     @if (isAuthenticated()) {
-      <div class="mt-4 flex items-center justify-center gap-3 text-sm">
-        <span class="text-white/30">Conectado como <span class="text-white/60 font-medium">{{ userName() }}</span></span>
-        <button (click)="logout()" class="text-white/40 hover:text-white/70 underline underline-offset-2 transition-colors text-xs">
-          Cerrar sesión
-        </button>
-      </div>
+    <div class="ps-session">
+      <span>Conectado como <span class="ps-session-name">{{ userName() }}</span></span>
+      <button (click)="logout()" class="ps-logout">Cerrar sesión</button>
+    </div>
     } @else {
-      <div class="mt-5 flex items-center justify-center gap-4 text-sm">
-        <a routerLink="/login" class="text-white/50 hover:text-white transition-colors">
-          ¿Ya tienes cuenta? <span class="text-amber-400 font-semibold">Inicia sesión</span>
-        </a>
-        <span class="text-white/20">·</span>
-        <a routerLink="/registro" class="text-white/50 hover:text-white transition-colors">
-          <span class="text-white/70 font-semibold">Crear cuenta</span>
-        </a>
-      </div>
+    <div class="ps-auth-links">
+      <a routerLink="/login" class="ps-auth-link">
+        ¿Ya tienes cuenta? <span class="ps-auth-accent">Inicia sesión</span>
+      </a>
+      <span class="ps-dot-sep">·</span>
+      <a routerLink="/registro" class="ps-auth-link">
+        <span class="ps-auth-muted">Crear cuenta</span>
+      </a>
+    </div>
     }
   </div>
 
   <!-- Grid de planes -->
-  <div @fadeIn class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-5xl">
+  <div @fadeIn class="ps-plans-grid">
 
     @for (plan of plans(); track plan.id) {
-      <div [class]="getPlanCardClass(plan)"
-           (click)="selectPlan(plan)"
-           [attr.role]="plan.available && !plan.comingSoon ? 'button' : null">
+    @if (plan.id !== 'free' || isOnboarding() || !isAuthenticated()) {
+    <div [class]="getPlanCardClass(plan)" (click)="selectPlan(plan)"
+      [attr.role]="plan.available && !plan.comingSoon ? 'button' : null">
 
-        <!-- Badge proxmamente -->
-        @if (plan.comingSoon) {
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
-            Próximamente
-          </div>
-        }
+      <!-- Badge próximamente -->
+      @if (plan.comingSoon) {
+      <div class="ps-plan-soon">Próximamente</div>
+      }
 
-        <!-- Nombre del plan -->
-        <div class="mb-4">
-          <div class="text-[11px] font-bold uppercase tracking-widest mb-1"
-               [class]="plan.id === 'pro_max' ? 'text-amber-400' : 'text-white/40'">
-            {{ plan.duration }}
-          </div>
-          <h2 class="text-xl font-extrabold text-white tracking-tight">{{ plan.name }}</h2>
+      <!-- Badge "más elegido" -->
+      @if (getPlanBadge(plan)) {
+      <div class="ps-plan-popular">{{ getPlanBadge(plan) }}</div>
+      }
+
+      <!-- Nombre del plan -->
+      <div class="ps-plan-header">
+        <div [class]="'ps-plan-duration ' + (isPrimary(plan) ? 'ps-plan-duration--featured' : '')">
+          {{ plan.duration }}
         </div>
+        <h2 class="ps-plan-name">{{ plan.name }}</h2>
+      </div>
 
-        <!-- Precio -->
-        <div class="mb-5">
-          @if (plan.price === null) {
-            <span class="text-3xl font-black text-white/30">—</span>
-          } @else if (plan.price === 0) {
-            <span class="text-3xl font-black text-white">Gratis</span>
-            <span class="text-sm text-white/40 ml-1">/ 14 días</span>
-          } @else {
-            <span class="text-3xl font-black text-white">${{ plan.price | number:'1.0-0' }}</span>
-            <span class="text-sm text-white/40 ml-1">CLP / mes</span>
-          }
-        </div>
-
-        <!-- Descripción -->
-        <p class="text-white/50 text-[12.5px] leading-relaxed mb-6 flex-1">
-          {{ plan.description }}
-        </p>
-
-        <!-- Botón -->
-        @if (!plan.comingSoon) {
-          <button
-            [disabled]="!plan.available || !!activating() || (plan.id === 'free' && !isOnboarding())"
-            [class]="getPlanButtonClass(plan)"
-            (click)="$event.stopPropagation(); selectPlan(plan)">
-            @if (activating() === plan.id) {
-              <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
-              Activando…
-            } @else if (plan.id === 'free' && isOnboarding()) {
-              Comenzar gratis (14 días)
-            } @else if (plan.id === 'free') {
-              Incluido al registrarse
-            } @else {
-              Seleccionar plan
-            }
-          </button>
+      <!-- Precio -->
+      <div class="ps-plan-price">
+        @if (plan.price === null) {
+        <span class="ps-price-null">—</span>
+        } @else if (plan.price === 0) {
+        <span class="ps-price-num">Gratis</span>
+        <span class="ps-price-per">/ 14 días</span>
         } @else {
-          <button disabled class="w-full py-2.5 rounded-xl bg-white/5 text-white/20 text-sm font-semibold cursor-not-allowed">
-            No disponible aún
-          </button>
+        <span class="ps-price-cur">$</span>
+        <span class="ps-price-num">{{ plan.price | number:'1.0-0' }}</span>
+        <span class="ps-price-per">CLP / mes</span>
         }
       </div>
+
+      <!-- Descripción -->
+      <p class="ps-plan-desc">{{ plan.description }}</p>
+
+      <!-- Features list -->
+      @if (getPlanFeatures(plan).length > 0) {
+      <ul class="ps-plan-features">
+        @for (f of getPlanFeatures(plan); track f) {
+        <li>
+          <span class="ps-check">✓</span>
+          <span>{{ f }}</span>
+        </li>
+        }
+      </ul>
+      }
+
+      <!-- Botón -->
+      @if (!plan.comingSoon) {
+      <button [disabled]="!plan.available || !!activating() || (plan.id === 'free' && !isOnboarding())"
+        [class]="getPlanButtonClass(plan)" (click)="$event.stopPropagation(); selectPlan(plan)">
+        @if (activating() === plan.id) {
+        <span class="ps-spinner"></span>
+        Activando…
+        } @else if (plan.id === 'free' && isOnboarding()) {
+        Comenzar gratis (14 días)
+        } @else if (plan.id === 'free') {
+        Incluido al registrarse
+        } @else {
+        Seleccionar plan
+        }
+      </button>
+      } @else {
+      <button disabled class="ps-btn ps-btn--disabled">No disponible aún</button>
+      }
+    </div>
+    }
     }
 
   </div>
 
   <!-- Error global -->
   @if (errorMsg()) {
-    <div class="mt-6 bg-red-500/20 border border-red-500/40 text-red-300 text-sm px-5 py-3 rounded-xl">
-      {{ errorMsg() }}
-    </div>
+  <div class="ps-error">{{ errorMsg() }}</div>
   }
 
   <!-- Nota inferior -->
+  <p class="ps-note">
+    Todos los planes incluyen <strong>trial de 2 semanas</strong> sin tarjeta de crédito.<br>
+    El cobro es mensual. Puedes cambiar de plan en cualquier momento.
+    ota inferior -->
   <p class="text-white/25 text-xs mt-10 text-center">
     El cobro es mensual. Puedes cambiar de plan en cualquier momento desde tu perfil.
   </p>

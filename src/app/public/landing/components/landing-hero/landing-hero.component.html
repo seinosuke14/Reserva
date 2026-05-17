@@ -1,0 +1,58 @@
+<section class="hero">
+  @if (currentVertical().bgImage) {
+    <div class="hero-bg-img" [style.background-image]="'url(' + currentVertical().bgImage + ')'"></div>
+  }
+  <div class="hero-overlay" [style.background]="currentVertical().bg"></div>
+
+  <div class="container">
+    <span class="eyebrow">
+      <span class="dot"></span>Hecho para {{ currentVertical().label.toLowerCase() }} en Chile
+    </span>
+
+    <h1 class="h-hero">
+      Tu sistema de citas.<br /><span class="serif">Tu control total.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Agendamiento, analytics y perfil 100% personalizable para tu negocio.
+      Tus clientes agendan 24/7, tú ves tus números en tiempo real.
+    </p>
+
+    <div class="hero-cta">
+      <a routerLink="/registro" class="btn btn-primary btn-lg">
+        Prueba GRATIS 2 semanas
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+      <a routerLink="." fragment="producto" class="btn btn-outline btn-lg">Ver demo</a>
+    </div>
+
+    <div class="hero-meta">
+      <span><span class="check">✓</span> Sin tarjeta de crédito</span>
+      <span><span class="check">✓</span> Cancela cuando quieras</span>
+      <span><span class="check">✓</span> Soporte en español</span>
+    </div>
+
+    <div class="vertical-switch" role="tablist" aria-label="Tipo de profesional">
+      <span class="vsw-label">Soy</span>
+      @for (key of verticalKeys; track key) {
+        <button [class]="'vsw' + (key === vertical() ? ' active' : '')"
+          (click)="setVertical(key)" role="tab">
+          {{ verticals[key].label }}
+        </button>
+      }
+    </div>
+
+    <div class="vsw-progress">
+      @for (key of verticalKeys; track key) {
+        <div class="vsw-bar">
+          <div class="vsw-bar-fill"
+            [style.width]="key === vertical() ? progress() + '%' : '0%'">
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

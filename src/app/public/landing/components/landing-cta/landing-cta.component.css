@@ -1,0 +1,11 @@
+app-landing .final { background: linear-gradient(135deg, var(--lp-blue-700) 0%, var(--lp-blue-600) 50%, var(--lp-ink) 100%); color: white; text-align: center; position: relative; overflow: hidden; }
+app-landing .final::before { content: ""; position: absolute; left: 50%; top: 50%; width: 800px; height: 800px; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(219,150,72,.25), rgba(219,150,72,0) 55%); pointer-events: none; }
+app-landing .final .container { position: relative; z-index: 1; }
+app-landing .final .section-eyebrow { color: var(--lp-gold); }
+app-landing .final .lead { color: rgba(255,255,255,.78); max-width: 580px; margin: 0 auto 32px; }
+app-landing .final .h2 { color: white; margin-bottom: 22px; }
+app-landing .final .h2 .serif { color: #2dd4bf; }
+app-landing .final-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+app-landing .final-meta { margin-top: 22px; font-size: 13.5px; color: rgba(255,255,255,.55); }
+app-landing .final .btn-ink { background: rgba(255,255,255,.1); color: white; }
+app-landing .final .btn-ink:hover { background: rgba(255,255,255,.18); }

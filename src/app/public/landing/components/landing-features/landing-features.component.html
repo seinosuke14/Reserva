@@ -1,0 +1,44 @@
+<section id="beneficios" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Por qué CITEMA</div>
+      <h2 class="h2">Todo lo que tu negocio necesita, <span class="serif">en una sola herramienta.</span></h2>
+      <p class="lead">Agenda, ventas, marketing y clientes — sin malabares entre apps. Pensado para que crezcas, no para que te compliques.</p>
+    </div>
+    <div class="features">
+      @for (f of features; track f.title) {
+        <div [class]="'feat acc-' + f.acc">
+          <div [class]="'feat-ic ' + f.color">
+            @if (f.color === 'blue') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
+              </svg>
+            }
+            @if (f.color === 'rose') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+              </svg>
+            }
+            @if (f.color === 'gold') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18M12 3a13 13 0 010 18M12 3a13 13 0 000 18" />
+              </svg>
+            }
+            @if (f.color === 'ink') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a8 8 0 11-3.2-6.4L21 4l-1 4.5A8 8 0 0121 12z" />
+              </svg>
+            }
+          </div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.body }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>

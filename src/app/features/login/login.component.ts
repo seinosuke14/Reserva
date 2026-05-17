@@ -72,7 +72,7 @@ export class LoginComponent {
     this.isSubmitting.set(false);
     if (result.success) {
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-      const target = returnUrl?.startsWith('/reservar/') ? returnUrl : '/';
+      const target = returnUrl?.startsWith('/reservar/') ? returnUrl : '/app/agenda';
       this.router.navigateByUrl(target);
     } else {
       this.error.set(result.message);

@@ -1,0 +1,70 @@
+<section id="producto" class="section demo">
+  <div class="container">
+    <div class="demo-grid">
+      <div>
+        <div class="section-eyebrow">Producto</div>
+        <h2 class="h2">Tus números, <span class="serif">en una sola pantalla.</span></h2>
+        <p class="lead">No más libreta. No más memoria. CITEMA te muestra lo que pasa en tu negocio en tiempo real.</p>
+        <div class="demo-bullets">
+          <div class="demo-bullet">
+            <div class="num">1</div>
+            <div>
+              <h4>Citas que se confirman solas</h4>
+              <p>Tus clientes agendan 24/7 desde tu link. Mensajería automática de confirmación incluida.</p>
+            </div>
+          </div>
+          <div class="demo-bullet">
+            <div class="num">2</div>
+            <div>
+              <h4>Analytics que te dicen qué vender</h4>
+              <p>Qué servicio está caliente, qué día rinde más, qué cliente vuelve. Todo desde el plan básico.</p>
+            </div>
+          </div>
+          <div class="demo-bullet">
+            <div class="num">3</div>
+            <div>
+              <h4>Recordatorios automáticos</h4>
+              <p>1 hora antes vía WhatsApp o SMS. Menos ausencias, más ingresos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-stack">
+        <div class="dash">
+          <div class="dash-h">
+            <span class="title">Resumen — Esta semana</span>
+            <span class="pill">● En vivo</span>
+          </div>
+          <div class="dash-stats">
+            <div class="dash-stat">
+              <div class="lbl">Citas</div>
+              <div class="val">47</div>
+              <div class="delta">↑ 12% vs semana pasada</div>
+            </div>
+            <div class="dash-stat">
+              <div class="lbl">Ingresos</div>
+              <div class="val">$487k</div>
+              <div class="delta">↑ 18%</div>
+            </div>
+            <div class="dash-stat">
+              <div class="lbl">Ocupación</div>
+              <div class="val">82%</div>
+              <div class="delta">↑ 6 pts</div>
+            </div>
+          </div>
+          <div class="chart">
+            <div class="chart-bars">
+              @for (h of chartHeights; track $index; let i = $index) {
+                <div [class]="'chart-bar' + (i === 5 ? ' gold' : '')" [style.height]="h + '%'"></div>
+              }
+            </div>
+          </div>
+          <div class="chart-x">
+            @for (l of chartLabels; track l) { <span>{{ l }}</span> }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

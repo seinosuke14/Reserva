@@ -70,7 +70,7 @@ export class SubscriptionPaymentResultComponent implements OnInit {
   }
 
   goToDashboard(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/app']);
   }
 
   goToPlans(): void {
@@ -81,6 +81,7 @@ export class SubscriptionPaymentResultComponent implements OnInit {
     const names: Record<PlanType, string> = {
       free:    'Gratuito',
       basic:   'Básico',
+      pro:     'Pro',
       team:    'Equipo',
       pro_max: 'Pro Max',
     };

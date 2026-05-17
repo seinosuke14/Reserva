@@ -1,0 +1,10 @@
+app-landing .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(11,18,36,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.08); }
+app-landing .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+app-landing .nav-links { display: flex; align-items: center; gap: 30px; font-size: 14.5px; color: rgba(255,255,255,.72); }
+app-landing .nav-links a:hover { color: white; }
+app-landing .nav .btn-ghost { color: rgba(255,255,255,.85); }
+app-landing .nav .btn-ghost:hover { color: white; background: rgba(255,255,255,.08); }
+app-landing .nav .btn-ink { background: white; color: var(--lp-ink); }
+app-landing .nav .btn-ink:hover { background: #2dd4bf; color: var(--lp-ink); }
+app-landing .nav-cta { display: flex; align-items: center; gap: 14px; }
+@media (max-width: 820px) { app-landing .nav-links { display: none; } }
