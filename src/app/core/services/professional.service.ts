@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type PlanType = 'free' | 'basic' | 'team' | 'pro_max';
+export type PlanType = 'free' | 'basic' | 'pro' | 'team' | 'pro_max';
 export type SubscriptionStatus = 'active' | 'suspended' | 'expired';
 
 export interface IProfessional {

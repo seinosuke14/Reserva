@@ -68,7 +68,7 @@ export class DashboardHomeComponent implements OnInit {
   }
 
   goToAgenda(): void {
-    this.router.navigate(['/agenda']);
+    this.router.navigate(['/app/agenda']);
   }
 
   readonly filteredTodayApts = computed(() => {

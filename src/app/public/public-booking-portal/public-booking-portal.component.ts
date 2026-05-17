@@ -225,7 +225,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.loadState.set('ready');
     } catch (err: any) {
       if (err?.status === 404) {
-        this.router.navigate(['/']);
+        this.router.navigate(['/app']);
       } else {
         this.loadState.set('error');
       }

@@ -435,7 +435,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   }
 
   handleConfirm(): void {
-    if (this.selectedHour()) this.router.navigate(['/pagos']);
+    if (this.selectedHour()) this.router.navigate(['/app/pagos']);
   }
 
   toggleBlockingMode(): void {

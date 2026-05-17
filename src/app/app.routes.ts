@@ -3,6 +3,15 @@ import { authGuard } from './core/guards/auth.guard';
 import { subscriptionGuard } from './core/guards/subscription.guard';
 
 export const routes: Routes = [
+  // Landing page (pública, ruta raíz)
+  {
+    path: '',
+    loadComponent: () => import('./public/landing/landing.component').then(m => m.LandingComponent)
+  },
+  {
+    path: 'landing',
+    loadComponent: () => import('./public/landing/landing.component').then(m => m.LandingComponent)
+  },
   // Rutas públicas
   {
     path: 'login',
@@ -46,7 +55,7 @@ export const routes: Routes = [
 
   // Rutas protegidas (Dashboard)
   {
-    path: '',
+    path: 'app',
     canActivate: [authGuard, subscriptionGuard],
     loadComponent: () => import('./layout/app-layout/app-layout.component').then(m => m.AppLayoutComponent),
     children: [
@@ -56,7 +65,7 @@ export const routes: Routes = [
       { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
-{ path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
+      { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
       { path: '**', redirectTo: '' }
     ]

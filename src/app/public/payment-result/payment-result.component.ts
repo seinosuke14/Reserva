@@ -444,7 +444,7 @@ export class PaymentResultComponent implements OnInit {
     if (this.slug) {
       this.router.navigate(['/reservar', this.slug]);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/app']);
     }
   }
 

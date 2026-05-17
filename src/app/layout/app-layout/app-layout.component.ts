@@ -56,36 +56,36 @@ export class AppLayoutComponent {
     {
       label: 'Principal',
       items: [
-        { path: '/',          label: 'Dashboard', icon: 'dashboard' },
-        { path: '/agenda',    label: 'Agenda',    icon: 'calendar' },
-        { path: '/clientes',  label: 'Clientes',  icon: 'users' },
-        { path: '/servicios', label: 'Servicios', icon: 'package' },
+        { path: '/app',          label: 'Dashboard', icon: 'dashboard' },
+        { path: '/app/agenda',    label: 'Agenda',    icon: 'calendar' },
+        { path: '/app/clientes',  label: 'Clientes',  icon: 'users' },
+        { path: '/app/servicios', label: 'Servicios', icon: 'package' },
       ],
     },
     {
       label: 'Análisis',
       items: [
-        { path: '/analytics', label: 'Analytics', icon: 'bar-chart' },
+        { path: '/app/analytics', label: 'Analytics', icon: 'bar-chart' },
       ],
     },
     {
       label: 'Configuración',
       items: [
-        { path: '/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
-        { path: '/horario',       label: 'Horario',         icon: 'clock' },
+        { path: '/app/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
+        { path: '/app/horario',       label: 'Horario',         icon: 'clock' },
       ],
     },
   ];
 
   private readonly pageTitles: Record<string, PageMeta> = {
-    '/':              { title: 'Dashboard',      sub: 'Bienvenido de vuelta' },
-    '/agenda':        { title: 'Agenda',         sub: 'Gestiona tus citas y disponibilidad' },
-    '/clientes':      { title: 'Clientes',       sub: 'Tu base de clientes' },
-    '/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
-    '/pagos':         { title: 'Métodos de Pago', sub: 'Configura tus formas de cobro' },
-    '/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
-    '/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
-    '/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
+    '/app':              { title: 'Dashboard',      sub: 'Bienvenido de vuelta' },
+    '/app/agenda':        { title: 'Agenda',         sub: 'Gestiona tus citas y disponibilidad' },
+    '/app/clientes':      { title: 'Clientes',       sub: 'Tu base de clientes' },
+    '/app/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
+    '/app/pagos':         { title: 'Métodos de Pago', sub: 'Configura tus formas de cobro' },
+    '/app/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
+    '/app/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
+    '/app/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
   };
 
   private readonly subscriptionSvc = inject(SubscriptionService);
@@ -119,7 +119,7 @@ export class AppLayoutComponent {
   );
 
   readonly isFullHeightRoute = computed(() =>
-    ['/agenda', '/clientes'].includes(this.currentPath())
+    ['/app/agenda', '/app/clientes'].includes(this.currentPath())
   );
 
   private _resizeListener = () => {
@@ -147,6 +147,6 @@ export class AppLayoutComponent {
 
   handleLogout() {
     this.auth.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/landing']);
   }
 }
