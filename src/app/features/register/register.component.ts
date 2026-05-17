@@ -131,7 +131,7 @@ export class RegisterComponent implements OnInit {
     this.isVerifying.set(false);
     if (result.success && result.token && result.user) {
       this.authSvc.setSession(result.token, result.user);
-      this.router.navigate(['/']);
+      this.router.navigate(['/app']);
     } else {
       this.verifyError.set(result.message);
     }

@@ -1,0 +1,35 @@
+/* ---- Demo section ---- */
+app-landing .demo { background: var(--lp-ink); color: white; position: relative; overflow: hidden; }
+app-landing .demo::before { content: ""; position: absolute; left: -200px; top: -200px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,.35), rgba(59,130,246,0) 60%); pointer-events: none; }
+app-landing .demo .container { position: relative; z-index: 1; }
+app-landing .demo .section-eyebrow { color: var(--lp-gold); }
+app-landing .demo .lead { color: rgba(255,255,255,.7); }
+app-landing .demo .demo-bullet .num { background: var(--lp-gold); color: var(--lp-ink); }
+app-landing .demo .demo-bullet h4 { color: white; }
+app-landing .demo .demo-bullet p { color: rgba(255,255,255,.65); }
+app-landing .demo-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 64px; align-items: center; }
+@media (max-width: 980px) { app-landing .demo-grid { grid-template-columns: 1fr; gap: 40px; } }
+app-landing .demo-bullets { display: flex; flex-direction: column; gap: 18px; margin: 28px 0 0; }
+app-landing .demo-bullet { display: flex; gap: 14px; }
+app-landing .demo-bullet .num { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--lp-ink); color: white; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+app-landing .demo-bullet h4 { margin: 4px 0 4px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+app-landing .demo-bullet p { margin: 0; font-size: 14.5px; color: var(--lp-gray-dark); line-height: 1.5; }
+
+/* ---- Dashboard mock ---- */
+app-landing .dash-stack { position: relative; }
+app-landing .dash-stack::before { content: ""; position: absolute; inset: 18px -22px -22px 22px; background: var(--lp-blue-500); border-radius: 22px; opacity: .6; }
+app-landing .dash-stack::after { content: ""; position: absolute; top: -18px; right: -18px; width: 90px; height: 90px; border-radius: 24px; background: var(--lp-gold); transform: rotate(12deg); }
+app-landing .dash { position: relative; z-index: 1; background: white; color: var(--lp-ink); border-radius: 18px; padding: 22px; border: 1px solid var(--lp-border); box-shadow: 0 30px 60px -20px rgba(0,0,0,.4); }
+app-landing .dash-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+app-landing .dash-h .title { font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+app-landing .dash-h .pill { padding: 4px 10px; border-radius: 999px; background: #ecfdf5; color: var(--lp-success); font-size: 12px; font-weight: 600; }
+app-landing .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+app-landing .dash-stat { padding: 14px; border-radius: 12px; background: var(--lp-canvas); border: 1px solid var(--lp-border-soft); }
+app-landing .dash-stat .lbl { font-size: 11.5px; color: var(--lp-gray-medium); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+app-landing .dash-stat .val { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; }
+app-landing .dash-stat .delta { font-size: 11.5px; color: var(--lp-success); font-weight: 600; margin-top: 2px; }
+app-landing .chart { height: 140px; padding: 14px 8px 8px; border-radius: 12px; background: var(--lp-canvas); border: 1px solid var(--lp-border-soft); position: relative; }
+app-landing .chart-bars { display: flex; align-items: flex-end; justify-content: space-between; height: 100%; gap: 8px; }
+app-landing .chart-bar { flex: 1; background: linear-gradient(to top, var(--lp-blue-500), var(--lp-blue-700)); border-radius: 4px 4px 0 0; }
+app-landing .chart-bar.gold { background: linear-gradient(to top, var(--lp-gold), #b9762d); }
+app-landing .chart-x { display: flex; justify-content: space-between; padding: 6px 4px 0; font-size: 10.5px; color: var(--lp-gray-medium); }

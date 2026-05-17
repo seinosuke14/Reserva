@@ -1,0 +1,101 @@
+/* ============================================================
+   CITEMA Landing — estilos globales compartidos
+   ============================================================ */
+
+html { scroll-behavior: smooth; }
+
+/* Variables */
+:root {
+  --lp-blue-500: #3b82f6;
+  --lp-blue-600: #2563eb;
+  --lp-blue-700: #1d4ed8;
+  --lp-gold: #db9648;
+  --lp-gold-soft: #fdf7ee;
+  --lp-ink: #0f172a;
+  --lp-ink-soft: #1c2233;
+  --lp-canvas: #f8fafc;
+  --lp-gray-medium: #6b7280;
+  --lp-gray-dark: #374151;
+  --lp-border: #e5e7eb;
+  --lp-border-soft: #eef0f3;
+  --lp-success: #10b981;
+  --lp-warning: #f59e0b;
+  --lp-danger: #ef4444;
+}
+
+/* Child component hosts transparent to layout */
+app-landing-nav, app-landing-hero, app-landing-trust,
+app-landing-features, app-landing-demo, app-landing-pricing,
+app-landing-destacados, app-landing-faq, app-landing-cta,
+app-landing-footer { display: contents; }
+
+/* ---- Layout ---- */
+app-landing { display: block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--lp-ink); background: #fff; -webkit-font-smoothing: antialiased; }
+app-landing .serif { font-family: 'Instrument Serif', 'Times New Roman', serif; font-style: italic; font-weight: 400; }
+app-landing a { color: inherit; text-decoration: none; }
+app-landing button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; color: inherit; }
+app-landing .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+app-landing .section { padding: 96px 0; }
+@media (max-width: 720px) {
+  app-landing .section { padding: 64px 0; }
+  app-landing .container { padding: 0 20px; }
+}
+
+/* ---- TOP (nav + hero dark zone) ---- */
+app-landing .top {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 1100px 600px at 12% 0%, rgba(45,212,191,.18) 0%, rgba(45,212,191,0) 60%),
+    radial-gradient(ellipse 900px 700px at 95% 30%, rgba(99,102,241,.22) 0%, rgba(99,102,241,0) 60%),
+    radial-gradient(ellipse 1200px 800px at 50% 100%, rgba(59,130,246,.10) 0%, rgba(59,130,246,0) 60%),
+    linear-gradient(180deg, #0b1224 0%, #0f172a 60%, #0f172a 100%);
+  color: #f1f5f9;
+}
+app-landing .top::before {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,.04) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 36px 36px, 48px 48px;
+  pointer-events: none;
+}
+
+/* ---- Brand (compartido nav + footer) ---- */
+app-landing .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; font-size: 19px; color: white; }
+app-landing .brand-mark {
+  width: 28px; height: 28px; border-radius: 8px; background: white;
+  display: grid; place-items: center; color: var(--lp-ink); font-weight: 800;
+  position: relative;
+  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 6px 14px -8px rgba(0,0,0,.5);
+}
+app-landing .brand-mark::after {
+  content: ""; position: absolute; right: -3px; top: -3px;
+  width: 10px; height: 10px; border-radius: 50%; background: #2dd4bf; border: 2px solid #0f172a;
+}
+
+/* ---- Buttons ---- */
+app-landing .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 20px; border-radius: 10px;
+  font-weight: 600; font-size: 15px; letter-spacing: -.005em;
+  transition: transform .08s ease, background .15s, box-shadow .15s, color .15s;
+  white-space: nowrap; text-decoration: none;
+}
+app-landing .btn:active { transform: translateY(1px); }
+app-landing .btn-primary { background: var(--lp-blue-500); color: white; box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 8px 18px -10px rgba(59,130,246,.8); }
+app-landing .btn-primary:hover { background: var(--lp-blue-600); }
+app-landing .btn-ink { background: var(--lp-ink); color: white; }
+app-landing .btn-ink:hover { background: var(--lp-ink-soft); }
+app-landing .btn-ghost { color: var(--lp-gray-dark); }
+app-landing .btn-ghost:hover { color: var(--lp-ink); background: var(--lp-gold-soft); }
+app-landing .btn-outline { border: 1px solid var(--lp-border); color: var(--lp-ink); background: white; }
+app-landing .btn-outline:hover { border-color: var(--lp-ink); }
+app-landing .btn-sm { height: 36px; padding: 0 14px; font-size: 14px; border-radius: 8px; }
+app-landing .btn-lg { height: 52px; padding: 0 26px; font-size: 16px; border-radius: 12px; }
+
+/* ---- Section heading (compartido) ---- */
+app-landing .section-head { max-width: 760px; margin: 0 auto 56px; text-align: center; }
+app-landing .section-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--lp-gold); margin-bottom: 14px; }
+app-landing .h2 { font-size: clamp(32px, 4.2vw, 52px); font-weight: 700; letter-spacing: -.025em; line-height: 1.04; margin: 0 0 16px; text-wrap: balance; }
+app-landing .h2 .serif { color: var(--lp-gold); font-weight: 400; }
+app-landing .lead { font-size: 18px; line-height: 1.55; color: var(--lp-gray-dark); margin: 0; text-wrap: pretty; }

@@ -1,0 +1,117 @@
+/* ---- Hero ---- */
+app-landing .hero {
+  position: relative;
+  min-height: 88vh;
+  display: flex;
+  align-items: center;
+  padding: 168px 0 80px;
+  overflow: hidden;
+}
+app-landing .hero-bg-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.18;
+  transition: opacity 0.8s ease;
+}
+app-landing .hero-overlay {
+  position: absolute; inset: 0;
+  opacity: 1;
+  pointer-events: none;
+  transition: background 0.8s ease;
+}
+app-landing .hero .container { position: relative; z-index: 1; max-width: 720px; }
+
+/* Eyebrow */
+app-landing .eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 10px; border-radius: 999px;
+  background: rgba(45,212,191,.12); color: #99f6e4;
+  border: 1px solid rgba(45,212,191,.3);
+  font-size: 13px; font-weight: 600;
+}
+app-landing .eyebrow .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #2dd4bf;
+  box-shadow: 0 0 0 3px rgba(45,212,191,.25);
+  flex-shrink: 0;
+}
+
+/* Heading */
+app-landing .h-hero {
+  font-size: clamp(48px, 6.5vw, 82px);
+  font-weight: 700; letter-spacing: -.03em; line-height: .96;
+  margin: 24px 0 26px; color: white; text-wrap: balance;
+}
+app-landing .h-hero .serif { color: #2dd4bf; }
+
+/* Sub */
+app-landing .hero-sub {
+  font-size: 19px; line-height: 1.55;
+  color: rgba(241,245,249,.72);
+  max-width: 540px; text-wrap: pretty;
+  margin: 0;
+}
+
+/* CTA row */
+app-landing .hero-cta { display: flex; gap: 12px; margin: 34px 0 24px; flex-wrap: wrap; }
+app-landing .hero .btn-primary {
+  background: #2dd4bf; color: var(--lp-ink);
+  box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 10px 24px -10px rgba(45,212,191,.7);
+}
+app-landing .hero .btn-primary:hover { background: #5eead4; }
+app-landing .hero .btn-outline {
+  background: rgba(255,255,255,.06); color: white;
+  border-color: rgba(255,255,255,.2);
+}
+app-landing .hero .btn-outline:hover { background: rgba(255,255,255,.12); border-color: white; }
+
+/* Meta trust */
+app-landing .hero-meta {
+  display: flex; gap: 22px; flex-wrap: wrap; align-items: center;
+  font-size: 13.5px; color: rgba(241,245,249,.55);
+}
+app-landing .hero-meta .check { color: #2dd4bf; font-weight: 700; margin-right: 4px; }
+
+/* Vertical switch */
+app-landing .vertical-switch {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 8px; margin-top: 36px;
+}
+app-landing .vsw-label {
+  font-size: 11px; color: rgba(241,245,249,.45);
+  text-transform: uppercase; letter-spacing: .1em;
+  font-weight: 700; margin-right: 4px;
+}
+app-landing .vsw {
+  padding: 7px 16px; border-radius: 999px;
+  background: rgba(255,255,255,.05); color: rgba(241,245,249,.65);
+  border: 1px solid rgba(255,255,255,.1);
+  font-size: 13px; font-weight: 600;
+  transition: all .15s; cursor: pointer;
+}
+app-landing .vsw:hover { color: white; border-color: rgba(255,255,255,.28); }
+app-landing .vsw.active {
+  background: rgba(45,212,191,.15); color: #2dd4bf;
+  border-color: rgba(45,212,191,.4);
+}
+
+/* Progress bars */
+app-landing .vsw-progress {
+  display: flex; gap: 6px; margin-top: 14px; width: 100%; max-width: 320px;
+}
+app-landing .vsw-bar {
+  flex: 1; height: 3px;
+  background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden;
+}
+app-landing .vsw-bar-fill {
+  height: 100%; background: #2dd4bf; border-radius: 2px;
+  transition: width 0.05s linear;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  app-landing .hero { min-height: 92vh; padding: 80px 0 60px; }
+  app-landing .h-hero { font-size: clamp(40px, 10vw, 60px); }
+  app-landing .hero-sub { font-size: 17px; }
+  app-landing .hero-meta { gap: 14px; }
+}

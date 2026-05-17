@@ -11,6 +11,7 @@ import { PlanType } from '../../core/services/professional.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './plan-selection.component.html',
+  styleUrls: ['./plan-selection.component.css'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
@@ -44,7 +45,7 @@ export class PlanSelectionComponent implements OnInit {
 
   logout(): void {
     this.authSvc.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/landing']);
   }
 
   async selectPlan(plan: IPlan): Promise<void> {
@@ -62,7 +63,7 @@ export class PlanSelectionComponent implements OnInit {
           subscriptionStatus: result.subscriptionStatus as any,
           subscriptionEndDate: result.subscriptionEndDate ?? null,
         });
-        this.router.navigate(['/']);
+        this.router.navigate(['/app']);
       } else {
         this.errorMsg.set(result.message ?? 'Error al activar el plan gratuito.');
         this.activating.set(null);
@@ -88,32 +89,43 @@ export class PlanSelectionComponent implements OnInit {
     return `$${price.toLocaleString('es-CL')} CLP`;
   }
 
+  private static readonly PLAN_BADGES: Partial<Record<string, string>> = {
+    team: 'Más elegido',
+  };
+
+  private static readonly PLAN_FEATURES: Partial<Record<string, string[]>> = {
+    free:    ['Sin tarjeta de crédito', '14 días completos', 'Todas las funciones incluidas', 'Soporte por email'],
+    basic:   ['1 usuario', 'Citas ilimitadas', 'Mensajería ilimitada', 'Recordatorio automático 1h antes', 'Perfil público personalizable', 'Analytics básico'],
+    pro:     ['1 usuario', 'WhatsApp automático nativo', 'Recordatorios WhatsApp', 'Cupones y descuentos', 'Visibilidad especial en Marketplace', 'Reseñas y ratings', 'Soporte prioritario'],
+    team:    ['Todo lo de PRO', 'Multi-profesional', 'Vista de equipo (citas + ventas)', 'Analytics de equipo', 'Método de pago compartido'],
+    pro_max: ['Todo lo de UNIDOS', 'WhatsApp automático nativo', 'Cupones y descuentos', 'Visibilidad especial en Marketplace', 'Reseñas y ratings', 'Soporte prioritario'],
+  };
+
+  getPlanBadge(plan: IPlan): string | null {
+    return PlanSelectionComponent.PLAN_BADGES[plan.id] ?? null;
+  }
+
+  isPrimary(plan: IPlan): boolean {
+    return plan.id === 'team';
+  }
+
+  getPlanFeatures(plan: IPlan): string[] {
+    return PlanSelectionComponent.PLAN_FEATURES[plan.id] ?? [];
+  }
+
   getPlanCardClass(plan: IPlan): string {
-    const base = 'relative flex flex-col p-6 rounded-2xl border transition-all duration-200 ';
-    if (plan.comingSoon) {
-      return base + 'bg-white/[.04] border-white/10 opacity-60 cursor-not-allowed';
-    }
-    if (plan.id === 'pro_max') {
-      return base + 'bg-gradient-to-b from-amber-500/20 to-amber-900/10 border-amber-500/40 cursor-pointer hover:border-amber-400/60 hover:scale-[1.02]';
-    }
-    if (plan.id === 'free') {
-      return base + (this.isOnboarding()
-        ? 'bg-white/[.06] border-white/15 cursor-pointer hover:bg-white/10 hover:border-white/25 hover:scale-[1.02]'
-        : 'bg-white/[.06] border-white/15 cursor-default');
-    }
-    return base + 'bg-white/[.06] border-white/15 cursor-pointer hover:bg-white/10 hover:border-white/25 hover:scale-[1.02]';
+    if (plan.comingSoon) return 'ps-plan-card ps-plan-card--disabled';
+    if (plan.id === 'pro_max') return 'ps-plan-card ps-plan-card--max';
+    if (this.isPrimary(plan))  return 'ps-plan-card ps-plan-card--featured';
+    return 'ps-plan-card';
   }
 
   getPlanButtonClass(plan: IPlan): string {
-    const base = 'w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ';
     if (plan.id === 'free') {
-      return base + (this.isOnboarding()
-        ? 'bg-white text-slate-900 hover:bg-white/90 disabled:opacity-60'
-        : 'bg-white/10 text-white/40 cursor-default');
+      return this.isOnboarding() ? 'ps-btn ps-btn--primary' : 'ps-btn ps-btn--muted';
     }
-    if (plan.id === 'pro_max') {
-      return base + 'bg-amber-400 text-amber-900 hover:bg-amber-300 disabled:opacity-60';
-    }
-    return base + 'bg-white text-slate-900 hover:bg-white/90 disabled:opacity-60';
+    if (plan.id === 'pro_max') return 'ps-btn ps-btn--max';
+    if (this.isPrimary(plan))  return 'ps-btn ps-btn--featured';
+    return 'ps-btn ps-btn--secondary';
   }
 }
