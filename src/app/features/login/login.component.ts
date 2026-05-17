@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
+import { ProfessionalService } from '../../core/services/professional.service';
 
 @Component({
   selector: 'app-login',
@@ -30,15 +31,16 @@ import { AuthService } from '../../core/services/auth.service';
   ]
 })
 export class LoginComponent {
-  private readonly fb     = inject(FormBuilder);
-  private readonly auth   = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route  = inject(ActivatedRoute);
+  private readonly fb      = inject(FormBuilder);
+  private readonly auth    = inject(AuthService);
+  private readonly profSvc = inject(ProfessionalService);
+  private readonly router  = inject(Router);
+  private readonly route   = inject(ActivatedRoute);
 
-  isSubmitting      = signal(false);
-  error             = signal('');
-  needsVerification = signal(false);
-  step              = signal<'login' | 'forgot' | 'forgot-sent'>('login');
+  isSubmitting  = signal(false);
+  isRedirecting = signal(false);
+  error         = signal('');
+  step          = signal<'login' | 'forgot' | 'forgot-sent'>('login');
 
   // Forgot password
   forgotEmail      = signal('');
@@ -67,17 +69,25 @@ export class LoginComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
     this.error.set('');
-    this.needsVerification.set(false);
     const result = await this.auth.login(this.form.value.email!, this.form.value.password!);
     this.isSubmitting.set(false);
     if (result.success) {
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
       const target = returnUrl?.startsWith('/reservar/') ? returnUrl : '/app/agenda';
       this.router.navigateByUrl(target);
+    } else if (result.needsVerification && result.email) {
+      await this._redirectToVerify(result.email, result.verificationExpired ?? false);
     } else {
       this.error.set(result.message);
-      this.needsVerification.set(result.needsVerification ?? false);
     }
+  }
+
+  private async _redirectToVerify(email: string, isExpired: boolean): Promise<void> {
+    this.isRedirecting.set(true);
+    if (isExpired) {
+      await this.profSvc.resendVerification(email);
+    }
+    this.router.navigate(['/registro'], { state: { step: 'verify', email } });
   }
 
   async onForgotSubmit(): Promise<void> {
