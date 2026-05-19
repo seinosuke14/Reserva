@@ -9,15 +9,48 @@
   <!-- Tarjeta de identidad -->
   <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[20px_22px]">
     <div class="flex items-center gap-4">
-      <div class="w-[56px] h-[56px] rounded-full shrink-0 flex items-center justify-center text-white text-[18px] font-bold tracking-tight"
-        style="background:linear-gradient(135deg,#db9648ee,#db964877);
-               box-shadow:0 0 0 3px rgba(219,150,72,.18),0 4px 14px rgba(219,150,72,.3);">
-        {{ userInitials() }}
+
+      <!-- Avatar con botón de cambio de foto -->
+      <div class="relative shrink-0">
+        @if (profileImgSrc()) {
+          <img [src]="profileImgSrc()" alt="Foto de perfil"
+            class="w-[56px] h-[56px] rounded-full object-cover"
+            style="box-shadow:0 0 0 3px rgba(219,150,72,.18),0 4px 14px rgba(219,150,72,.3);">
+        } @else {
+          <div class="w-[56px] h-[56px] rounded-full flex items-center justify-center text-white text-[18px] font-bold tracking-tight"
+            style="background:linear-gradient(135deg,#db9648ee,#db964877);
+                   box-shadow:0 0 0 3px rgba(219,150,72,.18),0 4px 14px rgba(219,150,72,.3);">
+            {{ userInitials() }}
+          </div>
+        }
+
+        <!-- Botón cámara -->
+        <label class="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] rounded-full bg-white border border-ink-200
+                       flex items-center justify-center cursor-pointer hover:bg-ink-50 transition-colors shadow-sm"
+          title="Cambiar foto de perfil">
+          <input type="file" hidden accept="image/jpeg,image/png,image/webp"
+            (change)="onProfileImageSelect($event)" [disabled]="profileImgSaving()">
+          @if (profileImgSaving()) {
+            <div class="w-3 h-3 border-[1.5px] border-gold border-t-transparent rounded-full animate-spin"></div>
+          } @else {
+            <svg width="11" height="11" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          }
+        </label>
       </div>
-      <div class="min-w-0">
+
+      <div class="min-w-0 flex-1">
         <p class="text-[16px] font-bold text-ink truncate">{{ user()?.name || '—' }}</p>
         <p class="text-[12.5px] text-ink-400 truncate">{{ user()?.email || '—' }}</p>
         <p class="text-[11.5px] text-ink-300 mt-0.5 truncate">{{ user()?.specialty || '—' }}</p>
+        @if (profileImgMsg()) {
+          <p class="text-[11px] mt-1 font-medium"
+             [class]="profileImgMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+            {{ profileImgMsg()!.text }}
+          </p>
+        }
       </div>
     </div>
   </div>
@@ -125,96 +158,6 @@
         </p>
       }
     </div>
-  </div>
-
-  <!-- Nombre comercial (slug) -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
-    <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-        </svg>
-        Nombre Comercial
-      </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">
-        Define la URL con la que tus clientes acceden a tu portal de reservas.
-      </p>
-    </div>
-
-    <!-- Preview URL -->
-    <div class="bg-ink-50 rounded-[10px] px-3 py-2 flex items-center gap-1.5">
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-ink-300 shrink-0">
-        <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-      <span class="text-[11.5px] text-ink-400 font-mono truncate">
-        /reservar/<strong class="text-ink">{{ slugValue() || user()?.slug || '…' }}</strong>
-      </span>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-2.5">
-      <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-gold">
-        <span class="px-3 text-[12px] text-ink-400 whitespace-nowrap border-r border-ink-200 py-2.5 bg-ink-50 font-mono">
-          /reservar/
-        </span>
-        <input type="text" [ngModel]="slugValue()" (ngModelChange)="slugValue.set($event)"
-          placeholder="mi-consulta"
-          class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono" />
-      </div>
-      <button (click)="saveSlug()" [disabled]="slugSaving()"
-        class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
-        {{ slugSaving() ? 'Guardando...' : 'Guardar' }}
-      </button>
-    </div>
-
-    @if (slugMsg()) {
-    <p class="text-[11.5px] ml-0.5 font-medium"
-       [class]="slugMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
-      {{ slugMsg()!.text }}
-    </p>
-    }
-  </div>
-
-  <!-- Descripción pública -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
-    <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-        Descripción del Perfil
-      </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Texto visible en tu portal público de reservas.</p>
-    </div>
-
-    <textarea [value]="descriptionValue()" (input)="descriptionValue.set($any($event.target).value)"
-      placeholder="Ej: Soy especialista en cortes modernos con más de 10 años de experiencia..."
-      rows="4" maxlength="200"
-      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 resize-none transition-colors focus:border-gold">
-    </textarea>
-
-    <div class="flex items-center justify-between">
-      <span class="text-[11px]"
-        [class]="descriptionValue().length >= 200 ? 'text-red-500 font-semibold' : 'text-ink-400'">
-        {{ descriptionValue().length }} / 200 caracteres
-      </span>
-      <button (click)="saveDescription()" [disabled]="descSaving()"
-        class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
-        {{ descSaving() ? 'Guardando...' : 'Guardar Descripción' }}
-      </button>
-    </div>
-
-    @if (descMsg()) {
-    <p class="text-[11.5px] ml-0.5 font-medium"
-       [class]="descMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
-      {{ descMsg()!.text }}
-    </p>
-    }
   </div>
 
   <!-- Contraseña -->

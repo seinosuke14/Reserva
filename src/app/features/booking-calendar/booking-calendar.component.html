@@ -166,11 +166,17 @@
           <div class="w-[68px] shrink-0"></div>
           <!-- Una columna por profesional — añadir más aquí cuando haya más profesionales -->
           <div class="w-[340px] shrink-0 border-l border-ink-100 px-3 py-2 flex items-center gap-2.5">
-            <div class="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0"
-                 style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                        box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
-              {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}
-            </div>
+            @if (auth.currentUser()?.profileImage) {
+              <img [src]="auth.currentUser()!.profileImage!" alt="Perfil"
+                class="w-[28px] h-[28px] rounded-full object-cover shrink-0"
+                style="box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
+            } @else {
+              <div class="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0"
+                   style="background:linear-gradient(135deg,#db9648ee,#db964877);
+                          box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
+                {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}
+              </div>
+            }
             <div>
               <div class="text-[13px] font-bold text-ink leading-none">{{ auth.currentUser()?.name }}</div>
               <div class="text-[10.5px] text-ink-400 mt-px">{{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }}</div>

@@ -1,6 +1,6 @@
-<div class="portal-root">
+<div class="portal-root" [ngStyle]="portalBgStyle()">
 
-  <main class="portal-main">
+  <main class="portal-main" [ngStyle]="portalBgStyle()">
     @switch (loadState()) {
       @case ('loading') {
         <div class="state-screen">
@@ -93,21 +93,29 @@
           <!-- Hero + Info Card -->
           <div class="profile-hero-section">
             <div class="hero-image">
-              <div class="hero-placeholder">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-                <span>Imagen del profesional</span>
-              </div>
+              @if (professional()?.bannerImage) {
+                <img [src]="professional()!.bannerImage!" class="hero-banner-img" alt="Portada">
+              } @else {
+                <div class="hero-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>Imagen del profesional</span>
+                </div>
+              }
             </div>
 
             <div class="hero-info-card">
-              <div class="info-avatar">{{ professional()?.name?.charAt(0) }}</div>
-              <h2 class="info-name">{{ professional()?.name }}</h2>
-              <p class="info-specialty">{{ professional()?.specialty }}</p>
+              @if (professional()?.profileImage) {
+                <img [src]="professional()!.profileImage!" class="info-avatar-img" alt="Foto de perfil">
+              } @else {
+                <div class="info-avatar">{{ professional()?.name?.charAt(0) }}</div>
+              }
+              <h2 class="info-name" [ngStyle]="headingFontStyle()">{{ professional()?.name }}</h2>
+              <p class="info-specialty" [ngStyle]="headingFontStyle()">{{ professional()?.specialty }}</p>
 
               <div class="info-rating">
                 <div class="rating-stars">
@@ -160,34 +168,41 @@
 
           <!-- Descripción -->
           @if (professional()?.description) {
-            <div class="profile-description">
+            <div class="profile-description" [ngStyle]="bodyFontStyle()">
               <p>{{ professional()!.description }}</p>
             </div>
           }
 
           <!-- Servicios -->
           <div class="profile-services-section">
-            <h3 class="section-title">Servicios disponibles</h3>
+            <h3 class="section-title" [ngStyle]="headingFontStyle()">Servicios disponibles</h3>
             <div class="profile-services-list">
               @for (service of services(); track service.id) {
                 <div class="profile-service-card">
-                  <div class="psc-body">
-                    <h4 class="psc-name">{{ service.name }}</h4>
-                    <p class="psc-desc">{{ service.description }}</p>
-                    <div class="psc-meta">
-                      <span class="psc-duration">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        {{ service.duration }} min
-                      </span>
-                      <span class="psc-price">{{ formatCLP(service.price) }}</span>
+                  @if (service.serviceImage) {
+                    <div class="psc-image">
+                      <img [src]="service.serviceImage" [alt]="service.name" class="psc-image-img">
                     </div>
+                  }
+                  <div class="psc-body">
+                    <div class="psc-info">
+                      <h4 class="psc-name">{{ service.name }}</h4>
+                      <p class="psc-desc">{{ service.description }}</p>
+                      <div class="psc-meta">
+                        <span class="psc-duration">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          {{ service.duration }} min
+                        </span>
+                        <span class="psc-price">{{ formatCLP(service.price) }}</span>
+                      </div>
+                    </div>
+                    <button class="psc-book-btn" (click)="selectService(service)">
+                      Agendar servicio
+                    </button>
                   </div>
-                  <button class="psc-book-btn" (click)="selectService(service)">
-                    Agendar servicio
-                  </button>
                 </div>
               }
             </div>

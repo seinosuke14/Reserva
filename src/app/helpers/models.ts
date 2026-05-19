@@ -9,6 +9,7 @@ export interface IService {
   duration: number;
   price: number;
   isActive: boolean;
+  serviceImage?: string | null;
 }
 
 /** Servicio público (portal de reservas) — sin estado activo */
@@ -18,6 +19,7 @@ export interface IPublicService {
   description: string;
   duration: number;
   price: number;
+  serviceImage?: string | null;
 }
 
 /** Slot de tiempo */
