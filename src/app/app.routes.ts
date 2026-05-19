@@ -67,6 +67,7 @@ export const routes: Routes = [
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
       { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+      { path: 'editar', loadComponent: () => import('./features/brand-editor/brand-editor.component').then(m => m.BrandEditorComponent) },
       { path: '**', redirectTo: '' }
     ]
   },

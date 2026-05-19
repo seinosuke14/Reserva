@@ -1,8 +1,8 @@
 import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
@@ -78,6 +78,41 @@ export class ProfileComponent {
     return status === 'active' && this.daysLeft() <= 7;
   });
 
+  // ── Foto de perfil ───────────────────────────────────────────────────────────
+  profileImgPreview = signal<string | null>(this.auth.currentUser()?.profileImage ?? null);
+  profileImgSaving  = signal(false);
+  profileImgMsg     = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  readonly profileImgSrc = computed(() =>
+    this.profileImgPreview() ?? this.auth.currentUser()?.profileImage ?? null
+  );
+
+  async onProfileImageSelect(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.profileImgPreview.set(URL.createObjectURL(file));
+    this.profileImgSaving.set(true);
+    this.profileImgMsg.set(null);
+
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const updated: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/professionals/upload/profile`, formData)
+      );
+      this.auth.patchUser({ profileImage: updated.profileImage });
+      this.profileImgPreview.set(updated.profileImage);
+      this.profileImgMsg.set({ type: 'success', text: 'Foto de perfil actualizada.' });
+    } catch (err: any) {
+      this.profileImgPreview.set(this.auth.currentUser()?.profileImage ?? null);
+      this.profileImgMsg.set({ type: 'error', text: err?.error?.message ?? 'No se pudo subir la imagen.' });
+    } finally {
+      this.profileImgSaving.set(false);
+      (event.target as HTMLInputElement).value = '';
+    }
+  }
+
   // ── Renovar plan ─────────────────────────────────────────────────────────────
   renewSaving = signal(false);
   renewMsg    = signal<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -93,60 +128,6 @@ export class ProfileComponent {
       window.location.href = result.url;
     } else {
       this.renewMsg.set({ type: 'error', text: result.message ?? 'No se pudo iniciar el pago.' });
-    }
-  }
-
-  // ── Descripción ─────────────────────────────────────────────────────────────
-  descriptionValue = signal(this.auth.currentUser()?.description ?? '');
-  descSaving       = signal(false);
-  descMsg          = signal<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  async saveDescription(): Promise<void> {
-    const description = this.descriptionValue().trim();
-    if (description.length > 200) {
-      this.descMsg.set({ type: 'error', text: 'La descripción no puede superar los 200 caracteres.' }); return;
-    }
-    this.descSaving.set(true);
-    this.descMsg.set(null);
-    try {
-      const updated: any = await firstValueFrom(
-        this.http.put(`${environment.apiUrl}/professionals/profile`, { description })
-      );
-      this.auth.patchUser({ description: updated.description });
-      this.descMsg.set({ type: 'success', text: 'Descripción actualizada correctamente.' });
-    } catch (err: any) {
-      this.descMsg.set({ type: 'error', text: err?.error?.message ?? 'No se pudo actualizar.' });
-    } finally {
-      this.descSaving.set(false);
-    }
-  }
-
-  // ── Slug ────────────────────────────────────────────────────────────────────
-  slugValue   = signal(this.auth.currentUser()?.slug ?? '');
-  slugSaving  = signal(false);
-  slugMsg     = signal<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  async saveSlug(): Promise<void> {
-    const slug = this.slugValue().trim().toLowerCase();
-    if (!slug) { this.slugMsg.set({ type: 'error', text: 'El slug no puede estar vacío.' }); return; }
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-      this.slugMsg.set({ type: 'error', text: 'Solo letras minúsculas, números y guiones (ej: mi-consulta).' }); return;
-    }
-    if (slug === this.auth.currentUser()?.slug) {
-      this.slugMsg.set({ type: 'error', text: 'El slug es el mismo que el actual.' }); return;
-    }
-    this.slugSaving.set(true);
-    this.slugMsg.set(null);
-    try {
-      const updated: any = await firstValueFrom(
-        this.http.put(`${environment.apiUrl}/professionals/profile`, { slug })
-      );
-      this.auth.patchUser({ slug: updated.slug });
-      this.slugMsg.set({ type: 'success', text: 'Nombre comercial actualizado.' });
-    } catch (err: any) {
-      this.slugMsg.set({ type: 'error', text: err?.error?.message ?? 'No se pudo actualizar.' });
-    } finally {
-      this.slugSaving.set(false);
     }
   }
 

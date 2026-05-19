@@ -44,6 +44,9 @@ export class ServiceManagementComponent implements OnInit {
   isSaving       = signal(false);
   errorMsg       = signal<string | null>(null);
 
+  imgPreview     = signal<string | null>(null);
+  imgFile        = signal<File | null>(null);
+
   slotDuration   = signal(30);
   blocksCount    = signal(1);
   readonly maxBlocks = 8;
@@ -97,6 +100,8 @@ export class ServiceManagementComponent implements OnInit {
     this.editingService.set(null);
     this.blocksCount.set(1);
     this.form.reset({ duration: this.slotDuration(), price: 0 });
+    this.imgPreview.set(null);
+    this.imgFile.set(null);
     this.isFormOpen.set(true);
   }
 
@@ -104,8 +109,17 @@ export class ServiceManagementComponent implements OnInit {
     this.editingService.set(service);
     const blocks = Math.max(1, Math.round(service.duration / this.slotDuration()));
     this.blocksCount.set(blocks);
-    this.form.patchValue({ ...service, duration: blocks * this.slotDuration() });
+    this.form.patchValue({ ...service, price: Number(service.price), duration: blocks * this.slotDuration() });
+    this.imgPreview.set(service.serviceImage ?? null);
+    this.imgFile.set(null);
     this.isFormOpen.set(true);
+  }
+
+  onImageSelect(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.imgFile.set(file);
+    this.imgPreview.set(URL.createObjectURL(file));
   }
 
   async deleteService(id: string): Promise<void> {
@@ -137,16 +151,31 @@ export class ServiceManagementComponent implements OnInit {
     const editing = this.editingService();
 
     try {
+      let saved: IService;
       if (editing) {
-        const updated = await firstValueFrom(
+        saved = await firstValueFrom(
           this.http.put<IService>(`${environment.apiUrl}/services/${editing.id}`, val)
         );
-        this.services.update(list => list.map(s => s.id === updated.id ? updated : s));
       } else {
-        const created = await firstValueFrom(
+        saved = await firstValueFrom(
           this.http.post<IService>(`${environment.apiUrl}/services`, val)
         );
-        this.services.update(list => [...list, created]);
+      }
+
+      // Si hay imagen pendiente, subirla ahora que tenemos el ID
+      const file = this.imgFile();
+      if (file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        saved = await firstValueFrom(
+          this.http.post<IService>(`${environment.apiUrl}/services/${saved.id}/upload`, formData)
+        );
+      }
+
+      if (editing) {
+        this.services.update(list => list.map(s => s.id === saved.id ? saved : s));
+      } else {
+        this.services.update(list => [...list, saved]);
       }
       this.isFormOpen.set(false);
     } catch {

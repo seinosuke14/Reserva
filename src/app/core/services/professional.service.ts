@@ -22,6 +22,13 @@ export interface IProfessional {
   subscriptionStatus?: SubscriptionStatus | null;
   subscriptionEndDate?: string | null;
   planActivatedAt?: string | null;
+  headingFont?: string;
+  bodyFont?: string;
+  profileImage?: string;
+  bannerImage?: string;
+  backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundType?: 'color' | 'image';
 }
 
 @Injectable({ providedIn: 'root' })
