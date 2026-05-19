@@ -73,6 +73,7 @@ export class AppLayoutComponent {
       items: [
         { path: '/app/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
         { path: '/app/horario',       label: 'Horario',         icon: 'clock' },
+        { path: '/app/editar',        label: 'Editar',          icon: 'sliders' },
       ],
     },
   ];
@@ -86,6 +87,7 @@ export class AppLayoutComponent {
     '/app/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
     '/app/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
     '/app/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
+    '/app/editar':        { title: 'Editar Portal',  sub: 'Personaliza la apariencia de tu portal de reservas' },
   };
 
   private readonly subscriptionSvc = inject(SubscriptionService);

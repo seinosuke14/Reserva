@@ -47,7 +47,17 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');
-  readonly professional = signal<{ id: string; name: string; slug: string; specialty: string; phone: string; description?: string; ratingAvg?: number; ratingCount?: number } | null>(null);
+  readonly professional = signal<{
+    id: string; name: string; slug: string; specialty: string; phone: string;
+    description?: string; ratingAvg?: number; ratingCount?: number;
+    profileImage?:    string | null;
+    bannerImage?:     string | null;
+    backgroundColor?: string | null;
+    backgroundImage?: string | null;
+    backgroundType?:  'color' | 'image';
+    headingFont?:     string | null;
+    bodyFont?:        string | null;
+  } | null>(null);
 
   readonly stars = [1, 2, 3, 4, 5];
   readonly services     = signal<IPublicService[]>([]);
@@ -73,6 +83,42 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly emailCheckState = signal<EmailCheckState>('idle');
   private emailDebounce: ReturnType<typeof setTimeout> | null = null;
   private sub: Subscription | null = null;
+
+  // ─── Estilos dinámicos del portal ──────────────────────────────────────────
+  readonly portalBgStyle = computed((): Record<string, string> => {
+    const p = this.professional();
+    if (!p) return {};
+    if (p.backgroundType === 'image' && p.backgroundImage) {
+      return {
+        'background-image':      `url(${p.backgroundImage})`,
+        'background-size':       'cover',
+        'background-position':   'center',
+        'background-attachment': 'fixed',
+      };
+    }
+    if (p.backgroundColor) return { 'background-color': p.backgroundColor };
+    return {};
+  });
+
+  readonly headingFontStyle = computed((): Record<string, string> => {
+    const f = this.professional()?.headingFont;
+    return f ? { 'font-family': `${f}, sans-serif` } : {};
+  });
+
+  readonly bodyFontStyle = computed((): Record<string, string> => {
+    const f = this.professional()?.bodyFont;
+    return f ? { 'font-family': `${f}, sans-serif` } : {};
+  });
+
+  private _loadFont(family: string): void {
+    const id = `gfont-portal-${family.replace(/\s+/g, '-').toLowerCase()}`;
+    if (document.getElementById(id)) return;
+    const link = document.createElement('link');
+    link.id   = id;
+    link.rel  = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+  }
 
   // ─── Computed ───────────────────────────────────────────────────────────────
   readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
@@ -209,6 +255,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.http.get(`${environment.apiUrl}/public/professionals/${slug}`)
       );
       this.professional.set(data.professional);
+      if (data.professional.headingFont) this._loadFont(data.professional.headingFont);
+      if (data.professional.bodyFont)    this._loadFont(data.professional.bodyFont);
       this.services.set(data.services);
       this.availability.set(data.availability);
       const visibleMethods: IPublicPaymentMethod[] = (data.paymentMethods ?? [])
