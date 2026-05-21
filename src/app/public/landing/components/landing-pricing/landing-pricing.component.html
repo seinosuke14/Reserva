@@ -7,13 +7,13 @@
     </div>
 
     <div class="plans">
-      @for (p of plans; track p.name) {
-      <div [class]="'plan' + (p.primary ? ' featured' : '') + (p.comingSoon ? ' coming-soon' : '')">
+      @for (p of mergedPlans; track p.name) {
+      <div [class]="'plan' + (p.primary ? ' featured' : '') + (p.comingSoon && !companyMode ? ' coming-soon' : '')">
 
         @if (p.badge) {
         <div class="plan-badge">{{ p.badge }}</div>
         }
-        @if (p.comingSoon) {
+        @if (p.comingSoon && !companyMode) {
         <div class="plan-badge plan-badge--soon">Próximamente</div>
         }
 
@@ -21,7 +21,7 @@
 
         <!-- Precio -->
         <div class="plan-price">
-          @if (!p.comingSoon && p.price !== null) {
+          @if (p.price !== null) {
           <span class="cur">$</span>
           <span class="num">{{ displayPrice(p).toLocaleString('es-CL') }}</span>
           <span class="per">
@@ -30,13 +30,13 @@
             @else { / mes }
           </span>
           }
-          @if (p.comingSoon) {
+          @if (p.comingSoon && !companyMode && p.price === null) {
           <span class="price-soon">—</span>
           }
         </div>
 
-        <!-- Selector de usuarios: básico y pro (estático, 1 usuario) -->
-        @if (p.id === 'basic' || p.id === 'pro') {
+        <!-- Selector usuarios: 1 usuario (basic/pro) -->
+        @if ((p.id === 'basic' || p.id === 'pro') && !companyMode) {
         <div class="plan-users">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -47,10 +47,25 @@
         </div>
         }
 
-        <!-- Selector de usuarios: pro_max (interactivo 4–10) -->
+        <!-- Selector usuarios: team (interactivo 2–4) -->
+        @if (p.id === 'team') {
+        <div class="plan-users plan-users--selector">
+          <span class="users-label">Profesionales (+$5.000 c/u desde el 3°)</span>
+          <div class="users-control">
+            <button class="users-btn" (click)="decrementTeamUsers()" [disabled]="teamUsers() <= TEAM_MIN"
+              aria-label="Quitar usuario">−</button>
+            <span class="users-count mostPopular">{{ teamUsers() }}</span>
+            <button class="users-btn" (click)="incrementTeamUsers()" [disabled]="teamUsers() >= TEAM_MAX"
+              aria-label="Agregar usuario">+</button>
+          </div>
+          <span class="users-note">mín. {{ TEAM_MIN }} · máx. {{ TEAM_MAX }}</span>
+        </div>
+        }
+
+        <!-- Selector usuarios: pro_max (interactivo 5–25) -->
         @if (p.id === 'pro_max') {
         <div class="plan-users plan-users--selector">
-          <span class="users-label">Usuarios (8000$ c/u)</span>
+          <span class="users-label">Usuarios (5.000 CLP c/u)</span>
           <div class="users-control">
             <button class="users-btn" (click)="decrementUsers()" [disabled]="proMaxUsers() <= PRO_MAX_MIN"
               aria-label="Quitar usuario">−</button>
@@ -71,7 +86,23 @@
         </ul>
 
         <div class="plan-cta">
-          @if (p.comingSoon) {
+          @if (companyMode && (p.id === 'team' || p.id === 'pro_max')) {
+            <!-- CTA empresa: botón contratar -->
+            <button
+              (click)="emitCheckout(p.id)"
+              [disabled]="!!checkingOut"
+              [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline') + (!!checkingOut ? ' btn-disabled' : '')">
+              @if (checkingOut === p.id) {
+                <svg style="display:inline;animation:spin 1s linear infinite;margin-right:6px" width="14" height="14"
+                  fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                </svg>
+                Redirigiendo...
+              } @else {
+                Contratar {{ p.name }}
+              }
+            </button>
+          } @else if (p.comingSoon) {
             <span class="btn btn-soon" aria-disabled="true">Próximamente</span>
           } @else if (p.id === 'free') {
             @if (isAuthenticated()) {
@@ -83,6 +114,14 @@
                 {{ p.cta }}
               </a>
             }
+          } @else if (p.id === 'team' || p.id === 'pro_max') {
+            <a routerLink="/registro-empresa" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+              Crear cuenta empresa
+            </a>
+            <div class="plan-cta-login">
+              ¿Ya tienes cuenta empresa?
+              <a routerLink="/login" class="plan-cta-login-link">Iniciar sesión</a>
+            </div>
           } @else if (isAuthenticated()) {
             <a routerLink="/planes" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
               Contratar plan

@@ -1,10 +1,11 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { SubscriptionService, IPlan } from '../../core/services/subscription.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PlanType } from '../../core/services/professional.service';
+import { ICompanySubStatus } from '../../core/services/company.service';
 
 @Component({
   selector: 'app-plan-selection',
@@ -22,6 +23,11 @@ import { PlanType } from '../../core/services/professional.service';
   ]
 })
 export class PlanSelectionComponent implements OnInit {
+  @Input() companyMode = false;
+  @Input() checkingOut: string | null = null;
+  @Input() companySubStatus: ICompanySubStatus | null = null;
+  @Output() companyCheckout = new EventEmitter<{ plan: string; members: number }>();
+
   private readonly subscriptionSvc = inject(SubscriptionService);
   private readonly authSvc         = inject(AuthService);
   private readonly router          = inject(Router);
@@ -33,14 +39,82 @@ export class PlanSelectionComponent implements OnInit {
   isAuthenticated = computed(() => this.authSvc.isAuthenticated());
   userName        = computed(() => this.authSvc.currentUser()?.name ?? '');
 
-  /** Onboarding: usuario autenticado pero sin plan aún (recién verificó email) */
   isOnboarding = computed(() => {
     const user = this.authSvc.currentUser();
     return !!user && !user.plan;
   });
 
+  // ── Company mode: selectores de cantidad ──
+  readonly TEAM_MIN    = 2;
+  readonly TEAM_MAX    = 4;
+  readonly TEAM_EXTRA  = 5000;
+  readonly PRO_MAX_MIN = 5;
+  readonly PRO_MAX_MAX = 25;
+  readonly PRO_MAX_EXTRA = 5000;
+
+  teamUsers   = signal(2);
+  proMaxUsers = signal(5);
+
+  teamDisplayPrice = computed(() => {
+    const base = this.plans().find(p => p.id === 'team')?.price ?? 25000;
+    return base + Math.max(0, this.teamUsers() - this.TEAM_MIN) * this.TEAM_EXTRA;
+  });
+
+  proMaxDisplayPrice = computed(() => {
+    const base = this.plans().find(p => p.id === 'pro_max')?.price ?? 25000;
+    return base + (this.proMaxUsers() - this.PRO_MAX_MIN) * this.PRO_MAX_EXTRA;
+  });
+
+  teamUsersMin   = computed(() => this.isActivePlan('team')    ? Math.max(this.TEAM_MIN,    this.companySubStatus?.maxMembers ?? this.TEAM_MIN)    : this.TEAM_MIN);
+  proMaxUsersMin = computed(() => this.isActivePlan('pro_max') ? Math.max(this.PRO_MAX_MIN, this.companySubStatus?.maxMembers ?? this.PRO_MAX_MIN) : this.PRO_MAX_MIN);
+
+  incrementTeam()   { this.teamUsers.update(n => Math.min(n + 1, this.TEAM_MAX)); }
+  decrementTeam()   { this.teamUsers.update(n => Math.max(n - 1, this.teamUsersMin())); }
+  incrementProMax() { this.proMaxUsers.update(n => Math.min(n + 1, this.PRO_MAX_MAX)); }
+  decrementProMax() { this.proMaxUsers.update(n => Math.max(n - 1, this.proMaxUsersMin())); }
+
+  isActivePlan(planId: string): boolean {
+    return !!this.companySubStatus?.hasPlan && this.companySubStatus.plan === planId && this.companySubStatus.status === 'active';
+  }
+
+  hasChange(plan: IPlan): boolean {
+    if (!this.isActivePlan(plan.id)) return true;
+    const current  = this.companySubStatus?.maxMembers ?? 0;
+    const selected = plan.id === 'team' ? this.teamUsers() : this.proMaxUsers();
+    return selected !== current;
+  }
+
+  extraCost(plan: IPlan): number {
+    if (!this.isActivePlan(plan.id)) return 0;
+    const current = this.companySubStatus?.maxMembers ?? 0;
+    if (plan.id === 'team') {
+      return Math.max(0, this.teamUsers() - current) * this.TEAM_EXTRA;
+    }
+    if (plan.id === 'pro_max') {
+      return Math.max(0, this.proMaxUsers() - current) * this.PRO_MAX_EXTRA;
+    }
+    return 0;
+  }
+
+  get visiblePlans(): IPlan[] {
+    const all = this.plans();
+    if (this.companyMode) return all.filter(p => p.id === 'team' || p.id === 'pro_max');
+    const trialUsed = this.authSvc.currentUser()?.trialUsed ?? false;
+    return trialUsed ? all.filter(p => p.id !== 'free') : all;
+  }
+
+  isPlanComingSoon(plan: IPlan): boolean {
+    return !!plan.comingSoon && !this.companyMode;
+  }
+
   ngOnInit(): void {
-    this.subscriptionSvc.getPlans().then(p => this.plans.set(p));
+    this.subscriptionSvc.getPlans().then(p => {
+      this.plans.set(p);
+      if (this.companySubStatus?.hasPlan && this.companySubStatus.maxMembers) {
+        if (this.companySubStatus.plan === 'team')    this.teamUsers.set(this.companySubStatus.maxMembers);
+        if (this.companySubStatus.plan === 'pro_max') this.proMaxUsers.set(this.companySubStatus.maxMembers);
+      }
+    });
   }
 
   logout(): void {
@@ -49,9 +123,15 @@ export class PlanSelectionComponent implements OnInit {
   }
 
   async selectPlan(plan: IPlan): Promise<void> {
-    if (!plan.available || plan.comingSoon) return;
+    if (!plan.available || this.isPlanComingSoon(plan)) return;
 
-    // Plan gratuito solo seleccionable en modo onboarding
+    if (this.companyMode) {
+      if (!this.hasChange(plan)) return;
+      const members = plan.id === 'team' ? this.teamUsers() : this.proMaxUsers();
+      this.companyCheckout.emit({ plan: plan.id, members });
+      return;
+    }
+
     if (plan.id === 'free') {
       if (!this.isOnboarding()) return;
       this.activating.set('free');
@@ -114,18 +194,27 @@ export class PlanSelectionComponent implements OnInit {
   }
 
   getPlanCardClass(plan: IPlan): string {
-    if (plan.comingSoon) return 'ps-plan-card ps-plan-card--disabled';
-    if (plan.id === 'pro_max') return 'ps-plan-card ps-plan-card--max';
-    if (this.isPrimary(plan))  return 'ps-plan-card ps-plan-card--featured';
+    if (this.isPlanComingSoon(plan)) return 'ps-plan-card ps-plan-card--disabled';
+    if (plan.id === 'pro_max' && !this.companyMode) return 'ps-plan-card ps-plan-card--max';
+    if (this.isPrimary(plan) || this.companyMode) return 'ps-plan-card ps-plan-card--featured';
     return 'ps-plan-card';
   }
 
   getPlanButtonClass(plan: IPlan): string {
+    if (this.companyMode) {
+      return 'ps-btn ps-btn--featured';
+    }
     if (plan.id === 'free') {
       return this.isOnboarding() ? 'ps-btn ps-btn--primary' : 'ps-btn ps-btn--muted';
     }
     if (plan.id === 'pro_max') return 'ps-btn ps-btn--max';
     if (this.isPrimary(plan))  return 'ps-btn ps-btn--featured';
     return 'ps-btn ps-btn--secondary';
+  }
+
+  isActivating(plan: IPlan): boolean {
+    return this.companyMode
+      ? this.checkingOut === plan.id
+      : this.activating() === plan.id;
   }
 }

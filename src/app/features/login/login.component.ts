@@ -5,6 +5,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfessionalService } from '../../core/services/professional.service';
+import { CompanyService } from '../../core/services/company.service';
 
 @Component({
   selector: 'app-login',
@@ -31,12 +32,14 @@ import { ProfessionalService } from '../../core/services/professional.service';
   ]
 })
 export class LoginComponent {
-  private readonly fb      = inject(FormBuilder);
-  private readonly auth    = inject(AuthService);
-  private readonly profSvc = inject(ProfessionalService);
-  private readonly router  = inject(Router);
-  private readonly route   = inject(ActivatedRoute);
+  private readonly fb         = inject(FormBuilder);
+  private readonly auth       = inject(AuthService);
+  private readonly profSvc    = inject(ProfessionalService);
+  private readonly companySvc = inject(CompanyService);
+  private readonly router     = inject(Router);
+  private readonly route      = inject(ActivatedRoute);
 
+  accountType   = signal<'professional' | 'company'>('professional');
   isSubmitting  = signal(false);
   isRedirecting = signal(false);
   error         = signal('');
@@ -65,10 +68,28 @@ export class LoginComponent {
     this.step.set('forgot');
   }
 
+  setAccountType(type: 'professional' | 'company'): void {
+    this.accountType.set(type);
+    this.error.set('');
+    this.step.set('login');
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
     this.error.set('');
+
+    if (this.accountType() === 'company') {
+      const result = await this.companySvc.login(this.form.value.email!, this.form.value.password!);
+      this.isSubmitting.set(false);
+      if (result.success) {
+        this.router.navigate(['/empresa']);
+      } else {
+        this.error.set(result.message);
+      }
+      return;
+    }
+
     const result = await this.auth.login(this.form.value.email!, this.form.value.password!);
     this.isSubmitting.set(false);
     if (result.success) {
@@ -98,7 +119,11 @@ export class LoginComponent {
     }
     this.isForgotSending.set(true);
     this.forgotError.set('');
-    await this.auth.forgotPassword(email);
+    if (this.accountType() === 'company') {
+      await this.companySvc.forgotPassword(email);
+    } else {
+      await this.auth.forgotPassword(email);
+    }
     this.isForgotSending.set(false);
     this.step.set('forgot-sent');
   }

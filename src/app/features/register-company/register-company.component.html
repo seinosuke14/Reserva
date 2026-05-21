@@ -1,0 +1,190 @@
+<div class="min-h-screen flex items-center justify-center p-6 font-sans"
+  style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
+
+  <div @fadeSlide class="w-full max-w-lg">
+
+    <!-- Brand -->
+    <div class="flex items-center justify-center gap-3 mb-7">
+      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
+        style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
+        <img src="citema.webp" alt="citema" class="h-9 w-auto" />
+      </div>
+      <div class="leading-none">
+        <div class="text-[18px] font-extrabold tracking-tight text-white">CITEMA</div>
+        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">EQUIPOS</div>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-[20px] p-8 shadow-[0_28px_80px_rgba(0,0,0,.35)] border border-black/[.04]">
+
+      @if (step() === 'verify') {
+      <!-- ── Paso 2: Verificación ── -->
+      <div @stepAnim class="text-center">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center"
+          style="background:rgba(219,150,72,.12);">
+          <svg width="28" height="28" fill="none" stroke="#db9648" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+        </div>
+        <h2 class="text-[19px] font-bold text-ink tracking-tight mb-1">Verifica tu correo</h2>
+        <p class="text-[12.5px] text-ink-400 mb-6">
+          Enviamos un código de 6 dígitos a<br>
+          <strong class="text-ink">{{ pendingEmail() }}</strong>
+        </p>
+
+        <input type="text" inputmode="numeric" maxlength="6" placeholder="000000" [value]="verificationCode()"
+          (input)="onCodeInput($event)"
+          class="w-44 mx-auto block text-center text-[28px] font-black tracking-[.3em] px-4 py-3 rounded-[12px] border-[2px] outline-none transition-colors text-ink"
+          [class.border-red-300]="verifyError()" [class.border-ink-200]="!verifyError()"
+          style="font-family:monospace;" />
+
+        @if (verifyError()) {
+        <p class="text-[12px] text-red-500 font-medium mt-2">{{ verifyError() }}</p>
+        }
+
+        <button (click)="onVerify()" [disabled]="isVerifying() || verificationCode().length < 6"
+          class="w-full mt-5 py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+          @if (isVerifying()) {
+          <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
+            viewBox="0 0 24 24">
+            <line x1="12" y1="2" x2="12" y2="6" /><line x1="12" y1="18" x2="12" y2="22" />
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" /><line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+            <line x1="2" y1="12" x2="6" y2="12" /><line x1="18" y1="12" x2="22" y2="12" />
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" /><line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+          </svg>
+          Verificando...
+          } @else { Verificar cuenta }
+        </button>
+
+        <div class="mt-4 flex flex-col items-center gap-1">
+          @if (resendMsg()) {
+          <p class="text-[12px] text-emerald-600 font-medium">{{ resendMsg() }}</p>
+          }
+          <button (click)="onResend()" [disabled]="isResending()"
+            class="text-[12px] text-ink-400 hover:text-gold transition-colors disabled:opacity-50">
+            {{ isResending() ? 'Reenviando...' : '¿No llegó el código? Reenviar' }}
+          </button>
+        </div>
+      </div>
+
+      } @else {
+
+      <!-- ── Paso 1: Formulario ── -->
+      <div class="mb-6">
+        <h1 class="text-[20px] font-bold text-ink tracking-tight">Registro de Empresa</h1>
+        <p class="text-[13px] text-ink-400 mt-1">Crea la cuenta de tu equipo. Plan <strong>Equipo</strong> o <strong>Pro Max</strong>.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+
+        <!-- Nombre empresa -->
+        <div class="space-y-1.5">
+          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Nombre de la empresa</label>
+          <input formControlName="name" type="text" placeholder="Clínica Los Andes" maxlength="80"
+            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            [class.border-red-300]="f['name'].invalid && f['name'].touched"
+            [class.border-ink-200]="!(f['name'].invalid && f['name'].touched)" />
+          @if (f['name'].invalid && f['name'].touched) {
+            @if (f['name'].errors?.['required']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Nombre requerido</p>
+            } @else if (f['name'].errors?.['minlength']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 3 caracteres</p>
+            }
+          }
+        </div>
+
+        <!-- RUT empresa -->
+        <div class="space-y-1.5">
+          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">RUT empresa</label>
+          <input formControlName="rut" type="text" placeholder="76.543.210-K" maxlength="12"
+            (input)="onRutInput($event)"
+            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            [class.border-red-300]="f['rut'].invalid && f['rut'].touched"
+            [class.border-ink-200]="!(f['rut'].invalid && f['rut'].touched)" />
+          @if (f['rut'].invalid && f['rut'].touched) {
+            @if (f['rut'].errors?.['required']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT requerido</p>
+            } @else if (f['rut'].errors?.['rutInvalid']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT inválido</p>
+            }
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email de la empresa</label>
+          <input formControlName="email" type="email" placeholder="contacto@clinica.com" maxlength="254"
+            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            [class.border-red-300]="f['email'].invalid && f['email'].touched"
+            [class.border-ink-200]="!(f['email'].invalid && f['email'].touched)" />
+          @if (f['email'].invalid && f['email'].touched) {
+            @if (f['email'].errors?.['required']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Email requerido</p>
+            } @else if (f['email'].errors?.['emailInvalid']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Formato inválido</p>
+            }
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="space-y-1.5">
+          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Contraseña</label>
+          <input formControlName="password" type="password" placeholder="••••••••" maxlength="16"
+            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            [class.border-red-300]="f['password'].invalid && f['password'].touched"
+            [class.border-ink-200]="!(f['password'].invalid && f['password'].touched)" />
+          @if (f['password'].invalid && f['password'].touched) {
+            @if (f['password'].errors?.['required']) {
+            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Contraseña requerida</p>
+            } @else {
+            <ul class="text-[11.5px] text-red-500 font-medium ml-0.5 space-y-0.5">
+              @if (f['password'].errors?.['minLength']) { <li>• Mínimo 6 caracteres</li> }
+              @if (f['password'].errors?.['noUppercase']) { <li>• Al menos 1 mayúscula</li> }
+              @if (f['password'].errors?.['noNumber']) { <li>• Al menos 1 número</li> }
+            </ul>
+            }
+          } @else {
+          <p class="text-[10.5px] text-ink-400 ml-0.5">6–16 caracteres, 1 mayúscula y 1 número.</p>
+          }
+        </div>
+
+        @if (errorMsg()) {
+        <div class="bg-red-50 border border-red-200 text-red-700 text-[12.5px] px-3.5 py-2.5 rounded-[10px]">
+          {{ errorMsg() }}
+        </div>
+        }
+
+        <button type="submit" [disabled]="isSubmitting()"
+          class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+          style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+          @if (isSubmitting()) {
+          <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
+            viewBox="0 0 24 24">
+            <line x1="12" y1="2" x2="12" y2="6" /><line x1="12" y1="18" x2="12" y2="22" />
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" /><line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+            <line x1="2" y1="12" x2="6" y2="12" /><line x1="18" y1="12" x2="22" y2="12" />
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" /><line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+          </svg>
+          Registrando...
+          } @else {
+          Crear cuenta empresa
+          }
+        </button>
+
+        <p class="text-center text-[12.5px] text-ink-500">
+          ¿Ya tienes cuenta empresa?
+          <a routerLink="/login" class="font-bold text-gold hover:underline ml-0.5">Iniciar sesión</a>
+        </p>
+
+        <p class="text-center text-[12.5px] text-ink-500">
+          ¿Eres profesional independiente?
+          <a routerLink="/registro" class="font-bold text-gold hover:underline ml-0.5">Regístrate aquí</a>
+        </p>
+      </form>
+      }
+    </div>
+  </div>
+</div>
