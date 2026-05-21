@@ -29,6 +29,9 @@ export interface IProfessional {
   backgroundColor?: string;
   backgroundImage?: string;
   backgroundType?: 'color' | 'image';
+  companyId?: string | null;
+  companyRole?: string | null;
+  trialUsed?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +71,28 @@ export class ProfessionalService {
     } catch (err: any) {
       const message = err?.error?.message ?? 'Error al reenviar el código.';
       return { success: false, message };
+    }
+  }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/auth/check-email`, { params: { email } })
+      );
+      return res.exists === true;
+    } catch {
+      return false;
+    }
+  }
+
+  async acceptInvite(inviteToken: string): Promise<{ success: boolean; message: string; token?: string; user?: any }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/auth/accept-invite`, { inviteToken })
+      );
+      return { success: true, message: res.message, token: res.token, user: res.user };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al aceptar la invitación.' };
     }
   }
 

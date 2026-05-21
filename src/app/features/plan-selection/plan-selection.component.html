@@ -1,5 +1,6 @@
-<div class="ps-page">
+<div [class]="companyMode ? 'ps-page ps-embedded' : 'ps-page'">
 
+  @if (!companyMode) {
   <!-- Volver al dashboard (solo si está autenticado) -->
   @if (isAuthenticated()) {
   <div class="ps-back-row">
@@ -58,7 +59,6 @@
       }
     </p>
 
-    <!-- Acciones de sesión -->
     @if (isAuthenticated()) {
     <div class="ps-session">
       <span>Conectado como <span class="ps-session-name">{{ userName() }}</span></span>
@@ -76,26 +76,23 @@
     </div>
     }
   </div>
+  }
 
   <!-- Grid de planes -->
-  <div @fadeIn class="ps-plans-grid">
+  <div @fadeIn [class]="companyMode ? 'ps-plans-grid ps-plans-grid--2col' : 'ps-plans-grid'">
 
-    @for (plan of plans(); track plan.id) {
-    @if (plan.id !== 'free' || isOnboarding() || !isAuthenticated()) {
+    @for (plan of visiblePlans; track plan.id) {
+    @if (!companyMode && (plan.id !== 'free' || isOnboarding() || !isAuthenticated())) {
     <div [class]="getPlanCardClass(plan)" (click)="selectPlan(plan)"
-      [attr.role]="plan.available && !plan.comingSoon ? 'button' : null">
+      [attr.role]="plan.available && !isPlanComingSoon(plan) ? 'button' : null">
 
-      <!-- Badge próximamente -->
-      @if (plan.comingSoon) {
+      @if (isPlanComingSoon(plan)) {
       <div class="ps-plan-soon">Próximamente</div>
       }
-
-      <!-- Badge "más elegido" -->
       @if (getPlanBadge(plan)) {
       <div class="ps-plan-popular">{{ getPlanBadge(plan) }}</div>
       }
 
-      <!-- Nombre del plan -->
       <div class="ps-plan-header">
         <div [class]="'ps-plan-duration ' + (isPrimary(plan) ? 'ps-plan-duration--featured' : '')">
           {{ plan.duration }}
@@ -103,7 +100,6 @@
         <h2 class="ps-plan-name">{{ plan.name }}</h2>
       </div>
 
-      <!-- Precio -->
       <div class="ps-plan-price">
         @if (plan.price === null) {
         <span class="ps-price-null">—</span>
@@ -117,23 +113,17 @@
         }
       </div>
 
-      <!-- Descripción -->
       <p class="ps-plan-desc">{{ plan.description }}</p>
 
-      <!-- Features list -->
       @if (getPlanFeatures(plan).length > 0) {
       <ul class="ps-plan-features">
         @for (f of getPlanFeatures(plan); track f) {
-        <li>
-          <span class="ps-check">✓</span>
-          <span>{{ f }}</span>
-        </li>
+        <li><span class="ps-check">✓</span><span>{{ f }}</span></li>
         }
       </ul>
       }
 
-      <!-- Botón -->
-      @if (!plan.comingSoon) {
+      @if (!isPlanComingSoon(plan)) {
       <button [disabled]="!plan.available || !!activating() || (plan.id === 'free' && !isOnboarding())"
         [class]="getPlanButtonClass(plan)" (click)="$event.stopPropagation(); selectPlan(plan)">
         @if (activating() === plan.id) {
@@ -152,22 +142,124 @@
       }
     </div>
     }
+
+    <!-- Company mode cards -->
+    @if (companyMode) {
+    <div [class]="getPlanCardClass(plan) + (isActivePlan(plan.id) ? ' ps-plan-card--active' : '')">
+
+      <!-- Badge plan activo -->
+      @if (isActivePlan(plan.id)) {
+      <div class="ps-plan-current">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Tu plan actual
+      </div>
+      } @else if (getPlanBadge(plan)) {
+      <div class="ps-plan-popular">{{ getPlanBadge(plan) }}</div>
+      }
+
+      <div class="ps-plan-header">
+        <div [class]="'ps-plan-duration ' + (isPrimary(plan) ? 'ps-plan-duration--featured' : '')">
+          {{ plan.duration }}
+        </div>
+        <h2 class="ps-plan-name">{{ plan.name }}</h2>
+      </div>
+
+      <!-- Precio dinámico -->
+      <div class="ps-plan-price">
+        @if (isActivePlan(plan.id) && hasChange(plan)) {
+          <span class="ps-price-cur">$</span>
+          <span class="ps-price-num">
+            {{ (plan.id === 'pro_max' ? proMaxDisplayPrice() : teamDisplayPrice()) | number:'1.0-0' }}
+          </span>
+          <span class="ps-price-per">CLP / mes</span>
+        } @else {
+          <span class="ps-price-cur">$</span>
+          <span class="ps-price-num">
+            {{ (plan.id === 'pro_max' ? proMaxDisplayPrice() : plan.id === 'team' ? teamDisplayPrice() : (plan.price ?? 0)) | number:'1.0-0' }}
+          </span>
+          <span class="ps-price-per">CLP / mes</span>
+        }
+      </div>
+      @if (isActivePlan(plan.id) && hasChange(plan)) {
+        <span class="ps-price-upgrade-label">Precio mensual nuevo</span>
+        <span class="ps-price-extra">
+          A pagar ahora: ${{ extraCost(plan) | number:'1.0-0' }} CLP (diferencia)
+        </span>
+      }
+
+      <p class="ps-plan-desc">{{ plan.description }}</p>
+
+      <!-- Selector cantidad team -->
+      @if (plan.id === 'team') {
+      <div class="ps-quantity">
+        <span class="ps-quantity-label">Profesionales (+${{ TEAM_EXTRA | number }} c/u desde el 3°)</span>
+        <div class="ps-quantity-control">
+          <button class="ps-qty-btn" (click)="$event.stopPropagation(); decrementTeam()"
+            [disabled]="teamUsers() <= teamUsersMin()">−</button>
+          <span class="ps-qty-num">{{ teamUsers() }}</span>
+          <button class="ps-qty-btn" (click)="$event.stopPropagation(); incrementTeam()"
+            [disabled]="teamUsers() >= TEAM_MAX">+</button>
+        </div>
+        <span class="ps-quantity-note">mín. {{ teamUsersMin() }} · máx. {{ TEAM_MAX }}</span>
+      </div>
+      }
+
+      <!-- Selector cantidad pro_max -->
+      @if (plan.id === 'pro_max') {
+      <div class="ps-quantity">
+        <span class="ps-quantity-label">Profesionales
+          @if (!isActivePlan('pro_max')) { (+${{ PRO_MAX_EXTRA | number }} c/u) }
+        </span>
+        <div class="ps-quantity-control">
+          <button class="ps-qty-btn" (click)="$event.stopPropagation(); decrementProMax()"
+            [disabled]="proMaxUsers() <= proMaxUsersMin()">−</button>
+          <span class="ps-qty-num">{{ proMaxUsers() }}</span>
+          <button class="ps-qty-btn" (click)="$event.stopPropagation(); incrementProMax()"
+            [disabled]="proMaxUsers() >= PRO_MAX_MAX">+</button>
+        </div>
+        <span class="ps-quantity-note">
+          @if (isActivePlan('pro_max')) { actual: {{ companySubStatus?.maxMembers }} · } máx. {{ PRO_MAX_MAX }}
+        </span>
+      </div>
+      }
+
+      @if (getPlanFeatures(plan).length > 0) {
+      <ul class="ps-plan-features">
+        @for (f of getPlanFeatures(plan); track f) {
+        <li><span class="ps-check">✓</span><span>{{ f }}</span></li>
+        }
+      </ul>
+      }
+
+      <button [disabled]="!!checkingOut || !hasChange(plan)" [class]="getPlanButtonClass(plan)"
+        (click)="$event.stopPropagation(); selectPlan(plan)">
+        @if (isActivating(plan)) {
+          <span class="ps-spinner"></span>
+          Redirigiendo…
+        } @else if (isActivePlan(plan.id) && !hasChange(plan)) {
+          Plan activo
+        } @else if (isActivePlan(plan.id) && hasChange(plan)) {
+          Ampliar equipo
+        } @else {
+          Contratar {{ plan.name }}
+        }
+      </button>
+    </div>
+    }
     }
 
   </div>
 
-  <!-- Error global -->
+  @if (!companyMode) {
   @if (errorMsg()) {
   <div class="ps-error">{{ errorMsg() }}</div>
   }
-
-  <!-- Nota inferior -->
   <p class="ps-note">
     Todos los planes incluyen <strong>trial de 2 semanas</strong> sin tarjeta de crédito.<br>
     El cobro es mensual. Puedes cambiar de plan en cualquier momento.
-    ota inferior -->
-  <p class="text-white/25 text-xs mt-10 text-center">
-    El cobro es mensual. Puedes cambiar de plan en cualquier momento desde tu perfil.
   </p>
+  }
 
 </div>

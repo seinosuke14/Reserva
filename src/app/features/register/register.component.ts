@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { ProfessionalService } from '../../core/services/professional.service';
 import { ProfessionService, IProfession } from '../../core/services/profession.service';
@@ -35,11 +35,14 @@ import {
   ]
 })
 export class RegisterComponent implements OnInit {
-  private readonly fb           = inject(FormBuilder);
-  private readonly svc          = inject(ProfessionalService);
+  private readonly fb            = inject(FormBuilder);
+  private readonly svc           = inject(ProfessionalService);
   private readonly professionSvc = inject(ProfessionService);
-  private readonly authSvc      = inject(AuthService);
-  private readonly router       = inject(Router);
+  private readonly authSvc       = inject(AuthService);
+  private readonly router        = inject(Router);
+  private readonly route         = inject(ActivatedRoute);
+
+  inviteToken = signal<string | null>(null);
 
   professions    = signal<IProfession[]>([]);
   isSubmitting   = signal(false);
@@ -67,6 +70,9 @@ export class RegisterComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.professions.set(await this.professionSvc.getActive());
+
+    const token = this.route.snapshot.queryParamMap.get('invite');
+    if (token) this.inviteToken.set(token);
 
     const state = history.state as { step?: string; email?: string };
     if (state?.step === 'verify' && state?.email) {
@@ -107,7 +113,7 @@ export class RegisterComponent implements OnInit {
     this.errorMsg.set('');
 
     const { firstName, lastName, rut, professionId, email, phone, password } = this.form.value;
-    const payload = {
+    const payload: Record<string, string> = {
       name: `${(firstName ?? '').trim()} ${(lastName ?? '').trim()}`.trim(),
       rut: rut!,
       professionId: professionId!,
@@ -116,6 +122,7 @@ export class RegisterComponent implements OnInit {
       password: password!,
       termsAcceptedAt: new Date().toISOString(),
     };
+    if (this.inviteToken()) payload['inviteToken'] = this.inviteToken()!;
 
     const result = await this.svc.register(payload as any);
     this.isSubmitting.set(false);

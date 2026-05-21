@@ -17,6 +17,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  // Si el request ya trae Authorization (ej: CompanyService), no sobreescribir
+  if (req.headers.has('Authorization')) {
+    return next(req);
+  }
+
   const token = auth.getToken();
 
   const modified = token
