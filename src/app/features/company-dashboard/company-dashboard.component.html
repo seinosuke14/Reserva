@@ -1,0 +1,291 @@
+<div class="min-h-screen font-sans" style="background:#f8fafc;">
+
+  <!-- Topbar -->
+  <header class="bg-white border-b border-black/[.06] px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-[10px] bg-white flex items-center justify-center overflow-hidden"
+        style="box-shadow:0 3px 10px rgba(219,150,72,.3);">
+        <img src="citema.webp" alt="citema" class="h-7 w-auto" />
+      </div>
+      <div>
+        <div class="text-[14px] font-bold text-ink leading-none">{{ company()?.name }}</div>
+        <div class="text-[11px] text-ink-400 mt-0.5">
+          @if (company()?.plan) { Plan {{ company()?.plan?.toUpperCase() }} · {{ company()?.maxMembers }} profesionales }
+          @else { Sin plan activo }
+        </div>
+      </div>
+    </div>
+    <button (click)="logout()"
+      class="text-[12.5px] text-ink-400 hover:text-ink transition-colors flex items-center gap-1.5">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Salir
+    </button>
+  </header>
+
+  <!-- Tabs -->
+  <div class="bg-white border-b border-black/[.06] px-6">
+    <nav class="flex gap-6">
+      @for (tab of [['analytics','Analytics'],['equipo','Equipo'],['invitaciones','Invitaciones'],['planes','Planes']] ; track tab[0]) {
+      <button (click)="activeTab.set($any(tab[0]))"
+        class="py-3 text-[13px] font-semibold border-b-2 transition-colors"
+        [class.border-gold]="activeTab() === tab[0]"
+        [class.text-ink]="activeTab() === tab[0]"
+        [class.border-transparent]="activeTab() !== tab[0]"
+        [class.text-ink-400]="activeTab() !== tab[0]">
+        {{ tab[1] }}
+      </button>
+      }
+    </nav>
+  </div>
+
+  <!-- Content -->
+  <main class="max-w-5xl mx-auto px-6 py-8">
+
+    @if (isLoading()) {
+    <div class="flex items-center justify-center py-24 text-[13px] text-slate-400 gap-2">
+      <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+        <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+      </svg>
+      Cargando...
+    </div>
+    } @else {
+
+    <!-- ══════════ ANALYTICS ══════════ -->
+    @if (activeTab() === 'analytics') {
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Ingresos 12m</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            [style.background]="revTrend() >= 0 ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)'"
+            [style.color]="revTrend() >= 0 ? '#059669' : '#dc2626'">
+            {{ revTrend() >= 0 ? '+' : '' }}{{ revTrend() }}%
+          </span>
+        </div>
+        <div class="text-[1.625rem] font-black text-slate-900 leading-none tracking-tight">{{ formatCLP(totalRev12m()) }}</div>
+        <div class="text-[11.5px] text-slate-400">{{ totalPaid12m() }} citas pagadas</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Promedio mensual</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">12m</span>
+        </div>
+        <div class="text-[1.625rem] font-black text-slate-900 leading-none tracking-tight">{{ formatCLP(avgRev()) }}</div>
+        <div class="text-[11.5px] text-slate-400">ingreso promedio por mes</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Total citas</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            [style.background]="aptTrend() >= 0 ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)'"
+            [style.color]="aptTrend() >= 0 ? '#059669' : '#dc2626'">
+            {{ aptTrend() >= 0 ? '+' : '' }}{{ aptTrend() }}%
+          </span>
+        </div>
+        <div class="text-[1.625rem] font-black text-slate-900 leading-none tracking-tight">{{ totalApts12m() }}</div>
+        <div class="text-[11.5px] text-slate-400">{{ totalPaid12m() }} pagadas · {{ totalApts12m() - totalPaid12m() }} pendientes</div>
+      </div>
+    </div>
+
+    <!-- Línea de ingresos -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm mb-6">
+      <h2 class="text-[13px] font-bold text-slate-700 mb-4">Ingresos mensuales del equipo</h2>
+      <div class="w-full overflow-x-auto">
+        <svg [attr.viewBox]="'0 0 ' + lcW + ' ' + lcH" class="w-full" style="min-width:320px;">
+          <defs>
+            <linearGradient id="cmpAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#db9648" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#db9648" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid -->
+          @for (tick of yTicks(); track tick.y) {
+          <line [attr.x1]="52" [attr.y1]="tick.y" [attr.x2]="lcW - 12" [attr.y2]="tick.y"
+            stroke="#f1f5f9" stroke-width="1"/>
+          <text [attr.x]="46" [attr.y]="tick.y + 4" text-anchor="end"
+            style="font-size:9px;fill:#94a3b8;font-family:sans-serif;">{{ tick.label }}</text>
+          }
+          <!-- Área -->
+          <path [attr.d]="lineArea()" fill="url(#cmpAreaGrad)"/>
+          <!-- Línea -->
+          <path [attr.d]="linePath()" fill="none" stroke="#db9648" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Puntos + labels -->
+          @for (p of linePoints(); track p.key; let last = $last) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="#db9648"/>
+          @if (last || p.revenue > 0) {
+          <text [attr.x]="p.x" [attr.y]="lcH - 4" text-anchor="middle"
+            style="font-size:9px;fill:#94a3b8;font-family:sans-serif;">{{ p.month }}</text>
+          }
+          }
+        </svg>
+      </div>
+    </div>
+
+    <!-- Ranking profesionales -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h2 class="text-[13px] font-bold text-slate-700">Rendimiento por profesional</h2>
+      </div>
+      @if (!members().length) {
+      <div class="px-5 py-10 text-center text-[13px] text-ink-400">
+        Aún no hay profesionales en el equipo.<br>
+        <button (click)="activeTab.set('invitaciones')" class="mt-3 text-gold font-semibold hover:underline">Invitar profesional</button>
+      </div>
+      } @else {
+      <div class="divide-y divide-slate-50">
+        @for (m of members(); track m.id) {
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center text-[13px] font-bold text-slate-400">
+              @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
+              @else { {{ m.name.charAt(0).toUpperCase() }} }
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] font-semibold text-ink truncate">{{ m.name }}</span>
+                <span class="text-[13px] font-bold text-ink shrink-0 ml-2">{{ formatCLP(m.revenue) }}</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1.5">
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" style="background:#db9648;"
+                    [style.width.%]="(m.revenue / maxMemberRev()) * 100"></div>
+                </div>
+                <span class="text-[11px] text-slate-400 shrink-0">{{ m.appointments }} citas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ══════════ EQUIPO ══════════ -->
+    @if (activeTab() === 'equipo') {
+    <div class="bg-white rounded-[14px] border border-black/[.05] overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[.05] flex items-center justify-between">
+        <h2 class="text-[14px] font-bold text-ink">Miembros del equipo</h2>
+        <button (click)="activeTab.set('invitaciones')"
+          class="text-[12.5px] font-semibold text-gold hover:underline flex items-center gap-1">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Invitar
+        </button>
+      </div>
+      @if (!members().length) {
+      <div class="px-5 py-10 text-center text-[13px] text-ink-400">No hay miembros aún.</div>
+      } @else {
+      @for (m of members(); track m.id) {
+      <div class="flex items-center justify-between px-5 py-4 border-b border-black/[.04] last:border-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center text-[13px] font-bold text-slate-400">
+            @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
+            @else { {{ m.name.charAt(0).toUpperCase() }} }
+          </div>
+          <div>
+            <div class="text-[13.5px] font-semibold text-ink">{{ m.name }}</div>
+            <div class="text-[11.5px] text-ink-400">{{ m.email }}</div>
+          </div>
+        </div>
+        <button (click)="onRemoveMember(m.id)"
+          class="text-[12px] text-red-400 hover:text-red-600 transition-colors font-medium">
+          Desvincular
+        </button>
+      </div>
+      }
+      }
+    </div>
+    }
+
+    <!-- ══════════ INVITACIONES ══════════ -->
+    @if (activeTab() === 'invitaciones') {
+    <div class="bg-white rounded-[14px] border border-black/[.05] p-5 mb-6">
+      <h2 class="text-[14px] font-bold text-ink mb-4">Invitar profesional</h2>
+      <div class="flex gap-3">
+        <input type="email" placeholder="email@profesional.com"
+          [value]="inviteEmail()" (input)="inviteEmail.set($any($event.target).value)"
+          (keydown.enter)="onInvite()"
+          class="flex-1 px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400 focus:border-gold"/>
+        <button (click)="onInvite()" [disabled]="isSending() || !inviteEmail()"
+          class="px-5 py-2.5 rounded-[10px] font-bold text-[13px] text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          style="background:#db9648;">
+          {{ isSending() ? 'Enviando...' : 'Enviar' }}
+        </button>
+      </div>
+      @if (inviteError()) { <p class="text-[12px] text-red-500 font-medium mt-2">{{ inviteError() }}</p> }
+      @if (inviteSuccess()) { <p class="text-[12px] text-emerald-600 font-medium mt-2">{{ inviteSuccess() }}</p> }
+      <p class="text-[11.5px] text-ink-400 mt-3">
+        Cupo: <strong class="text-ink">{{ members().length }}</strong> de <strong class="text-ink">{{ company()?.maxMembers ?? '—' }}</strong> profesionales.
+      </p>
+    </div>
+    <div class="bg-white rounded-[14px] border border-black/[.05] overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[.05]">
+        <h2 class="text-[14px] font-bold text-ink">Invitaciones pendientes</h2>
+      </div>
+      @if (!invitations().length) {
+      <div class="px-5 py-8 text-center text-[13px] text-ink-400">No hay invitaciones pendientes.</div>
+      } @else {
+      @for (inv of invitations(); track inv.id) {
+      <div class="flex items-center justify-between px-5 py-4 border-b border-black/[.04] last:border-0">
+        <div>
+          <div class="text-[13px] font-semibold text-ink">{{ inv.email }}</div>
+          <div class="text-[11px] text-ink-400 mt-0.5">Expira {{ inv.expiresAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+        <button (click)="onCancelInvitation(inv.id)"
+          class="text-[12px] text-red-400 hover:text-red-600 transition-colors font-medium">Cancelar</button>
+      </div>
+      }
+      }
+    </div>
+    }
+
+    <!-- ══════════ PLANES ══════════ -->
+    @if (activeTab() === 'planes') {
+
+    <!-- Estado actual -->
+    @if (subStatus().hasPlan) {
+    <div class="bg-white rounded-[14px] border border-black/[.05] p-5 mb-6 flex items-center justify-between">
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wide text-ink-400 mb-1">Plan actual</div>
+        <div class="text-[17px] font-black text-ink">{{ subStatus().planName }}</div>
+        <div class="text-[12px] text-ink-400 mt-0.5">
+          {{ subStatus().maxMembers }} profesionales · vence {{ subStatus().endDate | date:'dd/MM/yyyy' }}
+          @if (subStatus().daysLeft !== null) { · <strong class="text-ink">{{ subStatus().daysLeft }} días restantes</strong> }
+        </div>
+      </div>
+      <span class="px-3 py-1.5 rounded-full text-[11.5px] font-bold"
+        [class.bg-emerald-50]="subStatus().status === 'active'"
+        [class.text-emerald-700]="subStatus().status === 'active'"
+        [class.bg-red-50]="subStatus().status !== 'active'"
+        [class.text-red-600]="subStatus().status !== 'active'">
+        {{ subStatus().status === 'active' ? 'Activo' : 'Inactivo' }}
+      </span>
+    </div>
+    }
+
+    @if (planError()) {
+    <div class="bg-red-50 border border-red-200 text-red-700 text-[12.5px] px-4 py-3 rounded-[10px] mb-5">{{ planError() }}</div>
+    }
+
+    <app-plan-selection
+      [companyMode]="true"
+      [checkingOut]="isCheckingOut()"
+      [companySubStatus]="subStatus()"
+      (companyCheckout)="onCheckoutEvent($event)">
+    </app-plan-selection>
+
+    }
+
+    }
+  </main>
+</div>

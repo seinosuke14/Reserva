@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { subscriptionGuard } from './core/guards/subscription.guard';
+import { companyAuthGuard } from './core/guards/company-auth.guard';
 
 export const routes: Routes = [
   // Landing page (pública, ruta raíz)
@@ -20,6 +21,23 @@ export const routes: Routes = [
   {
     path: 'registro',
     loadComponent: () => import('./features/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'aceptar-invitacion',
+    loadComponent: () => import('./features/accept-invite/accept-invite.component').then(m => m.AcceptInviteComponent)
+  },
+  {
+    path: 'registro-empresa',
+    loadComponent: () => import('./features/register-company/register-company.component').then(m => m.RegisterCompanyComponent)
+  },
+  {
+    path: 'login-empresa',
+    redirectTo: 'login',
+  },
+  {
+    path: 'empresa',
+    canActivate: [companyAuthGuard],
+    loadComponent: () => import('./features/company-dashboard/company-dashboard.component').then(m => m.CompanyDashboardComponent)
   },
   // Redirigir ruta legacy al portal de reservas
   {

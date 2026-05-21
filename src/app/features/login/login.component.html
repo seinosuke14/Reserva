@@ -92,9 +92,31 @@
       <!-- ── Login normal ── -->
       } @else {
       <div>
-        <div class="mb-7">
+        <div class="mb-6">
           <h1 class="text-[20px] font-bold text-ink tracking-tight">Bienvenido de vuelta</h1>
-          <p class="text-[13px] text-ink-400 mt-1">Ingresa a tu panel de gestión profesional.</p>
+          <p class="text-[13px] text-ink-400 mt-1">
+            {{ accountType() === 'company' ? 'Ingresa a tu panel de empresa.' : 'Ingresa a tu panel de gestión profesional.' }}
+          </p>
+        </div>
+
+        <!-- Selector tipo de cuenta -->
+        <div class="flex rounded-[12px] bg-ink-50 p-1 mb-6 gap-1">
+          <button type="button" (click)="setAccountType('professional')"
+            class="flex-1 py-2 text-[12.5px] font-bold rounded-[9px] transition-all"
+            [class.bg-white]="accountType() === 'professional'"
+            [class.text-ink]="accountType() === 'professional'"
+            [class.shadow-sm]="accountType() === 'professional'"
+            [class.text-ink-400]="accountType() !== 'professional'">
+            Profesional
+          </button>
+          <button type="button" (click)="setAccountType('company')"
+            class="flex-1 py-2 text-[12.5px] font-bold rounded-[9px] transition-all"
+            [class.bg-white]="accountType() === 'company'"
+            [class.text-ink]="accountType() === 'company'"
+            [class.shadow-sm]="accountType() === 'company'"
+            [class.text-ink-400]="accountType() !== 'company'">
+            Empresa
+          </button>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -155,10 +177,12 @@
               </svg>
               <p class="text-[12.5px] font-medium leading-snug">{{ error() }}</p>
             </div>
-            @if (error().includes('no se encuentra registrada')) {
+            @if (error().includes('no se encuentra registrada') || error().includes('no encontrada')) {
             <div class="pt-2.5 border-t border-red-100">
-              <p class="text-[11.5px] text-red-700 mb-1.5">¿Aún no tienes una cuenta profesional?</p>
-              <a routerLink="/registro"
+              <p class="text-[11.5px] text-red-700 mb-1.5">
+                {{ accountType() === 'company' ? '¿Aún no tienes cuenta empresa?' : '¿Aún no tienes una cuenta profesional?' }}
+              </p>
+              <a [routerLink]="accountType() === 'company' ? '/registro-empresa' : '/registro'"
                 class="inline-flex items-center gap-1 text-[12.5px] font-bold text-gold hover:gap-2 transition-all">
                 Regístrate aquí ahora →
               </a>
@@ -196,8 +220,9 @@
 
         <div class="mt-5 text-center">
           <p class="text-[12.5px] text-ink-500">
-            ¿Aún no tienes una cuenta profesional?
-            <a routerLink="/registro" class="font-bold text-gold hover:underline ml-0.5">Crear cuenta</a>
+            {{ accountType() === 'company' ? '¿Aún no tienes cuenta empresa?' : '¿Aún no tienes cuenta profesional?' }}
+            <a [routerLink]="accountType() === 'company' ? '/registro-empresa' : '/registro'"
+              class="font-bold text-gold hover:underline ml-0.5">Crear cuenta</a>
           </p>
         </div>
 
