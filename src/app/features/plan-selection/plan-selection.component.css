@@ -60,12 +60,12 @@
 /* ---- Plans grid ---- */
 .ps-plans-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 220px));
+  justify-content: center;
   gap: 16px;
   width: 100%;
   max-width: 900px;
 }
-@media (max-width: 900px) { .ps-plans-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 540px) { .ps-plans-grid { grid-template-columns: 1fr; } }
 
 /* ---- Plan card ---- */
@@ -225,6 +225,28 @@
   border-radius: 50%; animation: ps-spin .6s linear infinite;
 }
 @keyframes ps-spin { to { transform: rotate(360deg); } }
+
+/* Company member notice */
+.ps-company-notice {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  max-width: 420px; text-align: center;
+  padding: 40px 32px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.5);
+}
+.ps-company-notice svg { opacity: .35; }
+.ps-company-notice-title {
+  font-size: 20px; font-weight: 800; color: white; letter-spacing: -.02em; margin: 0;
+}
+.ps-company-notice-text {
+  font-size: 13.5px; line-height: 1.6; margin: 0;
+}
+.ps-company-notice-email {
+  font-size: 13px; font-weight: 700; color: #db9648;
+  text-decoration: none; word-break: break-all;
+}
+.ps-company-notice-email:hover { text-decoration: underline; }
 
 /* Error */
 .ps-error {

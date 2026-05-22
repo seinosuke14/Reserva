@@ -1,28 +1,18 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { CompanyService } from '../services/company.service';
 import { environment } from '../../../environments/environment';
 
-/**
- * Interceptor de autenticación:
- * - Si existe token JWT → añade Authorization: Bearer <token>
- * - Si es visita anónima → añade X-Guest-Id: <guestId>
- * Solo aplica a llamadas hacia nuestra API (evita contaminar llamadas externas).
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
+  const auth    = inject(AuthService);
+  const company = inject(CompanyService);
 
-  // No interceptar URLs externas
-  if (!req.url.includes(environment.apiUrl)) {
-    return next(req);
-  }
+  if (!req.url.includes(environment.apiUrl)) return next(req);
+  if (req.headers.has('Authorization'))      return next(req);
 
-  // Si el request ya trae Authorization (ej: CompanyService), no sobreescribir
-  if (req.headers.has('Authorization')) {
-    return next(req);
-  }
-
-  const token = auth.getToken();
+  const isCompanyRoute = req.url.includes('/company/');
+  const token = isCompanyRoute ? company.getToken() : auth.getToken();
 
   const modified = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })

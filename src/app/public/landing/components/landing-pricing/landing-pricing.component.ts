@@ -19,7 +19,8 @@ export class LandingPricingComponent {
   @Output() checkoutPlan = new EventEmitter<{ plan: string; members: number }>();
 
   private readonly auth = inject(AuthService);
-  isAuthenticated = computed(() => this.auth.isAuthenticated());
+  isAuthenticated   = computed(() => this.auth.isAuthenticated());
+  isProfessional    = computed(() => this.auth.isAuthenticated() && !this.auth.currentUser()?.companyId);
 
   readonly PRO_MAX_MIN = 5;
   readonly PRO_MAX_MAX = 25;
@@ -105,8 +106,8 @@ export class LandingPricingComponent {
       })
       .filter((p): p is LandingPlan => p !== null);
 
-    return this.companyMode
-      ? all.filter(p => p.id === 'team' || p.id === 'pro_max')
-      : all;
+    if (this.companyMode)        return all.filter(p => p.id === 'team' || p.id === 'pro_max');
+    if (this.isProfessional())   return all.filter(p => p.id !== 'team' && p.id !== 'pro_max');
+    return all;
   }
 }

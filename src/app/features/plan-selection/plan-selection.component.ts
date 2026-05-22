@@ -35,9 +35,11 @@ export class PlanSelectionComponent implements OnInit {
   plans           = signal<IPlan[]>([]);
   activating      = signal<PlanType | null>(null);
   errorMsg        = signal('');
-  isSuspended     = computed(() => this.authSvc.currentUser()?.subscriptionStatus === 'suspended');
-  isAuthenticated = computed(() => this.authSvc.isAuthenticated());
-  userName        = computed(() => this.authSvc.currentUser()?.name ?? '');
+  isSuspended      = computed(() => this.authSvc.currentUser()?.subscriptionStatus === 'suspended');
+  isAuthenticated  = computed(() => this.authSvc.isAuthenticated());
+  userName         = computed(() => this.authSvc.currentUser()?.name ?? '');
+  isCompanyMember  = computed(() => !!this.authSvc.currentUser()?.companyId && !this.companyMode);
+  companyEmail     = computed(() => this.authSvc.currentUser()?.companyEmail ?? null);
 
   isOnboarding = computed(() => {
     const user = this.authSvc.currentUser();
@@ -99,8 +101,9 @@ export class PlanSelectionComponent implements OnInit {
   get visiblePlans(): IPlan[] {
     const all = this.plans();
     if (this.companyMode) return all.filter(p => p.id === 'team' || p.id === 'pro_max');
-    const trialUsed = this.authSvc.currentUser()?.trialUsed ?? false;
-    return trialUsed ? all.filter(p => p.id !== 'free') : all;
+    const individual = all.filter(p => p.id !== 'team' && p.id !== 'pro_max');
+    const trialUsed  = this.authSvc.currentUser()?.trialUsed ?? false;
+    return trialUsed ? individual.filter(p => p.id !== 'free') : individual;
   }
 
   isPlanComingSoon(plan: IPlan): boolean {

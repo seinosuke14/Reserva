@@ -65,6 +65,11 @@ export const routes: Routes = [
     path: 'privacidad',
     loadComponent: () => import('./public/privacidad/privacidad.component').then(m => m.PrivacidadComponent)
   },
+  // Página pública de empresa
+  {
+    path: 'empresa/:slug',
+    loadComponent: () => import('./public/company-public-page/company-public-page.component').then(m => m.CompanyPublicPageComponent)
+  },
   // Portal de reservas público (nuevo flujo con roles y email check)
   {
     path: 'reservar/:slug',
