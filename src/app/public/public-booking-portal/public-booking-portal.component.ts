@@ -11,6 +11,9 @@ import { BookingDatetimeSelectorComponent } from '../components/booking-datetime
 import { BookingFormComponent } from '../components/booking-form/booking-form.component';
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
 import { BookingFooterComponent } from '../components/booking-footer/booking-footer.component';
+import { BookingProfileViewComponent } from '../components/booking-profile-view/booking-profile-view.component';
+import { BookingPaymentStepComponent } from '../components/booking-payment-step/booking-payment-step.component';
+import { BookingConfirmedComponent } from '../components/booking-confirmed/booking-confirmed.component';
 
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
@@ -33,7 +36,10 @@ type LoadState = 'loading' | 'ready' | 'error';
     BookingDatetimeSelectorComponent,
     BookingFormComponent,
     BookingActionsComponent,
-    BookingFooterComponent
+    BookingFooterComponent,
+    BookingProfileViewComponent,
+    BookingPaymentStepComponent,
+    BookingConfirmedComponent,
   ],
   templateUrl: './public-booking-portal.component.html',
   styleUrl: './public-booking-portal.component.scss'

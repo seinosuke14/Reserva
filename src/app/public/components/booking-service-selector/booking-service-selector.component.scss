@@ -1,4 +1,4 @@
-@import '../../styles/shared.scss';
+@use 'shared' as *;
 
 .step-content {
   @include card;

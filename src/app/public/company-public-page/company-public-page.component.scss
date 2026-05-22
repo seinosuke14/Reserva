@@ -1,9 +1,4 @@
-$gold:   #db9648;
-$dark:   #0f172a;
-$text:   #0f172a;
-$muted:  #64748b;
-$border: #e2e8f0;
-$canvas: #f8fafc;
+@use 'shared' as *;
 
 .portal-root {
   min-height: 100dvh;
@@ -44,17 +39,9 @@ $canvas: #f8fafc;
 }
 .state-error { color: #ef4444; font-weight: 600; }
 
-.spinner {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 3px solid $border;
-  border-top-color: $gold;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { @include spinner(2.5rem); }
 
-// ── Hero ──────────────────────────────────────────────
+
 .profile-hero-section {
   display: flex;
   flex-direction: column;
@@ -138,7 +125,7 @@ $canvas: #f8fafc;
   text-align: center;
 }
 
-// ── Members & Services ───────────────────────────────
+
 .member-section { margin-bottom: 2rem; }
 
 .member-header {
@@ -255,7 +242,6 @@ $canvas: #f8fafc;
   border: 1px dashed #cbd5e1;
 }
 
-// ══ CHECKOUT / BOOKING INLINE ════════════════════════
 
 .checkout-header {
   display: flex;
@@ -322,7 +308,7 @@ $canvas: #f8fafc;
   &:hover { background: rgba(219,150,72,.08); }
 }
 
-// Profesional seleccionado (badge sobre el stepper)
+
 .booking-member-badge {
   display: flex;
   align-items: center;
@@ -357,7 +343,7 @@ $canvas: #f8fafc;
 .bm-name { font-size: .9375rem; font-weight: 700; color: $text; margin: 0; }
 .bm-specialty { font-size: .75rem; color: $muted; margin: .1rem 0 0; }
 
-// Payment
+
 .step-content { margin-bottom: 1.5rem; }
 
 .step-header {
@@ -506,7 +492,7 @@ $canvas: #f8fafc;
   &:hover { color: #c4873e; }
 }
 
-// Booked
+
 .booked-card {
   max-width: 520px;
   margin: 2rem auto;

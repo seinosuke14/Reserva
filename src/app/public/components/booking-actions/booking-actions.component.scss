@@ -1,7 +1,4 @@
-$gold:    #db9648;
-$success: #10B981;
-$muted:   #94a3b8;
-$surface: #F9FAFB;
+@use 'shared' as *;
 
 .step-actions {
   display: flex; justify-content: flex-end; margin-top: 1.5rem; gap: .75rem;

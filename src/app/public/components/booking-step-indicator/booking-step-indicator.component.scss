@@ -1,7 +1,4 @@
-$gold:    #db9648;
-$success: #10B981;
-$muted:   #94a3b8;
-$border:  #e2e8f0;
+@use 'shared' as *;
 
 .stepper {
   display: flex;
