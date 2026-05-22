@@ -1,48 +1,180 @@
-<div class="min-h-screen font-sans" style="background:#f8fafc;">
+<div class="flex h-screen font-sans overflow-hidden" style="background:#f8fafc;">
 
-  <!-- Topbar -->
-  <header class="bg-white border-b border-black/[.06] px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-[10px] bg-white flex items-center justify-center overflow-hidden"
-        style="box-shadow:0 3px 10px rgba(219,150,72,.3);">
+  <!-- Mobile backdrop -->
+  @if (isMobile() && isSidebarOpen()) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30" (click)="closeSidebar()"></div>
+  }
+
+  <!-- ── Sidebar ── -->
+  <aside class="text-white flex flex-col z-40 shrink-0 transition-[width,min-width] duration-300 ease-out overflow-hidden relative"
+    [class.fixed]="isMobile()" [class.h-full]="isMobile()"
+    [style.width]="isMobile() ? (isSidebarOpen() ? '232px' : '0px') : (isSidebarOpen() ? '232px' : '64px')"
+    style="background:linear-gradient(180deg,#0d1526 0%,#0f172a 60%,#111827 100%);border-right:1px solid rgba(255,255,255,.055);box-shadow:4px 0 32px rgba(0,0,0,.35);">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-2.5 border-b border-white/[.055] shrink-0"
+      [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '20px 16px 18px' : '18px 0'">
+      <div class="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden bg-white/95"
+        style="box-shadow:0 4px 14px rgba(219,150,72,.45);">
         <img src="citema.webp" alt="citema" class="h-7 w-auto" />
       </div>
-      <div>
-        <div class="text-[14px] font-bold text-ink leading-none">{{ company()?.name }}</div>
-        <div class="text-[11px] text-ink-400 mt-0.5">
-          @if (company()?.plan) { Plan {{ company()?.plan?.toUpperCase() }} · {{ company()?.maxMembers }} profesionales }
-          @else { Sin plan activo }
+      @if (isSidebarOpen()) {
+      <div @sidebarLabel class="leading-none flex-1 min-w-0">
+        <div class="text-[13px] font-extrabold tracking-tight text-white truncate">{{ company()?.name }}</div>
+        <div class="text-[9.5px] font-medium tracking-[.08em] text-white/35 mt-[2px]">
+          @if (company()?.plan) { PLAN {{ company()?.plan?.toUpperCase() }} } @else { SIN PLAN }
         </div>
       </div>
+      <button @sidebarLabel (click)="toggleSidebar()"
+        class="ml-auto w-6 h-6 rounded-[7px] border border-white/10 bg-white/[.06] hover:bg-white/[.12] flex items-center justify-center text-white/40 hover:text-white/80 shrink-0 transition-colors">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      } @else {
+      <button (click)="toggleSidebar()"
+        class="absolute -right-px top-[19px] w-[18px] h-[18px] rounded-r-md border border-white/10 flex items-center justify-center text-white/50 hover:text-white"
+        style="background:#1e293b;">
+        <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+      }
     </div>
-    <button (click)="logout()"
-      class="text-[12.5px] text-ink-400 hover:text-ink transition-colors flex items-center gap-1.5">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-      Salir
-    </button>
-  </header>
 
-  <!-- Tabs -->
-  <div class="bg-white border-b border-black/[.06] px-6">
-    <nav class="flex gap-6">
-      @for (tab of [['analytics','Analytics'],['equipo','Equipo'],['invitaciones','Invitaciones'],['planes','Planes']] ; track tab[0]) {
-      <button (click)="activeTab.set($any(tab[0]))"
-        class="py-3 text-[13px] font-semibold border-b-2 transition-colors"
-        [class.border-gold]="activeTab() === tab[0]"
-        [class.text-ink]="activeTab() === tab[0]"
-        [class.border-transparent]="activeTab() !== tab[0]"
-        [class.text-ink-400]="activeTab() !== tab[0]">
-        {{ tab[1] }}
+    <!-- Nav -->
+    <nav class="flex-1 px-2 py-2.5 overflow-y-auto overflow-x-hidden">
+      @for (item of navItems; track item.tab) {
+      <button (click)="selectTab(item.tab)"
+        class="group w-full flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
+        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
+        [style.gap]="isSidebarOpen() ? '9px' : '0'"
+        [style.background]="activeTab() === item.tab ? 'linear-gradient(90deg,rgba(219,150,72,.13),rgba(219,150,72,.05))' : ''"
+        [style.color]="activeTab() === item.tab ? '#db9648' : 'rgba(255,255,255,.4)'"
+        [title]="!isSidebarOpen() ? item.label : ''">
+
+        @if (activeTab() === item.tab) {
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#db9648;"></span>
+        }
+
+        <span class="shrink-0 transition-colors"
+          [style.color]="activeTab() === item.tab ? '#db9648' : 'rgba(255,255,255,.55)'">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            @switch (item.icon) {
+              @case ('bar-chart') {
+                <rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
+              }
+              @case ('calendar') {
+                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
+              }
+              @case ('users') {
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              }
+              @case ('mail') {
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              }
+              @case ('credit-card') {
+                <rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>
+              }
+              @case ('sliders') {
+                <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+              }
+              @case ('dollar') {
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+              }
+            }
+          </svg>
+        </span>
+
+        @if (isSidebarOpen()) {
+        <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1 text-left"
+          [class.font-semibold]="activeTab() === item.tab" [class.font-medium]="activeTab() !== item.tab">
+          {{ item.label }}
+        </span>
+        }
       </button>
       }
     </nav>
-  </div>
 
-  <!-- Content -->
-  <main class="max-w-5xl mx-auto px-6 py-8">
+    <!-- Bottom: empresa + logout -->
+    <div class="px-2 pt-2.5 pb-3 border-t border-white/[.055] shrink-0">
+      <div class="flex items-center rounded-[10px]"
+        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '8px 10px' : '8px 0'"
+        [style.gap]="isSidebarOpen() ? '9px' : '0'">
+        @if (company()?.profileImage) {
+          <img [src]="company()!.profileImage!" alt="Logo"
+            class="w-[30px] h-[30px] rounded-full object-cover shrink-0"
+            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+        } @else {
+          <div class="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+            style="background:linear-gradient(135deg,#db9648ee,#db964877);box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+            {{ companyInitials() }}
+          </div>
+        }
+        @if (isSidebarOpen()) {
+        <div @sidebarLabel class="flex-1 min-w-0">
+          <div class="text-[12px] font-semibold text-white truncate">{{ company()?.name }}</div>
+          <div class="text-[10px] text-white/35">Cuenta empresa</div>
+        </div>
+        }
+      </div>
+
+      <button (click)="logout()"
+        class="w-full flex items-center rounded-[10px] mt-px transition-colors hover:bg-white/[.05] text-white/40 hover:text-white/80"
+        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
+        [style.gap]="isSidebarOpen() ? '9px' : '0'">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="shrink-0">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        @if (isSidebarOpen()) {
+        <span @sidebarLabel class="text-[13.5px] font-medium tracking-tight">Cerrar sesión</span>
+        }
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Topbar -->
+    <header class="h-[58px] bg-white/[.98] backdrop-blur-md border-b border-black/[.07] flex items-center justify-between px-4 md:px-7 shrink-0 z-20">
+      <div class="flex items-center gap-2.5 min-w-0">
+        @if (isMobile() && !isSidebarOpen()) {
+        <button (click)="toggleSidebar()"
+          class="w-8 h-8 rounded-[9px] border border-black/[.08] bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-600 shrink-0 transition-colors">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        }
+        <div class="min-w-0">
+          <h1 class="text-[16px] font-bold text-ink tracking-tight leading-none">
+            @for (item of navItems; track item.tab) {
+              @if (item.tab === activeTab()) { {{ item.label }} }
+            }
+          </h1>
+        </div>
+      </div>
+
+      @if (company()?.profileImage) {
+        <img [src]="company()!.profileImage!" alt="Logo"
+          class="w-[34px] h-[34px] rounded-full object-cover"
+          style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+      } @else {
+        <div class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-[11px] font-bold tracking-tight"
+          style="background:linear-gradient(135deg,#db9648ee,#db964877);box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+          {{ companyInitials() }}
+        </div>
+      }
+    </header>
+
+    <!-- Content -->
+  <main class="flex-1 overflow-y-auto" style="background:#f8fafc;">
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
     @if (isLoading()) {
     <div class="flex items-center justify-center py-24 text-[13px] text-slate-400 gap-2">
@@ -55,6 +187,243 @@
       Cargando...
     </div>
     } @else {
+
+    <!-- ══════════ AGENDA ══════════ -->
+    @if (activeTab() === 'agenda') {
+
+    <div class="flex flex-col md:flex-row gap-5 items-start">
+
+      <!-- ── Sidebar: mini calendario (oculto en mobile) ── -->
+      <div class="hidden md:block w-[220px] shrink-0 bg-white rounded-[14px] border border-black/[.05] p-4 sticky top-24">
+
+        <!-- Navegación mes -->
+        <div class="flex items-center justify-between mb-3">
+          <button (click)="agendaPrevMonth()"
+            class="w-7 h-7 rounded-[7px] border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="text-[11.5px] font-bold text-slate-700 capitalize">{{ agendaMonthLabel() }}</span>
+          <button (click)="agendaNextMonth()"
+            class="w-7 h-7 rounded-[7px] border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Cabeceras días -->
+        <div class="grid grid-cols-7 mb-1">
+          @for (d of ['L','M','X','J','V','S','D']; track d) {
+          <div class="text-center text-[9px] font-bold text-slate-400 py-0.5">{{ d }}</div>
+          }
+        </div>
+
+        <!-- Grid días -->
+        <div class="grid grid-cols-7 gap-y-0.5">
+          @for (day of agendaCalendarGrid(); track $index) {
+          @if (day) {
+          <button (click)="agendaSelectCalDate(day)"
+            class="aspect-square flex items-center justify-center rounded-full text-[11px] font-medium transition-all"
+            [style.background]="agendaIsSameDayStr(day, agendaDate()) ? '#db9648' : ''"
+            [style.color]="agendaIsSameDayStr(day, agendaDate()) ? '#fff' : agendaIsSameDayStr(day, _todayStr()) ? '#db9648' : '#334155'"
+            [style.fontWeight]="agendaIsSameDayStr(day, _todayStr()) ? '700' : '500'">
+            {{ day.getDate() }}
+          </button>
+          } @else {
+          <div></div>
+          }
+          }
+        </div>
+
+        <!-- Ir a hoy -->
+        @if (!agendaIsToday()) {
+        <button (click)="agendaGoToday()"
+          class="mt-3 w-full py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors"
+          style="border:1.5px solid #db9648;background:rgba(219,150,72,.08);color:#db9648;">
+          Ir a hoy
+        </button>
+        }
+      </div>
+
+      <!-- ── Contenido principal ── -->
+      <div class="flex-1 min-w-0 w-full">
+
+        <!-- Fecha seleccionada + navegación móvil -->
+        <div class="flex items-center gap-2 mb-3">
+          <button (click)="agendaPrevDay()"
+            class="w-8 h-8 rounded-[8px] border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors shrink-0">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="text-[13px] font-bold text-slate-800 capitalize flex-1 text-center leading-tight">{{ agendaDateLabel() }}</span>
+          <button (click)="agendaNextDay()"
+            class="w-8 h-8 rounded-[8px] border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors shrink-0">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          @if (!agendaIsToday()) {
+          <button (click)="agendaGoToday()"
+            class="md:hidden shrink-0 px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold"
+            style="border:1.5px solid #db9648;background:rgba(219,150,72,.08);color:#db9648;">
+            Hoy
+          </button>
+          }
+        </div>
+
+        @if (agendaLoading()) {
+        <div class="flex items-center justify-center py-16 text-[13px] text-slate-400 gap-2">
+          <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+            <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+          </svg>
+          Cargando agenda...
+        </div>
+        } @else if (!agendaMembers().length) {
+        <div class="text-center py-16 text-[13px] text-slate-400">No hay profesionales en el equipo aún.</div>
+        } @else {
+
+        <!-- Grid multi-profesional (scroll horizontal en mobile) -->
+        <div class="bg-white rounded-[14px] border border-black/[.05] overflow-hidden">
+          <div class="overflow-x-auto">
+
+            <!-- Cabecera profesionales -->
+            <div class="flex border-b border-slate-100 bg-white z-10 sticky top-[60px] md:top-[72px]" style="min-width:max-content;">
+              <div class="w-12 md:w-14 shrink-0 border-r border-slate-100"></div>
+              @for (m of agendaMembers(); track m.id) {
+              <div class="w-[140px] md:w-[180px] shrink-0 px-2 md:px-3 py-2.5 border-r border-slate-100 last:border-r-0 flex items-center gap-1.5">
+                <div class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-slate-100 shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-500 overflow-hidden">
+                  @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
+                  @else { {{ m.name.charAt(0).toUpperCase() }} }
+                </div>
+                <div class="min-w-0">
+                  <div class="text-[11px] md:text-[12px] font-semibold text-slate-700 truncate">{{ m.name }}</div>
+                  <div class="text-[9px] md:text-[10px] text-slate-400">{{ m.appointments.length }} cita{{ m.appointments.length !== 1 ? 's' : '' }}</div>
+                </div>
+              </div>
+              }
+            </div>
+
+            <!-- Filas de horarios -->
+            <div style="min-width:max-content;">
+              @for (slot of AGENDA_SLOTS; track slot) {
+              <div class="flex border-b border-slate-50 last:border-b-0" style="min-height:44px;">
+                <div class="w-12 md:w-14 shrink-0 border-r border-slate-100 flex items-start justify-end pr-2 pt-1.5">
+                  <span class="text-[9px] md:text-[10px] font-medium text-slate-400">{{ slot }}</span>
+                </div>
+                @for (m of agendaMembers(); track m.id) {
+                @let appt = agendaApptAt(m, slot);
+                @let cont = agendaIsContinuation(m, slot);
+                <div class="w-[140px] md:w-[180px] shrink-0 border-r border-slate-100 last:border-r-0 p-0.5 md:p-1"
+                  [class.bg-slate-50]="!!cont">
+                  @if (appt) {
+                  <button class="w-full rounded-[5px] px-1.5 py-1 h-full flex flex-col gap-0.5 text-left transition-opacity hover:opacity-80"
+                    [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.1)' : 'rgba(219,150,72,.1)'"
+                    [style.border-left]="'3px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : '#db9648')"
+                    (click)="agendaSelectedAppt.set({ appt: appt, memberName: m.name })">
+                    <span class="text-[10px] font-bold text-slate-800 leading-tight truncate">{{ appt.customer.name }}</span>
+                    <span class="text-[9px] text-slate-500 truncate">{{ appt.service.name }}</span>
+                  </button>
+                  } @else if (cont) {
+                  <div class="h-full rounded-[5px]"
+                    [style.background]="cont.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.06)' : 'rgba(219,150,72,.06)'"
+                    [style.border-left]="'3px solid ' + (cont.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.3)' : 'rgba(219,150,72,.3)')">
+                  </div>
+                  }
+                </div>
+                }
+              </div>
+              }
+            </div>
+
+          </div>
+        </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- ── Modal detalle de cita ── -->
+    @if (agendaSelectedAppt()) {
+    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+      (click)="agendaSelectedAppt.set(null)">
+      <div class="bg-white rounded-[18px] w-full max-w-sm shadow-2xl p-6 relative"
+        (click)="$event.stopPropagation()">
+
+        <!-- Cerrar -->
+        <button (click)="agendaSelectedAppt.set(null)"
+          class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- Hora + profesional -->
+        <div class="flex items-center gap-2 mb-4">
+          <span class="px-2.5 py-1 rounded-full text-[12px] font-bold"
+            style="background:rgba(219,150,72,.12);color:#b45309;">
+            {{ agendaSelectedAppt()!.appt.time }}
+          </span>
+          <span class="text-[12px] text-slate-500">{{ agendaSelectedAppt()!.memberName }}</span>
+        </div>
+
+        <!-- Cliente -->
+        <div class="mb-4">
+          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Cliente</div>
+          <div class="text-[16px] font-bold text-slate-900">{{ agendaSelectedAppt()!.appt.customer.name }}</div>
+        </div>
+
+        <!-- Servicio -->
+        <div class="mb-4">
+          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Servicio</div>
+          <div class="flex items-center justify-between">
+            <span class="text-[14px] font-semibold text-slate-800">{{ agendaSelectedAppt()!.appt.service.name }}</span>
+            <span class="text-[12px] text-slate-500">{{ agendaSelectedAppt()!.appt.service.duration }} min</span>
+          </div>
+        </div>
+
+        <!-- Estado de pago -->
+        <div class="mb-5">
+          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Estado</div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+            [style.background]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.12)' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? 'rgba(239,68,68,.10)' : 'rgba(245,158,11,.12)'"
+            [style.color]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? '#059669' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? '#dc2626' : '#b45309'">
+            <span class="w-1.5 h-1.5 rounded-full"
+              [style.background]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? '#10b981' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? '#ef4444' : '#f59e0b'"></span>
+            {{ agendaSelectedAppt()!.appt.paymentStatus }}
+          </span>
+        </div>
+
+        <!-- Acciones -->
+        @if (agendaSelectedAppt()!.appt.paymentStatus !== 'Cancelado') {
+        <div class="flex flex-col gap-2 pt-4 border-t border-slate-100">
+          @if (agendaSelectedAppt()!.appt.paymentStatus !== 'Pagado') {
+          <button (click)="updateAgendaApptStatus('Pagado')" [disabled]="agendaApptUpdating()"
+            class="w-full py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+            style="background:#10b981;">
+            @if (agendaApptUpdating()) {
+              <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+              </svg>
+            } @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            }
+            Confirmar pago
+          </button>
+          }
+          <button (click)="updateAgendaApptStatus('Cancelado')" [disabled]="agendaApptUpdating()"
+            class="w-full py-2.5 rounded-[12px] text-[13px] font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all disabled:opacity-60">
+            Cancelar reserva
+          </button>
+        </div>
+        }
+
+      </div>
+    </div>
+    }
+    }
 
     <!-- ══════════ ANALYTICS ══════════ -->
     @if (activeTab() === 'analytics') {
@@ -286,6 +655,406 @@
 
     }
 
+    <!-- ══════════ MARCA ══════════ -->
+    @if (activeTab() === 'marca') {
+
+    @if (brandPublicUrl) {
+    <div class="bg-white rounded-[14px] border border-black/[.05] px-5 py-3 mb-5 flex items-center justify-between">
+      <span class="text-[12.5px] text-ink-400">Vista pública de tu empresa</span>
+      <a [routerLink]="brandPublicUrl" target="_blank" class="text-[12.5px] font-bold text-gold hover:underline">Ver página ↗</a>
+    </div>
     }
-  </main>
-</div>
+
+    <div class="flex flex-col gap-5">
+
+      <!-- URL pública / Slug -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-3">
+        <div>
+          <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Nombre comercial</h2>
+          <p class="text-[11.5px] text-ink-400 mt-1">Define la URL con la que los clientes acceden a la página pública de tu empresa.</p>
+        </div>
+        <div class="bg-ink-50 rounded-[10px] px-3 py-2 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-ink-300 shrink-0">
+              <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span class="text-[11.5px] text-ink-400 font-mono truncate">
+              /empresa/<strong class="text-ink">{{ brandSlugValue() || company()?.slug || '…' }}</strong>
+            </span>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button (click)="copyBrandLink()" [disabled]="!company()?.slug && !brandSlugValue()"
+              class="text-[11.5px] font-semibold transition-colors disabled:opacity-40"
+              [class]="brandLinkCopied() ? 'text-emerald-600' : 'text-ink-400 hover:text-gold'">
+              {{ brandLinkCopied() ? '¡Copiado!' : 'Copiar link' }}
+            </button>
+            @if (company()?.slug) {
+            <a [routerLink]="brandPublicUrl" target="_blank" class="text-[11.5px] font-semibold text-gold hover:underline">Ver ↗</a>
+            }
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-gold">
+            <span class="px-3 text-[12px] text-ink-400 whitespace-nowrap border-r border-ink-200 py-2.5 bg-ink-50 font-mono">/empresa/</span>
+            <input type="text" [value]="brandSlugValue()"
+              (input)="brandSlugValue.set($any($event.target).value)"
+              placeholder="mi-empresa"
+              class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono"/>
+          </div>
+          <button (click)="saveBrandSlug()" [disabled]="brandSlugSaving()"
+            class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
+            style="background:#db9648;">
+            {{ brandSlugSaving() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+        @if (brandSlugMsg()) {
+        <p class="text-[11.5px] font-medium" [class]="brandSlugMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+          {{ brandSlugMsg()!.text }}
+        </p>
+        }
+      </div>
+
+      <!-- Descripción -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-3">
+        <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Descripción</h2>
+        <textarea rows="3" placeholder="Describe brevemente tu empresa o equipo..." maxlength="200"
+          [value]="brand().description ?? ''"
+          (input)="patchBrand('description', $any($event.target).value)"
+          class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13px] text-ink placeholder:text-ink-400 focus:border-gold resize-none">
+        </textarea>
+      </div>
+
+      <!-- Logo -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-3">
+        <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Logo</h2>
+        <label class="block cursor-pointer group">
+          <input type="file" hidden accept="image/jpeg,image/png,image/webp"
+            (change)="onBrandLogoSelect($event)" [disabled]="brandLogoSaving()">
+          <div class="relative flex items-center gap-4">
+            <div class="w-20 h-20 rounded-[14px] overflow-hidden border-2 transition-colors shrink-0 flex items-center justify-center bg-ink-50"
+              [class]="brandLogoPreview() ? 'border-transparent' : 'border-dashed border-ink-200 group-hover:border-gold'">
+              @if (brandLogoPreview()) {
+                <img [src]="brandLogoPreview()" class="w-full h-full object-cover" alt="Logo"/>
+              } @else if (brandLogoSaving()) {
+                <div class="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
+              } @else {
+                <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              }
+              @if (brandLogoSaving() && brandLogoPreview()) {
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center rounded-[14px]">
+                  <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }
+            </div>
+            <div>
+              <p class="text-[13px] font-semibold text-ink">{{ brandLogoPreview() ? 'Cambiar logo' : 'Subir logo' }}</p>
+              <p class="text-[11.5px] text-ink-400 mt-0.5">JPG, PNG o WebP · recomendado cuadrado</p>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Banner -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-3">
+        <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Imagen de portada</h2>
+        <p class="text-[11.5px] text-ink-400">Aparece como banner en la parte superior de tu página pública. Recomendado: 1920×640 px.</p>
+        <label class="block cursor-pointer group">
+          <input type="file" hidden accept="image/jpeg,image/png,image/webp"
+            (change)="onBrandBannerSelect($event)" [disabled]="brandBannerSaving()">
+          <div class="relative w-full rounded-[12px] overflow-hidden border-2 transition-colors"
+            [class]="brandBannerPreview() ? 'border-transparent' : 'border-dashed border-ink-200 group-hover:border-gold'"
+            style="aspect-ratio:3/1;min-height:96px;">
+            @if (brandBannerPreview()) {
+              <img [src]="brandBannerPreview()" class="w-full h-full object-cover" alt="Banner">
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[12px] font-semibold bg-black/50 px-3 py-1.5 rounded-lg">Cambiar imagen</span>
+              </div>
+            } @else {
+              <div class="w-full h-full bg-ink-50 flex flex-col items-center justify-center gap-2">
+                @if (brandBannerSaving()) {
+                  <div class="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-[11.5px] text-ink-400">Subiendo...</span>
+                } @else {
+                  <svg width="24" height="24" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span class="text-[11.5px] text-ink-400">Haz clic para subir imagen de portada</span>
+                  <span class="text-[10.5px] text-ink-300">JPG, PNG o WebP · máx 10 MB</span>
+                }
+              </div>
+            }
+            @if (brandBannerSaving() && brandBannerPreview()) {
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
+                <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-white text-[12px] font-medium">Subiendo...</span>
+              </div>
+            }
+          </div>
+        </label>
+      </div>
+
+      <!-- Fondo -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-4">
+        <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Fondo del portal</h2>
+        <div class="flex gap-1 bg-ink-50 p-1 rounded-[10px] w-fit">
+          <button (click)="patchBrand('backgroundType','color')"
+            class="px-4 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all"
+            [class]="brand().backgroundType !== 'image' ? 'bg-white text-ink shadow-sm' : 'text-ink-400 hover:text-ink'">
+            Color
+          </button>
+          <button (click)="patchBrand('backgroundType','image')"
+            class="px-4 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all"
+            [class]="brand().backgroundType === 'image' ? 'bg-white text-ink shadow-sm' : 'text-ink-400 hover:text-ink'">
+            Imagen
+          </button>
+        </div>
+
+        @if (brand().backgroundType !== 'image') {
+        <div class="flex items-center gap-3">
+          <label class="relative w-10 h-10 rounded-[10px] overflow-hidden border-[1.5px] border-ink-200 cursor-pointer shrink-0"
+            [style.background]="brand().backgroundColor ?? '#ffffff'">
+            <input type="color" [value]="brand().backgroundColor ?? '#ffffff'"
+              (input)="patchBrand('backgroundColor', $any($event.target).value)"
+              class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+          </label>
+          <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden focus-within:border-gold">
+            <span class="px-3 text-[12px] text-ink-400 border-r border-ink-200 py-2.5 bg-ink-50 font-mono">#</span>
+            <input type="text"
+              [value]="(brand().backgroundColor ?? '#ffffff').replace('#','')"
+              (input)="patchBrand('backgroundColor', '#' + $any($event.target).value)"
+              placeholder="ffffff" maxlength="6"
+              class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono uppercase"/>
+          </div>
+        </div>
+        <div class="h-14 rounded-[10px] border border-ink-100 transition-colors" [style.background-color]="brand().backgroundColor ?? '#ffffff'"></div>
+        }
+
+        @if (brand().backgroundType === 'image') {
+        <label class="block cursor-pointer group">
+          <input type="file" hidden accept="image/jpeg,image/png,image/webp"
+            (change)="onBrandBgImageSelect($event)" [disabled]="brandBgSaving()">
+          <div class="relative w-full rounded-[12px] overflow-hidden border-2 transition-colors"
+            [class]="brandBgPreview() ? 'border-transparent' : 'border-dashed border-ink-200 group-hover:border-gold'"
+            style="height:120px;">
+            @if (brandBgPreview()) {
+              <div class="w-full h-full bg-cover bg-center" [style.background-image]="'url(' + brandBgPreview() + ')'"></div>
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[12px] font-semibold bg-black/50 px-3 py-1.5 rounded-lg">Cambiar imagen</span>
+              </div>
+            } @else {
+              <div class="w-full h-full bg-ink-50 flex flex-col items-center justify-center gap-1.5">
+                @if (brandBgSaving()) {
+                  <div class="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-[11.5px] text-ink-400">Subiendo...</span>
+                } @else {
+                  <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
+                    <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                  </svg>
+                  <span class="text-[11.5px] text-ink-400">Subir imagen de fondo</span>
+                  <span class="text-[10.5px] text-ink-300">JPG, PNG o WebP · máx 10 MB</span>
+                }
+              </div>
+            }
+            @if (brandBgSaving() && brandBgPreview()) {
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
+                <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-white text-[12px] font-medium">Subiendo...</span>
+              </div>
+            }
+          </div>
+        </label>
+        }
+      </div>
+
+      <!-- Tipografía -->
+      <div class="bg-white rounded-[14px] border border-black/[.05] p-5 space-y-4">
+        <h2 class="text-[12px] font-bold text-ink uppercase tracking-wider">Tipografía</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-[11px] font-semibold text-ink-500 block">Títulos</label>
+            <div class="relative">
+              <select [value]="brand().headingFont ?? ''"
+                (change)="patchBrand('headingFont', $any($event.target).value)"
+                class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] font-medium text-ink bg-white outline-none focus:border-gold cursor-pointer">
+                @for (group of ['Sans-serif', 'Serif']; track group) {
+                <optgroup [label]="group">
+                  @for (opt of fontOptions; track opt.value) {
+                    @if (opt.category === group) { <option [value]="opt.value">{{ opt.label }}</option> }
+                  }
+                </optgroup>
+                }
+              </select>
+              <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" width="12" height="12"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="text-[11px] font-semibold text-ink-500 block">Texto general</label>
+            <div class="relative">
+              <select [value]="brand().bodyFont ?? ''"
+                (change)="patchBrand('bodyFont', $any($event.target).value)"
+                class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] font-medium text-ink bg-white outline-none focus:border-gold cursor-pointer">
+                @for (group of ['Sans-serif', 'Serif']; track group) {
+                <optgroup [label]="group">
+                  @for (opt of fontOptions; track opt.value) {
+                    @if (opt.category === group) { <option [value]="opt.value">{{ opt.label }}</option> }
+                  }
+                </optgroup>
+                }
+              </select>
+              <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" width="12" height="12"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback imágenes -->
+      @if (brandImgMsg()) {
+      <p class="text-[13px] font-medium" [class]="brandImgMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+        {{ brandImgMsg()!.text }}
+      </p>
+      }
+
+      <!-- Guardar campos de texto -->
+      @if (brandMsg()) { <p class="text-[13px] text-emerald-600 font-medium">{{ brandMsg() }}</p> }
+      @if (brandError()) { <p class="text-[13px] text-red-500 font-medium">{{ brandError() }}</p> }
+      <button (click)="saveBrand()" [disabled]="brandSaving()"
+        class="self-start px-6 py-3 rounded-[12px] font-bold text-[13.5px] text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        style="background:#db9648;">
+        {{ brandSaving() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+
+    </div>
+    }
+
+    <!-- ══════════ PAGOS ══════════ -->
+    @if (activeTab() === 'pagos') {
+    <div class="flex flex-col gap-4 max-w-2xl">
+
+      <div class="mb-1">
+        <h2 class="text-[15px] font-bold text-ink">Métodos de pago</h2>
+        <p class="text-[12.5px] text-ink-400 mt-0.5">Configura cómo los clientes pagan al agendar a través de tu página de empresa.</p>
+      </div>
+
+      @if (paymentFeedback()) {
+      <div class="px-4 py-3 rounded-[12px] text-[13px] font-medium"
+        [class]="paymentFeedback()!.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'">
+        {{ paymentFeedback()!.text }}
+      </div>
+      }
+
+      @for (config of paymentProviders; track config.provider) {
+      <div class="bg-white rounded-[16px] border-[1.5px] transition-all"
+        [class.border-gold]="isPaymentConfigured(config.provider)"
+        [class.border-ink-100]="!isPaymentConfigured(config.provider)">
+
+        <!-- Cabecera del proveedor -->
+        <div class="flex items-center gap-3 px-5 py-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-[14px] font-bold text-ink">{{ config.label }}</span>
+              @if (isPaymentConfigured(config.provider)) {
+                @if (isPaymentActive(config.provider)) {
+                  <span class="text-[10.5px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Activo</span>
+                } @else {
+                  <span class="text-[10.5px] font-bold text-ink-400 bg-ink-100 px-2 py-0.5 rounded-full">Inactivo</span>
+                }
+              }
+            </div>
+            <p class="text-[12px] text-ink-400 mt-0.5">{{ config.description }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            @if (isPaymentConfigured(config.provider)) {
+              <button (click)="togglePaymentActive(config.provider)"
+                class="text-[11.5px] font-semibold text-ink-400 hover:text-ink transition-colors px-2 py-1">
+                {{ isPaymentActive(config.provider) ? 'Desactivar' : 'Activar' }}
+              </button>
+            }
+            <button (click)="togglePaymentExpand(config.provider)"
+              class="px-3.5 py-2 rounded-[10px] text-[12.5px] font-semibold transition-all border"
+              [class]="isPaymentConfigured(config.provider)
+                ? 'border-ink-200 text-ink-500 hover:border-gold hover:text-gold'
+                : 'border-gold text-white bg-gold hover:bg-[#c4873e]'">
+              {{ paymentExpanded() === config.provider ? 'Cerrar' : (isPaymentConfigured(config.provider) ? 'Editar' : 'Configurar') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario expandible -->
+        @if (paymentExpanded() === config.provider) {
+        <div class="border-t border-ink-100 px-5 py-4 flex flex-col gap-3">
+          @for (field of config.fields; track field.key) {
+          <div class="space-y-1.5">
+            <label class="text-[11.5px] font-semibold text-ink-500 block">{{ field.label }}</label>
+            @if (field.type === 'select') {
+              <div class="relative">
+                <select [value]="getPaymentFieldValue(field.key)"
+                  (change)="setPaymentFieldValue(field.key, $any($event.target).value)"
+                  class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] text-ink bg-white outline-none focus:border-gold cursor-pointer">
+                  <option value="" disabled>{{ field.placeholder }}</option>
+                  @for (opt of field.options; track opt) { <option [value]="opt">{{ opt }}</option> }
+                </select>
+                <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" width="12" height="12"
+                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            } @else {
+              <div class="relative">
+                <input [type]="getPaymentFieldType(field)"
+                  [value]="getPaymentFieldValue(field.key)"
+                  (input)="setPaymentFieldValue(field.key, $any($event.target).value)"
+                  [placeholder]="field.placeholder"
+                  [attr.maxlength]="field.maxlength"
+                  [attr.inputmode]="field.inputmode ?? null"
+                  class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] text-ink bg-white outline-none focus:border-gold"
+                  [class.pr-10]="field.type === 'password'">
+                @if (field.type === 'password') {
+                  <button type="button" (click)="togglePaymentFieldVisible(field.key)"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      @if (isPaymentFieldVisible(field.key)) {
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      } @else {
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      }
+                    </svg>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          }
+
+          <div class="flex items-center gap-3 pt-1">
+            <button (click)="savePaymentMethod(config)" [disabled]="paymentSaving()"
+              class="px-5 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-60"
+              style="background:#db9648;">
+              {{ paymentSaving() ? 'Guardando...' : 'Guardar' }}
+            </button>
+            @if (isPaymentConfigured(config.provider)) {
+              <button (click)="removePaymentMethod(config.provider)"
+                class="px-4 py-2.5 rounded-[10px] text-[12.5px] font-semibold text-red-500 hover:bg-red-50 transition-colors">
+                Eliminar
+              </button>
+            }
+          </div>
+        </div>
+        }
+
+      </div>
+      }
+
+    </div>
+    }
+
+    }
+  </div><!-- /max-w container -->
+  </main><!-- /content -->
+  </div><!-- /flex-1 main col -->
+</div><!-- /flex h-screen -->

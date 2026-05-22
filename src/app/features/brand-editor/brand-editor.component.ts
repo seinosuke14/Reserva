@@ -1,6 +1,7 @@
 import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
@@ -31,7 +32,7 @@ export const FONT_OPTIONS: FontOption[] = [
 @Component({
   selector: 'app-brand-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './brand-editor.component.html',
   styleUrls: ['./brand-editor.component.scss'],
   animations: [
@@ -47,7 +48,9 @@ export class BrandEditorComponent {
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
 
-  readonly user        = this.auth.currentUser;
+  readonly user            = this.auth.currentUser;
+  readonly isCompanyMember = computed(() => !!this.auth.currentUser()?.companyId);
+  readonly companySlug     = computed(() => this.auth.currentUser()?.companySlug ?? null);
   readonly fontOptions = FONT_OPTIONS;
 
   // ── Descripción ───────────────────────────────────────────────────────────
