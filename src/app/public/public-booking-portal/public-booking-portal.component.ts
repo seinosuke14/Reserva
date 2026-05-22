@@ -11,11 +11,15 @@ import { BookingDatetimeSelectorComponent } from '../components/booking-datetime
 import { BookingFormComponent } from '../components/booking-form/booking-form.component';
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
 import { BookingFooterComponent } from '../components/booking-footer/booking-footer.component';
+import { BookingProfileViewComponent } from '../components/booking-profile-view/booking-profile-view.component';
+import { BookingPaymentStepComponent } from '../components/booking-payment-step/booking-payment-step.component';
+import { BookingConfirmedComponent } from '../components/booking-confirmed/booking-confirmed.component';
 
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
 import { CompanyService } from '../../core/services/company.service';
+import { QuoteService, IQuoteTokenData } from '../../core/services/quote.service';
 import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
@@ -32,26 +36,31 @@ type LoadState = 'loading' | 'ready' | 'error';
     BookingDatetimeSelectorComponent,
     BookingFormComponent,
     BookingActionsComponent,
-    BookingFooterComponent
+    BookingFooterComponent,
+    BookingProfileViewComponent,
+    BookingPaymentStepComponent,
+    BookingConfirmedComponent,
   ],
   templateUrl: './public-booking-portal.component.html',
   styleUrl: './public-booking-portal.component.scss'
 })
 export class PublicBookingPortalComponent implements OnInit, OnDestroy {
-  private readonly fb     = inject(FormBuilder);
-  private readonly route  = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly http   = inject(HttpClient);
-  readonly auth           = inject(AuthService);
-  private readonly company = inject(CompanyService);
-  readonly formatCLP      = formatCLP;
-  readonly formatDate     = formatDateLong;
+  private readonly fb       = inject(FormBuilder);
+  private readonly route    = inject(ActivatedRoute);
+  private readonly router   = inject(Router);
+  private readonly http     = inject(HttpClient);
+  private readonly quoteSvc = inject(QuoteService);
+  readonly auth             = inject(AuthService);
+  private readonly company  = inject(CompanyService);
+  readonly formatCLP        = formatCLP;
+  readonly formatDate       = formatDateLong;
 
   // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');
   readonly professional = signal<{
     id: string; name: string; slug: string; specialty: string; phone: string;
     description?: string; ratingAvg?: number; ratingCount?: number;
+    requiresQuote?:   boolean;
     profileImage?:    string | null;
     bannerImage?:     string | null;
     backgroundColor?: string | null;
@@ -80,6 +89,31 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly bookingRef      = signal('');
   readonly copiedTransfer       = signal(false);
   readonly acceptedClientTerms  = signal(false);
+
+  // ─── Modo cotización ─────────────────────────────────────────────────────────
+  readonly quoteData   = signal<IQuoteTokenData | null>(null);
+  private  quoteToken  = '';
+
+  readonly isQuoteMode = computed(() => !!this.quoteData());
+
+  /** Duración a usar para filtrar slots: del servicio o de la cotización */
+  private readonly _bookingDuration = computed(() => {
+    const q = this.quoteData();
+    if (q) return q.estimatedDuration;
+    return this.selectedService()?.duration ?? null;
+  });
+
+  /** Precio efectivo: de la cotización o del servicio seleccionado */
+  readonly bookingPrice = computed(() =>
+    this.quoteData()?.estimatedPrice ?? this.selectedService()?.price ?? 0
+  );
+
+  /** Nombre del ítem reservado: ref de cotización o nombre del servicio */
+  readonly bookingLabel = computed(() =>
+    this.quoteData()
+      ? `Cotización ${this.quoteData()!.quoteRef}`
+      : (this.selectedService()?.name ?? '')
+  );
 
   // ─── Email check ────────────────────────────────────────────────────────────
   readonly emailCheckState = signal<EmailCheckState>('idle');
@@ -132,13 +166,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
    * para completar el servicio (ej: 90min = 3 bloques de 30min seguidos).
    */
   readonly filteredAvailability = computed((): IDayAvailability[] => {
-    const service = this.selectedService();
-    const avail   = this.availability();
-    if (!service) return avail;
+    const duration = this._bookingDuration();
+    const avail    = this.availability();
+    if (!duration) return avail;
 
     return avail.map(day => {
-      const slotDur     = this._inferSlotDuration(day.slots);
-      const blocksNeeded = Math.ceil(service.duration / slotDur);
+      const slotDur      = this._inferSlotDuration(day.slots);
+      const blocksNeeded = Math.ceil(duration / slotDur);
       if (blocksNeeded <= 1) return day;
 
       const slotMap = new Map(day.slots.map(s => [s.time, s.available]));
@@ -226,7 +260,27 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    this.quoteToken = this.route.snapshot.queryParamMap.get('quote') ?? '';
+
+    // Si viene con token de cotización, cargarlo primero
+    if (this.quoteToken) {
+      try {
+        const qData = await this.quoteSvc.getQuoteByToken(this.quoteToken);
+        this.quoteData.set(qData);
+      } catch {
+        // Token inválido o expirado — continúa sin modo cotización
+        this.quoteToken = '';
+      }
+    }
+
     await this._loadProfile(slug);
+
+    // Pre-llenar formulario con datos del cliente de la cotización
+    if (this.quoteData()) {
+      const q = this.quoteData()!;
+      this.form.patchValue({ name: q.customerName, email: q.customerEmail, phone: q.customerPhone });
+      this.viewMode.set('checkout');
+    }
 
     this.sub = this.f['email'].valueChanges.subscribe(email => {
       if (!email || this.f['email'].invalid || !this.isGuest()) {
@@ -345,6 +399,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
+  goToQuote(): void {
+    const slug = this.professional()?.slug ?? this.route.snapshot.paramMap.get('slug') ?? '';
+    this.router.navigate(['/cotizar', slug]);
+  }
+
   private _normalizePhone(value: string): string {
     const digits = value.replace(/\D/g, '').replace(/^569/, '');
     return '+569' + digits.slice(0, 8);
@@ -362,7 +421,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     return `https://wa.me/${phone}?text=${msg}`;
   }
 
-  copyTransferData(amount?: number): void {
+  copyTransferData(amount: number = 0): void {
     const info = this.selectedPayment()?.transferInfo;
     if (!info) return;
 
@@ -402,16 +461,23 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     try {
       const { name, email, phone, notes } = this.form.value;
+      const body: Record<string, any> = {
+        slug:            this.professional()?.slug,
+        termsAcceptedAt: new Date().toISOString(),
+        date:     this.selectedDate(),
+        time:     this.selectedHour(),
+        name, email, phone, notes,
+        paymentProvider: provider,
+      };
+
+      if (this.quoteToken) {
+        body['quoteToken'] = this.quoteToken;
+      } else {
+        body['serviceId'] = this.selectedService()!.id;
+      }
+
       const res: any = await firstValueFrom(
-        this.http.post(`${environment.apiUrl}/public/book`, {
-          slug:             this.professional()?.slug,
-          serviceId:        this.selectedService()!.id,
-          termsAcceptedAt:  new Date().toISOString(),
-          date:      this.selectedDate(),
-          time:      this.selectedHour(),
-          name, email, phone, notes,
-          paymentProvider: provider,
-        })
+        this.http.post(`${environment.apiUrl}/public/book`, body)
       );
 
       if (provider === 'transfer') {

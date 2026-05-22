@@ -1,23 +1,108 @@
-// ─── Tokens de color ─────────────────────────────────────
-$primary:  #db9648;
-$accent:   #db9648;
-$success:  #10B981;
-$warning:  #F59E0B;
-$surface:  #F9FAFB;
-$border:   #E5E7EB;
-$text:     #0f172a;
-$muted:    #64748b;
+// ─── Design tokens ───────────────────────────────────────
+$gold:    #db9648;
+$text:    #0f172a;
+$muted:   #64748b;
+$border:  #e2e8f0;
+$canvas:  #f8fafc;
+$surface: #f9fafb;
+$error:   #ef4444;
+$success: #10b981;
+$warning: #f59e0b;
 
-// ─── Mixins ──────────────────────────────────────────────
-@mixin card {
+// Aliases para compatibilidad con componentes que usan $primary
+$primary: $gold;
+$accent:  $gold;
+
+// ─── Card ────────────────────────────────────────────────
+@mixin card($radius: 1rem) {
   background: #fff;
   border: 1px solid $border;
-  border-radius: 1.25rem;
+  border-radius: $radius;
   box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
 
+@mixin card-elevated($radius: 1rem) {
+  background: #fff;
+  border-radius: $radius;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+// ─── Focus ring ──────────────────────────────────────────
 @mixin focus-ring {
   outline: none;
   box-shadow: 0 0 0 3px rgba(219,150,72,.18);
-  border-color: $primary;
+  border-color: $gold;
+}
+
+// ─── Input ───────────────────────────────────────────────
+@mixin input-base {
+  border: 1.5px solid $border;
+  border-radius: .5rem;
+  padding: .625rem .875rem;
+  font-size: .9rem;
+  color: $text;
+  background: #fafafa;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+  &:focus { @include focus-ring; background: #fff; }
+}
+
+// ─── Buttons ─────────────────────────────────────────────
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity .15s, background .15s;
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+@mixin btn-gold($radius: .625rem, $pad: .75rem 1.5rem) {
+  @include btn-base;
+  padding: $pad;
+  border-radius: $radius;
+  background: $gold;
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(219,150,72,.35);
+  &:hover:not(:disabled) { background: #c4873e; }
+}
+
+@mixin btn-secondary($radius: .625rem, $pad: .75rem 1.5rem) {
+  @include btn-base;
+  padding: $pad;
+  border-radius: $radius;
+  background: #fff;
+  color: $text;
+  border: 1.5px solid $border;
+  &:hover:not(:disabled) { background: $surface; }
+}
+
+// ─── Spinner ─────────────────────────────────────────────
+@mixin spinner($size: 2rem, $color: $gold) {
+  width: $size;
+  height: $size;
+  border: 3px solid $border;
+  border-top-color: $color;
+  border-radius: 50%;
+  animation: _spin .8s linear infinite;
+  @keyframes _spin { to { transform: rotate(360deg); } }
+}
+
+// ─── Backdrop ────────────────────────────────────────────
+@mixin backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 40;
+}
+
+// ─── Status chips ────────────────────────────────────────
+@mixin status-chip {
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
 }

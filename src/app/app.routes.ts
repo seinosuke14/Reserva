@@ -75,6 +75,11 @@ export const routes: Routes = [
     path: 'reservar/:slug',
     loadComponent: () => import('./public/public-booking-portal/public-booking-portal.component').then(m => m.PublicBookingPortalComponent)
   },
+  // Formulario de cotización previa (para profesiones que lo requieren)
+  {
+    path: 'cotizar/:slug',
+    loadComponent: () => import('./public/quote-request/quote-request.component').then(m => m.QuoteRequestComponent)
+  },
 
   // Rutas protegidas (Dashboard)
   {
@@ -83,7 +88,8 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/app-layout/app-layout.component').then(m => m.AppLayoutComponent),
     children: [
       { path: '', loadComponent: () => import('./features/dashboard-home/dashboard-home.component').then(m => m.DashboardHomeComponent) },
-      { path: 'agenda', loadComponent: () => import('./features/booking-calendar/booking-calendar.component').then(m => m.BookingCalendarComponent) },
+      { path: 'agenda',       loadComponent: () => import('./features/booking-calendar/booking-calendar.component').then(m => m.BookingCalendarComponent) },
+      { path: 'cotizaciones', loadComponent: () => import('./features/quotes/quotes.component').then(m => m.QuotesComponent) },
       { path: 'clientes', loadComponent: () => import('./features/customer-directory/customer-directory.component').then(m => m.CustomerDirectoryComponent) },
       { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },

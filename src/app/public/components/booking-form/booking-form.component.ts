@@ -88,7 +88,7 @@ import { IPublicService } from '../../../helpers/models';
             <div class="detail-icon">📦</div>
             <div>
               <p class="detail-label">Servicio</p>
-              <p class="detail-value">{{ selectedService()?.name }}</p>
+              <p class="detail-value">{{ bookingLabel() || selectedService()?.name }}</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ import { IPublicService } from '../../../helpers/models';
 
           <div class="summary-price">
             <span>Total</span>
-            <span class="price-amount">{{ formatCLP(selectedService()?.price ?? 0) }}</span>
+            <span class="price-amount">{{ formatCLP(bookingPrice() ?? selectedService()?.price ?? 0) }}</span>
           </div>
 
           <p class="cancel-notice">Puedes cancelar hasta 24h antes sin costo</p>
@@ -130,6 +130,8 @@ export class BookingFormComponent {
   readonly selectedHour    = input<string | null>(null);
   readonly emailStatus     = input<string>('idle');
   readonly showLoginHint   = input(false);
+  readonly bookingPrice    = input<number | null>(null);
+  readonly bookingLabel    = input<string>('');
 
   onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;

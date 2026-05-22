@@ -34,6 +34,8 @@ export interface IProfessional {
   companyEmail?: string | null;
   companySlug?: string | null;
   trialUsed?: boolean;
+  requiresQuote?: boolean;
+  profession?: { requiresQuote: boolean } | null;
 }
 
 @Injectable({ providedIn: 'root' })
