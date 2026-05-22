@@ -52,14 +52,19 @@ export class AppLayoutComponent {
   currentPath         = signal('');
   isMobile            = signal(window.innerWidth < 768);
 
-  readonly navSections: NavSection[] = [
+  readonly requiresQuote = computed(() =>
+    !!this.user()?.profession?.requiresQuote
+  );
+
+  readonly navSections = computed<NavSection[]>(() => [
     {
       label: 'Principal',
       items: [
-        { path: '/app',          label: 'Dashboard', icon: 'dashboard' },
-        { path: '/app/agenda',    label: 'Agenda',    icon: 'calendar' },
-        { path: '/app/clientes',  label: 'Clientes',  icon: 'users' },
-        { path: '/app/servicios', label: 'Servicios', icon: 'package' },
+        { path: '/app',               label: 'Dashboard',    icon: 'dashboard' },
+        { path: '/app/agenda',        label: 'Agenda',       icon: 'calendar' },
+        { path: '/app/clientes',      label: 'Clientes',     icon: 'users' },
+        { path: '/app/servicios',     label: 'Servicios',    icon: 'package' },
+        ...(this.requiresQuote() ? [{ path: '/app/cotizaciones', label: 'Cotizaciones', icon: 'file-text' }] : []),
       ],
     },
     {
@@ -76,7 +81,7 @@ export class AppLayoutComponent {
         { path: '/app/editar',        label: 'Editar',          icon: 'sliders' },
       ],
     },
-  ];
+  ]);
 
   private readonly pageTitles: Record<string, PageMeta> = {
     '/app':              { title: 'Dashboard',      sub: 'Bienvenido de vuelta' },
@@ -85,7 +90,8 @@ export class AppLayoutComponent {
     '/app/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
     '/app/pagos':         { title: 'Métodos de Pago', sub: 'Configura tus formas de cobro' },
     '/app/horario':       { title: 'Horario',        sub: 'Define tu disponibilidad' },
-    '/app/analytics':     { title: 'Analytics',      sub: 'Métricas y rendimiento de tu negocio' },
+    '/app/analytics':     { title: 'Analytics',        sub: 'Métricas y rendimiento de tu negocio' },
+    '/app/cotizaciones':  { title: 'Cotizaciones',    sub: 'Gestiona las solicitudes de cotización' },
     '/app/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
     '/app/editar':        { title: 'Editar Portal',  sub: 'Personaliza la apariencia de tu portal de reservas' },
   };

@@ -20,7 +20,13 @@
       "Bash(unzip -l \"Agendamiento-profesional-perfil.zip\")",
       "Bash(unzip -o \"Agendamiento-profesional-perfil.zip\" -d \"/tmp/agendamiento-ref\")",
       "Read(//c/tmp/agendamiento-ref/**)",
-      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/**)"
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/**)",
+      "Bash(Get-ChildItem -Path \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(xargs grep -l \"export interface.*Professional\\\\|export interface.*Booking\\\\|export interface.*Appointment\")",
+      "Bash(Get-ChildItem \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\\\\public-booking-portal\" -Recurse)",
+      "Bash(Select-Object FullName)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

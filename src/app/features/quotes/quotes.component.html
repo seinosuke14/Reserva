@@ -1,0 +1,174 @@
+<!-- Loading -->
+@if (loadState() === 'loading') {
+  <div class="q-loading">
+    <div class="q-spinner"></div>
+    <p>Cargando cotizaciones...</p>
+  </div>
+}
+
+<!-- Error -->
+@if (loadState() === 'error') {
+  <div class="q-empty">
+    <p>No se pudieron cargar las cotizaciones.</p>
+  </div>
+}
+
+<!-- Content -->
+@if (loadState() === 'ready') {
+  <div class="q-page">
+
+    <!-- Tabs -->
+    <div class="q-tabs">
+      @for (tab of [
+        { key: 'all',      label: 'Todas' },
+        { key: 'pending',  label: 'Pendientes' },
+        { key: 'reviewed', label: 'Respondidas' },
+        { key: 'booked',   label: 'Agendadas' }
+      ]; track tab.key) {
+        <button class="q-tab" [class.q-tab--active]="activeTab() === tab.key" (click)="activeTab.set($any(tab.key))">
+          {{ tab.label }}
+          @if (tab.key === 'pending' && pendingCount() > 0) {
+            <span class="q-badge">{{ pendingCount() }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <!-- Empty state -->
+    @if (filteredQuotes().length === 0) {
+      <div class="q-empty">
+        <p>No hay cotizaciones {{ activeTab() !== 'all' ? 'en esta categoría' : 'aún' }}.</p>
+      </div>
+    }
+
+    <!-- Lista -->
+    <div class="q-list">
+      @for (quote of filteredQuotes(); track quote.id) {
+        <div class="q-card" (click)="openQuote(quote)">
+          <div class="q-card-left">
+            <div class="q-status-dot" [class]="'q-dot--' + quote.status"></div>
+            <div>
+              <p class="q-customer-name">{{ quote.customerName }}</p>
+              <p class="q-meta">{{ quote.tattooStyle }} · {{ quote.bodyPart }}</p>
+              <p class="q-meta q-meta--dim">{{ formatDate(quote.createdAt) }}</p>
+            </div>
+          </div>
+          <div class="q-card-right">
+            <span class="q-status-chip" [class]="'q-chip--' + quote.status">{{ statusLabel(quote.status) }}</span>
+            @if (quote.estimatedPrice) {
+              <span class="q-price">{{ formatCLP(quote.estimatedPrice) }}</span>
+            }
+            <span class="q-arrow">›</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+}
+
+<!-- Modal detalle / respuesta -->
+@if (selectedQuote()) {
+  <div class="q-backdrop" [@backdrop] (click)="closeModal()"></div>
+  <div class="q-modal" [@modalAnim]>
+    <div class="q-modal-header">
+      <div>
+        <h3 class="q-modal-title">{{ selectedQuote()!.customerName }}</h3>
+        <span class="q-status-chip" [class]="'q-chip--' + selectedQuote()!.status">{{ statusLabel(selectedQuote()!.status) }}</span>
+      </div>
+      <button class="q-modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="q-modal-body">
+
+      <!-- Datos del cliente -->
+      <section class="q-detail-section">
+        <h4 class="q-detail-title">Cliente</h4>
+        <div class="q-detail-grid">
+          <div class="q-detail-item"><span class="q-detail-label">Email</span><span>{{ selectedQuote()!.customerEmail }}</span></div>
+          <div class="q-detail-item"><span class="q-detail-label">Teléfono</span><span>{{ selectedQuote()!.customerPhone }}</span></div>
+        </div>
+      </section>
+
+      <!-- Datos del diseño -->
+      <section class="q-detail-section">
+        <h4 class="q-detail-title">Diseño</h4>
+        <div class="q-detail-grid">
+          <div class="q-detail-item"><span class="q-detail-label">Estilo</span><span>{{ selectedQuote()!.tattooStyle }}</span></div>
+          <div class="q-detail-item"><span class="q-detail-label">Zona</span><span>{{ selectedQuote()!.bodyPart }}</span></div>
+          @if (selectedQuote()!.widthCm || selectedQuote()!.heightCm) {
+            <div class="q-detail-item"><span class="q-detail-label">Dimensiones</span><span>{{ selectedQuote()!.widthCm ?? '?' }} × {{ selectedQuote()!.heightCm ?? '?' }} cm</span></div>
+          }
+        </div>
+        <p class="q-description">{{ selectedQuote()!.designDescription }}</p>
+        @if (selectedQuote()!.additionalNotes) {
+          <p class="q-notes"><strong>Notas:</strong> {{ selectedQuote()!.additionalNotes }}</p>
+        }
+      </section>
+
+      <!-- Imagen de referencia -->
+      @if (selectedQuote()!.imageUrl) {
+        <section class="q-detail-section">
+          <h4 class="q-detail-title">Imagen de referencia</h4>
+          <img [src]="selectedQuote()!.imageUrl!" alt="Diseño" class="q-ref-image" />
+        </section>
+      }
+
+      <!-- Respuesta del profesional -->
+      @if (selectedQuote()!.status === 'reviewed' || selectedQuote()!.status === 'booked') {
+        <section class="q-detail-section q-detail-section--response">
+          <h4 class="q-detail-title">Tu respuesta</h4>
+          <div class="q-detail-grid">
+            <div class="q-detail-item"><span class="q-detail-label">Precio estimado</span><strong>{{ formatCLP(selectedQuote()!.estimatedPrice!) }}</strong></div>
+            <div class="q-detail-item"><span class="q-detail-label">Duración estimada</span><strong>{{ durationLabel(selectedQuote()!.estimatedDuration) }}</strong></div>
+          </div>
+          @if (selectedQuote()!.professionalNotes) {
+            <p class="q-notes"><strong>Tus notas:</strong> {{ selectedQuote()!.professionalNotes }}</p>
+          }
+        </section>
+      }
+
+      <!-- Formulario de respuesta -->
+      @if (selectedQuote()!.status === 'pending' || selectedQuote()!.status === 'reviewed') {
+        @if (respondSuccess()) {
+          <div class="q-success-banner">
+            ✓ Respuesta enviada. El cliente recibirá un correo con el enlace para agendar.
+          </div>
+        } @else {
+          <section class="q-detail-section">
+            <h4 class="q-detail-title">{{ selectedQuote()!.status === 'reviewed' ? 'Actualizar respuesta' : 'Responder cotización' }}</h4>
+            <form [formGroup]="responseForm" (ngSubmit)="sendResponse()" class="q-response-form">
+              <div class="q-response-row">
+                <div class="q-field">
+                  <label class="q-label">Precio estimado (CLP) *</label>
+                  <input type="number" formControlName="estimatedPrice" class="q-input" placeholder="Ej: 80000" min="1" />
+                  @if (rf['estimatedPrice'].invalid && rf['estimatedPrice'].touched) {
+                    <span class="q-error">Ingresa un precio válido</span>
+                  }
+                </div>
+                <div class="q-field">
+                  <label class="q-label">Duración estimada (min) *</label>
+                  <input type="number" formControlName="estimatedDuration" class="q-input" placeholder="Ej: 180" min="15" step="15" />
+                  @if (rf['estimatedDuration'].invalid && rf['estimatedDuration'].touched) {
+                    <span class="q-error">Mínimo 15 minutos</span>
+                  }
+                </div>
+              </div>
+              <div class="q-field">
+                <label class="q-label">Notas para el cliente (opcional)</label>
+                <textarea formControlName="professionalNotes" class="q-input q-textarea" rows="3"
+                  placeholder="Ej: El precio incluye boceto. Primera sesión de 3 horas..." maxlength="500"></textarea>
+              </div>
+              <div class="q-response-actions">
+                <button type="submit" class="q-btn q-btn--primary" [disabled]="isResponding()">
+                  {{ isResponding() ? 'Enviando...' : 'Enviar respuesta al cliente' }}
+                </button>
+              </div>
+            </form>
+          </section>
+        }
+      }
+
+    </div>
+  </div>
+}

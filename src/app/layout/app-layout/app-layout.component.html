@@ -46,7 +46,7 @@
 
     <!-- Nav -->
     <nav class="flex-1 px-2 py-2.5 overflow-y-auto overflow-x-hidden">
-      @for (section of navSections; track section.label; let si = $index) {
+      @for (section of navSections(); track section.label; let si = $index) {
       @if (isSidebarOpen()) {
       <div class="text-[9.5px] font-bold uppercase tracking-[.12em] text-white/[.22]"
         [style.padding]="si === 0 ? '4px 12px 7px' : '14px 12px 7px'">

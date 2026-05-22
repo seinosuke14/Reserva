@@ -69,11 +69,30 @@ $canvas:  #f8fafc;
 //  PROFILE MODE
 // ═══════════════════════════════════════════════════════
 
+// En mobile todo el contenido de perfil va dentro de una sola card
+.profile-card {
+  @media (max-width: 767px) {
+    background: #fff;
+    border: 1px solid $border;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    padding: 1rem;
+  }
+}
+
 .profile-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
+
+  // Desktop mantiene su propia card
+  @media (min-width: 768px) {
+    background: #fff;
+    border: 1px solid $border;
+    border-radius: 1rem;
+    padding: .625rem 1rem;
+  }
 }
 
 .profile-top-name {
@@ -112,18 +131,25 @@ $canvas:  #f8fafc;
 
 .hero-image {
   flex: 1;
-  min-height: 220px;
+  height: 220px;
   border-radius: 1.25rem;
   overflow: hidden;
   background: #e9ecf1;
 
-  @media (min-width: 768px) { min-height: 280px; }
+  @media (min-width: 768px) { height: 280px; }
+
+  @media (max-width: 767px) {
+    border-radius: 0;
+    margin: -1rem -1rem 1rem;
+    width: calc(100% + 2rem);
+  }
 }
 
 .hero-banner-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   display: block;
 }
 
@@ -146,6 +172,7 @@ $canvas:  #f8fafc;
   background: #fff;
   border: 1px solid $border;
   border-radius: 1.25rem;
+  @media (max-width: 767px) { background: transparent; border: none; border-radius: 0; padding-left: 0; padding-right: 0; }
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -262,6 +289,7 @@ $canvas:  #f8fafc;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
   p { font-size: .875rem; color: #374151; line-height: 1.7; margin: 0; white-space: pre-line; }
+  @media (max-width: 767px) { background: transparent; border: none; border-radius: 0; padding: .75rem 0; margin-bottom: .5rem; }
 }
 
 // Services section
@@ -274,6 +302,11 @@ $canvas:  #f8fafc;
   margin: 0 0 1rem;
   text-transform: uppercase;
   letter-spacing: .04em;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 1rem;
+  padding: .625rem 1rem;
+  @media (max-width: 767px) { background: transparent; border: none; border-radius: 0; padding: .5rem 0; }
 }
 
 .profile-services-list {
@@ -307,6 +340,7 @@ $canvas:  #f8fafc;
   background: #fff;
   border: 1.5px solid $border;
   border-radius: 1rem;
+  @media (max-width: 767px) { background: transparent; border: none; border-bottom: 1px solid $border; border-radius: 0; }
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -394,6 +428,44 @@ $canvas:  #f8fafc;
     box-shadow: 0 5px 18px rgba(219,150,72,.45);
     transform: translateY(-1px);
   }
+}
+
+// Divisor entre cotización y servicios
+.services-divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: .25rem 0;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,.12);
+  }
+
+  span {
+    font-size: .75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.35);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+}
+
+// Quote CTA icon (inline dentro de profile-service-card)
+.quote-cta-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(219,150,72,.15);
+  border: 1px solid rgba(219,150,72,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $gold;
+  flex-shrink: 0;
 }
 
 // ═══════════════════════════════════════════════════════

@@ -35,9 +35,9 @@
                 <div class="transfer-row"><span>RUT</span><strong>{{ selectedPayment()?.transferInfo?.rut }}</strong></div>
                 <div class="transfer-row"><span>Titular</span><strong>{{ selectedPayment()?.transferInfo?.holderName }}</strong></div>
                 <div class="transfer-row"><span>Email</span><strong>{{ selectedPayment()?.transferInfo?.email }}</strong></div>
-                <div class="transfer-row highlight"><span>Monto</span><strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong></div>
+                <div class="transfer-row highlight"><span>Monto</span><strong>{{ formatCLP(bookingPrice()) }}</strong></div>
                 <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
-                  (click)="copyTransferData(selectedService()?.price)">
+                  (click)="copyTransferData(bookingPrice())">
                   @if (copiedTransfer()) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -72,6 +72,7 @@
 
         <!-- MODO PERFIL -->
         } @else if (viewMode() === 'profile') {
+          <div class="profile-card">
 
           <!-- Top bar -->
           <div class="profile-top-bar">
@@ -177,6 +178,34 @@
           <div class="profile-services-section">
             <h3 class="section-title" [ngStyle]="headingFontStyle()">Servicios disponibles</h3>
             <div class="profile-services-list">
+              @if (professional()?.requiresQuote && !isQuoteMode()) {
+                <div class="profile-service-card">
+                  <div class="psc-body">
+                    <div class="quote-cta-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                      </svg>
+                    </div>
+                    <div class="psc-info">
+                      <h4 class="psc-name">Cotización personalizada</h4>
+                      <p class="psc-desc">Envía los detalles de tu proyecto y recibe un presupuesto a medida.</p>
+                    </div>
+                    <button class="psc-book-btn" (click)="goToQuote()">
+                      Cotizar
+                    </button>
+                  </div>
+                </div>
+              }
+              @if (professional()?.requiresQuote && !isQuoteMode() && services().length) {
+                <div class="services-divider">
+                  <span>Servicios</span>
+                </div>
+              }
               @for (service of services(); track service.id) {
                 <div class="profile-service-card">
                   @if (service.serviceImage) {
@@ -208,6 +237,9 @@
             </div>
           </div>
 
+
+          </div><!-- /profile-card -->
+
         <!-- MODO CHECKOUT -->
         } @else {
 
@@ -222,9 +254,9 @@
               Volver
             </button>
             <div class="checkout-service-badge">
-              <span class="csb-name">{{ selectedService()?.name }}</span>
+              <span class="csb-name">{{ bookingLabel() }}</span>
               <span class="csb-sep">·</span>
-              <span class="csb-price">{{ formatCLP(selectedService()?.price ?? 0) }}</span>
+              <span class="csb-price">{{ formatCLP(bookingPrice()) }}</span>
             </div>
             @if (auth.isAuthenticated()) {
               <button class="btn-text-sm" (click)="auth.logout()" style="display:inline-flex;align-items:center;gap:.375rem;">
@@ -261,7 +293,9 @@
               [selectedDate]="selectedDate()"
               [selectedHour]="selectedHour()"
               [emailStatus]="emailCheckState()"
-              [showLoginHint]="showLoginHint()">
+              [showLoginHint]="showLoginHint()"
+              [bookingPrice]="bookingPrice()"
+              [bookingLabel]="bookingLabel()">
             </app-booking-form>
           }
 
@@ -352,9 +386,9 @@
                         <div class="transfer-row"><span>Cuenta</span><strong>{{ method.transferInfo.accountType }} - {{ method.transferInfo.accountNumber }}</strong></div>
                         <div class="transfer-row"><span>RUT</span><strong>{{ method.transferInfo.rut }}</strong></div>
                         <div class="transfer-row"><span>Titular</span><strong>{{ method.transferInfo.holderName }}</strong></div>
-                        <div class="transfer-row highlight"><span>Monto a transferir</span><strong>{{ formatCLP(selectedService()?.price ?? 0) }}</strong></div>
+                        <div class="transfer-row highlight"><span>Monto a transferir</span><strong>{{ formatCLP(bookingPrice()) }}</strong></div>
                         <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
-                          (click)="copyTransferData(selectedService()?.price)">
+                          (click)="copyTransferData(bookingPrice())">
                           @if (copiedTransfer()) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
