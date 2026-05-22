@@ -54,20 +54,31 @@ export class DashboardHomeComponent implements OnInit {
   aptFilter         = signal<'todos' | 'Pagado' | 'Pendiente' | 'Cancelado'>('todos');
   hoveredBar        = signal<number | null>(null);
 
-  readonly bookingUrl = computed(() => {
-    const user = this.auth.currentUser() as any;
-    if (!user?.slug || user?.companyId) return null;
-    return `${window.location.origin}/reservar/${user.slug}`;
-  });
-
-  readonly companyUrl = computed(() => {
-    const user = this.auth.currentUser() as any;
-    if (!user?.companyId || !user?.companySlug) return null;
-    return `${window.location.origin}/empresa/${user.companySlug}`;
+  readonly linkBanner = computed(() => {
+    const user = this.auth.currentUser();
+    if (user?.slug && !user?.companyId) return {
+      url:     `${window.location.origin}/reservar/${user.slug}`,
+      label:   'Tu link de agendamiento',
+      accent:  '#db9648',
+      shadow:  'rgba(219,150,72,.4)',
+      iconBg:  'rgba(219,150,72,.13)',
+      iconColor: '#db9648',
+      isCompany: false,
+    };
+    if (user?.companyId && user?.companySlug) return {
+      url:     `${window.location.origin}/empresa/${user.companySlug}`,
+      label:   'Link de agendamiento (vía empresa)',
+      accent:  '#6366f1',
+      shadow:  'rgba(99,102,241,.4)',
+      iconBg:  'rgba(99,102,241,.18)',
+      iconColor: '#818cf8',
+      isCompany: true,
+    };
+    return null;
   });
 
   async copyUrl(): Promise<void> {
-    const url = this.bookingUrl() ?? this.companyUrl();
+    const url = this.linkBanner()?.url;
     if (!url) return;
     await navigator.clipboard.writeText(url);
     this.copied.set(true);
