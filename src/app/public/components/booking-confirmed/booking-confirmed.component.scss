@@ -1,0 +1,63 @@
+@use 'shared' as *;
+
+:host { display: block; }
+
+.booked-card {
+  max-width: 520px; margin: 2rem auto; background: #fff;
+  border-radius: 1.5rem; padding: 2.5rem 2rem; text-align: center;
+  border: 1px solid $border; box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  h2 { font-size: 1.5rem; font-weight: 700; color: $text; margin: 0 0 .5rem; }
+  > p { color: #64748b; font-size: .875rem; margin: 0 0 1.5rem; line-height: 1.5; }
+}
+
+.booked-icon {
+  width: 64px; height: 64px; background: #dcfce7; color: #16a34a;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.transfer-details {
+  background: $canvas; border: 1px solid $border;
+  border-radius: .75rem; padding: 1rem 1.25rem; margin-top: .5rem;
+  text-align: left;
+  h4 { font-size: .85rem; font-weight: 700; color: $text; margin: 0 0 .75rem; text-transform: uppercase; letter-spacing: .05em; }
+}
+
+.transfer-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .5rem 0; border-bottom: 1px solid #f1f5f9; font-size: .8rem;
+  &:last-of-type { border-bottom: none; }
+  span   { color: #64748b; }
+  strong { color: $text; font-weight: 600; }
+  &.highlight {
+    padding-top: .75rem; margin-top: .25rem;
+    border-top: 2px solid $border; border-bottom: none;
+    strong { color: $gold; font-size: 1.1rem; font-weight: 700; }
+  }
+}
+
+.copy-transfer-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: .4rem; width: 100%; margin-top: .875rem;
+  padding: .625rem 1rem; border-radius: .75rem;
+  border: 1.5px solid rgba(219,150,72,.4); background: rgba(219,150,72,.06);
+  color: $gold; font-size: .8125rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  &:hover:not(.copied) { background: rgba(219,150,72,.12); border-color: $gold; }
+  &.copied { border-color: #10b981; background: rgba(16,185,129,.08); color: #059669; cursor: default; }
+}
+
+.booking-ref {
+  margin-top: 1.5rem; padding: .75rem 1rem;
+  background: $canvas; border: 1px solid $border; border-radius: .5rem;
+  font-size: .85rem; color: #64748b;
+  strong { color: $gold; font-family: monospace; letter-spacing: .05em; }
+}
+
+.btn-whatsapp {
+  display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.5rem;
+  padding: .875rem 1.5rem; background: #25d366; color: #fff; border: none;
+  border-radius: .75rem; font-size: .9rem; font-weight: 600;
+  text-decoration: none; transition: background .2s;
+  &:hover { background: #1da851; }
+}

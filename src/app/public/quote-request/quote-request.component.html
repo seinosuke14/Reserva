@@ -1,0 +1,169 @@
+<!-- Loading -->
+@if (pageState() === 'loading') {
+  <div class="qr-loading">
+    <div class="qr-spinner"></div>
+    <p>Cargando...</p>
+  </div>
+}
+
+<!-- Error -->
+@if (pageState() === 'error') {
+  <div class="qr-error">
+    <p>No se encontró el profesional.</p>
+    <a routerLink="/" class="qr-btn qr-btn--secondary">Volver al inicio</a>
+  </div>
+}
+
+<!-- Success -->
+@if (pageState() === 'success') {
+  <div class="qr-success-wrap">
+    <div class="qr-success-card">
+      <div class="qr-success-icon">✓</div>
+      <h2>¡Cotización enviada!</h2>
+      <p>Tu solicitud fue enviada a <strong>{{ professional()?.name }}</strong>. Te responderemos por email con el presupuesto y un enlace para agendar tu hora.</p>
+      <p class="qr-ref">Referencia: <strong>{{ submittedRef() }}</strong></p>
+      <a [routerLink]="['/reservar', professional()?.slug]" class="qr-btn qr-btn--primary">Ver perfil del profesional</a>
+    </div>
+  </div>
+}
+
+<!-- Formulario -->
+@if (pageState() === 'ready' || pageState() === 'submitting') {
+  <div class="qr-page">
+    <div class="qr-header">
+      @if (professional()?.profileImage) {
+        <img [src]="professional()!.profileImage!" [alt]="professional()!.name" class="qr-avatar" />
+      }
+      <div class="qr-header-text">
+        <p class="qr-pre">Solicitud de cotización para</p>
+        <h1 class="qr-pro-name">{{ professional()?.name }}</h1>
+        <p class="qr-sub">Completa el formulario y nos pondremos en contacto contigo con el presupuesto.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="qr-form">
+
+      <!-- Datos de contacto -->
+      <section class="qr-section">
+        <h3 class="qr-section-title">Tus datos</h3>
+        <div class="qr-row">
+          <div class="qr-field">
+            <label class="qr-label">Nombre *</label>
+            <input type="text" formControlName="customerName" class="qr-input" placeholder="Tu nombre completo" />
+            @if (f['customerName'].invalid && f['customerName'].touched) {
+              <span class="qr-error">Mínimo 3 caracteres</span>
+            }
+          </div>
+          <div class="qr-field">
+            <label class="qr-label">Email *</label>
+            <input type="email" formControlName="customerEmail" class="qr-input" placeholder="tu@email.com" />
+            @if (f['customerEmail'].invalid && f['customerEmail'].touched) {
+              <span class="qr-error">Email inválido</span>
+            }
+          </div>
+        </div>
+        <div class="qr-row">
+          <div class="qr-field">
+            <label class="qr-label">Teléfono *</label>
+            <input type="tel" formControlName="customerPhone" class="qr-input" placeholder="+569 XXXX XXXX" (input)="onPhoneInput($event)" />
+            @if (f['customerPhone'].invalid && f['customerPhone'].touched) {
+              <span class="qr-error">Formato: +569XXXXXXXX</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Detalles del tatuaje -->
+      <section class="qr-section">
+        <h3 class="qr-section-title">Detalles del diseño</h3>
+
+        <div class="qr-field">
+          <label class="qr-label">Descripción del diseño *</label>
+          <textarea formControlName="designDescription" class="qr-input qr-textarea" rows="4"
+            placeholder="Describe el tatuaje que quieres: idea, referencias, colores, detalles importantes..." maxlength="1000"></textarea>
+          <span class="qr-counter">{{ f['designDescription'].value?.length ?? 0 }}/1000</span>
+          @if (f['designDescription'].invalid && f['designDescription'].touched) {
+            <span class="qr-error">Mínimo 10 caracteres</span>
+          }
+        </div>
+
+        <div class="qr-row">
+          <div class="qr-field">
+            <label class="qr-label">Estilo *</label>
+            <select formControlName="tattooStyle" class="qr-input qr-select">
+              <option value="" disabled>Selecciona un estilo</option>
+              @for (style of tattooStyles; track style) {
+                <option [value]="style">{{ style }}</option>
+              }
+            </select>
+            @if (f['tattooStyle'].invalid && f['tattooStyle'].touched) {
+              <span class="qr-error">Selecciona un estilo</span>
+            }
+          </div>
+          <div class="qr-field">
+            <label class="qr-label">Zona del cuerpo *</label>
+            <select formControlName="bodyPart" class="qr-input qr-select">
+              <option value="" disabled>Selecciona una zona</option>
+              @for (part of bodyParts; track part) {
+                <option [value]="part">{{ part }}</option>
+              }
+            </select>
+            @if (f['bodyPart'].invalid && f['bodyPart'].touched) {
+              <span class="qr-error">Selecciona una zona</span>
+            }
+          </div>
+        </div>
+
+        <div class="qr-row">
+          <div class="qr-field">
+            <label class="qr-label">Ancho aprox. (cm)</label>
+            <input type="number" formControlName="widthCm" class="qr-input" placeholder="Ej: 10" min="0.5" max="100" step="0.5" />
+          </div>
+          <div class="qr-field">
+            <label class="qr-label">Alto aprox. (cm)</label>
+            <input type="number" formControlName="heightCm" class="qr-input" placeholder="Ej: 15" min="0.5" max="100" step="0.5" />
+          </div>
+        </div>
+
+        <!-- Imagen -->
+        <div class="qr-field">
+          <label class="qr-label">Imagen de referencia (opcional)</label>
+          @if (!imgPreview()) {
+            <label class="qr-upload-zone">
+              <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageChange($event)" class="qr-upload-input" />
+              <div class="qr-upload-content">
+                <span class="qr-upload-icon">🖼️</span>
+                <span class="qr-upload-text">Haz clic o arrastra una imagen</span>
+                <span class="qr-upload-hint">JPG, PNG o WebP · Máx 10 MB</span>
+              </div>
+            </label>
+          } @else {
+            <div class="qr-img-preview">
+              <img [src]="imgPreview()!" alt="Vista previa" class="qr-preview-img" />
+              <button type="button" class="qr-remove-img" (click)="removeImage()">✕ Quitar imagen</button>
+            </div>
+          }
+        </div>
+
+        <!-- Notas adicionales -->
+        <div class="qr-field">
+          <label class="qr-label">Notas adicionales (opcional)</label>
+          <textarea formControlName="additionalNotes" class="qr-input qr-textarea" rows="3"
+            placeholder="¿Tienes alguna restricción de salud, alergia o algo más que debamos saber?" maxlength="500"></textarea>
+        </div>
+      </section>
+
+      <div class="qr-actions">
+        <a [routerLink]="['/reservar', professional()?.slug]" class="qr-btn qr-btn--secondary">Cancelar</a>
+        <button type="submit" class="qr-btn qr-btn--primary" [disabled]="pageState() === 'submitting'">
+          @if (pageState() === 'submitting') {
+            Enviando...
+          } @else {
+            Enviar cotización
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+}
