@@ -113,7 +113,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   private readonly _formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
   get f() { return this.form.controls; }
 
-  readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
+  readonly isGuest       = computed(() => this.auth.currentRole() === 'guest' && !this.svc.isAuthenticated());
   readonly showLoginHint = computed(() => this.emailCheckState() === 'exists' && this.isGuest());
 
   readonly filteredAvailability = computed((): IDayAvailability[] => {
@@ -172,14 +172,13 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       this.state.set('error');
     }
 
-    // Pre-rellena el form si hay sesión
-    const user = this.auth.currentUser();
+    // Pre-rellena el form si hay sesión (profesional o empresa)
+    const user    = this.auth.currentUser();
+    const company = this.svc.currentCompany();
     if (user) {
-      this.form.patchValue({
-        name:  user.name,
-        email: user.email,
-        phone: this._normalizePhone(user.phone ?? ''),
-      });
+      this.form.patchValue({ name: user.name, email: user.email, phone: this._normalizePhone(user.phone ?? '') });
+    } else if (company) {
+      this.form.patchValue({ name: company.name, email: company.email });
     }
 
     this.sub = this.f['email'].valueChanges.subscribe(email => {
@@ -212,7 +211,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       this.availLoading.set(true);
       try {
         const data: any = await firstValueFrom(
-          this.http.get(`${environment.apiUrl}/public/professionals/${member.slug}`)
+          this.http.get(`${environment.apiUrl}/public/professionals/${member.slug}/availability`)
         );
         this.availability.set(data.availability ?? []);
         if (data.availability?.length) this.selectedDate.set(data.availability[0].date);
@@ -300,7 +299,6 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   }
 
   getWhatsappLink(): string {
-    const phone   = this.bookingMember()?.slug ? '' : '';
     const service = this.bookingService()?.name ?? '';
     const date    = this.selectedDate() ? this.formatDate(this.selectedDate()) : '';
     const hour    = this.selectedHour() ?? '';
