@@ -1,5 +1,36 @@
 <div @fadeUp class="flex flex-col gap-[18px] max-w-2xl">
 
+  @if (isCompanyMember()) {
+  <div class="bg-white rounded-[16px] border border-amber-200 p-6 flex flex-col items-center gap-4 text-center">
+    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+      <svg width="22" height="22" fill="none" stroke="#b45309" stroke-width="1.75" viewBox="0 0 24 24">
+        <path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/>
+      </svg>
+    </div>
+    <div>
+      <h2 class="text-[15px] font-bold text-ink mb-1">Portal configurado por la empresa</h2>
+      <p class="text-[13px] text-ink-400 max-w-xs leading-relaxed">
+        Tu portal público es administrado desde el panel de la empresa a la que perteneces.
+        Para realizar cambios, contacta al administrador de tu empresa.
+      </p>
+    </div>
+    @if (companySlug()) {
+    <div class="w-full bg-ink-50 rounded-[12px] px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-ink-300 shrink-0">
+          <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span class="text-[11.5px] text-ink-400 font-mono truncate">/empresa/<strong class="text-ink">{{ companySlug() }}</strong></span>
+      </div>
+      <a [routerLink]="'/empresa/' + companySlug()" target="_blank"
+        class="text-[12px] font-bold text-gold hover:underline whitespace-nowrap shrink-0">
+        Ver página ↗
+      </a>
+    </div>
+    }
+  </div>
+  } @else {
+
   <!-- Header -->
   <div>
     <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Personalizar Portal</h1>
@@ -406,5 +437,7 @@
       </button>
     </div>
   </div>
+
+  } <!-- end @else isCompanyMember -->
 
 </div>

@@ -1,0 +1,352 @@
+<div class="portal-root" [ngStyle]="portalBgStyle()">
+  <main class="portal-main" [ngStyle]="portalBgStyle()">
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="state-screen">
+          <div class="spinner"></div>
+          <p>Cargando...</p>
+        </div>
+      }
+      @case ('error') {
+        <div class="state-screen">
+          <p class="state-error">Empresa no encontrada</p>
+          <a routerLink="/" style="font-size:.875rem;color:#db9648;font-weight:600;">Volver al inicio</a>
+        </div>
+      }
+      @default {
+        @let c = data()!.company;
+        @let members = data()!.members;
+
+        <!-- ══ BOOKING CONFIRMADO ══ -->
+        @if (isBooked()) {
+          <div class="booked-card">
+            <div class="booked-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <h2 [ngStyle]="headingFontStyle()">Reserva Registrada</h2>
+            @if (selectedPayment()?.provider === 'transfer') {
+              <p [ngStyle]="bodyFontStyle()">Tu reserva ha sido registrada. Realiza la transferencia y envía el comprobante por email para confirmar.</p>
+              <div class="transfer-details">
+                <h4>Datos para transferencia</h4>
+                <div class="transfer-row"><span>Banco</span><strong>{{ selectedPayment()?.transferInfo?.bankName }}</strong></div>
+                <div class="transfer-row"><span>Tipo de Cuenta</span><strong>{{ selectedPayment()?.transferInfo?.accountType }}</strong></div>
+                <div class="transfer-row"><span>N° Cuenta</span><strong>{{ selectedPayment()?.transferInfo?.accountNumber }}</strong></div>
+                <div class="transfer-row"><span>RUT</span><strong>{{ selectedPayment()?.transferInfo?.rut }}</strong></div>
+                <div class="transfer-row"><span>Titular</span><strong>{{ selectedPayment()?.transferInfo?.holderName }}</strong></div>
+                <div class="transfer-row"><span>Email</span><strong>{{ selectedPayment()?.transferInfo?.email }}</strong></div>
+                <div class="transfer-row highlight"><span>Monto</span><strong>{{ formatCLP(bookingService()?.price ?? 0) }}</strong></div>
+                <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
+                  (click)="copyTransferData(bookingService()?.price)">
+                  @if (copiedTransfer()) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    ¡Datos copiados!
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    Copiar datos para transferencia
+                  }
+                </button>
+              </div>
+            } @else {
+              <p [ngStyle]="bodyFontStyle()">Tu reserva ha sido confirmada exitosamente.</p>
+            }
+            @if (bookingRef()) {
+              <div class="booking-ref">Código: <strong>{{ bookingRef() }}</strong></div>
+            }
+            <button class="psc-book-btn" style="margin-top:1.5rem;" (click)="backToProfile()">Volver a la empresa</button>
+          </div>
+
+        <!-- ══ MODO PERFIL ══ -->
+        } @else if (viewMode() === 'profile') {
+
+          <!-- Hero: banner + info card -->
+          <div class="profile-hero-section">
+            <div class="hero-image">
+              @if (c.bannerImage) {
+                <img [src]="c.bannerImage" class="hero-banner-img" [alt]="c.name">
+              } @else {
+                <div class="hero-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </div>
+              }
+            </div>
+
+            <div class="hero-info-card">
+              @if (c.profileImage) {
+                <img [src]="c.profileImage" class="info-avatar-img" [alt]="c.name">
+              } @else {
+                <div class="info-avatar">{{ c.name.charAt(0).toUpperCase() }}</div>
+              }
+              <h2 class="info-name" [ngStyle]="headingFontStyle()">{{ c.name }}</h2>
+              @if (c.description) {
+                <p class="info-desc" [ngStyle]="bodyFontStyle()">{{ c.description }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Miembros y sus servicios -->
+          @if (!members.length) {
+            <div class="no-members">Aún no hay servicios publicados.</div>
+          } @else {
+            @for (m of members; track m.id) {
+              <div class="member-section">
+                <div class="member-header">
+                  @if (m.profileImage) {
+                    <img [src]="m.profileImage" [alt]="m.name" class="member-avatar-img">
+                  } @else {
+                    <div class="member-avatar">{{ m.name.charAt(0).toUpperCase() }}</div>
+                  }
+                  <div>
+                    <p class="member-name" [ngStyle]="headingFontStyle()">{{ m.name }}</p>
+                    @if (m.specialty) {
+                      <p class="member-specialty">{{ m.specialty }}</p>
+                    }
+                  </div>
+                </div>
+
+                <div class="profile-services-list">
+                  @for (s of m.services; track s.id) {
+                    <div class="profile-service-card">
+                      @if (s.serviceImage) {
+                        <div class="psc-image">
+                          <img [src]="s.serviceImage" [alt]="s.name" class="psc-image-img">
+                        </div>
+                      }
+                      <div class="psc-body">
+                        <div class="psc-info">
+                          <h4 class="psc-name" [ngStyle]="headingFontStyle()">{{ s.name }}</h4>
+                          @if (s.description) {
+                            <p class="psc-desc" [ngStyle]="bodyFontStyle()">{{ s.description }}</p>
+                          }
+                          <div class="psc-meta">
+                            <span class="psc-duration">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                              </svg>
+                              {{ s.duration }} min
+                            </span>
+                            <span class="psc-price">{{ formatCLP(s.price) }}</span>
+                          </div>
+                        </div>
+                        @if (m.slug) {
+                          <button class="psc-book-btn" (click)="book(m, s)">Agendar servicio</button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+        <!-- ══ MODO BOOKING INLINE ══ -->
+        } @else {
+
+          <!-- Header del checkout -->
+          <div class="checkout-header">
+            <button class="checkout-back" (click)="backToProfile()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              Volver
+            </button>
+            <div class="checkout-service-badge">
+              <span class="csb-name">{{ bookingService()?.name }}</span>
+              <span class="csb-sep">·</span>
+              <span class="csb-price">{{ formatCLP(bookingService()?.price ?? 0) }}</span>
+            </div>
+            @if (auth.isAuthenticated()) {
+              <button class="btn-text-sm" (click)="auth.logout()" style="display:inline-flex;align-items:center;gap:.375rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Cerrar sesión
+              </button>
+            } @else {
+              <button class="btn-text-sm" (click)="goToLogin()">Iniciar sesión</button>
+            }
+          </div>
+
+          <!-- Profesional seleccionado -->
+          <div class="booking-member-badge">
+            @if (bookingMember()?.profileImage) {
+              <img [src]="bookingMember()!.profileImage!" class="bm-avatar-img" [alt]="bookingMember()?.name">
+            } @else {
+              <div class="bm-avatar">{{ bookingMember()?.name?.charAt(0)?.toUpperCase() }}</div>
+            }
+            <div>
+              <p class="bm-name" [ngStyle]="headingFontStyle()">{{ bookingMember()?.name }}</p>
+              @if (bookingMember()?.specialty) {
+                <p class="bm-specialty">{{ bookingMember()?.specialty }}</p>
+              }
+            </div>
+          </div>
+
+          @if (availLoading()) {
+            <div class="state-screen" style="min-height:12rem;">
+              <div class="spinner"></div>
+              <p>Cargando disponibilidad...</p>
+            </div>
+          } @else {
+            <app-booking-step-indicator [currentStep]="step()"></app-booking-step-indicator>
+
+            <!-- Step 1: Fecha y hora -->
+            @if (step() === 1) {
+              <app-booking-datetime-selector
+                [availability]="filteredAvailability()"
+                [selectedDate]="selectedDate()"
+                [selectedHour]="selectedHour()"
+                (dateSelected)="selectDate($event)"
+                (hourSelected)="selectHour($event)">
+              </app-booking-datetime-selector>
+            }
+
+            <!-- Step 2: Datos del cliente -->
+            @if (step() === 2) {
+              <app-booking-form
+                [bookingForm]="form"
+                [selectedService]="$any(bookingService())"
+                [selectedDate]="selectedDate()"
+                [selectedHour]="selectedHour()"
+                [emailStatus]="emailCheckState()"
+                [showLoginHint]="showLoginHint()">
+              </app-booking-form>
+            }
+
+            <!-- Step 3: Método de pago -->
+            @if (step() === 3) {
+              <div class="step-content">
+                <div class="step-header">
+                  <h3 class="step-title" [ngStyle]="headingFontStyle()">Método de pago</h3>
+                  <p class="step-desc" [ngStyle]="bodyFontStyle()">Selecciona cómo deseas pagar tu reserva</p>
+                </div>
+
+                @if (paymentMethods().length === 0) {
+                  <div class="no-members">Esta empresa aún no tiene métodos de pago configurados.</div>
+                } @else {
+                  <div class="payment-options">
+                    @for (method of paymentMethods(); track method.provider) {
+                      <button class="payment-option"
+                        [class.selected]="selectedPayment()?.provider === method.provider"
+                        (click)="selectPayment(method)">
+                        <div class="payment-option-icon">
+                          @switch (method.provider) {
+                            @case ('flow') {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="2" y1="10" x2="22" y2="10"/>
+                                <line x1="6" y1="15" x2="10" y2="15"/>
+                              </svg>
+                            }
+                            @case ('transfer') {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="22" x2="21" y2="22"/>
+                                <line x1="6" y1="18" x2="6" y2="11"/>
+                                <line x1="10" y1="18" x2="10" y2="11"/>
+                                <line x1="14" y1="18" x2="14" y2="11"/>
+                                <line x1="18" y1="18" x2="18" y2="11"/>
+                                <polygon points="12 2 20 7 4 7"/>
+                              </svg>
+                            }
+                          }
+                        </div>
+                        <div class="payment-option-info">
+                          <h4>
+                            @switch (method.provider) {
+                              @case ('flow')     { Flow }
+                              @case ('transfer') { Transferencia Bancaria }
+                            }
+                          </h4>
+                          <p>
+                            @switch (method.provider) {
+                              @case ('flow')     { Tarjetas, débito y transferencia }
+                              @case ('transfer') { Depósito directo a cuenta bancaria }
+                            }
+                          </p>
+                        </div>
+                        <div class="payment-option-radio">
+                          @if (selectedPayment()?.provider === method.provider) {
+                            <div class="radio-dot"></div>
+                          }
+                        </div>
+                      </button>
+
+                      @if (method.provider === 'transfer' && selectedPayment()?.provider === 'transfer' && method.transferInfo) {
+                        <div class="transfer-preview">
+                          <div class="transfer-row"><span>Banco</span><strong>{{ method.transferInfo.bankName }}</strong></div>
+                          <div class="transfer-row"><span>Cuenta</span><strong>{{ method.transferInfo.accountType }} - {{ method.transferInfo.accountNumber }}</strong></div>
+                          <div class="transfer-row"><span>RUT</span><strong>{{ method.transferInfo.rut }}</strong></div>
+                          <div class="transfer-row"><span>Titular</span><strong>{{ method.transferInfo.holderName }}</strong></div>
+                          <div class="transfer-row highlight"><span>Monto a transferir</span><strong>{{ formatCLP(bookingService()?.price ?? 0) }}</strong></div>
+                          <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
+                            (click)="copyTransferData(bookingService()?.price)">
+                            @if (copiedTransfer()) {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                              ¡Datos copiados!
+                            } @else {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                              </svg>
+                              Copiar datos para transferencia
+                            }
+                          </button>
+                          <p class="transfer-note">Al confirmar, deberás enviar el comprobante de transferencia al email indicado.</p>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="terms-check-row">
+                <label class="terms-check-label">
+                  <input type="checkbox" [checked]="acceptedTerms()"
+                    (change)="acceptedTerms.set(!acceptedTerms())"
+                    class="terms-checkbox" />
+                  <span>
+                    Al confirmar acepto que: la cita queda sujeta a disponibilidad y confirmación; la política de cancelación es definida por la empresa; en transferencias, la reserva se activa al confirmar el comprobante.
+                    <a href="/terminos" target="_blank" class="terms-link">Ver términos completos</a>
+                  </span>
+                </label>
+              </div>
+            }
+
+            <app-booking-actions
+              [currentStep]="step()"
+              [canProceed]="canProceed()"
+              (back)="goBack()"
+              (next)="goNext()"
+              (confirm)="confirmBooking()">
+            </app-booking-actions>
+          }
+        }
+      }
+    }
+  </main>
+</div>

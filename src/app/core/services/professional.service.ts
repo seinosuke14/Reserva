@@ -31,6 +31,8 @@ export interface IProfessional {
   backgroundType?: 'color' | 'image';
   companyId?: string | null;
   companyRole?: string | null;
+  companyEmail?: string | null;
+  companySlug?: string | null;
   trialUsed?: boolean;
 }
 

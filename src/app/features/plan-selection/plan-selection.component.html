@@ -78,7 +78,27 @@
   </div>
   }
 
+  <!-- Mensaje plan empresa -->
+  @if (isCompanyMember()) {
+  <div @fadeIn class="ps-company-notice">
+    <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M3 21V7l9-4 9 4v14" /><path d="M9 21v-6h6v6" /><rect x="9" y="9" width="2" height="2" /><rect x="13" y="9" width="2" height="2" />
+    </svg>
+    <h2 class="ps-company-notice-title">Estás en un plan Empresa</h2>
+    <p class="ps-company-notice-text">
+      En este momento formas parte de un plan empresa. Para mejorar o cambiar el plan debes solicitarlo
+      a la cuenta empresa asociada.
+    </p>
+    @if (companyEmail()) {
+    <a [href]="'mailto:' + companyEmail()" class="ps-company-notice-email">
+      {{ companyEmail() }}
+    </a>
+    }
+  </div>
+  }
+
   <!-- Grid de planes -->
+  @if (!isCompanyMember()) {
   <div @fadeIn [class]="companyMode ? 'ps-plans-grid ps-plans-grid--2col' : 'ps-plans-grid'">
 
     @for (plan of visiblePlans; track plan.id) {
@@ -251,6 +271,7 @@
     }
 
   </div>
+  }
 
   @if (!companyMode) {
   @if (errorMsg()) {

@@ -254,6 +254,12 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       const data: any = await firstValueFrom(
         this.http.get(`${environment.apiUrl}/public/professionals/${slug}`)
       );
+
+      if (data.companyRedirect && data.companySlug) {
+        this.router.navigate(['/empresa', data.companySlug], { replaceUrl: true });
+        return;
+      }
+
       this.professional.set(data.professional);
       if (data.professional.headingFont) this._loadFont(data.professional.headingFont);
       if (data.professional.bodyFont)    this._loadFont(data.professional.bodyFont);
