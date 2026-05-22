@@ -55,12 +55,19 @@ export class DashboardHomeComponent implements OnInit {
   hoveredBar        = signal<number | null>(null);
 
   readonly bookingUrl = computed(() => {
-    const slug = (this.auth.currentUser() as any)?.slug;
-    return slug ? `${window.location.origin}/reservar/${slug}` : null;
+    const user = this.auth.currentUser() as any;
+    if (!user?.slug || user?.companyId) return null;
+    return `${window.location.origin}/reservar/${user.slug}`;
+  });
+
+  readonly companyUrl = computed(() => {
+    const user = this.auth.currentUser() as any;
+    if (!user?.companyId || !user?.companySlug) return null;
+    return `${window.location.origin}/empresa/${user.companySlug}`;
   });
 
   async copyUrl(): Promise<void> {
-    const url = this.bookingUrl();
+    const url = this.bookingUrl() ?? this.companyUrl();
     if (!url) return;
     await navigator.clipboard.writeText(url);
     this.copied.set(true);
