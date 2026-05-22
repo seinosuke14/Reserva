@@ -12,7 +12,7 @@
     </nav>
     <div class="nav-cta">
       @if (isAuthenticated()) {
-        <a routerLink="/app/agenda" class="btn btn-ghost btn-sm">Ir a dashboard</a>
+        <a [routerLink]="dashboardRoute()" class="btn btn-ghost btn-sm">Ir a dashboard</a>
       } @else {
         <a routerLink="/login" class="btn btn-ghost btn-sm">Iniciar sesión</a>
         <a routerLink="/registro" class="btn btn-ink btn-sm">

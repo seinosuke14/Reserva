@@ -15,6 +15,7 @@ import { BookingFooterComponent } from '../components/booking-footer/booking-foo
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
+import { CompanyService } from '../../core/services/company.service';
 import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
@@ -42,6 +43,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly http   = inject(HttpClient);
   readonly auth           = inject(AuthService);
+  private readonly company = inject(CompanyService);
   readonly formatCLP      = formatCLP;
   readonly formatDate     = formatDateLong;
 
@@ -121,7 +123,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   }
 
   // ─── Computed ───────────────────────────────────────────────────────────────
-  readonly isGuest       = computed(() => this.auth.currentRole() === 'guest');
+  readonly isGuest       = computed(() => this.auth.currentRole() === 'guest' && !this.company.isAuthenticated());
   readonly showLoginHint = computed(() => this.emailCheckState() === 'exists' && this.isGuest());
 
   /**
@@ -207,15 +209,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   get f() { return this.form.controls; }
 
   constructor() {
-    // Reacciona a cambios de sesión: pre-rellena si hay usuario, limpia si cierra sesión
     effect(() => {
-      const user = this.auth.currentUser();
+      const user    = this.auth.currentUser();
+      const company = this.company.currentCompany();
       if (user) {
-        this.form.patchValue({
-          name:  user.name,
-          email: user.email,
-          phone: this._normalizePhone(user.phone ?? ''),
-        });
+        this.form.patchValue({ name: user.name, email: user.email, phone: this._normalizePhone(user.phone ?? '') });
+      } else if (company) {
+        this.form.patchValue({ name: company.name, email: company.email });
       } else {
         this.form.reset({ name: '', email: '', phone: '+569', notes: '' });
       }
@@ -255,8 +255,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.http.get(`${environment.apiUrl}/public/professionals/${slug}`)
       );
 
-      if (data.companyRedirect && data.companySlug) {
-        this.router.navigate(['/empresa', data.companySlug], { replaceUrl: true });
+      if (data.companyRedirect) {
+        this.loadState.set('ready');
+        if (data.companySlug) {
+          this.router.navigate(['/empresa', data.companySlug], { replaceUrl: true });
+        } else {
+          this.loadState.set('error');
+        }
         return;
       }
 
