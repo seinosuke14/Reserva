@@ -29,7 +29,7 @@ export class LandingHeroComponent implements OnInit, OnDestroy {
     },
     barberia: {
       label: 'Barbería',
-      bg: 'radial-gradient(ellipse 900px 600px at 80% 50%, rgba(219,150,72,.18) 0%, transparent 70%), radial-gradient(ellipse 600px 500px at 20% 80%, rgba(30,41,59,.4) 0%, transparent 60%)',
+      bg: 'radial-gradient(ellipse 900px 600px at 80% 50%, rgba(0,196,167,.18) 0%, transparent 70%), radial-gradient(ellipse 600px 500px at 20% 80%, rgba(30,41,59,.4) 0%, transparent 60%)',
       bgImage: '/barbero.png',
     },
     estetica: {

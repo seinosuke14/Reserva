@@ -1,4 +1,4 @@
-<div class="flex h-full overflow-hidden" style="background:#f8fafc;">
+﻿<div class="flex h-full overflow-hidden" style="background:#f8fafc;">
 
   <!-- ── Left panel ─────────────────────────────────────── -->
   @if (isMobile() && isLeftPanelOpen()) {
@@ -9,21 +9,21 @@
       ? (isLeftPanelOpen()
           ? 'fixed left-0 top-0 h-full w-[252px] bg-white z-40 flex flex-col overflow-y-auto'
           : 'hidden')
-      : 'w-[252px] shrink-0 bg-white border-r border-ink-100 flex flex-col overflow-y-auto'"
+      : 'w-[252px] shrink-0 bg-white border-r border-primary-100 flex flex-col overflow-y-auto'"
        [style.box-shadow]="isMobile() && isLeftPanelOpen() ? '4px 0 32px rgba(0,0,0,.15)' : 'none'">
 
     <!-- Mini calendar -->
-    <div class="p-4 border-b border-ink-100">
+    <div class="p-4 border-b border-primary-100">
 
       <!-- Month nav -->
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex-between mb-3">
         <button (click)="prevMonth()"
-          class="w-7 h-7 rounded-[7px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center text-ink-600 transition-colors">
+          class="w-7 h-7 rounded-[7px] border border-primary-200 bg-white hover:bg-primary-50 flex-center text-primary-600 transition-colors">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <span class="text-[12.5px] font-bold text-ink capitalize tracking-tight">{{ monthLabel() }}</span>
+        <span class="text-[12.5px] font-bold text-primary capitalize tracking-tight">{{ monthLabel() }}</span>
         <button (click)="nextMonth()"
-          class="w-7 h-7 rounded-[7px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center text-ink-600 transition-colors">
+          class="w-7 h-7 rounded-[7px] border border-primary-200 bg-white hover:bg-primary-50 flex-center text-primary-600 transition-colors">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -31,7 +31,7 @@
       <!-- Day headers -->
       <div class="grid grid-cols-7 mb-1">
         @for (d of ['L','M','X','J','V','S','D']; track d) {
-          <div class="text-center text-[10px] font-bold text-ink-400 py-1">{{ d }}</div>
+          <div class="text-center text-[10px] font-bold text-primary-400 py-1">{{ d }}</div>
         }
       </div>
 
@@ -40,14 +40,14 @@
         @for (day of calendarGrid(); track $index) {
           @if (day) {
             <button (click)="selectDate(day)"
-              class="aspect-square flex items-center justify-center rounded-full text-[12px] font-medium transition-all relative"
-              [style.background]="isSameDay(day, selectedDate()) ? '#db9648' : ''"
-              [style.color]="isSameDay(day, selectedDate()) ? '#fff' : isSameDay(day, today) ? '#db9648' : '#334155'"
+              class="aspect-square flex-center rounded-full text-[12px] font-medium transition-all relative"
+              [style.background]="isSameDay(day, selectedDate()) ? '#00C4A7' : ''"
+              [style.color]="isSameDay(day, selectedDate()) ? '#fff' : isSameDay(day, today) ? '#00C4A7' : '#334155'"
               [style.fontWeight]="isSameDay(day, today) ? '700' : '500'">
               {{ day.getDate() }}
               @if (hasAppointment(day) && !isSameDay(day, selectedDate())) {
                 <span class="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
-                      style="background:#db9648;"></span>
+                      style="background:#00C4A7;"></span>
               }
             </button>
           } @else {
@@ -58,10 +58,10 @@
     </div>
 
     <!-- Nueva Cita button -->
-    <div class="px-4 py-3 border-b border-ink-100">
+    <div class="px-4 py-3 border-b border-primary-100">
       <button (click)="openNewAppt()"
-        class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90"
-        style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
+        class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all hover:opacity-90"
+        style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
         <svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -71,21 +71,21 @@
 
     <!-- Day appointment list -->
     <div class="px-4 py-3 flex-1">
-      <div class="text-[10px] font-bold uppercase tracking-[.08em] text-ink-400 mb-2.5">
+      <div class="text-[10px] font-bold uppercase tracking-[.08em] text-primary-400 mb-2.5">
         {{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }} este día
       </div>
 
       @if (dayAppointments().length === 0) {
-        <div class="text-[12px] text-ink-300 text-center py-4">Sin citas</div>
+        <div class="text-[12px] text-primary-300 text-center py-4">Sin citas</div>
       }
 
       @for (apt of dayAppointments(); track apt.id) {
-        <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-ink-50 border-l-[3px] cursor-pointer hover:bg-ink-100 transition-colors"
-             style="border-left-color:#db9648;"
+        <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-primary-50 border-l-[3px] cursor-pointer hover:bg-primary-100 transition-colors"
+             style="border-left-color:#00C4A7;"
              (click)="selectedAppointment.set(apt)">
-          <div class="text-[11.5px] font-bold mb-0.5" style="color:#db9648;">{{ apt.time }}</div>
-          <div class="text-[12.5px] font-semibold text-ink">{{ apt.customer.name }}</div>
-          <div class="text-[11px] text-ink-400">{{ apt.service.name }}</div>
+          <div class="text-[11.5px] font-bold mb-0.5" style="color:#00C4A7;">{{ apt.time }}</div>
+          <div class="text-[12.5px] font-semibold text-primary">{{ apt.customer.name }}</div>
+          <div class="text-[11px] text-primary-400">{{ apt.service.name }}</div>
         </div>
       }
     </div>
@@ -95,12 +95,12 @@
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Day header -->
-    <div class="bg-white border-b border-ink-100 px-4 md:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 md:gap-0 shrink-0">
+    <div class="bg-white border-b border-primary-100 px-4 md:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 md:gap-0 shrink-0">
       <!-- Title + calendar button (first row, or left side on desktop) -->
       <div class="flex items-center gap-2.5 min-w-0">
         @if (isMobile()) {
           <button (click)="toggleLeftPanel()"
-            class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-600 shrink-0 transition-colors">
+            class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-600 shrink-0 transition-colors">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <path d="M3 9h18M8 2v4M16 2v4"/>
@@ -108,8 +108,8 @@
           </button>
         }
         <div class="min-w-0">
-          <h2 class="text-[15px] font-bold text-ink tracking-tight capitalize truncate">{{ dayLabel() }}</h2>
-          <p class="text-[11.5px] text-ink-400 mt-0.5">
+          <h2 class="text-[15px] font-bold text-primary tracking-tight capitalize truncate">{{ dayLabel() }}</h2>
+          <p class="text-[11.5px] text-primary-400 mt-0.5">
             {{ dayStats().pagadas }} pagadas · {{ dayStats().pendientes }} pendientes
           </p>
         </div>
@@ -118,16 +118,16 @@
       <!-- Navigation buttons (second row on mobile, right side on desktop) -->
       <div class="flex items-center gap-2 flex-wrap">
         <button (click)="prevDay()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors shrink-0">
+          class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button (click)="goToToday()"
           class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors whitespace-nowrap"
-          style="border:1.5px solid #db9648;background:rgba(219,150,72,.08);color:#db9648;">
+          style="border:1.5px solid #00C4A7;background:rgba(0,196,167,.08);color:#00C4A7;">
           Hoy
         </button>
         <button (click)="nextDay()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-ink-200 bg-white hover:bg-ink-50 flex items-center justify-center transition-colors shrink-0">
+          class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </button>
 
@@ -144,7 +144,7 @@
 
     <!-- Loading -->
     @if (isLoading()) {
-      <div class="flex-1 flex items-center justify-center text-[13px] text-ink-400">
+      <div class="flex-1 flex-center text-[13px] text-primary-400">
         <span class="inline-flex items-center gap-2">
           <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -162,24 +162,24 @@
       <div class="flex-1 overflow-hidden flex flex-col">
 
         <!-- ── Cabecera por profesional (sticky) ── -->
-        <div class="flex shrink-0 border-b border-ink-100 bg-white z-10">
+        <div class="flex shrink-0 border-b border-primary-100 bg-white z-10">
           <div class="w-[68px] shrink-0"></div>
           <!-- Una columna por profesional — añadir más aquí cuando haya más profesionales -->
-          <div class="w-[340px] shrink-0 border-l border-ink-100 px-3 py-2 flex items-center gap-2.5">
+          <div class="w-[340px] shrink-0 border-l border-primary-100 px-3 py-2 flex items-center gap-2.5">
             @if (auth.currentUser()?.profileImage) {
               <img [src]="auth.currentUser()!.profileImage!" alt="Perfil"
                 class="w-[28px] h-[28px] rounded-full object-cover shrink-0"
-                style="box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
+                style="box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(0,196,167,.35);">
             } @else {
-              <div class="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0"
-                   style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                          box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(219,150,72,.35);">
+              <div class="w-[28px] h-[28px] rounded-full flex-center text-white text-[11px] font-bold shrink-0"
+                   style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                          box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(0,196,167,.35);">
                 {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}
               </div>
             }
             <div>
-              <div class="text-[13px] font-bold text-ink leading-none">{{ auth.currentUser()?.name }}</div>
-              <div class="text-[10.5px] text-ink-400 mt-px">{{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }}</div>
+              <div class="text-[13px] font-bold text-primary leading-none">{{ auth.currentUser()?.name }}</div>
+              <div class="text-[10.5px] text-primary-400 mt-px">{{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }}</div>
             </div>
           </div>
         </div>
@@ -196,10 +196,10 @@
 
               <!-- Slot label (gutter fijo) -->
               <div class="w-[68px] shrink-0 pt-3 pr-3 text-right"
-                   [style.color]="isCurrentSlot(slot) ? '#db9648' : '#94a3b8'">
+                   [style.color]="isCurrentSlot(slot) ? '#00C4A7' : '#94a3b8'">
                 <div class="text-[11px] font-semibold tabular-nums">{{ slot }}</div>
                 @if (isCurrentSlot(slot)) {
-                  <div class="w-[5px] h-[5px] rounded-full ml-auto mt-1" style="background:#db9648;"></div>
+                  <div class="w-[5px] h-[5px] rounded-full ml-auto mt-1" style="background:#00C4A7;"></div>
                 }
               </div>
 
@@ -208,7 +208,7 @@
                    [class]="getAppointmentsAtSlot(slot).length === 0
                      ? (isBlocked(slot) && !isBlockingMode()
                          ? 'min-h-[76px] bg-red-50 rounded-[12px] border-[1.5px] border-red-200 p-2 items-center transition-colors'
-                         : 'min-h-[76px] bg-white rounded-[12px] border-[1.5px] border-dashed border-ink-200 p-2 items-center cursor-pointer hover:border-gold/40 transition-colors')
+                         : 'min-h-[76px] bg-white rounded-[12px] border-[1.5px] border-dashed border-primary-200 p-2 items-center cursor-pointer hover:border-accent/40 transition-colors')
                      : 'rounded-[12px] p-0'"
                    (click)="getAppointmentsAtSlot(slot).length === 0 && !isBlockingMode() && !isBlocked(slot) && selectSlot(slot, false)"
                    (click)="getAppointmentsAtSlot(slot).length === 0 && isBlockingMode() && toggleBlock(slot)">
@@ -223,7 +223,7 @@
                         Bloqueado — clic para desbloquear
                       </div>
                     } @else {
-                      <div class="flex items-center gap-1.5 text-ink-300 text-[12px]">
+                      <div class="flex items-center gap-1.5 text-primary-300 text-[12px]">
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                           <path d="M12 5v14M5 12h14"/>
                         </svg>
@@ -242,7 +242,7 @@
                         </div>
                       </div>
                     } @else {
-                      <div class="flex items-center gap-1.5 text-ink-300 text-[12px]">
+                      <div class="flex items-center gap-1.5 text-primary-300 text-[12px]">
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                           <path d="M12 5v14M5 12h14"/>
                         </svg>
@@ -255,17 +255,17 @@
                 @for (apt of getAppointmentsAtSlot(slot); track apt.id) {
                   <div
                     class="w-full sm:w-[200px] shrink-0 bg-white rounded-[13px] p-[10px_12px] flex flex-col gap-1.5 cursor-pointer transition-all hover:-translate-y-0.5"
-                    style="border:1.5px solid rgba(219,150,72,.25);border-top:3px solid #db9648;box-shadow:0 2px 10px rgba(0,0,0,.07);"
+                    style="border:1.5px solid rgba(0,196,167,.25);border-top:3px solid #00C4A7;box-shadow:0 2px 10px rgba(0,0,0,.07);"
                     [style.min-height.px]="getAppointmentBlocks(apt) * 84 - 8"
                     (click)="selectedAppointment.set(apt)">
 
                     <!-- Time + bloques + status -->
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="text-[10.5px] font-bold tabular-nums" style="color:#db9648;">
+                    <div class="flex-between gap-2">
+                      <span class="text-[10.5px] font-bold tabular-nums" style="color:#00C4A7;">
                         {{ apt.time }} → {{ getAppointmentEndTime(apt) }}
                         @if (getAppointmentBlocks(apt) > 1) {
                           <span class="ml-1 px-1 py-px rounded text-[9px] font-black"
-                                style="background:rgba(219,150,72,.15);color:#db9648;">
+                                style="background:rgba(0,196,167,.15);color:#00C4A7;">
                             {{ getAppointmentBlocks(apt) }} bloques
                           </span>
                         }
@@ -279,15 +279,15 @@
 
                     <!-- Customer -->
                     <div class="flex items-center gap-1.5">
-                      <div class="w-[22px] h-[22px] rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                           style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+                      <div class="w-[22px] h-[22px] rounded-full flex-center text-white text-[9px] font-bold shrink-0"
+                           style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
                         {{ apt.customer.name.charAt(0).toUpperCase() }}
                       </div>
-                      <span class="text-[13px] font-bold text-ink truncate">{{ apt.customer.name }}</span>
+                      <span class="text-[13px] font-bold text-primary truncate">{{ apt.customer.name }}</span>
                     </div>
 
                     <!-- Service -->
-                    <div class="text-[11.5px] text-ink-400 truncate">{{ apt.service.name }}</div>
+                    <div class="text-[11.5px] text-primary-400 truncate">{{ apt.service.name }}</div>
                   </div>
                 }
               </div>
@@ -303,20 +303,20 @@
   <!-- ── Nueva Cita panel ─────────────────────────────────────── -->
   @if (showNewAppt()) {
     <div @backdrop class="fixed inset-0 z-40"
-         style="background:rgba(15,23,42,.45);backdrop-filter:blur(6px);"
+         style="background:rgba(13,27,42,.45);backdrop-filter:blur(6px);"
          (click)="closeNewAppt()"></div>
 
     <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
          style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
 
       <!-- Header -->
-      <div class="px-6 py-5 border-b border-ink-100 flex items-center justify-between shrink-0">
+      <div class="px-6 py-5 border-b border-primary-100 flex-between shrink-0">
         <div>
-          <h3 class="text-[16px] font-bold text-ink tracking-tight">Nueva Cita</h3>
-          <p class="text-[11.5px] text-ink-400 mt-0.5">Registro manual desde agenda</p>
+          <h3 class="text-[16px] font-bold text-primary tracking-tight">Nueva Cita</h3>
+          <p class="text-[11.5px] text-primary-400 mt-0.5">Registro manual desde agenda</p>
         </div>
         <button (click)="closeNewAppt()"
-          class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+          class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
@@ -328,14 +328,14 @@
 
         <!-- Servicio -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Servicio *</label>
+          <label class="form-label">Servicio *</label>
           @if (services().length === 0) {
-            <p class="text-[12px] text-ink-400 italic">Sin servicios configurados</p>
+            <p class="text-[12px] text-primary-400 italic">Sin servicios configurados</p>
           } @else {
             <select [value]="na_serviceId()"
                     (change)="onServiceChange($any($event.target).value)"
-                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
-                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
+                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
               @for (s of services(); track s.id) {
                 <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
               }
@@ -346,21 +346,21 @@
         <!-- Fecha + Hora -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Fecha *</label>
+            <label class="form-label">Fecha *</label>
             <input type="date" [value]="na_date()" [min]="todayStr"
                    (input)="onModalDateChange($any($event.target).value)"
-                   class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none"
-                   style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                   class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none"
+                   style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
           </div>
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Hora *</label>
+            <label class="form-label">Hora *</label>
             @if (na_availableSlots().length === 0) {
-              <p class="text-[12px] text-ink-400 italic pt-2">Sin horario configurado</p>
+              <p class="text-[12px] text-primary-400 italic pt-2">Sin horario configurado</p>
             } @else {
               <select [value]="na_time()"
                       (change)="na_time.set($any($event.target).value)"
-                      class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
-                      style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                      class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
+                      style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
                 @for (slot of na_availableSlots(); track slot) {
                   <option [value]="slot" [selected]="slot === na_time()">{{ slot }}</option>
                 }
@@ -370,33 +370,33 @@
         </div>
 
         <!-- Divisor cliente -->
-        <div class="border-t border-ink-100 pt-2">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-ink-400">Cliente</p>
+        <div class="border-t border-primary-100 pt-2">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-primary-400">Cliente</p>
         </div>
 
         <!-- Nombre con sugerencias -->
         <div class="relative">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Nombre *</label>
+          <label class="form-label">Nombre *</label>
           <input type="text" [value]="na_name()"
                  (input)="onNameInput($any($event.target).value)"
                  placeholder="Busca o escribe el nombre"
-                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
-                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
+                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
           <!-- Sugerencias de clientes existentes -->
           @if (na_suggestions().length > 0) {
-            <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-ink-200 rounded-[10px] shadow-lg z-10 overflow-hidden">
+            <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-200 rounded-[10px] shadow-lg z-10 overflow-hidden">
               @for (c of na_suggestions(); track c.id) {
                 <button type="button"
                         (click)="selectSuggestedCustomer(c)"
-                        class="w-full px-3 py-2 text-left hover:bg-ink-50 transition-colors flex items-center gap-2.5">
-                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                       style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+                        class="w-full px-3 py-2 text-left hover:bg-primary-50 transition-colors flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-full flex-center text-white text-[10px] font-bold shrink-0"
+                       style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
                     {{ c.name.charAt(0).toUpperCase() }}
                   </div>
                   <div>
-                    <div class="text-[12.5px] font-semibold text-ink">{{ c.name }}</div>
+                    <div class="text-[12.5px] font-semibold text-primary">{{ c.name }}</div>
                     @if (c.email) {
-                      <div class="text-[10.5px] text-ink-400">{{ c.email }}</div>
+                      <div class="text-[10.5px] text-primary-400">{{ c.email }}</div>
                     }
                   </div>
                 </button>
@@ -407,39 +407,39 @@
 
         <!-- Email -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Email</label>
+          <label class="form-label">Email</label>
           <input type="email" [value]="na_email()"
                  (input)="na_email.set($any($event.target).value)"
                  placeholder="cliente@email.com"
-                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
-                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
-          <p class="text-[10.5px] text-ink-400 mt-1">Si el cliente ya existe con este email, se vincula automáticamente</p>
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
+                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+          <p class="text-[10.5px] text-primary-400 mt-1">Si el cliente ya existe con este email, se vincula automáticamente</p>
         </div>
 
         <!-- Teléfono -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Teléfono</label>
+          <label class="form-label">Teléfono</label>
           <input type="tel" [value]="na_phone()"
                  (input)="na_phone.set($any($event.target).value)"
                  placeholder="+56 9 1234 5678"
-                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300"
-                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
+                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
         </div>
 
         <!-- Notas -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Notas</label>
+          <label class="form-label">Notas</label>
           <textarea [value]="na_notes()"
                     (input)="na_notes.set($any($event.target).value)"
                     rows="2"
                     placeholder="Observaciones opcionales..."
-                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300 resize-none"
-                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);"></textarea>
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300 resize-none"
+                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);"></textarea>
         </div>
 
         <!-- Estado de pago -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Estado de pago</label>
+          <label class="form-label">Estado de pago</label>
           <div class="flex gap-2">
             <button type="button" (click)="na_status.set('Pendiente')"
               class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
@@ -468,14 +468,14 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-6 py-4 border-t border-ink-100 flex gap-3 shrink-0">
+      <div class="px-6 py-4 border-t border-primary-100 flex gap-3 shrink-0">
         <button (click)="closeNewAppt()"
-          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 text-ink-600 hover:bg-ink-50 transition-colors">
+          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-600 hover:bg-primary-50 transition-colors">
           Cancelar
         </button>
         <button (click)="submitNewAppt()" [disabled]="na_submitting()"
           class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-          style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
+          style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
           {{ na_submitting() ? 'Guardando...' : 'Crear Cita' }}
         </button>
       </div>
@@ -485,16 +485,16 @@
   <!-- Appointment detail panel (fixed overlay) -->
   @if (selectedAppointment()) {
     <div @backdrop class="fixed inset-0 z-40"
-         style="background:rgba(15,23,42,.45);backdrop-filter:blur(6px);"
+         style="background:rgba(13,27,42,.45);backdrop-filter:blur(6px);"
          (click)="selectedAppointment.set(null)"></div>
 
     <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
          style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
 
-      <div class="px-6 py-5 border-b border-ink-100 flex items-center justify-between">
-        <h3 class="text-[16px] font-bold text-ink tracking-tight">Detalle de la cita</h3>
+      <div class="px-6 py-5 border-b border-primary-100 flex-between">
+        <h3 class="text-[16px] font-bold text-primary tracking-tight">Detalle de la cita</h3>
         <button (click)="selectedAppointment.set(null)"
-          class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+          class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
@@ -504,25 +504,25 @@
       <div class="flex-1 overflow-y-auto p-6 space-y-5">
         <!-- Customer -->
         <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0"
-               style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(219,150,72,.4);">
+          <div class="w-14 h-14 rounded-full flex-center text-white text-xl font-bold shrink-0"
+               style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(0,196,167,.4);">
             {{ selectedAppointment()!.customer.name.charAt(0).toUpperCase() }}
           </div>
           <div>
-            <div class="text-[16px] font-bold text-ink">{{ selectedAppointment()!.customer.name }}</div>
-            <div class="text-[12.5px] text-ink-400 mt-0.5">{{ selectedAppointment()!.service.name }}</div>
+            <div class="text-[16px] font-bold text-primary">{{ selectedAppointment()!.customer.name }}</div>
+            <div class="text-[12.5px] text-primary-400 mt-0.5">{{ selectedAppointment()!.service.name }}</div>
           </div>
         </div>
 
         <!-- Info cards -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-ink-50 rounded-[12px] p-3.5">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-ink-400 mb-1">Hora</div>
-            <div class="text-[15px] font-bold text-ink">{{ selectedAppointment()!.time }}</div>
+          <div class="bg-primary-50 rounded-[12px] p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Hora</div>
+            <div class="text-[15px] font-bold text-primary">{{ selectedAppointment()!.time }}</div>
           </div>
-          <div class="bg-ink-50 rounded-[12px] p-3.5">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-ink-400 mb-1">Estado</div>
+          <div class="bg-primary-50 rounded-[12px] p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Estado</div>
             <span class="text-[12.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
                   [style.background]="selectedAppointment()!.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : selectedAppointment()!.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
                   [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
@@ -546,9 +546,9 @@
         </div>
 
         @if (selectedAppointment()!.notes) {
-          <div class="bg-ink-50 rounded-[12px] p-4">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-ink-400 mb-2">Notas</div>
-            <p class="text-[13px] text-ink-600 leading-relaxed break-words whitespace-pre-wrap">{{ selectedAppointment()!.notes }}</p>
+          <div class="bg-primary-50 rounded-[12px] p-4">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-2">Notas</div>
+            <p class="text-[13px] text-primary-600 leading-relaxed break-words whitespace-pre-wrap">{{ selectedAppointment()!.notes }}</p>
           </div>
         }
       </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ import { RouterModule } from '@angular/router';
             </svg>
             Volver
           </a>
-          <span class="terms-brand">Citema</span>
+          <span class="terms-brand">Lets Reserve</span>
         </div>
 
         <div class="terms-card">
@@ -41,7 +41,7 @@ import { RouterModule } from '@angular/router';
           </div>
 
           <section class="terms-section terms-intro">
-            <p>Bienvenido/a a <strong>Citema</strong>, plataforma de agendamiento en línea domiciliada en la Región Metropolitana, Chile (en adelante, "la Plataforma"). Al acceder o utilizar la Plataforma, ya sea como profesional registrado o como cliente que realiza una reserva, aceptas quedar vinculado/a por estos Términos y Condiciones, así como por nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>.</p>
+            <p>Bienvenido/a a <strong>Lets Reserve</strong>, plataforma de agendamiento en línea domiciliada en la Región Metropolitana, Chile (en adelante, "la Plataforma"). Al acceder o utilizar la Plataforma, ya sea como profesional registrado o como cliente que realiza una reserva, aceptas quedar vinculado/a por estos Términos y Condiciones, así como por nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>.</p>
           </section>
 
           <!-- 1 -->
@@ -54,8 +54,8 @@ import { RouterModule } from '@angular/router';
           <!-- 2 -->
           <section class="terms-section">
             <h2>2. Naturaleza del servicio</h2>
-            <p>Citema es una plataforma digital de tipo <strong>marketplace de servicios</strong> que conecta a profesionales independientes con sus clientes para la gestión de citas. La Plataforma actúa exclusivamente como intermediario tecnológico y <strong>no es parte de la relación contractual</strong> entre el profesional y el cliente.</p>
-            <p>El uso de Citema <strong>no implica relación laboral, de dependencia ni de sociedad</strong> entre Citema y los profesionales que la utilizan. Cada profesional opera de forma independiente y es responsable de sus propios servicios, precios, políticas y obligaciones legales.</p>
+            <p>Lets Reserve es una plataforma digital de tipo <strong>marketplace de servicios</strong> que conecta a profesionales independientes con sus clientes para la gestión de citas. La Plataforma actúa exclusivamente como intermediario tecnológico y <strong>no es parte de la relación contractual</strong> entre el profesional y el cliente.</p>
+            <p>El uso de Lets Reserve <strong>no implica relación laboral, de dependencia ni de sociedad</strong> entre Lets Reserve y los profesionales que la utilizan. Cada profesional opera de forma independiente y es responsable de sus propios servicios, precios, políticas y obligaciones legales.</p>
           </section>
 
           <!-- 3 -->
@@ -75,7 +75,7 @@ import { RouterModule } from '@angular/router';
             <ul>
               <li>Las reservas quedan sujetas a la disponibilidad publicada por el profesional.</li>
               <li>Una reserva se considera confirmada únicamente cuando el profesional la acepta o cuando el pago ha sido procesado exitosamente, según el método de pago utilizado.</li>
-              <li>Las políticas de cancelación y reprogramación son definidas por cada profesional de forma independiente. Citema no se responsabiliza por conflictos derivados de dichas políticas.</li>
+              <li>Las políticas de cancelación y reprogramación son definidas por cada profesional de forma independiente. Lets Reserve no se responsabiliza por conflictos derivados de dichas políticas.</li>
               <li>El cliente es responsable de presentarse en el horario acordado. La inasistencia no da derecho automático a reembolso.</li>
               <li><strong>Derecho a retracto:</strong> Conforme al artículo 3 bis letra b) de la Ley N° 19.496, el derecho a retracto <strong>no aplica</strong> cuando el servicio ha sido prestado o cuando el cliente solicitó expresamente el inicio del servicio antes del vencimiento del plazo de retracto.</li>
             </ul>
@@ -87,11 +87,11 @@ import { RouterModule } from '@angular/router';
             <h3>5.1 Métodos disponibles</h3>
             <p>La Plataforma puede ofrecer distintos métodos de pago según la configuración del profesional: Webpay Plus, Flow, Mercado Pago o transferencia bancaria.</p>
             <h3>5.2 Transferencias bancarias</h3>
-            <p>En el caso de pago por transferencia, la reserva queda en estado <strong>pendiente</strong> hasta que el profesional confirme la recepción del comprobante. Citema no verifica ni valida las transferencias realizadas entre cliente y profesional.</p>
+            <p>En el caso de pago por transferencia, la reserva queda en estado <strong>pendiente</strong> hasta que el profesional confirme la recepción del comprobante. Lets Reserve no verifica ni valida las transferencias realizadas entre cliente y profesional.</p>
             <h3>5.3 Responsabilidad sobre los pagos</h3>
-            <p>Citema no almacena datos de tarjetas de crédito o débito. Los pagos con tarjeta son procesados íntegramente por los proveedores externos (Webpay, Flow, Mercado Pago), quienes aplican sus propias políticas de seguridad y privacidad.</p>
+            <p>Lets Reserve no almacena datos de tarjetas de crédito o débito. Los pagos con tarjeta son procesados íntegramente por los proveedores externos (Webpay, Flow, Mercado Pago), quienes aplican sus propias políticas de seguridad y privacidad.</p>
             <h3>5.4 Responsabilidad tributaria</h3>
-            <p>Cada profesional es el único responsable de cumplir con sus <strong>obligaciones tributarias ante el SII</strong> (Servicio de Impuestos Internos de Chile), incluyendo la emisión de boletas de honorarios, facturas u otros documentos tributarios según corresponda. Citema no actúa como agente retenedor ni tiene responsabilidad en materia de impuestos del profesional.</p>
+            <p>Cada profesional es el único responsable de cumplir con sus <strong>obligaciones tributarias ante el SII</strong> (Servicio de Impuestos Internos de Chile), incluyendo la emisión de boletas de honorarios, facturas u otros documentos tributarios según corresponda. Lets Reserve no actúa como agente retenedor ni tiene responsabilidad en materia de impuestos del profesional.</p>
           </section>
 
           <!-- 6 -->
@@ -121,33 +121,33 @@ import { RouterModule } from '@angular/router';
           <!-- 8 -->
           <section class="terms-section">
             <h2>8. Limitación de responsabilidad</h2>
-            <p>Citema no será responsable por:</p>
+            <p>Lets Reserve no será responsable por:</p>
             <ul>
               <li>Incumplimientos del servicio por parte del profesional.</li>
               <li>Pérdidas económicas derivadas de cancelaciones, reprogramaciones o inasistencias.</li>
               <li>Fallas temporales en los servicios de pago de terceros.</li>
               <li>Daños indirectos, incidentales o consecuentes derivados del uso de la Plataforma.</li>
             </ul>
-            <p>En cualquier caso, la responsabilidad máxima de Citema frente a un usuario no podrá exceder el monto equivalente a <strong>3 meses de suscripción</strong> pagados por dicho usuario a la Plataforma, o UF 5 (cinco unidades de fomento), lo que sea menor.</p>
+            <p>En cualquier caso, la responsabilidad máxima de Lets Reserve frente a un usuario no podrá exceder el monto equivalente a <strong>3 meses de suscripción</strong> pagados por dicho usuario a la Plataforma, o UF 5 (cinco unidades de fomento), lo que sea menor.</p>
           </section>
 
           <!-- 9 -->
           <section class="terms-section">
             <h2>9. Privacidad y datos personales</h2>
             <p>El tratamiento de los datos personales de los usuarios se rige por nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>, disponible en la Plataforma. Los datos recopilados se utilizan exclusivamente para la gestión de reservas y comunicaciones relacionadas con el servicio, en conformidad con la Ley N° 19.628.</p>
-            <p>Citema implementa medidas técnicas y organizativas para prevenir accesos no autorizados, fraude o uso indebido de la información. <strong>No venderemos ni cederemos tus datos personales a terceros con fines comerciales o publicitarios.</strong></p>
+            <p>Lets Reserve implementa medidas técnicas y organizativas para prevenir accesos no autorizados, fraude o uso indebido de la información. <strong>No venderemos ni cederemos tus datos personales a terceros con fines comerciales o publicitarios.</strong></p>
           </section>
 
           <!-- 10 -->
           <section class="terms-section">
             <h2>10. Propiedad intelectual</h2>
-            <p>Todos los elementos de la Plataforma — diseño, código, marca y contenidos propios — son propiedad exclusiva de Citema. Queda prohibida su reproducción o uso sin autorización expresa, incluyendo, sin limitación, la realización de <strong>ingeniería inversa</strong>, descompilación, desensamblo o cualquier intento de extraer el código fuente de la Plataforma.</p>
+            <p>Todos los elementos de la Plataforma — diseño, código, marca y contenidos propios — son propiedad exclusiva de Lets Reserve. Queda prohibida su reproducción o uso sin autorización expresa, incluyendo, sin limitación, la realización de <strong>ingeniería inversa</strong>, descompilación, desensamblo o cualquier intento de extraer el código fuente de la Plataforma.</p>
           </section>
 
           <!-- 11 -->
           <section class="terms-section">
             <h2>11. Modificaciones</h2>
-            <p>Citema se reserva el derecho de modificar estos Términos en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de los nuevos términos.</p>
+            <p>Lets Reserve se reserva el derecho de modificar estos Términos en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de los nuevos términos.</p>
           </section>
 
           <!-- 12 -->
@@ -197,13 +197,13 @@ import { RouterModule } from '@angular/router';
       padding: .5rem .75rem;
       border-radius: .5rem;
       transition: all .15s;
-      &:hover { color: #0f172a; background: #f1f5f9; }
+      &:hover { color: #0D1B2A; background: #f1f5f9; }
     }
 
     .terms-brand {
       font-size: .875rem;
       font-weight: 800;
-      color: #db9648;
+      color: #00C4A7;
       letter-spacing: -.01em;
     }
 
@@ -232,8 +232,8 @@ import { RouterModule } from '@angular/router';
       width: 56px;
       height: 56px;
       border-radius: .875rem;
-      background: rgba(219,150,72,.1);
-      color: #db9648;
+      background: rgba(0,196,167,.1);
+      color: #00C4A7;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -243,7 +243,7 @@ import { RouterModule } from '@angular/router';
     .terms-title {
       font-size: 1.375rem;
       font-weight: 800;
-      color: #0f172a;
+      color: #0D1B2A;
       margin: 0 0 .25rem;
       letter-spacing: -.02em;
     }
@@ -265,7 +265,7 @@ import { RouterModule } from '@angular/router';
     }
 
     .terms-inline-link {
-      color: #db9648;
+      color: #00C4A7;
       text-decoration: underline;
       text-underline-offset: 2px;
       &:hover { color: #b87830; }
@@ -277,7 +277,7 @@ import { RouterModule } from '@angular/router';
       h2 {
         font-size: 1rem;
         font-weight: 700;
-        color: #0f172a;
+        color: #0D1B2A;
         margin: 0 0 .625rem;
         padding-bottom: .375rem;
         border-bottom: 1.5px solid #f1f5f9;
@@ -311,7 +311,7 @@ import { RouterModule } from '@angular/router';
         }
       }
 
-      strong { color: #0f172a; }
+      strong { color: #0D1B2A; }
     }
   `]
 })

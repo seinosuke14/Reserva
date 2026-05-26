@@ -1,15 +1,15 @@
-<div class="flex flex-col gap-[18px] animate-fade-up">
+﻿<div class="flex flex-col gap-[18px] animate-fade-up">
 
   <!-- ── Fila 1: Banner + Nueva Cita ───────────────────────────────────── -->
   <div class="grid gap-3 grid-cols-1 sm:grid-cols-[1fr_auto]">
 
     <!-- Booking URL banner -->
     @if (linkBanner(); as b) {
-      <div class="rounded-[16px] p-[14px_20px] flex items-center justify-between gap-3 border border-white/[.07]"
-           style="background:linear-gradient(120deg,#0f172a,#1e293b);
+      <div class="rounded-[16px] p-[14px_20px] flex-between gap-3 border border-white/[.07]"
+           style="background:linear-gradient(120deg,#0D1B2A,#1e293b);
                   box-shadow:0 4px 20px rgba(0,0,0,.18);">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0"
+          <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
                [style.background]="b.iconBg">
             @if (b.isCompany) {
               <svg width="16" height="16" fill="none" [attr.stroke]="b.iconColor" stroke-width="2" viewBox="0 0 24 24">
@@ -44,21 +44,21 @@
       </div>
     } @else {
       <div class="rounded-[16px] border border-black/[.06] bg-white p-[14px_20px] flex items-center gap-3">
-        <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0"
-             style="background:rgba(219,150,72,.1);">
-          <svg width="15" height="15" fill="none" stroke="#db9648" stroke-width="2" viewBox="0 0 24 24">
+        <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
+             style="background:rgba(0,196,167,.1);">
+          <svg width="15" height="15" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
           </svg>
         </div>
-        <span class="text-[13px] text-ink-400">Sin link de agendamiento configurado</span>
+        <span class="text-[13px] text-primary-400">Sin link de agendamiento configurado</span>
       </div>
     }
 
     <!-- Nueva Cita button -->
     <button (click)="goToAgenda()"
-      class="w-full sm:w-auto px-[22px] py-3 sm:py-0 rounded-[14px] text-[13.5px] font-bold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-px"
-      style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.45);">
+      class="w-full sm:w-auto px-[22px] py-3 sm:py-0 rounded-[14px] text-[13.5px] font-bold text-white flex-center gap-2 transition-all hover:-translate-y-px"
+      style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.45);">
       <svg width="15" height="15" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
         <path d="M12 5v14M5 12h14"/>
       </svg>
@@ -73,23 +73,23 @@
     <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
          style="animation:fadeUp .4s ease 0ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center"
-             style="background:rgba(219,150,72,.14);color:#db9648;">
+        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
+             style="background:rgba(0,196,167,.14);color:#00C4A7;">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
           </svg>
         </div>
         <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full flex items-center gap-1"
-              style="background:rgba(219,150,72,.1);color:#db9648;">
+              style="background:rgba(0,196,167,.1);color:#00C4A7;">
           Hoy
         </span>
       </div>
-      <div class="text-[11.5px] font-medium text-ink-400 mb-1">Citas de Hoy</div>
-      <div class="text-[24px] font-extrabold text-ink leading-none tracking-tight">{{ stats().totalCitas }}</div>
-      <div class="flex items-center justify-between mt-2.5">
-        <span class="text-[11.5px] text-ink-400">{{ stats().confirmadas }} confirmadas</span>
+      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Citas de Hoy</div>
+      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ stats().totalCitas }}</div>
+      <div class="flex-between mt-2.5">
+        <span class="text-[11.5px] text-primary-400">{{ stats().confirmadas }} confirmadas</span>
         <svg width="60" height="22" style="overflow:visible">
-          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#db9648" stroke-width="1.75"
+          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#00C4A7" stroke-width="1.75"
                     stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
         </svg>
       </div>
@@ -99,7 +99,7 @@
     <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
          style="animation:fadeUp .4s ease 60ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center"
+        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
              style="background:rgba(16,185,129,.12);color:#10b981;">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <line x1="12" y1="1" x2="12" y2="23"/>
@@ -117,10 +117,10 @@
           </span>
         }
       </div>
-      <div class="text-[11.5px] font-medium text-ink-400 mb-1">Ingresos Hoy</div>
-      <div class="text-[24px] font-extrabold text-ink leading-none tracking-tight">{{ formatCLP(stats().ingresosHoy) }}</div>
-      <div class="flex items-center justify-between mt-2.5">
-        <span class="text-[11.5px] text-ink-400">Solo pagos confirmados</span>
+      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Ingresos Hoy</div>
+      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ formatCLP(stats().ingresosHoy) }}</div>
+      <div class="flex-between mt-2.5">
+        <span class="text-[11.5px] text-primary-400">Solo pagos confirmados</span>
         <svg width="60" height="22" style="overflow:visible">
           <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#10b981" stroke-width="1.75"
                     stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
@@ -132,7 +132,7 @@
     <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
          style="animation:fadeUp .4s ease 120ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center"
+        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
              style="background:rgba(99,102,241,.12);color:#6366f1;">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
@@ -150,10 +150,10 @@
           </span>
         }
       </div>
-      <div class="text-[11.5px] font-medium text-ink-400 mb-1">Ingresos del Mes</div>
-      <div class="text-[24px] font-extrabold text-ink leading-none tracking-tight">{{ formatCLP(monthlyIncome()) }}</div>
-      <div class="flex items-center justify-between mt-2.5">
-        <span class="text-[11.5px] text-ink-400">vs mes anterior</span>
+      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Ingresos del Mes</div>
+      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ formatCLP(monthlyIncome()) }}</div>
+      <div class="flex-between mt-2.5">
+        <span class="text-[11.5px] text-primary-400">vs mes anterior</span>
         <svg width="60" height="22" style="overflow:visible">
           <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#6366f1" stroke-width="1.75"
                     stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
@@ -165,7 +165,7 @@
     <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
          style="animation:fadeUp .4s ease 180ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center"
+        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
              style="background:rgba(245,158,11,.12);color:#f59e0b;">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -176,10 +176,10 @@
         <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full"
               style="background:rgba(245,158,11,.1);color:#d97706;">Total</span>
       </div>
-      <div class="text-[11.5px] font-medium text-ink-400 mb-1">Clientes Registrados</div>
-      <div class="text-[24px] font-extrabold text-ink leading-none tracking-tight">{{ activeClientCount() }}</div>
-      <div class="flex items-center justify-between mt-2.5">
-        <span class="text-[11.5px] text-ink-400">En tu directorio</span>
+      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Clientes Registrados</div>
+      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ activeClientCount() }}</div>
+      <div class="flex-between mt-2.5">
+        <span class="text-[11.5px] text-primary-400">En tu directorio</span>
         <svg width="60" height="22" style="overflow:visible">
           <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#f59e0b" stroke-width="1.75"
                     stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
@@ -196,11 +196,11 @@
          style="animation:fadeUp .4s ease 180ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-4">
         <div>
-          <h3 class="text-[14.5px] font-bold text-ink tracking-tight">Ingresos esta semana</h3>
-          <p class="text-[11.5px] text-ink-400 mt-0.5">{{ weekLabels()[0] }} — {{ weekLabels()[6] }}</p>
+          <h3 class="text-[14.5px] font-bold text-primary tracking-tight">Ingresos esta semana</h3>
+          <p class="text-[11.5px] text-primary-400 mt-0.5">{{ weekLabels()[0] }} — {{ weekLabels()[6] }}</p>
         </div>
         <div class="text-right">
-          <div class="text-[21px] font-extrabold text-ink tracking-tight leading-none">{{ formatCLP(weekTotal()) }}</div>
+          <div class="text-[21px] font-extrabold text-primary tracking-tight leading-none">{{ formatCLP(weekTotal()) }}</div>
           @if (weekTrend() !== 0) {
             <div class="text-[11.5px] font-semibold mt-1"
                  [style.color]="weekTrend() >= 0 ? '#10b981' : '#dc2626'">
@@ -219,7 +219,7 @@
 
             <!-- Background column -->
             <rect [attr.x]="bar.x" y="0" width="28" height="120" rx="8"
-                  [attr.fill]="hoveredBar() === i ? 'rgba(219,150,72,.06)' : 'transparent'"/>
+                  [attr.fill]="hoveredBar() === i ? 'rgba(0,196,167,.06)' : 'transparent'"/>
 
             <!-- Bar -->
             <rect [attr.x]="bar.x"
@@ -227,7 +227,7 @@
                   width="28"
                   [attr.height]="bar.barH"
                   rx="6"
-                  [attr.fill]="bar.isToday ? '#db9648' : (hoveredBar() === i ? '#db9648' : '#e2e8f0')"
+                  [attr.fill]="bar.isToday ? '#00C4A7' : (hoveredBar() === i ? '#00C4A7' : '#e2e8f0')"
                   style="transition:fill .15s"/>
 
             <!-- Tooltip value on hover -->
@@ -235,14 +235,14 @@
               <text [attr.x]="bar.x + 14"
                     [attr.y]="10 + (110 - bar.barH) - 7"
                     text-anchor="middle"
-                    style="font-size:9.5px;font-weight:700;fill:#0f172a;font-family:inherit">
+                    style="font-size:9.5px;font-weight:700;fill:#0D1B2A;font-family:inherit">
                 {{ formatCLP(bar.value) }}
               </text>
             }
 
             <!-- Day label -->
             <text [attr.x]="bar.x + 14" y="143" text-anchor="middle"
-                  [attr.fill]="bar.isToday ? '#db9648' : '#94a3b8'"
+                  [attr.fill]="bar.isToday ? '#00C4A7' : '#94a3b8'"
                   [attr.font-weight]="bar.isToday ? '700' : '500'"
                   style="font-size:9.5px;font-family:inherit">
               {{ bar.label }}
@@ -250,7 +250,7 @@
 
             <!-- Today dot -->
             @if (bar.isToday) {
-              <circle [attr.cx]="bar.x + 14" cy="125" r="2.5" fill="#db9648"/>
+              <circle [attr.cx]="bar.x + 14" cy="125" r="2.5" fill="#00C4A7"/>
             }
           </g>
         }
@@ -260,11 +260,11 @@
     <!-- Actividad reciente -->
     <div class="bg-white rounded-[16px] p-[19px_18px] border border-black/[.06]"
          style="animation:fadeUp .4s ease 220ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <h3 class="text-[14.5px] font-bold text-ink mb-3.5 tracking-tight">Actividad Reciente</h3>
+      <h3 class="text-[14.5px] font-bold text-primary mb-3.5 tracking-tight">Actividad Reciente</h3>
       @if (isLoading()) {
-        <div class="text-[12.5px] text-ink-400 text-center py-6">Cargando...</div>
+        <div class="text-[12.5px] text-primary-400 text-center py-6">Cargando...</div>
       } @else if (recentActivity().length === 0) {
-        <div class="text-[12.5px] text-ink-400 text-center py-6">Sin actividad reciente</div>
+        <div class="text-[12.5px] text-primary-400 text-center py-6">Sin actividad reciente</div>
       } @else {
         @for (item of recentActivity(); track item.text; let last = $last) {
           <div class="flex gap-2.5 py-2" [class.border-b]="!last" style="border-color:#f8fafc;">
@@ -272,7 +272,7 @@
                  [style.background]="item.color"></div>
             <div class="flex-1 min-w-0">
               <div class="text-[12.5px] text-slate-600 leading-snug">{{ item.text }}</div>
-              <div class="text-[11px] text-ink-400 mt-[2px]">{{ item.time }}</div>
+              <div class="text-[11px] text-primary-400 mt-[2px]">{{ item.time }}</div>
             </div>
           </div>
         }
@@ -285,17 +285,17 @@
        style="animation:fadeUp .4s ease 260ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
 
     <!-- Header + filter tabs -->
-    <div class="p-[16px_21px] border-b border-ink-100 flex items-center justify-between gap-3">
+    <div class="p-[16px_21px] border-b border-primary-100 flex-between gap-3">
       <div>
-        <h3 class="text-[14.5px] font-bold text-ink">Citas de Hoy</h3>
-        <p class="text-[11.5px] text-ink-400 mt-0.5">{{ todayAppointments().length }} citas programadas</p>
+        <h3 class="text-[14.5px] font-bold text-primary">Citas de Hoy</h3>
+        <p class="text-[11.5px] text-primary-400 mt-0.5">{{ todayAppointments().length }} citas programadas</p>
       </div>
       <div class="flex gap-1 rounded-[10px] p-[3px]" style="background:#f1f5f9;">
         @for (tab of [['todos','Todos'],['Pagado','Pagado'],['Pendiente','Pendiente'],['Cancelado','Cancelado']]; track tab[0]) {
           <button (click)="aptFilter.set($any(tab[0]))"
             class="px-[11px] py-1 rounded-[8px] text-[11.5px] font-medium transition-all"
             [style.background]="aptFilter() === tab[0] ? '#fff' : 'transparent'"
-            [style.color]="aptFilter() === tab[0] ? '#0f172a' : '#94a3b8'"
+            [style.color]="aptFilter() === tab[0] ? '#0D1B2A' : '#94a3b8'"
             [style.box-shadow]="aptFilter() === tab[0] ? '0 1px 4px rgba(0,0,0,.08)' : 'none'">
             {{ tab[1] }}
           </button>
@@ -308,7 +308,7 @@
         <thead>
           <tr style="background:#f8fafc;">
             @for (h of ['Hora','Cliente','Servicio','Monto','Estado']; track h) {
-              <th class="px-5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.06em] text-ink-400 border-b border-ink-100">
+              <th class="px-5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.06em] text-primary-400 border-b border-primary-100">
                 {{ h }}
               </th>
             }
@@ -317,7 +317,7 @@
         <tbody>
           @if (isLoading()) {
             <tr>
-              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-ink-400">
+              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-primary-400">
                 <span class="inline-flex items-center gap-2">
                   <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -332,31 +332,31 @@
           }
 
           @for (apt of filteredTodayApts(); track apt.id; let i = $index) {
-            <tr class="border-b border-ink-50 hover:brightness-[.98] transition-all"
+            <tr class="border-b border-primary-50 hover:brightness-[.98] transition-all"
                 style="animation:fadeIn .3s ease both;"
                 [style.animation-delay]="(i * 45) + 'ms'">
 
               <td class="px-5 py-3">
-                <span class="text-[14px] font-bold tabular-nums" style="color:#db9648;">{{ apt.time }}</span>
+                <span class="text-[14px] font-bold tabular-nums" style="color:#00C4A7;">{{ apt.time }}</span>
               </td>
 
               <td class="px-5 py-3">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[10.5px] font-bold shrink-0"
-                       style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                              box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+                  <div class="w-[28px] h-[28px] rounded-full flex-center text-white text-[10.5px] font-bold shrink-0"
+                       style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                              box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
                     {{ apt.customer.name.charAt(0).toUpperCase() }}
                   </div>
-                  <span class="text-[13.5px] font-medium text-ink">{{ apt.customer.name }}</span>
+                  <span class="text-[13.5px] font-medium text-primary">{{ apt.customer.name }}</span>
                 </div>
               </td>
 
               <td class="px-5 py-3">
-                <span class="text-[13px] text-ink-500">{{ apt.service.name }}</span>
+                <span class="text-[13px] text-primary-500">{{ apt.service.name }}</span>
               </td>
 
               <td class="px-5 py-3">
-                <span class="text-[13.5px] font-bold text-ink tabular-nums">{{ formatCLP(apt.amount) }}</span>
+                <span class="text-[13.5px] font-bold text-primary tabular-nums">{{ formatCLP(apt.amount) }}</span>
               </td>
 
               <td class="px-5 py-3">
@@ -380,7 +380,7 @@
 
           @if (filteredTodayApts().length === 0 && !isLoading()) {
             <tr>
-              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-ink-400">
+              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-primary-400">
                 Sin citas para este filtro.
               </td>
             </tr>

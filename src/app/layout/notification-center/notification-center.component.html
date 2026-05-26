@@ -1,4 +1,4 @@
-@if (isOpen) {
+﻿@if (isOpen) {
   <!-- Backdrop -->
   <div @backdropAnim
     class="fixed inset-0 z-40 bg-gray-900/10 backdrop-blur-[2px]"
@@ -11,9 +11,9 @@
     style="max-height: 520px;">
 
     <!-- Header -->
-    <div class="p-5 border-b border-gray-50 flex items-center justify-between bg-white">
+    <div class="p-5 border-b border-gray-50 flex-between bg-white">
       <div class="flex items-center gap-2">
-        <h3 class="font-bold text-secondary">Notificaciones</h3>
+        <h3 class="font-bold text-primary-700">Notificaciones</h3>
         @if (svc.unreadCount() > 0) {
           <span class="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">
             {{ svc.unreadCount() }} NUEVAS
@@ -55,7 +55,7 @@
             [class]="!notif.isRead ? 'bg-primary/5 border border-primary/10' : 'hover:bg-gray-50'"
             (click)="svc.markAsRead(notif.id)">
             <div class="flex gap-4">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              <div class="w-10 h-10 rounded-xl flex-center shrink-0"
                 [ngClass]="iconBg(notif.type)">
                 <!-- appointment -->
                 @if (notif.type === 'appointment') {
@@ -88,7 +88,7 @@
               </div>
               <div class="flex-1 space-y-1 pr-6">
                 <p class="text-sm leading-tight"
-                  [class]="!notif.isRead ? 'font-bold text-secondary' : 'text-gray-500'">
+                  [class]="!notif.isRead ? 'font-bold text-primary-700' : 'text-gray-500'">
                   {{ notif.message }}
                 </p>
                 <p class="text-[10px] text-gray-400 font-medium">{{ notif.timestamp }}</p>
@@ -106,7 +106,7 @@
         }
       } @else {
         <div class="flex flex-col items-center justify-center py-20 text-center space-y-3">
-          <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-200">
+          <div class="w-16 h-16 rounded-full bg-gray-50 flex-center text-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -122,7 +122,7 @@
     @if (svc.notifications().length > 0) {
       <div class="p-4 border-t border-gray-50 bg-gray-50/30">
         <button (click)="closed.emit()"
-          class="w-full py-2 text-xs font-bold text-gray-400 hover:text-secondary transition-colors uppercase tracking-widest">
+          class="w-full py-2 text-xs font-bold text-gray-400 hover:text-primary-700 transition-colors uppercase tracking-widest">
           Cerrar Panel
         </button>
       </div>

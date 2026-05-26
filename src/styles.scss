@@ -1,41 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* Layout */
+  .flex-center  { @apply flex items-center justify-center; }
+  .flex-between { @apply flex items-center justify-between; }
+
+  /* Formularios — etiquetas */
+  .form-label {
+    @apply block text-[11px] font-bold uppercase tracking-wider text-primary-400 mb-1.5;
+  }
+
+  /* Formularios — inputs */
+  .form-input {
+    @apply w-full px-3 py-2.5 rounded-[10px] border-[1.5px]
+           outline-none transition-colors text-[13.5px] text-primary bg-white
+           placeholder:text-primary-400;
+  }
+  .form-input-icon {
+    @apply form-input pl-10 pr-3;
+  }
+
+  /* Formularios — mensajes de validación */
+  .form-error { @apply text-[11.5px] text-red-500 font-medium ml-0.5; }
+  .form-hint  { @apply text-[11.5px] font-semibold text-primary-600 ml-0.5; }
+
+  /* Cards */
+  .dash-card {
+    @apply bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3;
+  }
+  .stat-card {
+    @apply bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2;
+  }
+}
+
 :root {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  /* --- Paleta principal --- */
+  --color-primary:    #0D1B2A;
+  --color-background: #F8FAFC;
+  --color-accent:     #2BB8A6;
+  --color-label:      #E8943A;
 
-  --color-secondary-50: #f9fafb;
-  --color-secondary-100: #f3f4f6;
-  --color-secondary-500: #6b7280;
-  --color-secondary-700: #374151;
-  --color-secondary-900: #111827;
+  /* Tintes primary */
+  --color-primary-50:  #e8edf3;
+  --color-primary-100: #c5d0dd;
+  --color-primary-200: #9fb0c4;
+  --color-primary-300: #7690ab;
+  --color-primary-400: #517192;
+  --color-primary-500: #3a5878;
+  --color-primary-600: #2a4160;
+  --color-primary-700: #1d2e47;
+  --color-primary-800: #131f30;
+  --color-primary-900: #0D1B2A;
 
-  --color-accent: #3b82f6;
-  --color-accent-hover: #2563eb;
+  /* Tintes accent */
+  --color-accent-50:  #e8f7f5;
+  --color-accent-100: #c0ece6;
+  --color-accent-200: #94dfd5;
+  --color-accent-300: #65d1c3;
+  --color-accent-400: #41c6b5;
+  --color-accent-500: #2BB8A6;
+  --color-accent-600: #22a494;
+  --color-accent-700: #1a8d7e;
+  --color-accent-800: #117668;
+  --color-accent-900: #065e52;
 
+  /* Tintes label */
+  --color-label-50:  #fef4e8;
+  --color-label-100: #fce4c3;
+  --color-label-200: #f9d09a;
+  --color-label-300: #f5bc71;
+  --color-label-400: #f0a848;
+  --color-label-500: #E8943A;
+  --color-label-600: #c87a28;
+  --color-label-700: #a5601e;
+  --color-label-800: #824814;
+  --color-label-900: #60310a;
+
+  /* Superficie y bordes */
+  --color-surface: #ffffff;
+  --color-border:  #e2e8f0;
+
+  /* Estado */
   --color-success: #10b981;
   --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #0ea5e9;
-
-  --color-background: #f3f4f6;
-  --color-surface: #ffffff;
-  --color-border: #e5e7eb;
-
-  // Paleta Citema
-  --color-gold: #db9648;
-  --color-gold-soft: #fdf7ee;
-  --color-ink: #0f172a;
-  --color-canvas: #f8fafc;
+  --color-danger:  #ef4444;
+  --color-info:    #0ea5e9;
 }
 
 * {
@@ -51,7 +104,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-// Scrollbar custom (citema style)
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+// Scrollbar custom (lets reserve style)
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;

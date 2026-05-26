@@ -31,7 +31,7 @@ export class LandingDestacadosComponent implements OnInit, OnDestroy {
       name: 'Barbería Fierro', loc: 'Ñuñoa · Barbería',
       quote: 'Los recordatorios automáticos me bajaron los no-show a casi cero. Cada hora libre la lleno solo con clientes recurrentes.',
       stats: [['+52%', 'Agenda llena'], ['4.8 ★', 'Reseñas reales'], ['96', 'Clientes/mes']],
-      initial: 'F', bg: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #db9648 100%)',
+      initial: 'F', bg: 'linear-gradient(135deg, #0D1B2A 0%, #1d2e47 50%, #E8943A 100%)',
     },
     {
       name: 'Estudio Nova', loc: 'Las Condes · Estética',
@@ -41,7 +41,7 @@ export class LandingDestacadosComponent implements OnInit, OnDestroy {
     },
     {
       name: 'Patitas Felices', loc: 'Vitacura · Paseo mascotas',
-      quote: 'Antes de CITEMA agendaba por WhatsApp y se me cruzaban paseos. Ahora cada ruta cuadra perfecto y duplico clientes.',
+      quote: 'Antes de LETS RESERVE agendaba por WhatsApp y se me cruzaban paseos. Ahora cada ruta cuadra perfecto y duplico clientes.',
       stats: [['x2', 'Clientes nuevos'], ['+40%', 'Rutas optimizadas'], ['84', 'Mascotas activas']],
       initial: 'P', bg: 'linear-gradient(135deg, #14b8a6 0%, #84cc16 50%, #fbbf24 100%)',
     },

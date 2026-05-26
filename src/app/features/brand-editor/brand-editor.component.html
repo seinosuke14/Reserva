@@ -1,29 +1,29 @@
-<div @fadeUp class="flex flex-col gap-[18px] max-w-2xl">
+﻿<div @fadeUp class="flex flex-col gap-[18px] max-w-2xl">
 
   @if (isCompanyMember()) {
   <div class="bg-white rounded-[16px] border border-amber-200 p-6 flex flex-col items-center gap-4 text-center">
-    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+    <div class="w-12 h-12 rounded-full bg-amber-50 flex-center">
       <svg width="22" height="22" fill="none" stroke="#b45309" stroke-width="1.75" viewBox="0 0 24 24">
         <path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/>
       </svg>
     </div>
     <div>
-      <h2 class="text-[15px] font-bold text-ink mb-1">Portal configurado por la empresa</h2>
-      <p class="text-[13px] text-ink-400 max-w-xs leading-relaxed">
+      <h2 class="text-[15px] font-bold text-primary mb-1">Portal configurado por la empresa</h2>
+      <p class="text-[13px] text-primary-400 max-w-xs leading-relaxed">
         Tu portal público es administrado desde el panel de la empresa a la que perteneces.
         Para realizar cambios, contacta al administrador de tu empresa.
       </p>
     </div>
     @if (companySlug()) {
-    <div class="w-full bg-ink-50 rounded-[12px] px-4 py-3 flex items-center justify-between gap-3">
+    <div class="w-full bg-primary-50 rounded-[12px] px-4 py-3 flex-between gap-3">
       <div class="flex items-center gap-1.5 min-w-0">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-ink-300 shrink-0">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-primary-300 shrink-0">
           <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
-        <span class="text-[11.5px] text-ink-400 font-mono truncate">/empresa/<strong class="text-ink">{{ companySlug() }}</strong></span>
+        <span class="text-[11.5px] text-primary-400 font-mono truncate">/empresa/<strong class="text-primary">{{ companySlug() }}</strong></span>
       </div>
       <a [routerLink]="'/empresa/' + companySlug()" target="_blank"
-        class="text-[12px] font-bold text-gold hover:underline whitespace-nowrap shrink-0">
+        class="text-[12px] font-bold text-label hover:underline whitespace-nowrap shrink-0">
         Ver página ↗
       </a>
     </div>
@@ -33,15 +33,15 @@
 
   <!-- Header -->
   <div>
-    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Personalizar Portal</h1>
-    <p class="text-[12.5px] text-ink-400 mt-0.5">Configura cómo verán tu negocio los clientes al reservar.</p>
+    <h1 class="text-[17px] font-extrabold text-primary tracking-tight">Personalizar Portal</h1>
+    <p class="text-[12.5px] text-primary-400 mt-0.5">Configura cómo verán tu negocio los clientes al reservar.</p>
   </div>
 
   <!-- ── Descripción ── -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+  <div class="dash-card">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -49,7 +49,7 @@
         </svg>
         Descripción del Perfil
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Texto de presentación visible en tu portal público de reservas.</p>
+      <p class="text-[11.5px] text-primary-400 mt-1">Texto de presentación visible en tu portal público de reservas.</p>
     </div>
 
     <textarea
@@ -57,17 +57,17 @@
       (input)="descriptionValue.set($any($event.target).value)"
       placeholder="Ej: Soy especialista en cortes modernos con más de 10 años de experiencia."
       rows="4" maxlength="200"
-      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 resize-none transition-colors focus:border-gold">
+      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary bg-white placeholder:text-primary-400 resize-none transition-colors focus:border-accent">
     </textarea>
 
-    <div class="flex items-center justify-between">
+    <div class="flex-between">
       <span class="text-[11px]"
-        [class]="descriptionValue().length >= 200 ? 'text-red-500 font-semibold' : 'text-ink-400'">
+        [class]="descriptionValue().length >= 200 ? 'text-red-500 font-semibold' : 'text-primary-400'">
         {{ descriptionValue().length }} / 200 caracteres
       </span>
       <button (click)="saveDescription()" [disabled]="descSaving()"
         class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
         {{ descSaving() ? 'Guardando...' : 'Guardar Descripción' }}
       </button>
     </div>
@@ -81,38 +81,38 @@
   </div>
 
   <!-- ── Nombre Comercial ── -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+  <div class="dash-card">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
         </svg>
         Nombre Comercial
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Define la URL con la que tus clientes acceden a tu portal de reservas.</p>
+      <p class="text-[11.5px] text-primary-400 mt-1">Define la URL con la que tus clientes acceden a tu portal de reservas.</p>
     </div>
 
-    <div class="bg-ink-50 rounded-[10px] px-3 py-2 flex items-center gap-1.5">
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-ink-300 shrink-0">
+    <div class="bg-primary-50 rounded-[10px] px-3 py-2 flex items-center gap-1.5">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" class="text-primary-300 shrink-0">
         <circle cx="12" cy="12" r="10"/>
         <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
       </svg>
-      <span class="text-[11.5px] text-ink-400 font-mono truncate">
-        /reservar/<strong class="text-ink">{{ slugValue() || user()?.slug || '…' }}</strong>
+      <span class="text-[11.5px] text-primary-400 font-mono truncate">
+        /reservar/<strong class="text-primary">{{ slugValue() || user()?.slug || '…' }}</strong>
       </span>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-2.5">
-      <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-gold">
-        <span class="px-3 text-[12px] text-ink-400 whitespace-nowrap border-r border-ink-200 py-2.5 bg-ink-50 font-mono">/reservar/</span>
+      <div class="flex-1 flex items-center border-[1.5px] border-primary-200 rounded-[10px] overflow-hidden transition-colors focus-within:border-accent">
+        <span class="px-3 text-[12px] text-primary-400 whitespace-nowrap border-r border-primary-200 py-2.5 bg-primary-50 font-mono">/reservar/</span>
         <input type="text" [ngModel]="slugValue()" (ngModelChange)="slugValue.set($event)"
           placeholder="mi-negocio"
-          class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono" />
+          class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-primary focus:outline-none font-mono" />
       </div>
       <button (click)="saveSlug()" [disabled]="slugSaving()"
         class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
         {{ slugSaving() ? 'Guardando...' : 'Guardar' }}
       </button>
     </div>
@@ -126,17 +126,17 @@
   </div>
 
   <!-- ── Imagen de Portada (Banner / Hero) ── -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+  <div class="dash-card">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
           <circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21 15 16 10 5 21"/>
         </svg>
         Imagen de Portada
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">
+      <p class="text-[11.5px] text-primary-400 mt-1">
         Imagen hero que aparece en la cabecera de tu portal. Recomendado: 1920×640 px.
       </p>
     </div>
@@ -147,35 +147,35 @@
         (change)="onBannerSelect($event)" [disabled]="bannerSaving()">
 
       <div class="relative w-full rounded-[12px] overflow-hidden border-2 transition-colors"
-        [class]="bannerPreview() ? 'border-transparent' : 'border-dashed border-ink-200 group-hover:border-gold'"
+        [class]="bannerPreview() ? 'border-transparent' : 'border-dashed border-primary-200 group-hover:border-accent'"
         style="aspect-ratio:3/1;min-height:96px;">
 
         @if (bannerPreview()) {
           <img [src]="bannerPreview()" class="w-full h-full object-cover" alt="Portada">
-          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex-center">
             <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[12px] font-semibold
                          bg-black/50 px-3 py-1.5 rounded-lg">Cambiar imagen</span>
           </div>
         } @else {
-          <div class="w-full h-full bg-ink-50 flex flex-col items-center justify-center gap-2">
+          <div class="w-full h-full bg-primary-50 flex flex-col items-center justify-center gap-2">
             @if (bannerSaving()) {
-              <div class="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
-              <span class="text-[11.5px] text-ink-400">Subiendo...</span>
+              <div class="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-[11.5px] text-primary-400">Subiendo...</span>
             } @else {
               <svg width="24" height="24" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <polyline points="21 15 16 10 5 21"/>
               </svg>
-              <span class="text-[11.5px] text-ink-400">Haz clic para subir imagen de portada</span>
-              <span class="text-[10.5px] text-ink-300">JPG, PNG o WebP · máx 10 MB</span>
+              <span class="text-[11.5px] text-primary-400">Haz clic para subir imagen de portada</span>
+              <span class="text-[10.5px] text-primary-300">JPG, PNG o WebP · máx 10 MB</span>
             }
           </div>
         }
 
         <!-- Spinner overlay al subir con imagen existente -->
         @if (bannerSaving() && bannerPreview()) {
-          <div class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
+          <div class="absolute inset-0 bg-black/40 flex-center gap-2">
             <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span class="text-white text-[12px] font-medium">Subiendo...</span>
           </div>
@@ -194,8 +194,8 @@
   <!-- ── Fondo del Portal ── -->
   <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-4">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <circle cx="13.5" cy="6.5" r="2.5"/>
           <circle cx="17.5" cy="10.5" r="2.5"/>
           <circle cx="8.5"  cy="7.5"  r="2.5"/>
@@ -204,14 +204,14 @@
         </svg>
         Fondo del Portal
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Elige un color sólido o una imagen de fondo para tu portal.</p>
+      <p class="text-[11.5px] text-primary-400 mt-1">Elige un color sólido o una imagen de fondo para tu portal.</p>
     </div>
 
     <!-- Toggle color / imagen -->
-    <div class="flex gap-1 bg-ink-50 p-1 rounded-[10px] w-fit">
+    <div class="flex gap-1 bg-primary-50 p-1 rounded-[10px] w-fit">
       <button (click)="switchBgType('color')"
         class="px-4 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all flex items-center gap-1.5"
-        [class]="bgType() === 'color' ? 'bg-white text-ink shadow-sm' : 'text-ink-400 hover:text-ink'">
+        [class]="bgType() === 'color' ? 'bg-white text-primary shadow-sm' : 'text-primary-400 hover:text-primary'">
         @if (activeBgType() === 'color') {
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
         }
@@ -219,7 +219,7 @@
       </button>
       <button (click)="switchBgType('image')"
         class="px-4 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all flex items-center gap-1.5"
-        [class]="bgType() === 'image' ? 'bg-white text-ink shadow-sm' : 'text-ink-400 hover:text-ink'">
+        [class]="bgType() === 'image' ? 'bg-white text-primary shadow-sm' : 'text-primary-400 hover:text-primary'">
         @if (activeBgType() === 'image') {
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
         }
@@ -230,28 +230,28 @@
     <!-- Color picker -->
     @if (bgType() === 'color') {
       <div class="flex items-center gap-3">
-        <label class="relative w-10 h-10 rounded-[10px] overflow-hidden border-[1.5px] border-ink-200 cursor-pointer shrink-0"
+        <label class="relative w-10 h-10 rounded-[10px] overflow-hidden border-[1.5px] border-primary-200 cursor-pointer shrink-0"
           [style.background]="bgColor()">
           <input type="color" [ngModel]="bgColor()" (ngModelChange)="bgColor.set($event)"
             class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
         </label>
-        <div class="flex-1 flex items-center border-[1.5px] border-ink-200 rounded-[10px] overflow-hidden focus-within:border-gold">
-          <span class="px-3 text-[12px] text-ink-400 border-r border-ink-200 py-2.5 bg-ink-50 font-mono">#</span>
+        <div class="flex-1 flex items-center border-[1.5px] border-primary-200 rounded-[10px] overflow-hidden focus-within:border-accent">
+          <span class="px-3 text-[12px] text-primary-400 border-r border-primary-200 py-2.5 bg-primary-50 font-mono">#</span>
           <input type="text"
             [ngModel]="bgColor().replace('#','')"
             (ngModelChange)="bgColor.set('#' + $event)"
             placeholder="f8fafc" maxlength="6"
-            class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-ink focus:outline-none font-mono uppercase" />
+            class="flex-1 px-3 py-2.5 bg-transparent text-[13.5px] font-medium text-primary focus:outline-none font-mono uppercase" />
         </div>
         <button (click)="saveBgColor()" [disabled]="bgSaving()"
           class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-          style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+          style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
           {{ bgSaving() ? 'Guardando...' : 'Guardar' }}
         </button>
       </div>
 
       <!-- Preview color -->
-      <div class="h-16 rounded-[10px] border border-ink-100 transition-colors"
+      <div class="h-16 rounded-[10px] border border-primary-100 transition-colors"
         [style.background-color]="bgColor()">
       </div>
     }
@@ -263,34 +263,34 @@
           (change)="onBgImageSelect($event)" [disabled]="bgSaving()">
 
         <div class="relative w-full rounded-[12px] overflow-hidden border-2 transition-colors"
-          [class]="bgPreview() ? 'border-transparent' : 'border-dashed border-ink-200 group-hover:border-gold'"
+          [class]="bgPreview() ? 'border-transparent' : 'border-dashed border-primary-200 group-hover:border-accent'"
           style="height:120px;">
 
           @if (bgPreview()) {
             <div class="w-full h-full bg-cover bg-center" [ngStyle]="bgPreviewStyle()"></div>
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex-center">
               <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[12px] font-semibold
                            bg-black/50 px-3 py-1.5 rounded-lg">Cambiar imagen</span>
             </div>
           } @else {
-            <div class="w-full h-full bg-ink-50 flex flex-col items-center justify-center gap-1.5">
+            <div class="w-full h-full bg-primary-50 flex flex-col items-center justify-center gap-1.5">
               @if (bgSaving()) {
-                <div class="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-[11.5px] text-ink-400">Subiendo...</span>
+                <div class="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-[11.5px] text-primary-400">Subiendo...</span>
               } @else {
                 <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
                   <polyline points="16 16 12 12 8 16"/>
                   <line x1="12" y1="12" x2="12" y2="21"/>
                   <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
                 </svg>
-                <span class="text-[11.5px] text-ink-400">Subir imagen de fondo</span>
-                <span class="text-[10.5px] text-ink-300">JPG, PNG o WebP · máx 10 MB</span>
+                <span class="text-[11.5px] text-primary-400">Subir imagen de fondo</span>
+                <span class="text-[10.5px] text-primary-300">JPG, PNG o WebP · máx 10 MB</span>
               }
             </div>
           }
 
           @if (bgSaving() && bgPreview()) {
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
+            <div class="absolute inset-0 bg-black/40 flex-center gap-2">
               <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               <span class="text-white text-[12px] font-medium">Subiendo...</span>
             </div>
@@ -302,7 +302,7 @@
       @if (bgPreview() && activeBgType() !== 'image') {
         <button (click)="activateBgImage()" [disabled]="bgSaving()"
           class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-          style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+          style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
           {{ bgSaving() ? 'Activando...' : 'Usar imagen como fondo activo' }}
         </button>
       }
@@ -325,26 +325,26 @@
   <!-- ── Tipografía ── -->
   <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-4">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <polyline points="4 7 4 4 20 4 20 7"/>
           <line x1="9" y1="20" x2="15" y2="20"/>
           <line x1="12" y1="4" x2="12" y2="20"/>
         </svg>
         Tipografía
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">Elige las fuentes que verán tus clientes en tu portal de reservas.</p>
+      <p class="text-[11.5px] text-primary-400 mt-1">Elige las fuentes que verán tus clientes en tu portal de reservas.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <!-- Títulos -->
       <div class="space-y-2">
-        <label class="text-[11px] font-semibold text-ink-500 block">
-          Títulos <span class="text-ink-300 font-normal">(h1, h2, h3)</span>
+        <label class="text-[11px] font-semibold text-primary-500 block">
+          Títulos <span class="text-primary-300 font-normal">(h1, h2, h3)</span>
         </label>
         <div class="relative">
           <select [ngModel]="headingFont()" (ngModelChange)="onHeadingFontChange($event)"
-            class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] font-medium text-ink bg-white outline-none transition-colors focus:border-gold cursor-pointer">
+            class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-primary-200 text-[13px] font-medium text-primary bg-white outline-none transition-colors focus:border-accent cursor-pointer">
             @for (group of ['Sans-serif', 'Serif']; track group) {
             <optgroup [label]="group">
               @for (opt of fontOptions; track opt.value) {
@@ -355,27 +355,27 @@
             </optgroup>
             }
           </select>
-          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" width="12" height="12"
+          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" width="12" height="12"
             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
-        <div class="rounded-[10px] border border-ink-100 bg-ink-50 p-3 space-y-1 overflow-hidden"
+        <div class="rounded-[10px] border border-primary-100 bg-primary-50 p-3 space-y-1 overflow-hidden"
           [style.font-family]="headingFont() + ', sans-serif'">
-          <p class="text-[20px] font-bold text-ink leading-tight truncate">Título Principal</p>
-          <p class="text-[15px] font-semibold text-ink-600 leading-tight truncate">Subtítulo de sección</p>
-          <p class="text-[13px] font-medium text-ink-400 leading-tight truncate">Encabezado terciario</p>
+          <p class="text-[20px] font-bold text-primary leading-tight truncate">Título Principal</p>
+          <p class="text-[15px] font-semibold text-primary-600 leading-tight truncate">Subtítulo de sección</p>
+          <p class="text-[13px] font-medium text-primary-400 leading-tight truncate">Encabezado terciario</p>
         </div>
       </div>
 
       <!-- Texto -->
       <div class="space-y-2">
-        <label class="text-[11px] font-semibold text-ink-500 block">
-          Texto general <span class="text-ink-300 font-normal">(párrafos)</span>
+        <label class="text-[11px] font-semibold text-primary-500 block">
+          Texto general <span class="text-primary-300 font-normal">(párrafos)</span>
         </label>
         <div class="relative">
           <select [ngModel]="bodyFont()" (ngModelChange)="onBodyFontChange($event)"
-            class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-ink-200 text-[13px] font-medium text-ink bg-white outline-none transition-colors focus:border-gold cursor-pointer">
+            class="w-full appearance-none px-3 py-2.5 pr-8 rounded-[10px] border-[1.5px] border-primary-200 text-[13px] font-medium text-primary bg-white outline-none transition-colors focus:border-accent cursor-pointer">
             @for (group of ['Sans-serif', 'Serif']; track group) {
             <optgroup [label]="group">
               @for (opt of fontOptions; track opt.value) {
@@ -386,14 +386,14 @@
             </optgroup>
             }
           </select>
-          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" width="12" height="12"
+          <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" width="12" height="12"
             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
-        <div class="rounded-[10px] border border-ink-100 bg-ink-50 p-3 overflow-hidden"
+        <div class="rounded-[10px] border border-primary-100 bg-primary-50 p-3 overflow-hidden"
           [style.font-family]="bodyFont() + ', sans-serif'">
-          <p class="text-[13px] text-ink-600 leading-relaxed">
+          <p class="text-[13px] text-primary-600 leading-relaxed">
             Bienvenido a mi portal de reservas. Aquí puedes agendar tu hora de forma rápida y sencilla.
           </p>
         </div>
@@ -401,38 +401,38 @@
     </div>
 
     <!-- Preview combinado -->
-    <div class="rounded-[12px] border border-ink-100 overflow-hidden">
-      <div class="px-4 py-2 border-b border-ink-100 bg-ink-50 flex items-center gap-1.5">
+    <div class="rounded-[12px] border border-primary-100 overflow-hidden">
+      <div class="px-4 py-2 border-b border-primary-100 bg-primary-50 flex items-center gap-1.5">
         <div class="w-2 h-2 rounded-full bg-red-400"></div>
         <div class="w-2 h-2 rounded-full bg-amber-400"></div>
         <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-        <span class="ml-2 text-[10.5px] text-ink-400 font-mono">Vista previa del portal</span>
+        <span class="ml-2 text-[10.5px] text-primary-400 font-mono">Vista previa del portal</span>
       </div>
       <div class="p-4 bg-white space-y-1.5">
-        <p class="text-[18px] font-bold text-ink" [style.font-family]="headingFont() + ', sans-serif'">
+        <p class="text-[18px] font-bold text-primary" [style.font-family]="headingFont() + ', sans-serif'">
           {{ user()?.name || 'Mi Negocio' }}
         </p>
-        <p class="text-[13px] font-semibold text-ink-500" [style.font-family]="headingFont() + ', sans-serif'">
+        <p class="text-[13px] font-semibold text-primary-500" [style.font-family]="headingFont() + ', sans-serif'">
           {{ user()?.specialty || 'Especialidad' }}
         </p>
-        <p class="text-[12.5px] text-ink-400 leading-relaxed pt-1" [style.font-family]="bodyFont() + ', sans-serif'">
+        <p class="text-[12.5px] text-primary-400 leading-relaxed pt-1" [style.font-family]="bodyFont() + ', sans-serif'">
           {{ descriptionValue() || user()?.description || 'Aquí irá la descripción de tu perfil.' }}
         </p>
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-1">
+    <div class="flex-between pt-1">
       @if (fontMsg()) {
       <p class="text-[11.5px] font-medium"
          [class]="fontMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
         {{ fontMsg()!.text }}
       </p>
       } @else {
-      <span class="text-[11px] text-ink-400">Los cambios se aplicarán en tu portal de reservas.</span>
+      <span class="text-[11px] text-primary-400">Los cambios se aplicarán en tu portal de reservas.</span>
       }
       <button (click)="saveFonts()" [disabled]="fontSaving()"
         class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
         {{ fontSaving() ? 'Guardando...' : 'Guardar Tipografía' }}
       </button>
     </div>

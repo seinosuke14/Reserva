@@ -1,4 +1,4 @@
-<div class="portal-root" [ngStyle]="portalBgStyle()">
+﻿<div class="portal-root" [ngStyle]="portalBgStyle()">
   <main class="portal-main" [ngStyle]="portalBgStyle()">
 
     @switch (state()) {
@@ -11,7 +11,7 @@
       @case ('error') {
         <div class="state-screen">
           <p class="state-error">Empresa no encontrada</p>
-          <a routerLink="/" style="font-size:.875rem;color:#db9648;font-weight:600;">Volver al inicio</a>
+          <a routerLink="/" style="font-size:.875rem;color:#00C4A7;font-weight:600;">Volver al inicio</a>
         </div>
       }
       @default {

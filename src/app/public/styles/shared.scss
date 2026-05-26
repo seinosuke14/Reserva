@@ -1,17 +1,18 @@
 // ─── Design tokens ───────────────────────────────────────
-$gold:    #db9648;
-$text:    #0f172a;
-$muted:   #64748b;
-$border:  #e2e8f0;
-$canvas:  #f8fafc;
-$surface: #f9fafb;
-$error:   #ef4444;
-$success: #10b981;
-$warning: #f59e0b;
-
-// Aliases para compatibilidad con componentes que usan $primary
-$primary: $gold;
-$accent:  $gold;
+$primary:      #0D1B2A;
+$accent:       #2BB8A6;
+$accent-hover: #22a494;
+$label:        #E8943A;
+$text:         #0D1B2A;
+$muted:        #64748b;
+$muted-light:  #94a3b8;
+$border:       #e2e8f0;
+$subtle-bg:    #f1f5f9;
+$canvas:       #F8FAFC;
+$surface:      #ffffff;
+$error:        #ef4444;
+$success:      #10b981;
+$warning:      #f59e0b;
 
 // ─── Card ────────────────────────────────────────────────
 @mixin card($radius: 1rem) {
@@ -30,8 +31,8 @@ $accent:  $gold;
 // ─── Focus ring ──────────────────────────────────────────
 @mixin focus-ring {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(219,150,72,.18);
-  border-color: $gold;
+  box-shadow: 0 0 0 3px rgba($accent,.18);
+  border-color: $accent;
 }
 
 // ─── Input ───────────────────────────────────────────────
@@ -60,14 +61,19 @@ $accent:  $gold;
   &:disabled { opacity: .6; cursor: not-allowed; }
 }
 
-@mixin btn-gold($radius: .625rem, $pad: .75rem 1.5rem) {
+@mixin btn-primary($radius: .625rem, $pad: .75rem 1.5rem) {
   @include btn-base;
   padding: $pad;
   border-radius: $radius;
-  background: $gold;
+  background: $accent;
   color: #fff;
-  box-shadow: 0 3px 12px rgba(219,150,72,.35);
-  &:hover:not(:disabled) { background: #c4873e; }
+  box-shadow: 0 3px 12px rgba($accent,.35);
+  &:hover:not(:disabled) { background: $accent-hover; }
+}
+
+// Alias de compatibilidad
+@mixin btn-gold($radius: .625rem, $pad: .75rem 1.5rem) {
+  @include btn-primary($radius, $pad);
 }
 
 @mixin btn-secondary($radius: .625rem, $pad: .75rem 1.5rem) {
@@ -77,11 +83,11 @@ $accent:  $gold;
   background: #fff;
   color: $text;
   border: 1.5px solid $border;
-  &:hover:not(:disabled) { background: $surface; }
+  &:hover:not(:disabled) { background: $canvas; }
 }
 
 // ─── Spinner ─────────────────────────────────────────────
-@mixin spinner($size: 2rem, $color: $gold) {
+@mixin spinner($size: 2rem, $color: $accent) {
   width: $size;
   height: $size;
   border: 3px solid $border;
@@ -105,4 +111,83 @@ $accent:  $gold;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
+}
+
+// ─── Transfer section (compartido entre booking-payment-step, booking-confirmed, company-public-page) ───
+@mixin transfer-container {
+  background: $canvas; border: 1px solid $border;
+  border-radius: .75rem; padding: 1rem 1.25rem; margin-top: .5rem;
+  h4 { font-size: .85rem; font-weight: 700; color: $text; margin: 0 0 .75rem; text-transform: uppercase; letter-spacing: .05em; }
+}
+
+@mixin transfer-section {
+  .transfer-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .5rem 0; border-bottom: 1px solid $subtle-bg; font-size: .8rem;
+    &:last-of-type { border-bottom: none; }
+    span   { color: $muted; }
+    strong { color: $text; font-weight: 600; }
+    &.highlight {
+      padding-top: .75rem; margin-top: .25rem;
+      border-top: 2px solid $border; border-bottom: none;
+      strong { color: $accent; font-size: 1.1rem; font-weight: 700; }
+    }
+  }
+  .copy-transfer-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: .4rem; width: 100%; margin-top: .875rem;
+    padding: .625rem 1rem; border-radius: .75rem;
+    border: 1.5px solid rgba($accent,.4); background: rgba($accent,.06);
+    color: $accent; font-size: .8125rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    &:hover:not(.copied) { background: rgba($accent,.12); border-color: $accent; }
+    &.copied { border-color: $success; background: rgba($success,.08); color: darken($success, 8%); cursor: default; }
+  }
+  .transfer-note { font-size: .75rem; color: $muted; margin: .75rem 0 0; font-style: italic; }
+}
+
+// ─── Payment option cards (compartido entre booking-payment-step y company-public-page) ───
+@mixin payment-option-styles {
+  .payment-options { display: flex; flex-direction: column; gap: .75rem; }
+  .payment-option {
+    display: flex; align-items: center; gap: 1rem; padding: 1.25rem;
+    background: $surface; border: 1.5px solid $border; border-radius: 1rem;
+    cursor: pointer; transition: border-color .15s; text-align: left;
+    width: 100%; box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    &:hover    { border-color: rgba($accent,.35); background: #fffdf9; }
+    &.selected { border-color: $accent; background: rgba($accent,.03); }
+  }
+  .payment-option-icon {
+    width: 52px; height: 52px; background: $subtle-bg; border-radius: .75rem;
+    display: flex; align-items: center; justify-content: center;
+    color: #475569; flex-shrink: 0; transition: background .15s, color .15s;
+    .selected & { background: $accent; color: #fff; }
+  }
+  .payment-option-info {
+    flex: 1;
+    h4 { font-size: .95rem; font-weight: 600; color: $text; margin: 0 0 .125rem; }
+    p  { font-size: .75rem; color: $muted-light; margin: 0; }
+  }
+  .payment-option-radio {
+    width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color .15s;
+    .selected & { border-color: $accent; }
+  }
+}
+
+// ─── Booked confirmation card (compartido entre booking-confirmed y company-public-page) ───
+@mixin booked-card-styles {
+  .booked-card {
+    max-width: 520px; margin: 2rem auto; background: $surface;
+    border-radius: 1.5rem; padding: 2.5rem 2rem; text-align: center;
+    border: 1px solid $border; box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    h2 { font-size: 1.5rem; font-weight: 700; color: $text; margin: 0 0 .5rem; }
+    > p { color: $muted; font-size: .875rem; margin: 0 0 1.5rem; line-height: 1.5; }
+  }
+  .booked-icon {
+    width: 64px; height: 64px; background: #dcfce7; color: #16a34a;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+  }
 }

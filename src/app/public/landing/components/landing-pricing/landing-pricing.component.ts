@@ -60,7 +60,7 @@ export class LandingPricingComponent {
 
   private readonly PLAN_META: Record<string, PlanMeta> = {
     free: {
-      tag: 'Prueba de 2 semanas para que te acostumbres a Citema',
+      tag: 'Prueba de 2 semanas para que te acostumbres a Lets Reserve',
       cta: 'Empezar gratis',
       ctaRoute: '/registro',
       features: ['1 usuario', 'Citas ilimitadas', 'Mensajería ilimitada', 'Recordatorio automático 1h antes', 'Perfil público personalizable', 'Analytics completo', 'Trial 2 semanas'],
