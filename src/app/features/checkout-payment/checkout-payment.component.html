@@ -1,9 +1,9 @@
-<div class="flex flex-col gap-[18px] animate-fade-up">
+﻿<div class="flex flex-col gap-[18px] animate-fade-up">
 
   <!-- Header -->
   <div>
-    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Métodos de Pago</h1>
-    <p class="text-[12.5px] text-ink-400 mt-0.5">Configura los métodos de pago disponibles para tus clientes.</p>
+    <h1 class="text-[17px] font-extrabold text-primary tracking-tight">Métodos de Pago</h1>
+    <p class="text-[12.5px] text-primary-400 mt-0.5">Configura los métodos de pago disponibles para tus clientes.</p>
   </div>
 
   <!-- Loading skeletons -->
@@ -11,10 +11,10 @@
     <div class="flex flex-col gap-3">
       @for (i of [1, 2, 3]; track i) {
         <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] flex items-center gap-4">
-          <div class="w-[42px] h-[42px] rounded-[10px] bg-ink-100 animate-pulse shrink-0"></div>
+          <div class="w-[42px] h-[42px] rounded-[10px] bg-primary-100 animate-pulse shrink-0"></div>
           <div class="flex-1 space-y-2">
-            <div class="h-3.5 bg-ink-100 rounded animate-pulse w-36"></div>
-            <div class="h-3 bg-ink-100 rounded animate-pulse w-52"></div>
+            <div class="h-3.5 bg-primary-100 rounded animate-pulse w-36"></div>
+            <div class="h-3 bg-primary-100 rounded animate-pulse w-52"></div>
           </div>
         </div>
       }
@@ -42,11 +42,11 @@
                (click)="toggleExpand(config.provider)">
 
             <!-- Icon -->
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center shrink-0"
+            <div class="w-[42px] h-[42px] rounded-[10px] flex-center shrink-0"
                  [style.background]="isConfigured(config.provider) && isActive(config.provider)
-                   ? 'rgba(219,150,72,.13)' : 'rgba(100,116,139,.08)'"
+                   ? 'rgba(0,196,167,.13)' : 'rgba(100,116,139,.08)'"
                  [style.color]="isConfigured(config.provider) && isActive(config.provider)
-                   ? '#db9648' : '#94a3b8'">
+                   ? '#00C4A7' : '#94a3b8'">
               @switch (config.icon) {
                 @case ('credit-card') {
                   <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -76,8 +76,8 @@
 
             <!-- Info -->
             <div class="flex-1 min-w-0">
-              <div class="text-[13.5px] font-bold text-ink tracking-tight">{{ config.label }}</div>
-              <div class="text-[12px] text-ink-400 truncate">{{ config.description }}</div>
+              <div class="text-[13.5px] font-bold text-primary tracking-tight">{{ config.label }}</div>
+              <div class="text-[12px] text-primary-400 truncate">{{ config.description }}</div>
             </div>
 
             <!-- Status + chevron -->
@@ -107,14 +107,14 @@
 
           <!-- Expandable form -->
           @if (expandedProvider() === config.provider) {
-            <div class="border-t border-ink-100/60 p-[18px_20px] space-y-4">
+            <div class="border-t border-primary-100/60 p-[18px_20px] space-y-4">
               @for (field of config.fields; track field.key) {
                 <div class="space-y-1.5">
-                  <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">{{ field.label }}</label>
+                  <label class="form-hint">{{ field.label }}</label>
                   <div class="relative">
                     @if (field.type === 'select') {
                       <select
-                        class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white transition-colors focus:border-gold appearance-none cursor-pointer"
+                        class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary bg-white transition-colors focus:border-accent appearance-none cursor-pointer"
                         [value]="getFieldValue(field.key)"
                         (change)="setFieldValue(field.key, $any($event.target).value)">
                         <option value="" disabled>{{ field.placeholder }}</option>
@@ -122,13 +122,13 @@
                           <option [value]="opt">{{ opt }}</option>
                         }
                       </select>
-                      <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-400" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-primary-400" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <polyline points="6 9 12 15 18 9"/>
                       </svg>
                     } @else {
                       <input
                         [type]="getFieldType(field)"
-                        class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 transition-colors focus:border-gold"
+                        class="form-input border-primary-200 focus:border-accent"
                         [placeholder]="field.placeholder"
                         [attr.maxlength]="field.maxlength ?? null"
                         [attr.inputmode]="field.inputmode ?? null"
@@ -136,7 +136,7 @@
                         (input)="setFieldValue(field.key, $any($event.target).value)" />
                       @if (field.type === 'password') {
                         <button type="button"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-300 hover:text-ink-500 transition-colors"
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-300 hover:text-primary-500 transition-colors"
                           (click)="toggleFieldVisibility(field.key)">
                           @if (isFieldVisible(field.key)) {
                             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -159,8 +159,8 @@
 
               <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
                 <button (click)="saveMethod(config)" [disabled]="isSaving()"
-                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
-                  style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
+                  style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
                   @if (isSaving()) {
                     <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                       <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -176,7 +176,7 @@
 
                 @if (isConfigured(config.provider)) {
                   <button (click)="toggleActive(config.provider); $event.stopPropagation()"
-                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 transition-all hover:bg-ink-50 text-ink-500">
+                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
                     {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
                   </button>
                   <button (click)="removeMethod(config.provider)"

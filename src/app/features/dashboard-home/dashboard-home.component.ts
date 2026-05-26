@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+﻿import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -59,10 +59,10 @@ export class DashboardHomeComponent implements OnInit {
     if (user?.slug && !user?.companyId) return {
       url:     `${window.location.origin}/reservar/${user.slug}`,
       label:   'Tu link de agendamiento',
-      accent:  '#db9648',
-      shadow:  'rgba(219,150,72,.4)',
-      iconBg:  'rgba(219,150,72,.13)',
-      iconColor: '#db9648',
+      accent:  '#00C4A7',
+      shadow:  'rgba(0,196,167,.4)',
+      iconBg:  'rgba(0,196,167,.13)',
+      iconColor: '#00C4A7',
       isCompany: false,
     };
     if (user?.companyId && user?.companySlug) return {

@@ -8,5 +8,3 @@ app-landing .footer ul a:hover { color: var(--lp-ink); }
 app-landing .footer-bot { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; font-size: 13px; color: var(--lp-gray-medium); flex-wrap: wrap; gap: 12px; }
 app-landing .footer-tag { font-size: 14px; color: var(--lp-gray-medium); margin-top: 14px; max-width: 320px; line-height: 1.5; }
 app-landing .footer .brand { color: var(--lp-ink); }
-app-landing .footer .brand-mark { box-shadow: none; border: 1px solid var(--lp-border); }
-app-landing .footer .brand-mark::after { border-color: white; }

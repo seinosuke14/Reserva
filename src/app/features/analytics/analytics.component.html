@@ -1,8 +1,8 @@
-<div class="p-5 space-y-5" style="background:#f8fafc; min-height:100%;">
+﻿<div class="p-5 space-y-5" style="background:#f8fafc; min-height:100%;">
 
   <!-- Loading -->
   @if (isLoading()) {
-  <div class="flex items-center justify-center py-24 text-[13px] text-slate-400 gap-2">
+  <div class="flex-center py-24 text-[13px] text-slate-400 gap-2">
     <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
       <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
       <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
@@ -22,8 +22,8 @@
   <!-- ── KPI cards ─────────────────────────────────────────────── -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
-      <div class="flex items-center justify-between">
+    <div class="stat-card">
+      <div class="flex-between">
         <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Ingresos 12 meses</span>
         <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
           [style.background]="revTrend() >= 0 ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)'"
@@ -35,8 +35,8 @@
       <div class="text-[11.5px] text-slate-400">{{ totalPaid12m() }} citas pagadas</div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
-      <div class="flex items-center justify-between">
+    <div class="stat-card">
+      <div class="flex-between">
         <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Promedio mensual</span>
         <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">12m</span>
       </div>
@@ -44,8 +44,8 @@
       <div class="text-[11.5px] text-slate-400">ingreso promedio por mes</div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-2">
-      <div class="flex items-center justify-between">
+    <div class="stat-card">
+      <div class="flex-between">
         <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Total citas</span>
         <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
           [style.background]="bkgTrend() >= 0 ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)'"
@@ -61,7 +61,7 @@
 
   <!-- ── Line chart: ingresos mensuales ────────────────────────── -->
   <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex-between mb-4">
       <div>
         <div class="text-[13.5px] font-bold text-slate-900">Ingresos por mes</div>
         <div class="text-[11.5px] text-slate-400 mt-0.5">Últimos 12 meses · solo citas pagadas</div>
@@ -73,8 +73,8 @@
          preserveAspectRatio="xMidYMid meet" class="overflow-visible">
       <defs>
         <linearGradient id="lcGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#db9648" stop-opacity=".18"/>
-          <stop offset="100%" stop-color="#db9648" stop-opacity="0"/>
+          <stop offset="0%"   stop-color="#00C4A7" stop-opacity=".18"/>
+          <stop offset="100%" stop-color="#00C4A7" stop-opacity="0"/>
         </linearGradient>
       </defs>
 
@@ -90,7 +90,7 @@
       <path [attr.d]="lineChartArea()" fill="url(#lcGrad)"/>
 
       <!-- Line -->
-      <path [attr.d]="lineChartPath()" fill="none" stroke="#db9648" stroke-width="2.5"
+      <path [attr.d]="lineChartPath()" fill="none" stroke="#00C4A7" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round"/>
 
       <!-- Dots, labels, X-axis month labels -->
@@ -98,7 +98,7 @@
 
         <!-- Dot -->
         <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4"
-                [attr.fill]="hoveredBar() === i ? '#c4873e' : '#db9648'"
+                [attr.fill]="hoveredBar() === i ? '#00a98e' : '#00C4A7'"
                 stroke="#fff" stroke-width="2"
                 style="cursor:pointer;"
                 (mouseenter)="hoveredBar.set(i)"
@@ -107,7 +107,7 @@
         <!-- Revenue label above dot (always visible) -->
         @if (pt.revenue > 0) {
         <text [attr.x]="pt.x" [attr.y]="pt.y - 9" text-anchor="middle"
-              font-size="7.5" font-weight="700" fill="#db9648" font-family="inherit">
+              font-size="7.5" font-weight="700" fill="#00C4A7" font-family="inherit">
           {{ formatCLP(pt.revenue) }}
         </text>
         }
@@ -120,11 +120,11 @@
         @if (hoveredBar() === i) {
         <g>
           <rect [attr.x]="pt.x - 38" [attr.y]="pt.y - 46" width="76" height="34" rx="6"
-                fill="#0f172a" opacity=".92"/>
+                fill="#0D1B2A" opacity=".92"/>
           <polygon [attr.points]="pt.x + ',' + (pt.y - 8) + ' ' + (pt.x - 5) + ',' + (pt.y - 14) + ' ' + (pt.x + 5) + ',' + (pt.y - 14)"
-                   fill="#0f172a" opacity=".92"/>
+                   fill="#0D1B2A" opacity=".92"/>
           <text [attr.x]="pt.x" [attr.y]="pt.y - 33" text-anchor="middle"
-                font-size="8.5" font-weight="700" fill="#db9648" font-family="inherit">
+                font-size="8.5" font-weight="700" fill="#00C4A7" font-family="inherit">
             {{ pt.revenue > 0 ? formatCLP(pt.revenue) : 'Sin ingresos' }}
           </text>
           <text [attr.x]="pt.x" [attr.y]="pt.y - 21" text-anchor="middle"
@@ -150,7 +150,7 @@
           <tr>
             @for (pt of lineChartPoints(); track pt.month) {
             <td class="text-[9.5px] font-semibold px-0.5 pb-0.5"
-                [style.color]="pt.revenue > 0 ? '#db9648' : '#cbd5e1'">
+                [style.color]="pt.revenue > 0 ? '#00C4A7' : '#cbd5e1'">
               {{ pt.revenue > 0 ? formatCLP(pt.revenue) : '—' }}
             </td>
             }
@@ -177,17 +177,17 @@
       <div class="space-y-3.5">
         @for (svc of topServices(); track svc.name; let i = $index) {
         <div>
-          <div class="flex items-center justify-between mb-1">
+          <div class="flex-between mb-1">
             <span class="text-[12.5px] font-semibold text-slate-800 truncate max-w-[180px]">{{ svc.name }}</span>
             <div class="flex items-center gap-2 shrink-0 ml-2">
               <span class="text-[11px] text-slate-400">{{ svc.bookings }} citas</span>
-              <span class="text-[12px] font-bold" style="color:#db9648;">{{ formatCLP(svc.revenue) }}</span>
+              <span class="text-[12px] font-bold" style="color:#00C4A7;">{{ formatCLP(svc.revenue) }}</span>
             </div>
           </div>
           <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500"
               [style.width]="svc.pct + '%'"
-              [style.background]="i === 0 ? '#db9648' : i === 1 ? '#0f172a' : '#94a3b8'">
+              [style.background]="i === 0 ? '#00C4A7' : i === 1 ? '#0D1B2A' : '#94a3b8'">
             </div>
           </div>
         </div>
@@ -212,7 +212,7 @@
             [attr.stroke-dashoffset]="seg.dashOffset.toFixed(2)"
             transform="rotate(-90 56 56)"/>
           }
-          <text x="56" y="52" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a" font-family="inherit">
+          <text x="56" y="52" text-anchor="middle" font-size="18" font-weight="800" fill="#0D1B2A" font-family="inherit">
             {{ totalBookings12m() }}
           </text>
           <text x="56" y="66" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="inherit">citas</text>
@@ -240,20 +240,20 @@
     <div class="text-[11.5px] text-slate-400 mb-4">{{ clientSegments().total }} clientes en total</div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <!-- VIP -->
-      <div class="rounded-xl p-4 border flex flex-col" style="background:rgba(219,150,72,.05);border-color:rgba(219,150,72,.2);">
+      <div class="rounded-xl p-4 border flex flex-col" style="background:rgba(0,196,167,.05);border-color:rgba(0,196,167,.2);">
         <div class="flex items-center gap-2 mb-2">
           <span class="text-lg">👑</span>
           <span class="text-[12px] font-bold uppercase tracking-[.05em]" style="color:#b37a2e;">VIP</span>
         </div>
-        <div class="text-[2rem] font-black leading-none" style="color:#db9648;">{{ clientSegments().vip }}</div>
+        <div class="text-[2rem] font-black leading-none" style="color:#00C4A7;">{{ clientSegments().vip }}</div>
         <div class="text-[11.5px] mt-1 mb-3" style="color:#b37a2e;">10 o más citas</div>
         @if (clientSegments().vipNames.length > 0) {
         <div class="flex flex-col gap-1 mt-auto">
           @for (c of clientSegments().vipNames; track c.id) {
-          <div class="flex items-center justify-between">
+          <div class="flex-between">
             <span class="text-[12px] font-semibold text-slate-800 truncate">{{ c.name }}</span>
             <span class="text-[11px] font-bold shrink-0 ml-2 px-1.5 py-px rounded-full"
-                  style="background:rgba(219,150,72,.15);color:#b37a2e;">
+                  style="background:rgba(0,196,167,.15);color:#b37a2e;">
               {{ c.appointments.length }}
             </span>
           </div>
@@ -263,7 +263,7 @@
       </div>
 
       <!-- Fiel -->
-      <div class="rounded-xl p-4 border flex flex-col" style="background:rgba(15,23,42,.04);border-color:rgba(15,23,42,.12);">
+      <div class="rounded-xl p-4 border flex flex-col" style="background:rgba(13,27,42,.04);border-color:rgba(13,27,42,.12);">
         <div class="flex items-center gap-2 mb-2">
           <span class="text-lg">⭐</span>
           <span class="text-[12px] font-bold uppercase tracking-[.05em] text-slate-600">Fiel</span>
@@ -273,7 +273,7 @@
         @if (clientSegments().fielNames.length > 0) {
         <div class="flex flex-col gap-1 mt-auto">
           @for (c of clientSegments().fielNames; track c.id) {
-          <div class="flex items-center justify-between">
+          <div class="flex-between">
             <span class="text-[12px] font-semibold text-slate-700 truncate">{{ c.name }}</span>
             <span class="text-[11px] font-bold shrink-0 ml-2 px-1.5 py-px rounded-full bg-slate-100 text-slate-500">
               {{ c.appointments.length }}

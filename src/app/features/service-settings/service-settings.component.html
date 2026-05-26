@@ -1,16 +1,16 @@
-<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
+﻿<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
 
   <!-- Header -->
   <div>
-    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Configuración</h1>
-    <p class="text-[12.5px] text-ink-400 mt-0.5">Personaliza tu perfil público visible en el portal de reservas.</p>
+    <h1 class="text-[17px] font-extrabold text-primary tracking-tight">Configuración</h1>
+    <p class="text-[12.5px] text-primary-400 mt-0.5">Personaliza tu perfil público visible en el portal de reservas.</p>
   </div>
 
   <!-- Descripción del perfil público -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
+  <div class="dash-card">
     <div>
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -18,7 +18,7 @@
         </svg>
         Descripción del Perfil
       </h3>
-      <p class="text-[11.5px] text-ink-400 mt-1">
+      <p class="text-[11.5px] text-primary-400 mt-1">
         Este texto se mostrará en tu portal público de reservas. Describe tus servicios, experiencia o lo que desees comunicar a tus clientes.
       </p>
     </div>
@@ -27,17 +27,17 @@
       placeholder="Ej: Soy especialista en cortes modernos con más de 10 años de experiencia..."
       rows="4"
       maxlength="200"
-      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-ink-200 outline-none text-[13.5px] text-ink bg-white placeholder:text-ink-400 resize-none transition-colors focus:border-gold">
+      class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary bg-white placeholder:text-primary-400 resize-none transition-colors focus:border-accent">
     </textarea>
 
-    <div class="flex items-center justify-between">
+    <div class="flex-between">
       <span class="text-[11px]"
-            [class]="descriptionValue().length >= 200 ? 'text-red-500 font-semibold' : 'text-ink-400'">
+            [class]="descriptionValue().length >= 200 ? 'text-red-500 font-semibold' : 'text-primary-400'">
         {{ descriptionValue().length }} / 200 caracteres
       </span>
       <button (click)="saveDescription()" [disabled]="descSaving()"
         class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
         {{ descSaving() ? 'Guardando...' : 'Guardar Descripción' }}
       </button>
     </div>

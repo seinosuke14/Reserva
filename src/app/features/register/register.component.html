@@ -1,18 +1,14 @@
-<div class="min-h-screen flex items-center justify-center p-6 font-sans"
-  style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
+﻿<div class="min-h-screen flex-center p-6 font-sans"
+  style="background:linear-gradient(135deg,#0D1B2A 0%,#0D1B2A 60%,#111827 100%);">
 
   <div @fadeSlide class="w-full max-w-lg">
 
     <!-- Brand -->
-    <div class="flex items-center justify-center gap-3 mb-7">
-      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
-        style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
-        <img src="citema.webp" alt="citema" class="h-9 w-auto" />
+    <div class="flex flex-col items-center gap-2.5 mb-7">
+      <div class="rounded-[14px] px-5 py-2">
+        <img src="letsreserves.png" alt="Lets Reserve" class="h-12 w-auto" />
       </div>
-      <div class="leading-none">
-        <div class="text-[18px] font-extrabold tracking-tight text-white">CITEMA</div>
-        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
-      </div>
+      <span class="text-[10px] font-medium tracking-[.12em] text-white/40">PROFESSIONAL</span>
     </div>
 
     <!-- Card -->
@@ -21,23 +17,23 @@
       @if (step() === 'verify') {
       <!-- ── Paso 2: Verificación de correo ── -->
       <div @stepAnim class="text-center">
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center"
-          style="background:rgba(219,150,72,.12);">
-          <svg width="28" height="28" fill="none" stroke="#db9648" stroke-width="2" viewBox="0 0 24 24">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full flex-center"
+          style="background:rgba(0,196,167,.12);">
+          <svg width="28" height="28" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
           </svg>
         </div>
-        <h2 class="text-[19px] font-bold text-ink tracking-tight mb-1">Verifica tu correo</h2>
-        <p class="text-[12.5px] text-ink-400 mb-6">
+        <h2 class="text-[19px] font-bold text-primary tracking-tight mb-1">Verifica tu correo</h2>
+        <p class="text-[12.5px] text-primary-400 mb-6">
           Enviamos un código de 6 dígitos a<br>
-          <strong class="text-ink">{{ pendingEmail() }}</strong>
+          <strong class="text-primary">{{ pendingEmail() }}</strong>
         </p>
 
         <input type="text" inputmode="numeric" maxlength="6" placeholder="000000" [value]="verificationCode()"
           (input)="onCodeInput($event)"
-          class="w-44 mx-auto block text-center text-[28px] font-black tracking-[.3em] px-4 py-3 rounded-[12px] border-[2px] outline-none transition-colors text-ink"
-          [class.border-red-300]="verifyError()" [class.border-ink-200]="!verifyError()"
+          class="w-44 mx-auto block text-center text-[28px] font-black tracking-[.3em] px-4 py-3 rounded-[12px] border-[2px] outline-none transition-colors text-primary"
+          [class.border-red-300]="verifyError()" [class.border-primary-200]="!verifyError()"
           style="font-family:monospace;" />
 
         @if (verifyError()) {
@@ -45,8 +41,8 @@
         }
 
         <button (click)="onVerify()" [disabled]="isVerifying() || verificationCode().length < 6"
-          class="w-full mt-5 py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+          class="w-full mt-5 py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
           @if (isVerifying()) {
           <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
             viewBox="0 0 24 24">
@@ -70,7 +66,7 @@
           <p class="text-[12px] text-emerald-600 font-medium">{{ resendMsg() }}</p>
           }
           <button (click)="onResend()" [disabled]="isResending()"
-            class="text-[12px] text-ink-400 hover:text-gold transition-colors disabled:opacity-50">
+            class="text-[12px] text-primary-400 hover:text-accent transition-colors disabled:opacity-50">
             {{ isResending() ? 'Reenviando...' : '¿No llegó el código? Reenviar' }}
           </button>
         </div>
@@ -78,8 +74,8 @@
       } @else {
 
       <div class="mb-6">
-        <h1 class="text-[20px] font-bold text-ink tracking-tight">Registro Profesional</h1>
-        <p class="text-[13px] text-ink-400 mt-1">Crea tu cuenta para gestionar tu agenda.</p>
+        <h1 class="text-[20px] font-bold text-primary tracking-tight">Registro Profesional</h1>
+        <p class="text-[13px] text-primary-400 mt-1">Crea tu cuenta para gestionar tu agenda.</p>
       </div>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -87,40 +83,40 @@
         <!-- Nombre + Apellido -->
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Nombre</label>
+            <label class="form-hint">Nombre</label>
             <input formControlName="firstName" type="text" placeholder="Juan" maxlength="16"
-              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              class="form-input"
               [class.border-red-300]="f['firstName'].invalid && f['firstName'].touched"
-              [class.border-ink-200]="!(f['firstName'].invalid && f['firstName'].touched)"
-              [class.focus:border-gold]="!(f['firstName'].invalid && f['firstName'].touched)" />
+              [class.border-primary-200]="!(f['firstName'].invalid && f['firstName'].touched)"
+              [class.focus:border-accent]="!(f['firstName'].invalid && f['firstName'].touched)" />
             @if (f['firstName'].invalid && f['firstName'].touched) {
             @if (f['firstName'].errors?.['required']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Nombre requerido</p>
+            <p class="form-error">Nombre requerido</p>
             } @else if (f['firstName'].errors?.['minlength']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 2 caracteres</p>
+            <p class="form-error">Mínimo 2 caracteres</p>
             } @else if (f['firstName'].errors?.['maxlength']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Máximo 16 caracteres</p>
+            <p class="form-error">Máximo 16 caracteres</p>
             } @else if (f['firstName'].errors?.['pattern']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Solo letras, sin espacios</p>
+            <p class="form-error">Solo letras, sin espacios</p>
             }
             }
           </div>
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Apellido</label>
+            <label class="form-hint">Apellido</label>
             <input formControlName="lastName" type="text" placeholder="Pérez" maxlength="16"
-              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              class="form-input"
               [class.border-red-300]="f['lastName'].invalid && f['lastName'].touched"
-              [class.border-ink-200]="!(f['lastName'].invalid && f['lastName'].touched)"
-              [class.focus:border-gold]="!(f['lastName'].invalid && f['lastName'].touched)" />
+              [class.border-primary-200]="!(f['lastName'].invalid && f['lastName'].touched)"
+              [class.focus:border-accent]="!(f['lastName'].invalid && f['lastName'].touched)" />
             @if (f['lastName'].invalid && f['lastName'].touched) {
             @if (f['lastName'].errors?.['required']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Apellido requerido</p>
+            <p class="form-error">Apellido requerido</p>
             } @else if (f['lastName'].errors?.['minlength']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 2 caracteres</p>
+            <p class="form-error">Mínimo 2 caracteres</p>
             } @else if (f['lastName'].errors?.['maxlength']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Máximo 16 caracteres</p>
+            <p class="form-error">Máximo 16 caracteres</p>
             } @else if (f['lastName'].errors?.['pattern']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Solo letras, sin espacios</p>
+            <p class="form-error">Solo letras, sin espacios</p>
             }
             }
           </div>
@@ -128,18 +124,18 @@
 
         <!-- RUT -->
         <div class="space-y-1.5">
-          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">RUT</label>
+          <label class="form-hint">RUT</label>
           <input formControlName="rut" type="text" placeholder="12.345.678-9" maxlength="12"
             (input)="onRutInput($event)"
-            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            class="form-input"
             [class.border-red-300]="f['rut'].invalid && f['rut'].touched"
-            [class.border-ink-200]="!(f['rut'].invalid && f['rut'].touched)"
-            [class.focus:border-gold]="!(f['rut'].invalid && f['rut'].touched)" />
+            [class.border-primary-200]="!(f['rut'].invalid && f['rut'].touched)"
+            [class.focus:border-accent]="!(f['rut'].invalid && f['rut'].touched)" />
           @if (f['rut'].invalid && f['rut'].touched) {
           @if (f['rut'].errors?.['required']) {
-          <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT requerido</p>
+          <p class="form-error">RUT requerido</p>
           } @else if (f['rut'].errors?.['rutInvalid']) {
-          <p class="text-[11.5px] text-red-500 font-medium ml-0.5">RUT inválido (verifica formato y dígito verificador)
+          <p class="form-error">RUT inválido (verifica formato y dígito verificador)
           </p>
           }
           }
@@ -147,12 +143,12 @@
 
         <!-- Profesión -->
         <div class="space-y-1.5">
-          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Profesión</label>
+          <label class="form-hint">Profesión</label>
           <select formControlName="professionId"
-            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white appearance-none"
+            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-primary bg-white appearance-none"
             [class.border-red-300]="f['professionId'].invalid && f['professionId'].touched"
-            [class.border-ink-200]="!(f['professionId'].invalid && f['professionId'].touched)"
-            [class.focus:border-gold]="!(f['professionId'].invalid && f['professionId'].touched)">
+            [class.border-primary-200]="!(f['professionId'].invalid && f['professionId'].touched)"
+            [class.focus:border-accent]="!(f['professionId'].invalid && f['professionId'].touched)">
             <option value="" disabled>
               {{ professions().length ? 'Selecciona una profesión' : 'Cargando profesiones...' }}
             </option>
@@ -161,42 +157,42 @@
             }
           </select>
           @if (f['professionId'].invalid && f['professionId'].touched) {
-          <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Selecciona una profesión</p>
+          <p class="form-error">Selecciona una profesión</p>
           }
         </div>
 
         <!-- Email + Teléfono -->
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+            <label class="form-hint">Email</label>
             <input formControlName="email" type="email" placeholder="email@clinica.com" maxlength="254"
-              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              class="form-input"
               [class.border-red-300]="f['email'].invalid && f['email'].touched"
-              [class.border-ink-200]="!(f['email'].invalid && f['email'].touched)"
-              [class.focus:border-gold]="!(f['email'].invalid && f['email'].touched)" />
+              [class.border-primary-200]="!(f['email'].invalid && f['email'].touched)"
+              [class.focus:border-accent]="!(f['email'].invalid && f['email'].touched)" />
             @if (f['email'].invalid && f['email'].touched) {
             @if (f['email'].errors?.['required']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Email requerido</p>
+            <p class="form-error">Email requerido</p>
             } @else if (f['email'].errors?.['maxlength']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Máximo 254 caracteres</p>
+            <p class="form-error">Máximo 254 caracteres</p>
             } @else if (f['email'].errors?.['emailInvalid']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Formato inválido</p>
+            <p class="form-error">Formato inválido</p>
             }
             }
           </div>
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Teléfono</label>
+            <label class="form-hint">Teléfono</label>
             <input formControlName="phone" type="tel" placeholder="+56912345678" maxlength="12"
               (input)="onPhoneInput($event)"
-              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+              class="form-input"
               [class.border-red-300]="f['phone'].invalid && f['phone'].touched"
-              [class.border-ink-200]="!(f['phone'].invalid && f['phone'].touched)"
-              [class.focus:border-gold]="!(f['phone'].invalid && f['phone'].touched)" />
+              [class.border-primary-200]="!(f['phone'].invalid && f['phone'].touched)"
+              [class.focus:border-accent]="!(f['phone'].invalid && f['phone'].touched)" />
             @if (f['phone'].invalid && f['phone'].touched) {
             @if (f['phone'].errors?.['required']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Teléfono requerido</p>
+            <p class="form-error">Teléfono requerido</p>
             } @else if (f['phone'].errors?.['phoneInvalid']) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">+569 + 8 dígitos</p>
+            <p class="form-error">+569 + 8 dígitos</p>
             }
             }
           </div>
@@ -204,17 +200,17 @@
 
         <!-- Contraseña -->
         <div class="space-y-1.5">
-          <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Contraseña</label>
+          <label class="form-hint">Contraseña</label>
           <input formControlName="password" type="password" placeholder="••••••••" maxlength="16"
-            class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+            class="form-input"
             [class.border-red-300]="f['password'].invalid && f['password'].touched"
-            [class.border-ink-200]="!(f['password'].invalid && f['password'].touched)"
-            [class.focus:border-gold]="!(f['password'].invalid && f['password'].touched)" />
+            [class.border-primary-200]="!(f['password'].invalid && f['password'].touched)"
+            [class.focus:border-accent]="!(f['password'].invalid && f['password'].touched)" />
           @if (f['password'].invalid && f['password'].touched) {
           @if (f['password'].errors?.['required']) {
-          <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Contraseña requerida</p>
+          <p class="form-error">Contraseña requerida</p>
           } @else {
-          <ul class="text-[11.5px] text-red-500 font-medium ml-0.5 space-y-0.5">
+          <ul class="form-error space-y-0.5">
             @if (f['password'].errors?.['maxlength']) {
             <li>• Máximo 16 caracteres</li>
             }
@@ -230,22 +226,22 @@
           </ul>
           }
           } @else {
-          <p class="text-[10.5px] text-ink-400 ml-0.5">6–16 caracteres, 1 mayúscula y 1 número.</p>
+          <p class="text-[10.5px] text-primary-400 ml-0.5">6–16 caracteres, 1 mayúscula y 1 número.</p>
           }
         </div>
 
         <!-- Términos y condiciones -->
         <label class="flex items-start gap-2.5 cursor-pointer group">
           <input type="checkbox" [checked]="acceptedTerms()" (change)="acceptedTerms.set(!acceptedTerms())"
-            class="mt-[3px] w-4 h-4 shrink-0 accent-[#db9648] cursor-pointer" />
-          <span class="text-[12px] text-ink-500 leading-relaxed">
+            class="mt-[3px] w-4 h-4 shrink-0 accent-[#00C4A7] cursor-pointer" />
+          <span class="text-[12px] text-primary-500 leading-relaxed">
             He leído y acepto los
-            <a href="/terminos" target="_blank" class="font-semibold text-[#db9648] hover:underline">Términos y
+            <a href="/terminos" target="_blank" class="font-semibold text-[#00C4A7] hover:underline">Términos y
               Condiciones</a>
             y la
-            <a href="/privacidad" target="_blank" class="font-semibold text-[#db9648] hover:underline">Política de
+            <a href="/privacidad" target="_blank" class="font-semibold text-[#00C4A7] hover:underline">Política de
               Privacidad</a>
-            de Citema, incluyendo el tratamiento de mis datos personales conforme a la Ley N° 19.628.
+            de Lets Reserve, incluyendo el tratamiento de mis datos personales conforme a la Ley N° 19.628.
           </span>
         </label>
 
@@ -256,8 +252,8 @@
         }
 
         <button type="submit" [disabled]="isSubmitting() || !acceptedTerms()"
-          class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-          style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+          class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+          style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
           @if (isSubmitting()) {
           <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
             viewBox="0 0 24 24">
@@ -276,9 +272,9 @@
           }
         </button>
 
-        <p class="text-center text-[12.5px] text-ink-500">
+        <p class="text-center text-[12.5px] text-primary-500">
           ¿Ya tienes cuenta?
-          <a routerLink="/login" class="font-bold text-gold hover:underline ml-0.5">Iniciar sesión</a>
+          <a routerLink="/login" class="font-bold text-label hover:underline ml-0.5">Iniciar sesión</a>
         </p>
       </form>
       }

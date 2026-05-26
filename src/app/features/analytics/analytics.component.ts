@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+﻿import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -84,7 +84,7 @@ export class AnalyticsComponent implements OnInit {
   hoveredBar   = signal<number | null>(null);
 
   private readonly MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  private readonly DONUT_COLORS = ['#db9648','#0f172a','#64748b','#94a3b8','#cbd5e1'];
+  private readonly DONUT_COLORS = ['#00C4A7','#0D1B2A','#64748b','#94a3b8','#cbd5e1'];
 
   readonly monthlyData = computed<IMonthData[]>(() => {
     const apts  = this.appointments();

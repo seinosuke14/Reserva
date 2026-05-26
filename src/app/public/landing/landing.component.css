@@ -1,22 +1,22 @@
 /* ============================================================
-   CITEMA Landing — estilos globales compartidos
+   LETS RESERVE Landing — estilos globales compartidos
    ============================================================ */
 
 html { scroll-behavior: smooth; }
 
 /* Variables */
 :root {
-  --lp-blue-500: #3b82f6;
-  --lp-blue-600: #2563eb;
-  --lp-blue-700: #1d4ed8;
-  --lp-gold: #db9648;
-  --lp-gold-soft: #fdf7ee;
-  --lp-ink: #0f172a;
-  --lp-ink-soft: #1c2233;
-  --lp-canvas: #f8fafc;
+  --lp-blue-500: #2BB8A6;
+  --lp-blue-600: $accent-hover;
+  --lp-blue-700: #008c75;
+  --lp-gold: #E8943A;
+  --lp-gold-soft: #fef4e8;
+  --lp-ink: #0D1B2A;
+  --lp-ink-soft: #1d2e47;
+  --lp-canvas: #F8FAFC;
   --lp-gray-medium: #6b7280;
   --lp-gray-dark: #374151;
-  --lp-border: #e5e7eb;
+  --lp-border: #e2e8f0;
   --lp-border-soft: #eef0f3;
   --lp-success: #10b981;
   --lp-warning: #f59e0b;
@@ -48,7 +48,7 @@ app-landing .top {
     radial-gradient(ellipse 1100px 600px at 12% 0%, rgba(45,212,191,.18) 0%, rgba(45,212,191,0) 60%),
     radial-gradient(ellipse 900px 700px at 95% 30%, rgba(99,102,241,.22) 0%, rgba(99,102,241,0) 60%),
     radial-gradient(ellipse 1200px 800px at 50% 100%, rgba(59,130,246,.10) 0%, rgba(59,130,246,0) 60%),
-    linear-gradient(180deg, #0b1224 0%, #0f172a 60%, #0f172a 100%);
+    linear-gradient(180deg, #0b1224 0%, #0D1B2A 60%, #0D1B2A 100%);
   color: #f1f5f9;
 }
 app-landing .top::before {
@@ -63,14 +63,7 @@ app-landing .top::before {
 /* ---- Brand (compartido nav + footer) ---- */
 app-landing .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; font-size: 19px; color: white; }
 app-landing .brand-mark {
-  width: 28px; height: 28px; border-radius: 8px; background: white;
-  display: grid; place-items: center; color: var(--lp-ink); font-weight: 800;
-  position: relative;
-  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 6px 14px -8px rgba(0,0,0,.5);
-}
-app-landing .brand-mark::after {
-  content: ""; position: absolute; right: -3px; top: -3px;
-  width: 10px; height: 10px; border-radius: 50%; background: #2dd4bf; border: 2px solid #0f172a;
+  height: 64px; width: auto; display: block; object-fit: contain;
 }
 
 /* ---- Buttons ---- */

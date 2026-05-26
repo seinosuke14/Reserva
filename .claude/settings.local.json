@@ -26,7 +26,9 @@
       "Bash(Sort-Object)",
       "Bash(xargs grep -l \"export interface.*Professional\\\\|export interface.*Booking\\\\|export interface.*Appointment\")",
       "Bash(Get-ChildItem \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\\\\public-booking-portal\" -Recurse)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(sed 's/^[[:space:]]*//')",
+      "Bash(powershell -Command ' *)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

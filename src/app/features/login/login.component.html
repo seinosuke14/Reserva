@@ -1,18 +1,14 @@
-<div class="min-h-screen flex items-center justify-center p-6 font-sans"
-  style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
+﻿<div class="min-h-screen flex-center p-6 font-sans"
+  style="background:linear-gradient(135deg,#0D1B2A 0%,#0D1B2A 60%,#111827 100%);">
 
   <div @fadeSlide class="w-full max-w-md">
 
     <!-- Brand -->
-    <div class="flex items-center justify-center gap-3 mb-7">
-      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
-        style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
-        <img src="citema.webp" alt="citema" class="h-9 w-auto" />
+    <div class="flex flex-col items-center gap-2.5 mb-7">
+      <div class="rounded-[14px] px-5 py-2">
+        <img src="letsreserves.png" alt="Lets Reserve" class="h-12 w-auto" />
       </div>
-      <div class="leading-none">
-        <div class="text-[18px] font-extrabold tracking-tight text-white">CITEMA</div>
-        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
-      </div>
+      <span class="text-[10px] font-medium tracking-[.12em] text-white/40">PROFESSIONAL</span>
     </div>
 
     <!-- Card -->
@@ -21,18 +17,18 @@
       <!-- ── Recuperación enviada ── -->
       @if (step() === 'forgot-sent') {
       <div @stepAnim class="text-center py-4">
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-50 text-emerald-500 flex-center">
           <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
         </div>
-        <h2 class="text-[19px] font-bold text-ink tracking-tight mb-1">Revisa tu correo</h2>
-        <p class="text-[12.5px] text-ink-400 mb-6 leading-relaxed">
+        <h2 class="text-[19px] font-bold text-primary tracking-tight mb-1">Revisa tu correo</h2>
+        <p class="text-[12.5px] text-primary-400 mb-6 leading-relaxed">
           Si el correo está registrado, recibirás una contraseña temporal.<br>
           Úsala para ingresar y cámbiala desde Configuración.
         </p>
         <button (click)="step.set('login')"
-          class="text-[13px] font-bold text-gold hover:underline">
+          class="text-[13px] font-bold text-label hover:underline">
           Volver al inicio de sesión
         </button>
       </div>
@@ -40,40 +36,40 @@
       <!-- ── Olvidé mi contraseña ── -->
       } @else if (step() === 'forgot') {
       <div @stepAnim>
-        <button (click)="step.set('login')" class="flex items-center gap-1.5 text-[12px] text-ink-400 hover:text-ink mb-5 transition-colors">
+        <button (click)="step.set('login')" class="flex items-center gap-1.5 text-[12px] text-primary-400 hover:text-primary mb-5 transition-colors">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
           </svg>
           Volver
         </button>
-        <h1 class="text-[20px] font-bold text-ink tracking-tight mb-1">Recuperar contraseña</h1>
-        <p class="text-[12.5px] text-ink-400 mb-6">
+        <h1 class="text-[20px] font-bold text-primary tracking-tight mb-1">Recuperar contraseña</h1>
+        <p class="text-[12.5px] text-primary-400 mb-6">
           Ingresa tu correo y te enviaremos una contraseña temporal.
         </p>
 
         <div class="space-y-4">
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+            <label class="form-hint">Email</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15" fill="none"
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" width="15" height="15" fill="none"
                 stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
               <input type="email" [value]="forgotEmail()" (input)="onForgotEmailInput($event)"
                 placeholder="ejemplo@clinica.com"
-                class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                class="form-input-icon"
                 [class.border-red-300]="forgotError()"
-                [class.border-ink-200]="!forgotError()" />
+                [class.border-primary-200]="!forgotError()" />
             </div>
             @if (forgotError()) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">{{ forgotError() }}</p>
+            <p class="form-error">{{ forgotError() }}</p>
             }
           </div>
 
           <button (click)="onForgotSubmit()" [disabled]="isForgotSending()"
-            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-            style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
             @if (isForgotSending()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -93,28 +89,28 @@
       } @else {
       <div>
         <div class="mb-6">
-          <h1 class="text-[20px] font-bold text-ink tracking-tight">Bienvenido de vuelta</h1>
-          <p class="text-[13px] text-ink-400 mt-1">
+          <h1 class="text-[20px] font-bold text-primary tracking-tight">Bienvenido de vuelta</h1>
+          <p class="text-[13px] text-primary-400 mt-1">
             {{ accountType() === 'company' ? 'Ingresa a tu panel de empresa.' : 'Ingresa a tu panel de gestión profesional.' }}
           </p>
         </div>
 
         <!-- Selector tipo de cuenta -->
-        <div class="flex rounded-[12px] bg-ink-50 p-1 mb-6 gap-1">
+        <div class="flex rounded-[12px] bg-primary-50 p-1 mb-6 gap-1">
           <button type="button" (click)="setAccountType('professional')"
             class="flex-1 py-2 text-[12.5px] font-bold rounded-[9px] transition-all"
             [class.bg-white]="accountType() === 'professional'"
-            [class.text-ink]="accountType() === 'professional'"
+            [class.text-primary]="accountType() === 'professional'"
             [class.shadow-sm]="accountType() === 'professional'"
-            [class.text-ink-400]="accountType() !== 'professional'">
+            [class.text-primary-400]="accountType() !== 'professional'">
             Profesional
           </button>
           <button type="button" (click)="setAccountType('company')"
             class="flex-1 py-2 text-[12.5px] font-bold rounded-[9px] transition-all"
             [class.bg-white]="accountType() === 'company'"
-            [class.text-ink]="accountType() === 'company'"
+            [class.text-primary]="accountType() === 'company'"
             [class.shadow-sm]="accountType() === 'company'"
-            [class.text-ink-400]="accountType() !== 'company'">
+            [class.text-primary-400]="accountType() !== 'company'">
             Empresa
           </button>
         </div>
@@ -123,45 +119,45 @@
 
           <!-- Email -->
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+            <label class="form-hint">Email</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15" fill="none"
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" width="15" height="15" fill="none"
                 stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
               </svg>
               <input formControlName="email" type="email" placeholder="ejemplo@clinica.com"
-                class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                class="form-input-icon"
                 [class.border-red-300]="(email.invalid && email.touched) || error()"
-                [class.border-ink-200]="!((email.invalid && email.touched) || error())"
-                [class.focus:border-gold]="!((email.invalid && email.touched) || error())" />
+                [class.border-primary-200]="!((email.invalid && email.touched) || error())"
+                [class.focus:border-accent]="!((email.invalid && email.touched) || error())" />
             </div>
             @if (email.invalid && email.touched) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Email inválido</p>
+            <p class="form-error">Email inválido</p>
             }
           </div>
 
           <!-- Password -->
           <div class="space-y-1.5">
             <div class="flex justify-between items-center ml-0.5">
-              <label class="text-[11.5px] font-semibold text-ink-600">Contraseña</label>
+              <label class="text-[11.5px] font-semibold text-primary-600">Contraseña</label>
               <button type="button" (click)="showForgot()"
-                class="text-[10.5px] font-semibold text-gold hover:underline">¿Olvidaste tu contraseña?</button>
+                class="text-[10.5px] font-semibold text-label hover:underline">¿Olvidaste tu contraseña?</button>
             </div>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15" fill="none"
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" width="15" height="15" fill="none"
                 stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <input formControlName="password" type="password" placeholder="••••••••"
-                class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                class="form-input-icon"
                 [class.border-red-300]="(password.invalid && password.touched) || error()"
-                [class.border-ink-200]="!((password.invalid && password.touched) || error())"
-                [class.focus:border-gold]="!((password.invalid && password.touched) || error())" />
+                [class.border-primary-200]="!((password.invalid && password.touched) || error())"
+                [class.focus:border-accent]="!((password.invalid && password.touched) || error())" />
             </div>
             @if (password.invalid && password.touched) {
-            <p class="text-[11.5px] text-red-500 font-medium ml-0.5">Mínimo 6 caracteres</p>
+            <p class="form-error">Mínimo 6 caracteres</p>
             }
           </div>
 
@@ -183,7 +179,7 @@
                 {{ accountType() === 'company' ? '¿Aún no tienes cuenta empresa?' : '¿Aún no tienes una cuenta profesional?' }}
               </p>
               <a [routerLink]="accountType() === 'company' ? '/registro-empresa' : '/registro'"
-                class="inline-flex items-center gap-1 text-[12.5px] font-bold text-gold hover:gap-2 transition-all">
+                class="inline-flex items-center gap-1 text-[12.5px] font-bold text-label hover:gap-2 transition-all">
                 Regístrate aquí ahora →
               </a>
             </div>
@@ -197,8 +193,8 @@
           }
 
           <button type="submit" [disabled]="isSubmitting()"
-            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-            style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
             @if (isSubmitting()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
               viewBox="0 0 24 24">
@@ -219,14 +215,14 @@
         </form>
 
         <div class="mt-5 text-center">
-          <p class="text-[12.5px] text-ink-500">
+          <p class="text-[12.5px] text-primary-500">
             {{ accountType() === 'company' ? '¿Aún no tienes cuenta empresa?' : '¿Aún no tienes cuenta profesional?' }}
             <a [routerLink]="accountType() === 'company' ? '/registro-empresa' : '/registro'"
-              class="font-bold text-gold hover:underline ml-0.5">Crear cuenta</a>
+              class="font-bold text-label hover:underline ml-0.5">Crear cuenta</a>
           </p>
         </div>
 
-        <div class="mt-6 pt-5 border-t border-ink-100 flex items-center justify-center gap-1.5 text-ink-400">
+        <div class="mt-6 pt-5 border-t border-primary-100 flex-center gap-1.5 text-primary-400">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             <polyline points="9 12 11 14 15 10" />

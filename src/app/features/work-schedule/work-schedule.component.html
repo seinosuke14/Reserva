@@ -1,15 +1,15 @@
-<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
+﻿<div class="flex flex-col gap-[18px] animate-fade-up max-w-2xl">
 
   <!-- Header -->
   <div>
-    <h1 class="text-[17px] font-extrabold text-ink tracking-tight">Configuración de Horario</h1>
-    <p class="text-[12.5px] text-ink-400 mt-0.5">
+    <h1 class="text-[17px] font-extrabold text-primary tracking-tight">Configuración de Horario</h1>
+    <p class="text-[12.5px] text-primary-400 mt-0.5">
       Define tu disponibilidad semanal. Los clientes solo podrán reservar en los días y rangos horarios que configures aquí.
     </p>
   </div>
 
   @if (isLoading()) {
-    <div class="flex items-center justify-center py-20 text-[13px] text-ink-400">
+    <div class="flex-center py-20 text-[13px] text-primary-400">
       <span class="inline-flex items-center gap-2">
         <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -23,9 +23,9 @@
   } @else {
 
     <!-- Slot duration -->
-    <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-3">
-      <h3 class="text-[12px] font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#db9648" stroke-width="1.75" viewBox="0 0 24 24">
+    <div class="dash-card">
+      <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         Duración de cada cita
@@ -34,33 +34,33 @@
         @for (dur of durations; track dur) {
           <button (click)="setSlotDuration(dur)"
             class="px-4 py-2 rounded-[9px] text-[12.5px] font-bold transition-all border"
-            [style.background]="slotDuration() === dur ? '#db9648' : ''"
+            [style.background]="slotDuration() === dur ? '#00C4A7' : ''"
             [style.color]="slotDuration() === dur ? '#fff' : ''"
-            [style.borderColor]="slotDuration() === dur ? '#db9648' : ''"
-            [style.boxShadow]="slotDuration() === dur ? '0 2px 8px rgba(219,150,72,.35)' : ''"
-            [class.border-ink-200]="slotDuration() !== dur"
-            [class.text-ink-500]="slotDuration() !== dur"
-            [class.hover:border-gold]="slotDuration() !== dur">
+            [style.borderColor]="slotDuration() === dur ? '#00C4A7' : ''"
+            [style.boxShadow]="slotDuration() === dur ? '0 2px 8px rgba(0,196,167,.35)' : ''"
+            [class.border-primary-200]="slotDuration() !== dur"
+            [class.text-primary-500]="slotDuration() !== dur"
+            [class.hover:border-accent]="slotDuration() !== dur">
             {{ dur }} min
           </button>
         }
       </div>
-      <p class="text-[11.5px] text-ink-400">
-        Cada cita ocupa <strong class="text-ink">{{ slotDuration() }} minutos</strong>.
+      <p class="text-[11.5px] text-primary-400">
+        Cada cita ocupa <strong class="text-primary">{{ slotDuration() }} minutos</strong>.
         Esto genera los bloques de tiempo disponibles dentro de tu horario de atención.
       </p>
     </div>
 
     <!-- Days of week -->
     <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card overflow-hidden">
-      <div class="divide-y divide-ink-100/60">
+      <div class="divide-y divide-primary-100/60">
         @for (day of days; track day.dayOfWeek) {
           <div class="flex items-center gap-4 px-5 py-3.5 transition-all"
                [style.background]="!day.isWorking ? 'rgba(248,250,252,.5)' : ''">
 
             <!-- Day name -->
             <div class="w-24 shrink-0 flex items-center gap-1.5">
-              <span class="text-[13px] font-bold text-ink">{{ dayLabels[day.dayOfWeek] }}</span>
+              <span class="text-[13px] font-bold text-primary">{{ dayLabels[day.dayOfWeek] }}</span>
               @if (day.dayOfWeek >= 5) {
                 <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-px rounded"
                       style="background:rgba(245,158,11,.1);color:#d97706;">Fin</span>
@@ -72,8 +72,8 @@
               <input type="checkbox" class="sr-only peer"
                 [(ngModel)]="day.isWorking"
                 (ngModelChange)="onToggle(day)">
-              <div class="w-10 h-[22px] bg-ink-200 rounded-full peer
-                          peer-checked:bg-gold
+              <div class="w-10 h-[22px] bg-primary-200 rounded-full peer
+                          peer-checked:bg-label
                           after:content-[''] after:absolute after:top-[2px] after:left-[2px]
                           after:bg-white after:rounded-full after:h-[18px] after:w-[18px]
                           after:transition-all peer-checked:after:translate-x-[18px]
@@ -85,21 +85,21 @@
             @if (day.isWorking) {
               <div class="flex items-end gap-2 flex-1 flex-wrap">
                 <div class="flex flex-col gap-0.5">
-                  <label class="text-[10px] text-ink-400 font-bold uppercase tracking-wider">Desde</label>
+                  <label class="text-[10px] text-primary-400 font-bold uppercase tracking-wider">Desde</label>
                   <input type="time" [(ngModel)]="day.startTime"
-                    class="border-[1.5px] border-ink-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-ink
-                           focus:outline-none focus:border-gold transition-all w-30" />
+                    class="border-[1.5px] border-primary-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-primary
+                           focus:outline-none focus:border-accent transition-all w-30" />
                 </div>
-                <span class="text-ink-300 font-bold pb-1.5 text-base">—</span>
+                <span class="text-primary-300 font-bold pb-1.5 text-base">—</span>
                 <div class="flex flex-col gap-0.5">
-                  <label class="text-[10px] text-ink-400 font-bold uppercase tracking-wider">Hasta</label>
+                  <label class="text-[10px] text-primary-400 font-bold uppercase tracking-wider">Hasta</label>
                   <input type="time" [(ngModel)]="day.endTime"
-                    class="border-[1.5px] border-ink-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-ink
-                           focus:outline-none focus:border-gold transition-all w-30" />
+                    class="border-[1.5px] border-primary-200 rounded-[9px] px-3 py-1.5 text-[13px] font-medium text-primary
+                           focus:outline-none focus:border-accent transition-all w-30" />
                 </div>
               </div>
             } @else {
-              <span class="text-[12.5px] text-ink-400 italic">No laborable</span>
+              <span class="text-[12.5px] text-primary-400 italic">No laborable</span>
             }
 
           </div>
@@ -108,7 +108,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="flex items-center justify-between">
+    <div class="flex-between">
       <div class="h-7">
         @if (savedOk()) {
           <span @fadeSlide class="flex items-center gap-1.5 text-emerald-600 text-[12.5px] font-bold">
@@ -122,7 +122,7 @@
 
       <button (click)="saveSchedule()" [disabled]="isSaving()"
         class="inline-flex items-center gap-2 px-5 py-[9px] rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-        style="background:#db9648;box-shadow:0 3px 12px rgba(219,150,72,.38);">
+        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
         @if (isSaving()) {
           <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>

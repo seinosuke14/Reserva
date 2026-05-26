@@ -1,4 +1,4 @@
-<div class="flex h-screen bg-canvas overflow-hidden font-sans">
+﻿<div class="flex h-screen bg-background overflow-hidden font-sans">
 
   <!-- Mobile backdrop -->
   @if (isMobile() && isSidebarOpen()) {
@@ -10,32 +10,29 @@
     class="text-white flex flex-col z-40 shrink-0 transition-[width,min-width] duration-300 ease-out overflow-hidden relative"
     [class.fixed]="isMobile()" [class.h-full]="isMobile()" [class.relative]="!isMobile()" [style.width]="isMobile()
       ? (isSidebarOpen() ? '232px' : '0px')
-      : (isSidebarOpen() ? '232px' : '64px')" style="background:linear-gradient(180deg,#0d1526 0%,#0f172a 60%,#111827 100%);
+      : (isSidebarOpen() ? '232px' : '64px')" style="background:linear-gradient(180deg,#0D1B2A 0%,#0D1B2A 60%,#111827 100%);
            border-right:1px solid rgba(255,255,255,.055);
            box-shadow:4px 0 32px rgba(0,0,0,.35);">
 
     <!-- Brand -->
     <div class="flex items-center gap-2.5 border-b border-white/[.055] shrink-0"
-      [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '20px 16px 18px' : '18px 0'">
-      <div
-        class="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden bg-white/95"
-        style="box-shadow:0 4px 14px rgba(219,150,72,.45);">
-        <img src="citema.webp" alt="citema" class="h-7 w-auto" />
-      </div>
+      [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '10px 16px 10px' : '18px 0'">
       @if (isSidebarOpen()) {
-      <div @sidebarLabel class="leading-none">
-        <div class="text-[14px] font-extrabold tracking-tight text-white">CITEMA</div>
-        <div class="text-[9.5px] font-medium tracking-[.1em] text-white/35 mt-[2px]">PROFESSIONAL</div>
+      <div @sidebarLabel class="rounded-[10px] px-3 py-1.5 flex-1 min-w-0">
+        <img src="letsreserves.png" alt="Lets Reserve" class="h-12 w-auto block" />
       </div>
       <button @sidebarLabel (click)="toggleSidebar()"
-        class="ml-auto w-6 h-6 rounded-[7px] border border-white/10 bg-white/[.06] hover:bg-white/[.12] flex items-center justify-center text-white/40 hover:text-white/80 shrink-0 transition-colors">
+        class="ml-auto w-6 h-6 rounded-[7px] border border-white/10 bg-white/[.06] hover:bg-white/[.12] flex-center text-white/40 hover:text-white/80 shrink-0 transition-colors">
         <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
       } @else {
+      <div class="w-[44px] h-[44px] flex-center">
+        <img src="IconoLetsReserve.png" alt="Lets Reserve" class="h-[44px] w-[44px] object-contain block" />
+      </div>
       <button (click)="toggleSidebar()"
-        class="absolute -right-px top-[19px] w-[18px] h-[18px] rounded-r-md border border-white/10 flex items-center justify-center text-white/50 hover:text-white"
+        class="absolute -right-px top-[19px] w-[18px] h-[18px] rounded-r-md border border-white/10 flex-center text-white/50 hover:text-white"
         style="background:#1e293b;">
         <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M9 18l6-6-6-6" />
@@ -61,16 +58,16 @@
         class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
         [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(item.path)
-               ? 'linear-gradient(90deg,rgba(219,150,72,.13),rgba(219,150,72,.05))'
-               : ''" [style.color]="isActive(item.path) ? '#db9648' : 'rgba(255,255,255,.4)'"
+               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
+               : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
         [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
 
         @if (isActive(item.path)) {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#db9648;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
         }
 
         <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
-          [style.color]="isActive(item.path) ? '#db9648' : 'rgba(255,255,255,.55)'">
+          [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
           <ng-container [ngSwitch]="item.icon">
             <svg *ngSwitchCase="'dashboard'" width="17" height="17" fill="none" stroke="currentColor"
               stroke-width="1.75" viewBox="0 0 24 24">
@@ -146,7 +143,7 @@
         </span>
         @if (item.badge) {
         <span @sidebarLabel class="text-[9.5px] font-bold px-[6px] py-px rounded-full text-white tracking-wider"
-          style="background:#db9648;">
+          style="background:#00C4A7;">
           {{ item.badge }}
         </span>
         }
@@ -164,12 +161,12 @@
         @if (user()?.profileImage) {
           <img [src]="user()!.profileImage!" alt="Perfil"
             class="w-[30px] h-[30px] rounded-full object-cover shrink-0"
-            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
         } @else {
           <div
-            class="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[10px] font-bold tracking-tight shrink-0"
-            style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                      box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+            class="w-[30px] h-[30px] rounded-full flex-center text-white text-[10px] font-bold tracking-tight shrink-0"
+            style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                      box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
             {{ userInitials() }}
           </div>
         }
@@ -204,11 +201,11 @@
 
     <!-- Topbar -->
     <header
-      class="h-[58px] bg-white/[.98] backdrop-blur-md border-b border-black/[.07] flex items-center justify-between px-4 md:px-7 shrink-0 z-20">
+      class="h-[58px] bg-white/[.98] backdrop-blur-md border-b border-black/[.07] flex-between px-4 md:px-7 shrink-0 z-20">
       <div class="flex items-center gap-2.5 min-w-0">
         @if (isMobile() && !isSidebarOpen()) {
         <button (click)="toggleSidebar()"
-          class="w-8 h-8 rounded-[9px] border border-black/[.08] bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-600 shrink-0 transition-colors">
+          class="w-8 h-8 rounded-[9px] border border-black/[.08] bg-primary-50 hover:bg-primary-100 flex-center text-primary-600 shrink-0 transition-colors">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -217,10 +214,10 @@
         </button>
         }
         <div class="min-w-0">
-          <h1 class="text-[16.5px] font-bold text-ink tracking-tight leading-none truncate">{{ currentPage().title }}
+          <h1 class="text-[16.5px] font-bold text-primary tracking-tight leading-none truncate">{{ currentPage().title }}
           </h1>
           @if (currentPage().sub) {
-          <p class="text-[11.5px] text-ink-400 mt-0.5 truncate">{{ currentPage().sub }}</p>
+          <p class="text-[11.5px] text-primary-400 mt-0.5 truncate">{{ currentPage().sub }}</p>
           }
         </div>
       </div>
@@ -228,9 +225,9 @@
       <div class="flex items-center gap-1.5">
         <!-- Bell -->
         <button (click)="isNotificationsOpen.set(true)"
-          class="relative w-[34px] h-[34px] rounded-[10px] border border-black/[.08] bg-ink-50 hover:bg-ink-100 flex items-center justify-center transition-colors">
+          class="relative w-[34px] h-[34px] rounded-[10px] border border-black/[.08] bg-primary-50 hover:bg-primary-100 flex-center transition-colors">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"
-            class="text-ink-600">
+            class="text-primary-600">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
@@ -245,11 +242,11 @@
           @if (user()?.profileImage) {
             <img [src]="user()!.profileImage!" alt="Perfil"
               class="w-[34px] h-[34px] rounded-full object-cover"
-              style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+              style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
           } @else {
-            <div class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-[11px] font-bold tracking-tight cursor-pointer"
-              style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                        box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(219,150,72,.4);">
+            <div class="w-[34px] h-[34px] rounded-full flex-center text-white text-[11px] font-bold tracking-tight cursor-pointer"
+              style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                        box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
               {{ userInitials() }}
             </div>
           }
@@ -260,8 +257,8 @@
     <!-- Banner suscripción -->
     @if (subscriptionBanner(); as banner) {
       @if (banner.type === 'free') {
-        <div class="shrink-0 flex items-center justify-between gap-3 px-4 md:px-7 py-2 text-[12.5px] font-medium"
-          style="background:linear-gradient(90deg,#0d1526,#1e3a5f);border-bottom:1px solid rgba(255,255,255,.08);">
+        <div class="shrink-0 flex-between gap-3 px-4 md:px-7 py-2 text-[12.5px] font-medium"
+          style="background:linear-gradient(90deg,#0D1B2A,#1e3a5f);border-bottom:1px solid rgba(255,255,255,.08);">
           <div class="flex items-center gap-2 text-white/75">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 text-amber-400">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -273,7 +270,7 @@
           </a>
         </div>
       } @else {
-        <div class="shrink-0 flex items-center justify-between gap-3 px-4 md:px-7 py-2 text-[12.5px] font-medium"
+        <div class="shrink-0 flex-between gap-3 px-4 md:px-7 py-2 text-[12.5px] font-medium"
           style="background:linear-gradient(90deg,#3b0a0a,#5f1a1a);border-bottom:1px solid rgba(255,255,255,.08);">
           <div class="flex items-center gap-2 text-white/75">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 text-red-400">
@@ -289,7 +286,7 @@
     }
 
     <!-- Content -->
-    <main [class]="isFullHeightRoute() ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto bg-canvas'">
+    <main [class]="isFullHeightRoute() ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto bg-background'">
       <div [class]="isFullHeightRoute() ? 'h-full' : 'max-w-7xl mx-auto p-4 md:p-6 min-h-full'">
         <router-outlet />
       </div>

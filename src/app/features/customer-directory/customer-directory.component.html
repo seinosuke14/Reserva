@@ -1,30 +1,30 @@
-<div class="flex h-full overflow-hidden" style="background:#f8fafc;">
+﻿<div class="flex h-full overflow-hidden" style="background:#f8fafc;">
 
   <!-- ── Main table area ──────────────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Toolbar -->
-    <div class="bg-white border-b border-ink-100 px-5 py-2.5 flex items-center gap-2.5 shrink-0 flex-wrap">
+    <div class="bg-white border-b border-primary-100 px-5 py-2.5 flex items-center gap-2.5 shrink-0 flex-wrap">
 
       <!-- Search -->
       <div class="relative w-full sm:w-[260px]">
-        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400" width="13" height="13" fill="none"
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400" width="13" height="13" fill="none"
           stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" />
         </svg>
         <input type="text" placeholder="Buscar cliente..." [ngModel]="searchTerm()"
           (ngModelChange)="searchTerm.set($event)"
-          class="w-full pl-8 pr-3 py-1.5 bg-white border-[1.5px] border-ink-200 rounded-[9px] outline-none focus:border-gold transition-colors text-[13px] text-ink placeholder:text-ink-400" />
+          class="w-full pl-8 pr-3 py-1.5 bg-white border-[1.5px] border-primary-200 rounded-[9px] outline-none focus:border-accent transition-colors text-[13px] text-primary placeholder:text-primary-400" />
       </div>
 
       <!-- Status filter tabs -->
-      <div class="flex gap-0.5 bg-ink-100 rounded-[9px] p-[3px]">
+      <div class="flex gap-0.5 bg-primary-100 rounded-[9px] p-[3px]">
         @for (tab of [['todos','Todos'],['paid','Al día'],['debt','Con deuda']]; track tab[0]) {
         <button (click)="statusFilter.set($any(tab[0]))"
           class="px-3 py-1 rounded-[7px] text-[12px] font-medium transition-all"
-          [class.bg-white]="statusFilter() === tab[0]" [class.text-ink]="statusFilter() === tab[0]"
-          [class.shadow-sm]="statusFilter() === tab[0]" [class.text-ink-400]="statusFilter() !== tab[0]">
+          [class.bg-white]="statusFilter() === tab[0]" [class.text-primary]="statusFilter() === tab[0]"
+          [class.shadow-sm]="statusFilter() === tab[0]" [class.text-primary-400]="statusFilter() !== tab[0]">
           {{ tab[1] }}
         </button>
         }
@@ -32,13 +32,13 @@
 
       <!-- Sort -->
       <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($any($event))"
-        class="py-1.5 px-2.5 rounded-[9px] border border-ink-200 bg-white text-[12.5px] text-ink-600 outline-none focus:border-gold transition-colors">
+        class="py-1.5 px-2.5 rounded-[9px] border border-primary-200 bg-white text-[12.5px] text-primary-600 outline-none focus:border-accent transition-colors">
         <option value="name">Nombre A–Z</option>
         <option value="sessions">Más sesiones</option>
         <option value="debt">Mayor deuda</option>
       </select>
 
-      <div class="ml-auto text-[11.5px] text-ink-400">
+      <div class="ml-auto text-[11.5px] text-primary-400">
         {{ filteredCustomers().length }} cliente{{ filteredCustomers().length !== 1 ? 's' : '' }}
       </div>
     </div>
@@ -57,7 +57,7 @@
           <tr style="background:#f8fafc;">
             @for (h of ['Cliente','Citas','Total pagado','Última visita','Estado']; track h) {
             <th
-              class="px-5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.06em] text-ink-400 border-b border-ink-100">
+              class="px-5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.06em] text-primary-400 border-b border-primary-100">
               {{ h }}
             </th>
             }
@@ -66,7 +66,7 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="5" class="px-5 py-16 text-center text-[13px] text-ink-400">
+            <td colspan="5" class="px-5 py-16 text-center text-[13px] text-primary-400">
               <span class="inline-flex items-center gap-2">
                 <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
                   viewBox="0 0 24 24">
@@ -86,38 +86,38 @@
           }
 
           @for (c of filteredCustomers(); track c.id; let i = $index) {
-          <tr class="cursor-pointer border-b border-ink-50 transition-colors hover:brightness-[.98]"
-            [style.background]="selectedCustomer()?.id === c.id ? 'rgba(219,150,72,.06)' : '#fff'"
+          <tr class="cursor-pointer border-b border-primary-50 transition-colors hover:brightness-[.98]"
+            [style.background]="selectedCustomer()?.id === c.id ? 'rgba(0,196,167,.06)' : '#fff'"
             (click)="openCustomer(c)">
 
             <!-- Cliente -->
             <td class="px-5 py-3">
               <div class="flex items-center gap-2.5">
                 <div
-                  class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0"
-                  style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+                  class="w-[34px] h-[34px] rounded-full flex-center text-white text-[11px] font-bold shrink-0"
+                  style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
                   {{ c.name.charAt(0).toUpperCase() }}
                 </div>
                 <div>
-                  <div class="text-[13.5px] font-semibold text-ink">{{ c.name }}</div>
-                  <div class="text-[11.5px] text-ink-400">{{ c.email }}</div>
+                  <div class="text-[13.5px] font-semibold text-primary">{{ c.name }}</div>
+                  <div class="text-[11.5px] text-primary-400">{{ c.email }}</div>
                 </div>
               </div>
             </td>
 
             <!-- Citas -->
             <td class="px-5 py-3">
-              <span class="text-[14px] font-bold text-ink">{{ c.appointments.length }}</span>
+              <span class="text-[14px] font-bold text-primary">{{ c.appointments.length }}</span>
             </td>
 
             <!-- Total pagado -->
             <td class="px-5 py-3">
-              <span class="text-[13.5px] font-semibold text-ink">{{ formatCLP(totalPaid(c)) }}</span>
+              <span class="text-[13.5px] font-semibold text-primary">{{ formatCLP(totalPaid(c)) }}</span>
             </td>
 
             <!-- Última visita -->
             <td class="px-5 py-3">
-              <span class="text-[13px] text-ink-500">{{ c.lastAppointment ?? '—' }}</span>
+              <span class="text-[13px] text-primary-500">{{ c.lastAppointment ?? '—' }}</span>
             </td>
 
             <!-- Estado -->
@@ -135,7 +135,7 @@
 
           @if (filteredCustomers().length === 0 && !isLoading()) {
           <tr>
-            <td colspan="5" class="px-5 py-16 text-center text-[13px] text-ink-400">
+            <td colspan="5" class="px-5 py-16 text-center text-[13px] text-primary-400">
               No se encontraron clientes.
             </td>
           </tr>
@@ -153,14 +153,14 @@
   <div @slidePanel
        [class]="isMobile()
          ? 'fixed right-0 top-0 h-full w-full max-w-sm bg-white z-40 flex flex-col overflow-hidden'
-         : 'w-[294px] shrink-0 border-l border-ink-100 bg-white flex flex-col overflow-hidden'"
+         : 'w-[294px] shrink-0 border-l border-primary-100 bg-white flex flex-col overflow-hidden'"
        [style.box-shadow]="isMobile() ? '-8px 0 32px rgba(0,0,0,.15)' : 'none'">
 
     <!-- Panel header -->
-    <div class="px-4 py-3 border-b border-ink-100 flex items-center justify-between shrink-0">
-      <span class="text-[12.5px] font-bold text-ink">Perfil</span>
+    <div class="px-4 py-3 border-b border-primary-100 flex-between shrink-0">
+      <span class="text-[12.5px] font-bold text-primary">Perfil</span>
       <button (click)="closeCustomer()"
-        class="w-6 h-6 rounded-[7px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+        class="w-6 h-6 rounded-[7px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
         <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
@@ -171,67 +171,67 @@
     <div class="flex-1 overflow-y-auto">
 
       <!-- Avatar + name -->
-      <div class="px-4 py-5 text-center border-b border-ink-100">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto" style="background:linear-gradient(135deg,#db9648ee,#db964877);
-                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(219,150,72,.4);">
+      <div class="px-4 py-5 text-center border-b border-primary-100">
+        <div class="w-14 h-14 rounded-full flex-center text-white text-xl font-bold mx-auto" style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
+                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(0,196,167,.4);">
           {{ selectedCustomer()!.name.charAt(0).toUpperCase() }}
         </div>
-        <div class="text-[15px] font-bold text-ink mt-2.5">{{ selectedCustomer()!.name }}</div>
-        <div class="text-[12px] text-ink-400 mt-0.5">{{ selectedCustomer()!.email }}</div>
+        <div class="text-[15px] font-bold text-primary mt-2.5">{{ selectedCustomer()!.name }}</div>
+        <div class="text-[12px] text-primary-400 mt-0.5">{{ selectedCustomer()!.email }}</div>
         @if (selectedCustomer()!.phone) {
-        <div class="text-[12px] text-ink-400">{{ selectedCustomer()!.phone }}</div>
+        <div class="text-[12px] text-primary-400">{{ selectedCustomer()!.phone }}</div>
         }
 
         <div class="flex gap-2 mt-3.5">
           <button class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold transition-all border"
-            style="border-color:#db9648;color:#db9648;background:transparent;">
+            style="border-color:#00C4A7;color:#00C4A7;background:transparent;">
             Mensaje
           </button>
           <button (click)="openBookingModal()"
             class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold text-white transition-all"
-            style="background:#db9648;box-shadow:0 2px 8px rgba(219,150,72,.35);">
+            style="background:#00C4A7;box-shadow:0 2px 8px rgba(0,196,167,.35);">
             Agendar
           </button>
         </div>
       </div>
 
       <!-- Stats -->
-      <div class="px-4 py-3 border-b border-ink-100">
-        <div class="text-[10px] font-bold uppercase tracking-[.07em] text-ink-400 mb-2.5">Estadísticas</div>
+      <div class="px-4 py-3 border-b border-primary-100">
+        <div class="text-[10px] font-bold uppercase tracking-[.07em] text-primary-400 mb-2.5">Estadísticas</div>
         @for (row of [
         ['Citas totales', selectedCustomer()!.appointments.length],
         ['Total pagado', formatCLP(totalPaid(selectedCustomer()!))],
         ['Deuda pendiente', formatCLP(toNumber(selectedCustomer()!.debtAmount ?? 0))],
         ['Última visita', selectedCustomer()!.lastAppointment ?? '—']
         ]; track row[0]) {
-        <div class="flex justify-between py-1.5 border-b border-ink-50">
-          <span class="text-[12.5px] text-ink-500">{{ row[0] }}</span>
-          <span class="text-[13px] font-semibold text-ink">{{ row[1] }}</span>
+        <div class="flex justify-between py-1.5 border-b border-primary-50">
+          <span class="text-[12.5px] text-primary-500">{{ row[0] }}</span>
+          <span class="text-[13px] font-semibold text-primary">{{ row[1] }}</span>
         </div>
         }
       </div>
 
       <!-- Appointments tabs -->
-      <div class="px-4 pt-3 pb-1 border-b border-ink-100">
-        <div class="flex gap-0.5 bg-ink-100 rounded-[9px] p-[3px]">
+      <div class="px-4 pt-3 pb-1 border-b border-primary-100">
+        <div class="flex gap-0.5 bg-primary-100 rounded-[9px] p-[3px]">
           <button (click)="aptTab.set('recientes')"
             class="flex-1 py-1 rounded-[7px] text-[11.5px] font-medium transition-all"
             [class.bg-white]="aptTab() === 'recientes'"
-            [class.text-ink]="aptTab() === 'recientes'"
+            [class.text-primary]="aptTab() === 'recientes'"
             [class.shadow-sm]="aptTab() === 'recientes'"
-            [class.text-ink-400]="aptTab() !== 'recientes'">
+            [class.text-primary-400]="aptTab() !== 'recientes'">
             Recientes
           </button>
           <button (click)="aptTab.set('todas')"
-            class="flex-1 py-1 rounded-[7px] text-[11.5px] font-medium transition-all flex items-center justify-center gap-1.5"
+            class="flex-1 py-1 rounded-[7px] text-[11.5px] font-medium transition-all flex-center gap-1.5"
             [class.bg-white]="aptTab() === 'todas'"
-            [class.text-ink]="aptTab() === 'todas'"
+            [class.text-primary]="aptTab() === 'todas'"
             [class.shadow-sm]="aptTab() === 'todas'"
-            [class.text-ink-400]="aptTab() !== 'todas'">
+            [class.text-primary-400]="aptTab() !== 'todas'">
             Ver todas
             <span class="text-[10px] font-bold px-1.5 py-px rounded-full"
-                  [style.background]="aptTab() === 'todas' ? 'rgba(219,150,72,.15)' : 'rgba(100,116,139,.12)'"
-                  [style.color]="aptTab() === 'todas' ? '#db9648' : '#64748b'">
+                  [style.background]="aptTab() === 'todas' ? 'rgba(0,196,167,.15)' : 'rgba(100,116,139,.12)'"
+                  [style.color]="aptTab() === 'todas' ? '#00C4A7' : '#64748b'">
               {{ selectedCustomer()!.appointments.length }}
             </span>
           </button>
@@ -240,17 +240,17 @@
 
       <div class="px-4 py-3">
         @if (selectedCustomer()!.appointments.length === 0) {
-          <div class="text-[12.5px] text-ink-300 text-center py-3">Sin historial</div>
+          <div class="text-[12.5px] text-primary-300 text-center py-3">Sin historial</div>
         } @else {
           @for (apt of (aptTab() === 'recientes'
               ? recentAppointments(selectedCustomer()!)
               : allAppointmentsSorted(selectedCustomer()!));
             track apt.id) {
-          <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-ink-50 flex flex-col gap-1.5">
-            <div class="flex items-center justify-between gap-2">
+          <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-primary-50 flex flex-col gap-1.5">
+            <div class="flex-between gap-2">
               <div>
-                <div class="text-[12.5px] font-semibold text-ink">{{ formatAppointment(apt) }}</div>
-                <div class="text-[11.5px] text-ink-400">{{ apt.service?.name ?? '—' }}</div>
+                <div class="text-[12.5px] font-semibold text-primary">{{ formatAppointment(apt) }}</div>
+                <div class="text-[11.5px] text-primary-400">{{ apt.service?.name ?? '—' }}</div>
               </div>
               <span class="text-[10.5px] font-semibold px-2 py-px rounded-full shrink-0"
                 [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : apt.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
@@ -285,20 +285,20 @@
 <!-- ── Modal Agendar ──────────────────────────────────────────────── -->
 @if (showBookingModal()) {
   <div @backdrop class="fixed inset-0 z-50"
-       style="background:rgba(15,23,42,.45);backdrop-filter:blur(6px);"
+       style="background:rgba(13,27,42,.45);backdrop-filter:blur(6px);"
        (click)="closeBookingModal()"></div>
 
   <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[60] flex flex-col"
        style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
 
     <!-- Header -->
-    <div class="px-6 py-5 border-b border-ink-100 flex items-center justify-between shrink-0">
+    <div class="px-6 py-5 border-b border-primary-100 flex-between shrink-0">
       <div>
-        <h3 class="text-[16px] font-bold text-ink tracking-tight">Nueva Cita</h3>
-        <p class="text-[11.5px] text-ink-400 mt-0.5">Registro manual desde clientes</p>
+        <h3 class="text-[16px] font-bold text-primary tracking-tight">Nueva Cita</h3>
+        <p class="text-[11.5px] text-primary-400 mt-0.5">Registro manual desde clientes</p>
       </div>
       <button (click)="closeBookingModal()"
-        class="w-8 h-8 rounded-[9px] border border-ink-200 bg-ink-50 hover:bg-ink-100 flex items-center justify-center text-ink-500 transition-colors">
+        class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
@@ -309,28 +309,28 @@
     <div class="flex-1 overflow-y-auto p-6 space-y-4">
 
       <!-- Cliente (solo lectura) -->
-      <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-ink-50 border border-ink-100">
-        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[12px] font-bold shrink-0"
-             style="background:linear-gradient(135deg,#db9648ee,#db964877);">
+      <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-primary-50 border border-primary-100">
+        <div class="w-9 h-9 rounded-full flex-center text-white text-[12px] font-bold shrink-0"
+             style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
           {{ selectedCustomer()!.name.charAt(0).toUpperCase() }}
         </div>
         <div class="min-w-0">
-          <div class="text-[13.5px] font-bold text-ink truncate">{{ selectedCustomer()!.name }}</div>
-          <div class="text-[11.5px] text-ink-400 truncate">{{ selectedCustomer()!.email }}</div>
+          <div class="text-[13.5px] font-bold text-primary truncate">{{ selectedCustomer()!.name }}</div>
+          <div class="text-[11.5px] text-primary-400 truncate">{{ selectedCustomer()!.email }}</div>
         </div>
-        <span class="ml-auto text-[10px] font-bold uppercase tracking-wider text-ink-400 shrink-0">Cliente</span>
+        <span class="ml-auto text-[10px] font-bold uppercase tracking-wider text-primary-400 shrink-0">Cliente</span>
       </div>
 
       <!-- Servicio -->
       <div>
-        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Servicio *</label>
+        <label class="form-label">Servicio *</label>
         @if (bk_services().length === 0) {
-          <p class="text-[12px] text-ink-400 italic">Sin servicios configurados</p>
+          <p class="text-[12px] text-primary-400 italic">Sin servicios configurados</p>
         } @else {
           <select [value]="bk_serviceId()"
                   (change)="onBkServiceChange($any($event.target).value)"
-                  class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
-                  style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
+                  style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
             @for (s of bk_services(); track s.id) {
               <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
             }
@@ -341,21 +341,21 @@
       <!-- Fecha + Hora -->
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Fecha *</label>
+          <label class="form-label">Fecha *</label>
           <input type="date" [value]="bk_date()" [min]="today"
                  (input)="onBkDateChange($any($event.target).value)"
-                 class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none"
-                 style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                 class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none"
+                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
         </div>
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Hora *</label>
+          <label class="form-label">Hora *</label>
           @if (bk_availableSlots().length === 0) {
-            <p class="text-[12px] text-ink-400 italic pt-2">Sin horario disponible</p>
+            <p class="text-[12px] text-primary-400 italic pt-2">Sin horario disponible</p>
           } @else {
             <select [value]="bk_time()"
                     (change)="bk_time.set($any($event.target).value)"
-                    class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 bg-white text-[13px] text-ink focus:outline-none"
-                    style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);">
+                    class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
+                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
               <option value="">Selecciona una hora</option>
               @for (slot of bk_availableSlots(); track slot) {
                 <option [value]="slot" [selected]="slot === bk_time()">{{ slot }}</option>
@@ -367,18 +367,18 @@
 
       <!-- Notas -->
       <div>
-        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Notas</label>
+        <label class="form-label">Notas</label>
         <textarea [value]="bk_notes()"
                   (input)="bk_notes.set($any($event.target).value)"
                   rows="2"
                   placeholder="Observaciones opcionales..."
-                  class="w-full px-3 py-2.5 rounded-[10px] border border-ink-200 text-[13px] text-ink focus:outline-none placeholder:text-ink-300 resize-none"
-                  style="border-color:rgba(219,150,72,.4);box-shadow:0 0 0 3px rgba(219,150,72,.08);"></textarea>
+                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300 resize-none"
+                  style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);"></textarea>
       </div>
 
       <!-- Estado de pago -->
       <div>
-        <label class="block text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-1.5">Estado de pago</label>
+        <label class="form-label">Estado de pago</label>
         <div class="flex gap-2">
           <button type="button" (click)="bk_status.set('Pendiente')"
             class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
@@ -407,14 +407,14 @@
     </div>
 
     <!-- Footer -->
-    <div class="px-6 py-4 border-t border-ink-100 flex gap-3 shrink-0">
+    <div class="px-6 py-4 border-t border-primary-100 flex gap-3 shrink-0">
       <button (click)="closeBookingModal()"
-        class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-ink-200 text-ink-600 hover:bg-ink-50 transition-colors">
+        class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-600 hover:bg-primary-50 transition-colors">
         Cancelar
       </button>
       <button (click)="submitBooking()" [disabled]="bk_submitting()"
         class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-        style="background:#db9648;box-shadow:0 3px 10px rgba(219,150,72,.35);">
+        style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
         {{ bk_submitting() ? 'Guardando...' : 'Crear Cita' }}
       </button>
     </div>

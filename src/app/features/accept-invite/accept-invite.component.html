@@ -1,18 +1,14 @@
-<div class="min-h-screen flex items-center justify-center p-6 font-sans"
-  style="background:linear-gradient(135deg,#0d1526 0%,#0f172a 60%,#111827 100%);">
+﻿<div class="min-h-screen flex-center p-6 font-sans"
+  style="background:linear-gradient(135deg,#0D1B2A 0%,#0D1B2A 60%,#111827 100%);">
 
   <div @fadeSlide class="w-full max-w-md">
 
     <!-- Brand -->
-    <div class="flex items-center justify-center gap-3 mb-7">
-      <div class="w-11 h-11 rounded-[12px] bg-white/95 flex items-center justify-center overflow-hidden"
-        style="box-shadow:0 6px 20px rgba(219,150,72,.45);">
-        <img src="citema.webp" alt="citema" class="h-9 w-auto" />
+    <div class="flex flex-col items-center gap-2.5 mb-7">
+      <div class="rounded-[14px] px-5 py-2">
+        <img src="letsreserves.png" alt="Lets Reserve" class="h-12 w-auto" />
       </div>
-      <div class="leading-none">
-        <div class="text-[18px] font-extrabold tracking-tight text-white">CITEMA</div>
-        <div class="text-[10px] font-medium tracking-[.12em] text-white/40 mt-1">PROFESSIONAL</div>
-      </div>
+      <span class="text-[10px] font-medium tracking-[.12em] text-white/40">PROFESSIONAL</span>
     </div>
 
     <div class="bg-white rounded-[20px] p-8 shadow-[0_28px_80px_rgba(0,0,0,.35)] border border-black/[.04]">
@@ -20,60 +16,60 @@
       <!-- ── Token inválido ── -->
       @if (step() === 'error') {
       <div @stepAnim class="text-center py-4">
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 text-red-400 flex-center">
           <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
         </div>
-        <h2 class="text-[18px] font-bold text-ink mb-2">Invitación inválida</h2>
-        <p class="text-[12.5px] text-ink-400">El link de invitación no es válido o ya expiró.</p>
+        <h2 class="text-[18px] font-bold text-primary mb-2">Invitación inválida</h2>
+        <p class="text-[12.5px] text-primary-400">El link de invitación no es válido o ya expiró.</p>
       </div>
 
       <!-- ── Login ── -->
       } @else if (step() === 'login') {
       <div @stepAnim>
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center"
-          style="background:rgba(219,150,72,.12);">
-          <svg width="28" height="28" fill="none" stroke="#db9648" stroke-width="2" viewBox="0 0 24 24">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full flex-center"
+          style="background:rgba(0,196,167,.12);">
+          <svg width="28" height="28" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </div>
-        <h2 class="text-[19px] font-bold text-ink tracking-tight mb-1 text-center">Invitación a equipo</h2>
-        <p class="text-[12.5px] text-ink-400 mb-6 text-center">
-          Ingresa con tu cuenta de Citema para aceptar la invitación.
+        <h2 class="text-[19px] font-bold text-primary tracking-tight mb-1 text-center">Invitación a equipo</h2>
+        <p class="text-[12.5px] text-primary-400 mb-6 text-center">
+          Ingresa con tu cuenta de Lets Reserve para aceptar la invitación.
         </p>
 
         <form [formGroup]="form" (ngSubmit)="onLogin()" class="space-y-4">
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Email</label>
+            <label class="form-hint">Email</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15" fill="none"
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" width="15" height="15" fill="none"
                 stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
               <input formControlName="email" type="email" placeholder="ejemplo@clinica.com"
-                class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                class="form-input-icon"
                 [class.border-red-300]="(f['email'].invalid && f['email'].touched) || loginError()"
-                [class.border-ink-200]="!((f['email'].invalid && f['email'].touched) || loginError())" />
+                [class.border-primary-200]="!((f['email'].invalid && f['email'].touched) || loginError())" />
             </div>
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-[11.5px] font-semibold text-ink-600 ml-0.5">Contraseña</label>
+            <label class="form-hint">Contraseña</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" width="15" height="15" fill="none"
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" width="15" height="15" fill="none"
                 stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
               <input formControlName="password" type="password" placeholder="••••••••"
-                class="w-full pl-10 pr-3 py-2.5 rounded-[10px] border-[1.5px] outline-none transition-colors text-[13.5px] text-ink bg-white placeholder:text-ink-400"
+                class="form-input-icon"
                 [class.border-red-300]="(f['password'].invalid && f['password'].touched) || loginError()"
-                [class.border-ink-200]="!((f['password'].invalid && f['password'].touched) || loginError())" />
+                [class.border-primary-200]="!((f['password'].invalid && f['password'].touched) || loginError())" />
             </div>
           </div>
 
@@ -87,8 +83,8 @@
           }
 
           <button type="submit" [disabled]="isLoading()"
-            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-1"
-            style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-1"
+            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
             @if (isLoading()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -107,13 +103,13 @@
       <!-- ── Advertencia plan pagado ── -->
       } @else if (step() === 'warn') {
       <div @stepAnim>
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-50 flex items-center justify-center">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-50 flex-center">
           <svg width="28" height="28" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
             <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
         </div>
-        <h2 class="text-[19px] font-bold text-ink tracking-tight mb-2 text-center">Atención</h2>
+        <h2 class="text-[19px] font-bold text-primary tracking-tight mb-2 text-center">Atención</h2>
 
         <div class="bg-amber-50 border border-amber-200 rounded-[12px] p-4 mb-5 text-[13px] text-amber-800 leading-relaxed">
           Actualmente tienes el plan
@@ -136,8 +132,8 @@
 
         <div class="space-y-2.5">
           <button (click)="confirmAccept()" [disabled]="isAccepting()"
-            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-            style="background:#db9648;box-shadow:0 4px 16px rgba(219,150,72,.4);">
+            class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
             @if (isAccepting()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -151,7 +147,7 @@
             }
           </button>
           <button type="button" (click)="step.set('login')"
-            class="w-full py-2.5 text-[13px] font-semibold text-ink-400 hover:text-ink transition-colors">
+            class="w-full py-2.5 text-[13px] font-semibold text-primary-400 hover:text-primary transition-colors">
             Cancelar
           </button>
         </div>
