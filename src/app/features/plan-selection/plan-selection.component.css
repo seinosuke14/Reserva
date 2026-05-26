@@ -1,5 +1,5 @@
-/* ============================================================
-   Plan Selection — estilos inspirados en la landing de CITEMA
+﻿/* ============================================================
+   Plan Selection — estilos inspirados en la landing de LETS RESERVE
    ============================================================ */
 
 .ps-page {
@@ -8,7 +8,7 @@
   flex-direction: column;
   align-items: center;
   padding: 48px 16px 64px;
-  background: linear-gradient(135deg, #0d1526 0%, #0f172a 60%, #111827 100%);
+  background: linear-gradient(135deg, #0D1B2A 0%, #0D1B2A 60%, #111827 100%);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -24,16 +24,14 @@
 
 /* ---- Brand ---- */
 .ps-brand {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 32px;
 }
 .ps-brand-mark {
-  width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.95);
-  display: grid; place-items: center; overflow: hidden;
-  box-shadow: 0 6px 20px rgba(219,150,72,.45);
+  border-radius: 14px;
+  padding: 8px 20px;
 }
-.ps-brand-img { height: 32px; width: auto; }
-.ps-brand-name { font-size: 17px; font-weight: 800; letter-spacing: -.02em; color: var(--lp-ink); line-height: 1.1; }
-.ps-brand-sub { font-size: 10px; font-weight: 600; letter-spacing: .12em; color: rgba(255,255,255,.4); margin-top: 2px; }
+.ps-brand-img { height: 128px; width: auto; display: block; }
+.ps-brand-sub { font-size: 10px; font-weight: 600; letter-spacing: .12em; color: rgba(255,255,255,.4); }
 
 /* ---- Header ---- */
 .ps-header { text-align: center; margin-bottom: 40px; }
@@ -53,7 +51,7 @@
 .ps-auth-links { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 14px; }
 .ps-auth-link { color: rgba(255,255,255,.5); text-decoration: none; transition: color .15s; }
 .ps-auth-link:hover { color: white; }
-.ps-auth-accent { color: #db9648; font-weight: 700; }
+.ps-auth-accent { color: #2BB8A6; font-weight: 700; }
 .ps-auth-muted { color: rgba(255,255,255,.7); font-weight: 600; }
 .ps-dot-sep { color: rgba(255,255,255,.2); }
 
@@ -110,7 +108,7 @@
 }
 .ps-plan-popular {
   position: absolute; top: -12px; left: 24px;
-  background: #db9648; color: #0f172a;
+  background: #2BB8A6; color: #0D1B2A;
   font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
   padding: 4px 10px; border-radius: 6px;
 }
@@ -137,10 +135,10 @@
   font-size: 10px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 4px;
 }
-.ps-plan-duration--featured { color: rgba(15,23,42,.5); }
-.ps-plan-card--featured .ps-plan-duration { color: rgba(15,23,42,.5); }
+.ps-plan-duration--featured { color: rgba(13,27,42,.5); }
+.ps-plan-card--featured .ps-plan-duration { color: rgba(13,27,42,.5); }
 .ps-plan-name { font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: white; margin: 0; }
-.ps-plan-card--featured .ps-plan-name { color: #0f172a; }
+.ps-plan-card--featured .ps-plan-name { color: #0D1B2A; }
 
 /* Price */
 .ps-plan-price {
@@ -151,9 +149,9 @@
 .ps-price-cur  { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.5); }
 .ps-price-num  { font-size: 36px; font-weight: 800; letter-spacing: -.03em; color: white; line-height: 1; }
 .ps-price-per  { font-size: 12px; color: rgba(255,255,255,.45); }
-.ps-plan-card--featured .ps-price-cur  { color: rgba(15,23,42,.5); }
-.ps-plan-card--featured .ps-price-num  { color: #0f172a; }
-.ps-plan-card--featured .ps-price-per  { color: rgba(15,23,42,.45); }
+.ps-plan-card--featured .ps-price-cur  { color: rgba(13,27,42,.5); }
+.ps-plan-card--featured .ps-price-num  { color: #0D1B2A; }
+.ps-plan-card--featured .ps-price-per  { color: rgba(13,27,42,.45); }
 .ps-plan-card--max .ps-price-cur  { color: rgba(251,191,36,.7); }
 .ps-plan-card--max .ps-price-num  { color: #fbbf24; }
 .ps-plan-card--max .ps-price-per  { color: rgba(251,191,36,.6); }
@@ -163,7 +161,7 @@
   font-size: 12px; line-height: 1.55; color: rgba(255,255,255,.5);
   margin: 0 0 16px; flex: 1;
 }
-.ps-plan-card--featured .ps-plan-desc { color: rgba(15,23,42,.55); }
+.ps-plan-card--featured .ps-plan-desc { color: rgba(13,27,42,.55); }
 
 /* Features list */
 .ps-plan-features {
@@ -174,7 +172,7 @@
   display: flex; gap: 8px; align-items: flex-start;
   font-size: 12.5px; line-height: 1.4; color: rgba(255,255,255,.7);
 }
-.ps-plan-card--featured .ps-plan-features li { color: rgba(15,23,42,.75); }
+.ps-plan-card--featured .ps-plan-features li { color: rgba(13,27,42,.75); }
 .ps-check {
   width: 16px; height: 16px; border-radius: 50%;
   background: rgba(45,212,191,.15); color: #2dd4bf;
@@ -193,7 +191,7 @@
   margin-top: auto;
 }
 .ps-btn--primary {
-  background: #2dd4bf; color: #0f172a;
+  background: #2dd4bf; color: #0D1B2A;
   box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 8px 20px -8px rgba(45,212,191,.6);
 }
 .ps-btn--primary:hover:not(:disabled) { background: #5eead4; }
@@ -203,7 +201,7 @@
 }
 .ps-btn--secondary:hover:not(:disabled) { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
 .ps-btn--featured {
-  background: #0f172a; color: white;
+  background: #0D1B2A; color: white;
   box-shadow: 0 1px 0 rgba(255,255,255,.1) inset, 0 8px 20px -8px rgba(0,0,0,.5);
 }
 .ps-btn--featured:hover:not(:disabled) { background: #1e293b; }
@@ -243,7 +241,7 @@
   font-size: 13.5px; line-height: 1.6; margin: 0;
 }
 .ps-company-notice-email {
-  font-size: 13px; font-weight: 700; color: #db9648;
+  font-size: 13px; font-weight: 700; color: #2BB8A6;
   text-decoration: none; word-break: break-all;
 }
 .ps-company-notice-email:hover { text-decoration: underline; }
@@ -287,7 +285,7 @@
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .07em; color: rgba(255,255,255,.4);
 }
-.ps-plan-card--featured .ps-quantity-label { color: rgba(15,23,42,.45); }
+.ps-plan-card--featured .ps-quantity-label { color: rgba(13,27,42,.45); }
 .ps-plan-card--max .ps-quantity-label { color: rgba(251,191,36,.6); }
 
 .ps-quantity-control {
@@ -306,9 +304,9 @@
 .ps-qty-btn:disabled { opacity: .3; cursor: not-allowed; }
 
 .ps-plan-card--featured .ps-qty-btn {
-  border-color: rgba(15,23,42,.2); background: rgba(15,23,42,.06); color: #0f172a;
+  border-color: rgba(13,27,42,.2); background: rgba(13,27,42,.06); color: #0D1B2A;
 }
-.ps-plan-card--featured .ps-qty-btn:hover:not(:disabled) { background: rgba(15,23,42,.12); }
+.ps-plan-card--featured .ps-qty-btn:hover:not(:disabled) { background: rgba(13,27,42,.12); }
 
 .ps-plan-card--max .ps-qty-btn {
   border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); color: #fbbf24;
@@ -318,11 +316,11 @@
 .ps-qty-num {
   font-size: 22px; font-weight: 800; min-width: 28px; text-align: center; color: white;
 }
-.ps-plan-card--featured .ps-qty-num { color: #0f172a; }
+.ps-plan-card--featured .ps-qty-num { color: #0D1B2A; }
 .ps-plan-card--max .ps-qty-num { color: #fbbf24; }
 
 .ps-quantity-note {
   font-size: 11px; color: rgba(255,255,255,.3);
 }
-.ps-plan-card--featured .ps-quantity-note { color: rgba(15,23,42,.35); }
+.ps-plan-card--featured .ps-quantity-note { color: rgba(13,27,42,.35); }
 .ps-plan-card--max .ps-quantity-note { color: rgba(251,191,36,.5); }

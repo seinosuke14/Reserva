@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ import { RouterModule } from '@angular/router';
             </svg>
             Volver
           </a>
-          <span class="terms-brand">Citema</span>
+          <span class="terms-brand">Lets Reserve</span>
         </div>
 
         <div class="terms-card">
@@ -39,7 +39,7 @@ import { RouterModule } from '@angular/router';
           <!-- 1 -->
           <section class="terms-section">
             <h2>1. Responsable del tratamiento</h2>
-            <p><strong>Citema</strong> es responsable del tratamiento de los datos personales recopilados a través de esta Plataforma, en conformidad con la Ley N° 19.628 sobre Protección de la Vida Privada de la República de Chile.</p>
+            <p><strong>Lets Reserve</strong> es responsable del tratamiento de los datos personales recopilados a través de esta Plataforma, en conformidad con la Ley N° 19.628 sobre Protección de la Vida Privada de la República de Chile.</p>
           </section>
 
           <!-- 2 -->
@@ -88,7 +88,7 @@ import { RouterModule } from '@angular/router';
           <section class="terms-section">
             <h2>5. Retención de datos</h2>
             <ul>
-              <li>Los datos de clientes se conservan mientras el profesional mantenga su cuenta activa en Citema.</li>
+              <li>Los datos de clientes se conservan mientras el profesional mantenga su cuenta activa en Lets Reserve.</li>
               <li>Los datos del profesional se conservan mientras su cuenta esté activa y por un período adicional de 2 años tras su baja, por razones de respaldo legal.</li>
               <li>Los registros de aceptación de términos (fecha y hora) se conservan indefinidamente como respaldo legal.</li>
             </ul>
@@ -116,7 +116,7 @@ import { RouterModule } from '@angular/router';
           <!-- 8 -->
           <section class="terms-section">
             <h2>8. Proveedores de pago</h2>
-            <p>Los pagos con tarjeta son procesados íntegramente por Webpay (Transbank), Flow y Mercado Pago. Citema no almacena ni tiene acceso a los datos de tarjetas de crédito o débito. Cada proveedor aplica su propia política de privacidad y seguridad.</p>
+            <p>Los pagos con tarjeta son procesados íntegramente por Webpay (Transbank), Flow y Mercado Pago. Lets Reserve no almacena ni tiene acceso a los datos de tarjetas de crédito o débito. Cada proveedor aplica su propia política de privacidad y seguridad.</p>
           </section>
 
           <!-- 9 -->
@@ -128,7 +128,7 @@ import { RouterModule } from '@angular/router';
           <!-- 10 -->
           <section class="terms-section">
             <h2>10. Modificaciones a esta política</h2>
-            <p>Citema se reserva el derecho de actualizar esta Política en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de la nueva versión.</p>
+            <p>Lets Reserve se reserva el derecho de actualizar esta Política en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de la nueva versión.</p>
           </section>
 
           <!-- 11 -->
@@ -172,13 +172,13 @@ import { RouterModule } from '@angular/router';
       padding: .5rem .75rem;
       border-radius: .5rem;
       transition: all .15s;
-      &:hover { color: #0f172a; background: #f1f5f9; }
+      &:hover { color: #0D1B2A; background: #f1f5f9; }
     }
 
     .terms-brand {
       font-size: .875rem;
       font-weight: 800;
-      color: #db9648;
+      color: #00C4A7;
       letter-spacing: -.01em;
     }
 
@@ -207,8 +207,8 @@ import { RouterModule } from '@angular/router';
       width: 56px;
       height: 56px;
       border-radius: .875rem;
-      background: rgba(219,150,72,.1);
-      color: #db9648;
+      background: rgba(0,196,167,.1);
+      color: #00C4A7;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -218,7 +218,7 @@ import { RouterModule } from '@angular/router';
     .terms-title {
       font-size: 1.375rem;
       font-weight: 800;
-      color: #0f172a;
+      color: #0D1B2A;
       margin: 0 0 .25rem;
       letter-spacing: -.02em;
     }
@@ -235,7 +235,7 @@ import { RouterModule } from '@angular/router';
       h2 {
         font-size: 1rem;
         font-weight: 700;
-        color: #0f172a;
+        color: #0D1B2A;
         margin: 0 0 .625rem;
         padding-bottom: .375rem;
         border-bottom: 1.5px solid #f1f5f9;
@@ -269,7 +269,7 @@ import { RouterModule } from '@angular/router';
         }
       }
 
-      strong { color: #0f172a; }
+      strong { color: #0D1B2A; }
     }
   `]
 })

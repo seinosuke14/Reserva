@@ -1,4 +1,4 @@
-@use 'shared' as *;
+﻿@use 'shared' as *;
 
 :host { display: block; }
 
@@ -28,10 +28,10 @@
 .profile-top-name { font-size: 1.125rem; font-weight: 800; color: $text; }
 
 .btn-text-sm {
-  font-size: .8125rem; font-weight: 600; color: $gold;
+  font-size: .8125rem; font-weight: 600; color: $accent;
   background: none; border: none; cursor: pointer;
   padding: .375rem .75rem; border-radius: .5rem; transition: background .15s;
-  &:hover { background: rgba(219,150,72,.08); }
+  &:hover { background: rgba($accent,.08); }
 }
 
 .profile-hero-section {
@@ -69,10 +69,10 @@
 
 .info-avatar, .info-avatar-img {
   width: 3.5rem; height: 3.5rem; border-radius: 50%; margin-bottom: .75rem;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 4px 14px rgba(219,150,72,.4);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 4px 14px rgba($accent,.4);
 }
 .info-avatar {
-  background: linear-gradient(135deg, #{$gold}ee, #{$gold}77);
+  background: linear-gradient(135deg, #{$accent}ee, #{$accent}77);
   color: #fff; font-size: 1.5rem; font-weight: 900;
   display: flex; align-items: center; justify-content: center;
 }
@@ -90,7 +90,7 @@
 .info-row {
   display: flex; align-items: center; gap: .5rem;
   font-size: .8125rem; color: $muted; margin-bottom: .5rem; font-weight: 500;
-  svg { color: $gold; flex-shrink: 0; opacity: .85; }
+  svg { color: $accent; flex-shrink: 0; opacity: .85; }
 }
 
 .info-status {
@@ -134,7 +134,7 @@
   background: #fff; border: 1.5px solid $border; border-radius: 1rem; overflow: hidden;
   display: flex; flex-direction: column; transition: border-color .2s;
   @media (max-width: 767px) { background: transparent; border: none; border-bottom: 1px solid $border; border-radius: 0; }
-  &:hover { border-color: rgba(219,150,72,.35); }
+  &:hover { border-color: rgba($accent,.35); }
   @media (min-width: 600px) { flex-direction: row; align-items: stretch; }
 }
 
@@ -150,16 +150,16 @@
 .psc-duration {
   display: flex; align-items: center; gap: .25rem;
   font-size: .75rem; font-weight: 600; color: $muted;
-  svg { color: $gold; opacity: .8; }
+  svg { color: $accent; opacity: .8; }
 }
-.psc-price { font-size: 1rem; font-weight: 800; color: $gold; }
+.psc-price { font-size: 1rem; font-weight: 800; color: $accent; }
 
 .psc-book-btn {
-  padding: .75rem 1.5rem; background: $gold; color: #fff;
+  padding: .75rem 1.5rem; background: $accent; color: #fff;
   border: none; border-radius: .875rem; font-size: .8125rem; font-weight: 700;
   cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(219,150,72,.35); transition: background .15s;
-  &:hover { background: #c4873e; }
+  box-shadow: 0 3px 12px rgba($accent,.35); transition: background .15s;
+  &:hover { background: $accent-hover; }
 }
 
 .services-divider {
@@ -170,7 +170,7 @@
 
 .quote-cta-icon {
   width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(219,150,72,.15); border: 1px solid rgba(219,150,72,.3);
+  background: rgba($accent,.15); border: 1px solid rgba($accent,.3);
   display: flex; align-items: center; justify-content: center;
-  color: $gold; flex-shrink: 0;
+  color: $accent; flex-shrink: 0;
 }
