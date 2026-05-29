@@ -20,6 +20,7 @@
             [selectedPayment]="selectedPayment()"
             [bookingPrice]="bookingPrice()"
             [bookingRef]="bookingRef()"
+            [appointmentId]="bookedAppointmentId()"
             [copiedTransfer]="copiedTransfer()"
             [whatsappLink]="getWhatsappLink()"
             (transferCopy)="copyTransferData($event)">
@@ -29,6 +30,7 @@
           <app-booking-profile-view
             [professional]="professional()"
             [services]="services()"
+            [reviews]="reviews()"
             [isQuoteMode]="isQuoteMode()"
             [headingStyle]="headingFontStyle()"
             [bodyStyle]="bodyFontStyle()"

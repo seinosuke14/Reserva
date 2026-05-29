@@ -271,8 +271,8 @@
                         }
                       </span>
                       <span class="text-[10.5px] font-semibold px-2 py-px rounded-full"
-                            [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : 'rgba(245,158,11,.1)'"
-                            [style.color]="apt.paymentStatus === 'Pagado' ? '#16a34a' : '#d97706'">
+                            [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : apt.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : 'rgba(245,158,11,.1)'"
+                            [style.color]="apt.paymentStatus === 'Pagado' ? '#16a34a' : apt.paymentStatus === 'Finalizada' ? '#2BB8A6' : '#d97706'">
                         {{ apt.paymentStatus }}
                       </span>
                     </div>
@@ -524,8 +524,8 @@
           <div class="bg-primary-50 rounded-[12px] p-3.5">
             <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Estado</div>
             <span class="text-[12.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                  [style.background]="selectedAppointment()!.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : selectedAppointment()!.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
-                  [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
+                  [style.background]="selectedAppointment()!.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : selectedAppointment()!.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : selectedAppointment()!.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
+                  [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Finalizada' ? '#2BB8A6' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
               {{ selectedAppointment()!.paymentStatus }}
             </span>
             @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
@@ -539,6 +539,16 @@
                 class="flex-1 py-1.5 rounded-[9px] text-[12px] font-semibold transition-all border"
                 style="border-color:#ef4444;color:#ef4444;background:transparent;">
                 ✕ Rechazar
+              </button>
+            </div>
+            }
+            @if (selectedAppointment()!.paymentStatus === 'Pagado' && isAppointmentPast(selectedAppointment()!)) {
+            <div class="mt-3">
+              <button (click)="markAsFinalized(selectedAppointment()!.id)"
+                class="w-full py-1.5 rounded-[9px] text-[12px] font-semibold transition-all"
+                style="background:rgba(43,184,166,.12);color:#2BB8A6;border:1.5px solid rgba(43,184,166,.35);"
+                [disabled]="finalizingId() === selectedAppointment()!.id">
+                {{ finalizingId() === selectedAppointment()!.id ? 'Procesando...' : '✓ Marcar como finalizada' }}
               </button>
             </div>
             }

@@ -433,7 +433,9 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   togglePaymentExpand(provider: PaymentProvider): void {
     if (this.paymentExpanded() === provider) { this.paymentExpanded.set(null); return; }
     const m = this.getPaymentMethod(provider);
-    this.paymentFormData.set(m?.credentials ? { ...m.credentials } : {});
+    const raw = m?.credentials ?? {};
+    const parsed: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    this.paymentFormData.set({ ...parsed });
     this.paymentExpanded.set(provider);
   }
 

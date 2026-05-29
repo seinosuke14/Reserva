@@ -62,36 +62,12 @@ type PaymentState = 'checking' | 'success' | 'error';
             Se ha enviado una confirmación a tu correo electrónico.
           </p>
 
-          <!-- Rating -->
-          <div class="rating-section">
-            @if (ratingSubmitted()) {
-              <p class="rating-thanks">Gracias por tu valoración</p>
-            } @else {
-              <p class="rating-label">¿Cómo calificarías tu experiencia?</p>
-              <div class="rating-stars-input">
-                @for (star of stars; track star) {
-                  <button class="star-btn"
-                    (mouseenter)="hoveredStar.set(star)"
-                    (mouseleave)="hoveredStar.set(0)"
-                    (click)="selectedRating.set(star)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-                      [attr.fill]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : 'none'"
-                      [attr.stroke]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : '#D1D5DB'"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                  </button>
-                }
-              </div>
-              @if (selectedRating()) {
-                <button class="btn-rate" (click)="submitRating()" [disabled]="ratingSubmitting()">
-                  {{ ratingSubmitting() ? 'Enviando...' : 'Enviar valoración' }}
-                </button>
-              }
-            }
+          <div class="result-actions">
+            <button class="btn-survey" (click)="goToSurvey()">
+              ¿Cómo fue tu experiencia? Valórala aquí
+            </button>
+            <a routerLink="/" class="btn-primary">Volver al inicio</a>
           </div>
-
-          <a routerLink="/" class="btn-primary">Volver al inicio</a>
         </div>
       }
 
@@ -254,66 +230,29 @@ type PaymentState = 'checking' | 'success' | 'error';
       background: #EFF6FF;
     }
 
-    .rating-section {
-      margin: 24px 0;
-      padding: 20px;
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #E5E7EB;
-    }
-
-    .rating-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #374151;
-      margin: 0 0 12px;
-    }
-
-    .rating-stars-input {
+    .result-actions {
       display: flex;
-      justify-content: center;
-      gap: 4px;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
     }
 
-    .star-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      transition: transform 0.15s;
-    }
-
-    .star-btn:hover {
-      transform: scale(1.2);
-    }
-
-    .btn-rate {
-      margin-top: 12px;
-      padding: 8px 20px;
-      background: #FBBF24;
-      color: #78350F;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-rate:hover {
-      background: #F59E0B;
-    }
-
-    .btn-rate:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .rating-thanks {
+    .btn-survey {
+      padding: 12px 20px;
+      background: #F0FDF4;
       color: #059669;
-      font-weight: 600;
+      border: 1.5px solid #A7F3D0;
+      border-radius: 8px;
       font-size: 14px;
-      margin: 0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+
+    .btn-survey:hover {
+      background: #DCFCE7;
+      border-color: #6EE7B7;
     }
   `]
 })
@@ -333,14 +272,7 @@ export class PaymentResultComponent implements OnInit {
   readonly errorTitle = signal('Pago no confirmado');
   readonly errorMessage = signal('No se pudo procesar tu pago. Intenta de nuevo.');
 
-  // Rating
-  readonly hoveredStar = signal(0);
-  readonly selectedRating = signal(0);
-  readonly ratingSubmitted = signal(false);
-  readonly ratingSubmitting = signal(false);
-  readonly stars = [1, 2, 3, 4, 5];
   private appointmentId = '';
-
   private slug = '';
 
   async ngOnInit(): Promise<void> {
@@ -448,22 +380,10 @@ export class PaymentResultComponent implements OnInit {
     }
   }
 
-  async submitRating(): Promise<void> {
-    if (!this.selectedRating() || !this.appointmentId) return;
-    this.ratingSubmitting.set(true);
-    try {
-      await firstValueFrom(
-        this.http.post(`${environment.apiUrl}/public/rate`, {
-          appointmentId: this.appointmentId,
-          rating: this.selectedRating(),
-        })
-      );
-      this.ratingSubmitted.set(true);
-    } catch {
-      this.ratingSubmitted.set(true);
-    } finally {
-      this.ratingSubmitting.set(false);
-    }
+  goToSurvey(): void {
+    this.router.navigate(['/reservar/encuesta'], {
+      queryParams: { appointmentId: this.appointmentId },
+    });
   }
 
 }

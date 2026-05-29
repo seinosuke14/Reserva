@@ -80,6 +80,13 @@ export interface ICompanyPublicService {
   serviceImage: string | null;
 }
 
+export interface ICompanyPublicReview {
+  rating: number;
+  comment: string | null;
+  reviewerName: string | null;
+  createdAt: string;
+}
+
 export interface ICompanyPublicMember {
   id: string;
   name: string;
@@ -87,6 +94,7 @@ export interface ICompanyPublicMember {
   profileImage: string | null;
   slug?: string;
   services: ICompanyPublicService[];
+  reviews: ICompanyPublicReview[];
 }
 
 export interface ICompanyPublicPaymentMethod {

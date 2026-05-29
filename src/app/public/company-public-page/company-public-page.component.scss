@@ -232,6 +232,118 @@
   &:hover { background: $accent-hover; box-shadow: 0 5px 18px rgba($accent,.45); transform: translateY(-1px); }
 }
 
+.profile-service-card {
+  cursor: pointer;
+  &.selected {
+    border-color: $accent;
+    box-shadow: 0 4px 20px rgba($accent, .15);
+  }
+}
+
+// ─── Reviews inline ──────────────────────────────────────────────────────────
+
+.psc-reviews {
+  background: $canvas;
+  border: 1px solid $border;
+  border-top: none;
+  border-radius: 0 0 1rem 1rem;
+  padding: 1.25rem;
+  margin-top: -.25rem;
+}
+
+.psc-reviews-empty {
+  font-size: .8125rem;
+  color: $muted-light;
+  text-align: center;
+  margin: 0;
+}
+
+.psc-reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.psc-reviews-title {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: $text;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.psc-reviews-count {
+  font-size: .75rem;
+  color: $muted;
+}
+
+.psc-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+
+.psc-review-card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: .75rem;
+  padding: .875rem 1rem;
+}
+
+.psc-review-header {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+
+.psc-review-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba($accent, .12);
+  color: $accent;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.psc-review-meta {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.psc-review-name {
+  font-size: .8125rem;
+  font-weight: 600;
+  color: $text;
+}
+
+.psc-review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.psc-review-date {
+  font-size: .7rem;
+  color: $muted-light;
+}
+
+.psc-review-comment {
+  font-size: .8125rem;
+  color: $muted;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: calc(32px + .75rem);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 .no-members {
   text-align: center;
   padding: 3rem 1rem;
@@ -527,4 +639,12 @@
   font-size: .85rem;
   color: #64748b;
   strong { color: $accent; font-family: monospace; letter-spacing: .05em; }
+}
+
+.btn-transfer-confirm {
+  @include btn-secondary;
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  font-size: .9rem;
 }

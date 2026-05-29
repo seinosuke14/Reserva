@@ -174,3 +174,51 @@
   display: flex; align-items: center; justify-content: center;
   color: $accent; flex-shrink: 0;
 }
+
+// ─── Reviews ─────────────────────────────────────────────
+
+.profile-reviews-section { margin-bottom: 2rem; }
+
+.reviews-list { display: flex; flex-direction: column; gap: .75rem; }
+
+.review-card {
+  background: #fff; border: 1.5px solid $border; border-radius: 1rem;
+  padding: 1.25rem;
+  @media (max-width: 767px) {
+    background: transparent; border: none; border-bottom: 1px solid $border;
+    border-radius: 0; padding: .875rem 0;
+  }
+}
+
+.review-header {
+  display: flex; align-items: center; gap: .75rem; margin-bottom: .625rem;
+}
+
+.review-avatar {
+  width: 2.25rem; height: 2.25rem; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #{$accent}cc, #{$accent}55);
+  color: #fff; font-size: .875rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.review-meta {
+  flex: 1; display: flex; flex-direction: column; gap: .2rem;
+}
+
+.review-name {
+  font-size: .875rem; font-weight: 700; color: $text; line-height: 1.2;
+}
+
+.review-stars {
+  display: flex; gap: .1rem;
+}
+
+.review-date {
+  font-size: .75rem; color: $muted-light; flex-shrink: 0;
+  @media (max-width: 480px) { display: none; }
+}
+
+.review-comment {
+  font-size: .8125rem; color: #374151; line-height: 1.65;
+  margin: 0; white-space: pre-line;
+}

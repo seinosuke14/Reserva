@@ -1,0 +1,178 @@
+@use '../styles/shared' as *;
+
+:host { display: block; }
+
+.survey-page {
+  min-height: 100vh;
+  background: $canvas;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.survey-card {
+  @include card(1.5rem);
+  width: 100%;
+  max-width: 520px;
+  padding: 2.5rem 2rem;
+}
+
+// ─── Header ──────────────────────────────────────────────
+
+.survey-header { text-align: center; margin-bottom: 2rem; }
+
+.survey-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: $text;
+  margin: 0 0 .5rem;
+}
+
+.survey-subtitle {
+  font-size: .875rem;
+  color: $muted;
+  margin: 0;
+}
+
+// ─── Stars ───────────────────────────────────────────────
+
+.stars-section { text-align: center; margin-bottom: 1.75rem; }
+
+.stars-label {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.stars-row {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  margin-bottom: .75rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: .25rem;
+  border-radius: .5rem;
+  transition: transform .15s;
+  &:hover, &.active { transform: scale(1.15); }
+}
+
+.rating-label {
+  font-size: .875rem;
+  font-weight: 600;
+  color: $accent;
+  margin: 0;
+  min-height: 1.25rem;
+}
+
+// ─── Comment ─────────────────────────────────────────────
+
+.comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+}
+
+.comment-label {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: $text;
+}
+
+.optional {
+  font-weight: 400;
+  color: $muted;
+  margin-left: .25rem;
+}
+
+.comment-textarea {
+  @include input-base;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.char-count {
+  font-size: .75rem;
+  color: $muted-light;
+  text-align: right;
+}
+
+// ─── Actions ─────────────────────────────────────────────
+
+.survey-actions {
+  display: flex;
+  gap: .75rem;
+}
+
+.btn-primary {
+  @include btn-primary;
+  flex: 1;
+  font-size: .875rem;
+}
+
+.btn-secondary {
+  @include btn-secondary;
+  flex: 0 0 auto;
+  padding: .75rem 1.25rem;
+  font-size: .875rem;
+  border-radius: .625rem;
+}
+
+// ─── State blocks ────────────────────────────────────────
+
+.state-block {
+  text-align: center;
+  padding: 1rem 0;
+
+  h2 {
+    font-size: 1.375rem;
+    font-weight: 800;
+    color: $text;
+    margin: 0 0 .5rem;
+  }
+
+  p {
+    font-size: .875rem;
+    color: $muted;
+    margin: 0 0 1.75rem;
+    line-height: 1.6;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    flex: none;
+    padding: .75rem 2rem;
+  }
+}
+
+.state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+
+  &--success {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  &--error {
+    background: #fee2e2;
+    color: $error;
+  }
+}
