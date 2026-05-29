@@ -14,7 +14,8 @@ interface IAppointment {
   date: string;
   time: string;
   notes: string | null;
-  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
+  rated:    boolean;
   customer: { id: string; name: string; email?: string };
   service:  { id: string; name: string; duration?: number };
 }
@@ -268,6 +269,29 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       const updated = this.appointments().find(a => a.id === id) ?? null;
       this.selectedAppointment.set(updated);
     } catch { /* silencioso */ }
+  }
+
+  readonly finalizingId = signal<string | null>(null);
+
+  isAppointmentPast(apt: IAppointment): boolean {
+    const [year, month, day] = apt.date.substring(0, 10).split('-').map(Number);
+    const [hour, minute]     = apt.time.split(':').map(Number);
+    const apptPlusOne = new Date(year, month - 1, day, hour, minute + 1, 0, 0);
+    return new Date() >= apptPlusOne;
+  }
+
+  async markAsFinalized(id: string): Promise<void> {
+    if (this.finalizingId()) return;
+    this.finalizingId.set(id);
+    try {
+      await firstValueFrom(
+        this.http.patch(`${environment.apiUrl}/appointments/${id}/status`, { paymentStatus: 'Finalizada' })
+      );
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch { /* silencioso */ }
+    finally { this.finalizingId.set(null); }
   }
 
   private _toDateStr(date: Date): string {

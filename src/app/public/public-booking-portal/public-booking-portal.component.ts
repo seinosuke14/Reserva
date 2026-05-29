@@ -71,9 +71,10 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   } | null>(null);
 
   readonly stars = [1, 2, 3, 4, 5];
-  readonly services     = signal<IPublicService[]>([]);
-  readonly availability = signal<IDayAvailability[]>([]);
+  readonly services       = signal<IPublicService[]>([]);
+  readonly availability   = signal<IDayAvailability[]>([]);
   readonly paymentMethods = signal<IPublicPaymentMethod[]>([]);
+  readonly reviews        = signal<any[]>([]);
 
   // ─── Modo de vista ──────────────────────────────────────────────────────────
   readonly viewMode        = signal<'profile' | 'checkout'>('profile');
@@ -85,8 +86,9 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly selectedHour    = signal<string | null>(null);
   readonly selectedPayment = signal<IPublicPaymentMethod | null>(null);
   readonly isSubmitting    = signal(false);
-  readonly isBooked        = signal(false);
-  readonly bookingRef      = signal('');
+  readonly isBooked           = signal(false);
+  readonly bookingRef         = signal('');
+  readonly bookedAppointmentId = signal('');
   readonly copiedTransfer       = signal(false);
   readonly acceptedClientTerms  = signal(false);
 
@@ -324,6 +326,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       if (data.professional.bodyFont)    this._loadFont(data.professional.bodyFont);
       this.services.set(data.services);
       this.availability.set(data.availability);
+      this.reviews.set(data.reviews ?? []);
       const visibleMethods: IPublicPaymentMethod[] = (data.paymentMethods ?? [])
         .filter((m: IPublicPaymentMethod) => m.provider !== 'webpay' && m.provider !== 'mercadopago');
       this.paymentMethods.set(visibleMethods);
@@ -482,11 +485,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
       if (provider === 'transfer') {
         this.bookingRef.set(res.bookingRef ?? '');
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url && res.token) {
         window.location.href = res.url;
       } else {
         this.bookingRef.set(res.bookingRef);
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       }
     } catch (err: any) {
