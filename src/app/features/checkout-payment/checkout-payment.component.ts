@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer';
+type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'stripe';
 
 interface IPaymentMethod {
   id: string;
@@ -48,9 +48,18 @@ const ACCOUNT_TYPES = [
 
 const PROVIDERS: ProviderConfig[] = [
   {
+    provider: 'khipu',
+    label: 'Khipu',
+    description: 'Transferencia bancaria automatica (confirmacion instantanea)',
+    icon: 'bank-transfer',
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'Llave de cobrador Khipu', type: 'password', maxlength: 128 },
+    ],
+  },
+  {
     provider: 'flow',
     label: 'Flow',
-    description: 'Tarjetas, debito y transferencia electronica',
+    description: 'Tarjetas, debito y transferencia electronica (credenciales propias)',
     icon: 'credit-card',
     fields: [
       { key: 'apiKey',     label: 'API Key',    placeholder: 'API Key de Flow',    type: 'text',     maxlength: 128 },
@@ -58,18 +67,34 @@ const PROVIDERS: ProviderConfig[] = [
     ],
   },
   {
+    provider: 'mercadopago',
+    label: 'MercadoPago',
+    description: 'Tarjetas y medios digitales (credenciales propias)',
+    icon: 'wallet',
+    fields: [
+      { key: 'accessToken', label: 'Access Token', placeholder: 'APP_USR-xxxxx... (token de produccion)', type: 'password', maxlength: 256 },
+    ],
+  },
+  {
     provider: 'transfer',
-    label: 'Transferencia Bancaria',
-    description: 'Pago directo a cuenta bancaria',
+    label: 'Transferencia Bancaria Manual',
+    description: 'El cliente te transfiere directamente y confirmas el pago',
     icon: 'bank',
     fields: [
-      { key: 'bankName',      label: 'Banco',               placeholder: 'Selecciona un banco',          type: 'select', options: CHILEAN_BANKS },
-      { key: 'accountType',   label: 'Tipo de Cuenta',      placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
-      { key: 'accountNumber', label: 'Numero de Cuenta',    placeholder: 'Ej: 12345678',                 type: 'text',  maxlength: 20, inputmode: 'numeric' },
-      { key: 'rut',           label: 'RUT',                 placeholder: 'Ej: 12.345.678-9',             type: 'text',  maxlength: 12 },
-      { key: 'holderName',    label: 'Titular',             placeholder: 'Nombre del titular',           type: 'text',  maxlength: 60 },
-      { key: 'email',         label: 'Email de notificacion', placeholder: 'pagos@email.com',            type: 'email', maxlength: 254 },
+      { key: 'bankName',      label: 'Banco',                 placeholder: 'Selecciona un banco',          type: 'select', options: CHILEAN_BANKS },
+      { key: 'accountType',   label: 'Tipo de Cuenta',        placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
+      { key: 'accountNumber', label: 'Numero de Cuenta',      placeholder: 'Ej: 12345678',                 type: 'text',  maxlength: 20, inputmode: 'numeric' },
+      { key: 'rut',           label: 'RUT',                   placeholder: 'Ej: 12.345.678-9',             type: 'text',  maxlength: 12 },
+      { key: 'holderName',    label: 'Titular',               placeholder: 'Nombre del titular',           type: 'text',  maxlength: 60 },
+      { key: 'email',         label: 'Email de notificacion', placeholder: 'pagos@email.com',              type: 'email', maxlength: 254 },
     ],
+  },
+  {
+    provider: 'stripe',
+    label: 'Boton de pago de plataforma',
+    description: 'Cobro gestionado por la plataforma. Se descuenta comision + fee Stripe al momento del pago.',
+    icon: 'platform',
+    fields: [],
   },
 ];
 
@@ -85,6 +110,24 @@ export class CheckoutPaymentComponent implements OnInit {
   private readonly apiUrl = environment.apiUrl;
 
   readonly providers = PROVIDERS;
+
+  readonly providerSections = [
+    {
+      label: 'Nuestro botón de pago',
+      subtitle: 'Cobro gestionado por la plataforma — comisión fija descontada al profesional',
+      providers: PROVIDERS.filter(p => p.provider === 'stripe'),
+    },
+    {
+      label: 'Métodos de pago externos',
+      subtitle: 'El profesional usa sus propias credenciales — el dinero va directo a su cuenta',
+      providers: PROVIDERS.filter(p => (['flow', 'mercadopago'] as Provider[]).includes(p.provider)),
+    },
+    {
+      label: 'Transferencia bancaria',
+      subtitle: 'El pago va directamente del cliente al profesional',
+      providers: PROVIDERS.filter(p => (['khipu', 'transfer'] as Provider[]).includes(p.provider)),
+    },
+  ];
 
   isLoading = signal(true);
   savedMethods = signal<IPaymentMethod[]>([]);
@@ -160,15 +203,17 @@ export class CheckoutPaymentComponent implements OnInit {
 
   async saveMethod(config: ProviderConfig): Promise<void> {
     const credentials = this.formData();
-    const missing = config.fields.some(f => f.type !== 'select' && !credentials[f.key]?.trim() || f.type === 'select' && !credentials[f.key]);
-    if (missing) {
-      this.showFeedback('Todos los campos son obligatorios.', 'error');
-      return;
-    }
-    const exceeded = config.fields.find(f => f.maxlength && (credentials[f.key]?.length ?? 0) > f.maxlength);
-    if (exceeded) {
-      this.showFeedback(`"${exceeded.label}" supera el límite de ${exceeded.maxlength} caracteres.`, 'error');
-      return;
+    if (config.fields.length > 0) {
+      const missing = config.fields.some(f => f.type !== 'select' && !credentials[f.key]?.trim() || f.type === 'select' && !credentials[f.key]);
+      if (missing) {
+        this.showFeedback('Todos los campos son obligatorios.', 'error');
+        return;
+      }
+      const exceeded = config.fields.find(f => f.maxlength && (credentials[f.key]?.length ?? 0) > f.maxlength);
+      if (exceeded) {
+        this.showFeedback(`"${exceeded.label}" supera el límite de ${exceeded.maxlength} caracteres.`, 'error');
+        return;
+      }
     }
 
     this.isSaving.set(true);

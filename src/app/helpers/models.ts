@@ -36,7 +36,7 @@ export interface IDayAvailability {
 
 /** Método de pago público */
 export interface IPublicPaymentMethod {
-  provider: 'webpay' | 'flow' | 'mercadopago' | 'transfer';
+  provider: 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'stripe';
   transferInfo?: {
     bankName: string;
     accountType: string;
