@@ -41,6 +41,11 @@
       </svg>
       Enviar comprobante por WhatsApp
     </a>
+    @if (appointmentId()) {
+      <button class="btn-transfer-sent" (click)="goToSurvey()">
+        Confirmar transferencia
+      </button>
+    }
   } @else {
     <p>Tu reserva ha sido confirmada exitosamente.</p>
   }

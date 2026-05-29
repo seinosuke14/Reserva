@@ -63,7 +63,10 @@
             @if (bookingRef()) {
               <div class="booking-ref">Código: <strong>{{ bookingRef() }}</strong></div>
             }
-            <button class="psc-book-btn" style="margin-top:1.5rem;" (click)="backToProfile()">Volver a la empresa</button>
+            @if (bookedAppointmentId() && selectedPayment()?.provider === 'transfer') {
+              <button class="btn-transfer-confirm" (click)="goToSurvey()">Confirmar transferencia</button>
+            }
+            <button class="psc-book-btn" style="margin-top:.75rem;" (click)="backToProfile()">Volver a la empresa</button>
           </div>
 
         <!-- ══ MODO PERFIL ══ -->
@@ -120,7 +123,9 @@
 
                 <div class="profile-services-list">
                   @for (s of m.services; track s.id) {
-                    <div class="profile-service-card">
+                    <div class="profile-service-card"
+                      [class.selected]="selectedServiceId() === s.id"
+                      (click)="toggleServiceReviews(s.id)">
                       @if (s.serviceImage) {
                         <div class="psc-image">
                           <img [src]="s.serviceImage" [alt]="s.name" class="psc-image-img">
@@ -144,10 +149,52 @@
                           </div>
                         </div>
                         @if (m.slug) {
-                          <button class="psc-book-btn" (click)="book(m, s)">Agendar servicio</button>
+                          <button class="psc-book-btn" (click)="book(m, s); $event.stopPropagation()">Agendar servicio</button>
                         }
                       </div>
                     </div>
+
+                    <!-- Reviews del profesional — visible solo cuando el servicio está seleccionado -->
+                    @if (selectedServiceId() === s.id) {
+                      <div class="psc-reviews">
+                        @if (m.reviews.length === 0) {
+                          <p class="psc-reviews-empty">Aún no hay valoraciones para este profesional.</p>
+                        } @else {
+                          <div class="psc-reviews-header">
+                            <span class="psc-reviews-title">Opiniones de clientes</span>
+                            <span class="psc-reviews-count">{{ m.reviews.length }} reseña{{ m.reviews.length !== 1 ? 's' : '' }}</span>
+                          </div>
+                          <div class="psc-reviews-list">
+                            @for (r of m.reviews; track r.createdAt) {
+                              <div class="psc-review-card">
+                                <div class="psc-review-header">
+                                  <div class="psc-review-avatar">
+                                    {{ (r.reviewerName ?? 'A').charAt(0).toUpperCase() }}
+                                  </div>
+                                  <div class="psc-review-meta">
+                                    <span class="psc-review-name">{{ r.reviewerName ?? 'Anónimo' }}</span>
+                                    <div class="psc-review-stars">
+                                      @for (star of reviewStars(r.rating); track $index) {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                          [attr.fill]="star === 'filled' ? '#FBBF24' : 'none'"
+                                          [attr.stroke]="star === 'filled' ? '#FBBF24' : '#CBD5E1'"
+                                          stroke-width="1.5">
+                                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                        </svg>
+                                      }
+                                    </div>
+                                    <span class="psc-review-date">{{ formatReviewDate(r.createdAt) }}</span>
+                                  </div>
+                                </div>
+                                @if (r.comment) {
+                                  <p class="psc-review-comment">{{ r.comment }}</p>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
                   }
                 </div>
               </div>

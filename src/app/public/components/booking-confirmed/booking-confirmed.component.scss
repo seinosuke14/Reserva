@@ -22,3 +22,11 @@
   text-decoration: none; transition: background .2s;
   &:hover { background: #1da851; }
 }
+
+.btn-transfer-sent {
+  @include btn-secondary;
+  display: block;
+  width: 100%;
+  margin-top: .75rem;
+  font-size: .9rem;
+}

@@ -1,0 +1,107 @@
+<div class="survey-page">
+  <div class="survey-card">
+
+    <!-- Enviado / agradecimiento -->
+    @if (state() === 'submitted') {
+      <div class="state-block state-block--success">
+        <div class="state-icon state-icon--success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>¡Gracias por tu opinión!</h2>
+        <p>Tu valoración nos ayuda a seguir mejorando.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Omitido -->
+    @if (state() === 'skipped') {
+      <div class="state-block">
+        <h2>Encuesta omitida</h2>
+        <p>Puedes valorar tu experiencia en cualquier momento.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Ya valorada -->
+    @if (state() === 'already_rated') {
+      <div class="state-block">
+        <h2>Ya enviaste tu opinión</h2>
+        <p>Esta cita ya fue valorada anteriormente. ¡Gracias!</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (state() === 'error') {
+      <div class="state-block state-block--error">
+        <h2>Enlace no válido</h2>
+        <p>No se pudo cargar la encuesta. Inténtalo desde el correo de confirmación.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Formulario -->
+    @if (state() === 'form') {
+      <div class="survey-header">
+        <h1 class="survey-title">¿Cómo fue tu experiencia?</h1>
+        <p class="survey-subtitle">Tu opinión es voluntaria y nos ayuda a mejorar.</p>
+      </div>
+
+      <div class="stars-section">
+        <p class="stars-label">Selecciona tu puntuación</p>
+        <div class="stars-row">
+          @for (star of stars; track star) {
+            <button class="star-btn"
+              (mouseenter)="hoveredStar.set(star)"
+              (mouseleave)="hoveredStar.set(0)"
+              (click)="selectedRating.set(star)"
+              [class.active]="star <= (hoveredStar() || selectedRating())"
+              [attr.aria-label]="star + ' estrella' + (star > 1 ? 's' : '')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                [attr.fill]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : 'none'"
+                [attr.stroke]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : '#CBD5E1'"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          }
+        </div>
+        @if (selectedRating()) {
+          <p class="rating-label">
+            {{ selectedRating() === 1 ? 'Muy malo' : selectedRating() === 2 ? 'Malo' : selectedRating() === 3 ? 'Regular' : selectedRating() === 4 ? 'Bueno' : 'Excelente' }}
+          </p>
+        }
+      </div>
+
+      @if (selectedRating()) {
+        <div class="comment-section">
+          <label class="comment-label" for="survey-comment">
+            {{ commentQuestion }}
+            <span class="optional">(opcional)</span>
+          </label>
+          <textarea
+            id="survey-comment"
+            class="comment-textarea"
+            [(ngModel)]="comment"
+            rows="4"
+            maxlength="500"
+            [placeholder]="commentPlaceholder"></textarea>
+          <span class="char-count">{{ comment.length }}/500</span>
+        </div>
+      }
+
+      <div class="survey-actions">
+        <button class="btn-secondary" (click)="skip()">Omitir</button>
+        <button class="btn-primary"
+          (click)="submit()"
+          [disabled]="!selectedRating() || submitting()">
+          {{ submitting() ? 'Enviando...' : 'Enviar valoración' }}
+        </button>
+      </div>
+    }
+
+  </div>
+</div>

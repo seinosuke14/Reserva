@@ -12,6 +12,7 @@ import {
   ICompanyPublicMember,
   ICompanyPublicService,
   ICompanyPublicPaymentMethod,
+  ICompanyPublicReview,
 } from '../../core/services/company.service';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingStepIndicatorComponent } from '../components/booking-step-indicator/booking-step-indicator.component';
@@ -95,9 +96,12 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   copiedTransfer  = signal(false);
   acceptedTerms   = signal(false);
 
-  isSubmitting    = signal(false);
-  isBooked        = signal(false);
-  bookingRef      = signal('');
+  selectedServiceId  = signal<string | null>(null);
+
+  isSubmitting       = signal(false);
+  isBooked           = signal(false);
+  bookingRef         = signal('');
+  bookedAppointmentId = signal('');
 
   emailCheckState = signal<EmailCheckState>('idle');
   private emailDebounce: ReturnType<typeof setTimeout> | null = null;
@@ -173,12 +177,9 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     }
 
     // Pre-rellena el form si hay sesión (profesional o empresa)
-    const user    = this.auth.currentUser();
-    const company = this.svc.currentCompany();
+    const user = this.auth.currentUser();
     if (user) {
       this.form.patchValue({ name: user.name, email: user.email, phone: this._normalizePhone(user.phone ?? '') });
-    } else if (company) {
-      this.form.patchValue({ name: company.name, email: company.email });
     }
 
     this.sub = this.f['email'].valueChanges.subscribe(email => {
@@ -249,6 +250,22 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
+  goToSurvey(): void {
+    this.router.navigate(['/reservar/encuesta'], { queryParams: { appointmentId: this.bookedAppointmentId() } });
+  }
+
+  toggleServiceReviews(serviceId: string): void {
+    this.selectedServiceId.update(cur => cur === serviceId ? null : serviceId);
+  }
+
+  reviewStars(rating: number): string[] {
+    return Array.from({ length: 5 }, (_, i) => i < rating ? 'filled' : 'empty');
+  }
+
+  formatReviewDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
   async confirmBooking(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (!this.selectedPayment()) return;
@@ -268,6 +285,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       );
       if (this.selectedPayment()!.provider === 'transfer') {
         this.bookingRef.set(res.bookingRef ?? '');
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url) {
         window.location.href = res.url;
@@ -315,7 +333,8 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   private _buildPaymentMethods(raw: ICompanyPublicPaymentMethod[]): IPaymentMethodView[] {
     return raw.map(m => {
       if (m.provider === 'transfer') {
-        const c = m.credentials;
+        const raw = m.credentials;
+        const c: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
         return {
           provider: 'transfer' as const,
           transferInfo: {

@@ -44,10 +44,20 @@ export const routes: Routes = [
     path: 'p/:slug',
     redirectTo: 'reservar/:slug',
   },
-  // Resultado de pago Webpay (DEBE ir antes de /reservar/:slug para ser específico)
+  // Resultado de pago (DEBE ir antes de /reservar/:slug para ser específico)
   {
     path: 'reservar/pago-resultado',
     loadComponent: () => import('./public/payment-result/payment-result.component').then(m => m.PaymentResultComponent)
+  },
+  // Encuesta de satisfacción post-pago (voluntaria)
+  {
+    path: 'reservar/encuesta',
+    loadComponent: () => import('./public/satisfaction-survey/satisfaction-survey.component').then(m => m.SatisfactionSurveyComponent)
+  },
+  // Valoración de profesional post-servicio (via link de email)
+  {
+    path: 'valorar/:token',
+    loadComponent: () => import('./public/professional-rating/professional-rating.component').then(m => m.ProfessionalRatingComponent)
   },
   {
     path: 'planes',
