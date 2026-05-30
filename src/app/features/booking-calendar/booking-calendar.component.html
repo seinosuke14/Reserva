@@ -40,8 +40,12 @@
         @for (day of calendarGrid(); track $index) {
           @if (day) {
             <button (click)="selectDate(day)"
+              (dragover)="onCalendarDayDragOver($event, day)"
+              (dragleave)="onCalendarDayDragLeave()"
+              (drop)="onCalendarDayDrop($event, day)"
               class="aspect-square flex-center rounded-full text-[12px] font-medium transition-all relative"
-              [style.background]="isSameDay(day, selectedDate()) ? '#00C4A7' : ''"
+              [style.background]="isSameDay(day, selectedDate()) ? '#00C4A7' : (dragOverDate() === _toDateStr(day) ? 'rgba(0,196,167,.25)' : '')"
+              [style.outline]="dragOverDate() === _toDateStr(day) ? '2px solid #00C4A7' : ''"
               [style.color]="isSameDay(day, selectedDate()) ? '#fff' : isSameDay(day, today) ? '#00C4A7' : '#334155'"
               [style.fontWeight]="isSameDay(day, today) ? '700' : '500'">
               {{ day.getDate() }}
@@ -91,12 +95,11 @@
     </div>
   </div>
 
-  <!-- ── Right: day view ──────────────────────────────────────────────── -->
+  <!-- ── Right: week view ──────────────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
-    <!-- Day header -->
+    <!-- Week header -->
     <div class="bg-white border-b border-primary-100 px-4 md:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 md:gap-0 shrink-0">
-      <!-- Title + calendar button (first row, or left side on desktop) -->
       <div class="flex items-center gap-2.5 min-w-0">
         @if (isMobile()) {
           <button (click)="toggleLeftPanel()"
@@ -108,25 +111,24 @@
           </button>
         }
         <div class="min-w-0">
-          <h2 class="text-[15px] font-bold text-primary tracking-tight capitalize truncate">{{ dayLabel() }}</h2>
+          <h2 class="text-[15px] font-bold text-primary tracking-tight truncate">{{ weekLabel() }}</h2>
           <p class="text-[11.5px] text-primary-400 mt-0.5">
-            {{ dayStats().pagadas }} pagadas · {{ dayStats().pendientes }} pendientes
+            {{ weekStats().pagadas }} pagadas · {{ weekStats().pendientes }} pendientes esta semana
           </p>
         </div>
       </div>
 
-      <!-- Navigation buttons (second row on mobile, right side on desktop) -->
       <div class="flex items-center gap-2 flex-wrap">
-        <button (click)="prevDay()"
+        <button (click)="prevWeek()"
           class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button (click)="goToToday()"
           class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors whitespace-nowrap"
           style="border:1.5px solid #00C4A7;background:rgba(0,196,167,.08);color:#00C4A7;">
-          Hoy
+          Esta semana
         </button>
-        <button (click)="nextDay()"
+        <button (click)="nextWeek()"
           class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
           <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </button>
@@ -157,142 +159,129 @@
       </div>
     }
 
-    <!-- Hour grid -->
+    <!-- Week grid -->
     @if (!isLoading()) {
       <div class="flex-1 overflow-hidden flex flex-col">
 
-        <!-- ── Cabecera por profesional (sticky) ── -->
-        <div class="flex shrink-0 border-b border-primary-100 bg-white z-10">
+        <!-- ── Cabecera días de la semana (sticky) ── -->
+        <div class="flex shrink-0 border-b border-primary-100 bg-white z-10" style="min-width:max-content;">
           <div class="w-[68px] shrink-0"></div>
-          <!-- Una columna por profesional — añadir más aquí cuando haya más profesionales -->
-          <div class="w-[340px] shrink-0 border-l border-primary-100 px-3 py-2 flex items-center gap-2.5">
-            @if (auth.currentUser()?.profileImage) {
-              <img [src]="auth.currentUser()!.profileImage!" alt="Perfil"
-                class="w-[28px] h-[28px] rounded-full object-cover shrink-0"
-                style="box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(0,196,167,.35);">
-            } @else {
-              <div class="w-[28px] h-[28px] rounded-full flex-center text-white text-[11px] font-bold shrink-0"
-                   style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
-                          box-shadow:0 0 0 2px rgba(255,255,255,.2),0 2px 6px rgba(0,196,167,.35);">
-                {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}
+          @for (day of weekDays(); track $index) {
+            <div class="w-[130px] shrink-0 border-l border-primary-100 px-2 py-2 flex flex-col items-center gap-0.5 transition-colors"
+                 [style.background]="isSameDay(day, today) ? 'rgba(0,196,167,.04)' : ''">
+              <div class="text-[9.5px] font-bold Uppercase tracking-wider text-primary-400 capitalize">
+                {{ day.toLocaleDateString('es-ES', { weekday: 'short' }) }}
               </div>
-            }
-            <div>
-              <div class="text-[13px] font-bold text-primary leading-none">{{ auth.currentUser()?.name }}</div>
-              <div class="text-[10.5px] text-primary-400 mt-px">{{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }}</div>
+              <div class="text-[20px] font-black leading-none"
+                   [style.color]="isSameDay(day, today) ? '#00C4A7' : '#334155'">
+                {{ day.getDate() }}
+              </div>
+              @if (dayApptCount(day) > 0) {
+                <div class="text-[9px] font-bold px-1.5 py-px rounded-full"
+                     style="background:rgba(0,196,167,.1);color:#00C4A7;">
+                  {{ dayApptCount(day) }} cita{{ dayApptCount(day) !== 1 ? 's' : '' }}
+                </div>
+              }
             </div>
-          </div>
+          }
         </div>
 
-        <!-- ── Grilla scrolleable ── -->
+        <!-- ── Grilla semanal scrolleable ── -->
         <div class="flex-1 overflow-y-auto overflow-x-auto" style="background:#f8fafc;">
-          <div class="flex flex-col gap-2 py-3 pl-0">
-          @for (slot of slots(); track slot) {
+          <div style="min-width:max-content;">
+          @for (slot of allWeekSlots(); track slot) {
+            <div class="flex border-b border-primary-50 last:border-b-0" style="min-height:58px;">
 
-            <!-- Saltar slots de continuación — la card del slot inicial ya los cubre visualmente -->
-            @if (!getContinuationFor(slot)) {
-            <!-- ── Slot normal ── -->
-            <div class="flex items-start">
-
-              <!-- Slot label (gutter fijo) -->
-              <div class="w-[68px] shrink-0 pt-3 pr-3 text-right"
-                   [style.color]="isCurrentSlot(slot) ? '#00C4A7' : '#94a3b8'">
+              <!-- Gutter hora -->
+              <div class="w-[68px] shrink-0 flex flex-col items-end justify-start pt-2 pr-3"
+                   [style.color]="isCurrentTimeSlot(slot) ? '#00C4A7' : '#94a3b8'">
                 <div class="text-[11px] font-semibold tabular-nums">{{ slot }}</div>
-                @if (isCurrentSlot(slot)) {
-                  <div class="w-[5px] h-[5px] rounded-full ml-auto mt-1" style="background:#00C4A7;"></div>
+                @if (isCurrentTimeSlot(slot)) {
+                  <div class="w-[5px] h-[5px] rounded-full mt-1" style="background:#00C4A7;"></div>
                 }
               </div>
 
-              <!-- Columna del profesional (ancho fijo, fácil de duplicar) -->
-              <div class="w-[340px] shrink-0 flex gap-2 flex-wrap items-start"
-                   [class]="getAppointmentsAtSlot(slot).length === 0
-                     ? (isBlocked(slot) && !isBlockingMode()
-                         ? 'min-h-[76px] bg-red-50 rounded-[12px] border-[1.5px] border-red-200 p-2 items-center transition-colors'
-                         : 'min-h-[76px] bg-white rounded-[12px] border-[1.5px] border-dashed border-primary-200 p-2 items-center cursor-pointer hover:border-accent/40 transition-colors')
-                     : 'rounded-[12px] p-0'"
-                   (click)="getAppointmentsAtSlot(slot).length === 0 && !isBlockingMode() && !isBlocked(slot) && selectSlot(slot, false)"
-                   (click)="getAppointmentsAtSlot(slot).length === 0 && isBlockingMode() && toggleBlock(slot)">
+              <!-- Una celda por día -->
+              @for (day of weekDays(); track $index) {
+                @let dateStr = _toDateStr(day);
+                @let appt    = getApptAtDay(day, slot);
+                @let cont    = getContinuationForDay(day, slot);
+                @let isDragOver = dragOverSlot()?.dateStr === dateStr && dragOverSlot()?.slot === slot;
+                @let working = isWorkingSlot(day, slot);
+                @let blocked = isBlockedForDay(day, slot);
 
-                @if (getAppointmentsAtSlot(slot).length === 0) {
-                  @if (isBlockingMode()) {
-                    @if (isBlocked(slot)) {
-                      <div class="flex items-center gap-1.5 text-amber-500 text-[12px] font-medium">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        Bloqueado — clic para desbloquear
+                <div class="w-[130px] shrink-0 border-l border-primary-100 p-1 transition-colors relative"
+                     [style.background]="isDragOver ? 'rgba(0,196,167,.1)' : (!working && !appt && !cont ? 'rgba(0,0,0,.015)' : '')"
+                     [style.outline]="isDragOver ? '2px solid #00C4A7' : ''"
+                     (dragover)="onSlotDragOver($event, dateStr, slot)"
+                     (dragleave)="onSlotDragLeave()"
+                     (drop)="onSlotDrop($event, dateStr, slot)"
+                     (click)="!appt && !cont && working && !blocked && !isBlockingMode() && openNewApptForDay(day, slot)"
+                     (click)="!appt && !cont && working && isBlockingMode() && toggleBlock(slot, day)">
+
+                  @if (appt) {
+                    <!-- Tarjeta de cita (compacta) -->
+                    <div
+                      [draggable]="appt.paymentStatus === 'Pagado' || appt.paymentStatus === 'Pendiente'"
+                      (dragstart)="(appt.paymentStatus === 'Pagado' || appt.paymentStatus === 'Pendiente') && onDragStart($event, appt)"
+                      (dragend)="onDragEnd($event)"
+                      (click)="selectedAppointment.set(appt)"
+                      class="rounded-[9px] p-[5px_7px] flex flex-col gap-0.5 h-full transition-all hover:opacity-90 select-none"
+                      [class.cursor-grab]="appt.paymentStatus === 'Pagado' || appt.paymentStatus === 'Pendiente'"
+                      [class.cursor-pointer]="appt.paymentStatus !== 'Pagado' && appt.paymentStatus !== 'Pendiente'"
+                      style="border:1.5px solid rgba(0,196,167,.25);border-top:3px solid #00C4A7;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+                      <span class="text-[9.5px] font-bold tabular-nums leading-none" style="color:#00C4A7;">
+                        {{ appt.time }}
+                        <span class="ml-1 px-1 rounded text-[8.5px] font-semibold"
+                              [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : appt.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : 'rgba(245,158,11,.1)'"
+                              [style.color]="appt.paymentStatus === 'Pagado' ? '#16a34a' : appt.paymentStatus === 'Finalizada' ? '#2BB8A6' : '#d97706'">
+                          {{ appt.paymentStatus }}
+                        </span>
+                      </span>
+                      <span class="text-[10.5px] font-bold text-primary truncate">{{ appt.customer.name }}</span>
+                      <span class="text-[9.5px] text-primary-400 truncate">{{ appt.service.name }}</span>
+                    </div>
+
+                  } @else if (cont) {
+                    <!-- Continuación de cita multi-bloque -->
+                    <div class="rounded-[9px] h-full"
+                         style="background:rgba(0,196,167,.06);border-left:3px solid rgba(0,196,167,.3);"></div>
+
+                  } @else if (blocked) {
+                    <!-- Bloqueado -->
+                    @if (isBlockingMode()) {
+                      <div class="h-full flex items-center justify-center cursor-pointer"
+                           (click)="toggleBlock(slot, day)">
+                        <div class="text-[9px] font-semibold text-amber-600 px-1.5 py-0.5 rounded"
+                             style="background:rgba(245,158,11,.1);">Bloq.</div>
                       </div>
                     } @else {
-                      <div class="flex items-center gap-1.5 text-primary-300 text-[12px]">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                          <path d="M12 5v14M5 12h14"/>
-                        </svg>
-                        Clic para bloquear
+                      <div class="h-full flex items-center justify-center">
+                        <div class="text-[9px] font-semibold text-red-400 px-1.5 py-0.5 rounded"
+                             style="background:rgba(239,68,68,.07);">Bloq.</div>
                       </div>
                     }
-                  } @else {
-                    @if (isBlocked(slot)) {
-                      <div class="flex items-center gap-2 w-full">
-                        <div class="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-red-100 border border-red-300 text-red-700 text-[12px] font-semibold">
-                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                          </svg>
-                          Hora bloqueada
-                        </div>
+
+                  } @else if (working) {
+                    <!-- Disponible -->
+                    @if (isBlockingMode()) {
+                      <div class="h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                           (click)="toggleBlock(slot, day)">
+                        <svg width="10" height="10" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24">
+                          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
                       </div>
                     } @else {
-                      <div class="flex items-center gap-1.5 text-primary-300 text-[12px]">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                      <div class="h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                        <svg width="10" height="10" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
                           <path d="M12 5v14M5 12h14"/>
                         </svg>
-                        Disponible
                       </div>
                     }
                   }
-                }
-
-                @for (apt of getAppointmentsAtSlot(slot); track apt.id) {
-                  <div
-                    class="w-full sm:w-[200px] shrink-0 bg-white rounded-[13px] p-[10px_12px] flex flex-col gap-1.5 cursor-pointer transition-all hover:-translate-y-0.5"
-                    style="border:1.5px solid rgba(0,196,167,.25);border-top:3px solid #00C4A7;box-shadow:0 2px 10px rgba(0,0,0,.07);"
-                    [style.min-height.px]="getAppointmentBlocks(apt) * 84 - 8"
-                    (click)="selectedAppointment.set(apt)">
-
-                    <!-- Time + bloques + status -->
-                    <div class="flex-between gap-2">
-                      <span class="text-[10.5px] font-bold tabular-nums" style="color:#00C4A7;">
-                        {{ apt.time }} → {{ getAppointmentEndTime(apt) }}
-                        @if (getAppointmentBlocks(apt) > 1) {
-                          <span class="ml-1 px-1 py-px rounded text-[9px] font-black"
-                                style="background:rgba(0,196,167,.15);color:#00C4A7;">
-                            {{ getAppointmentBlocks(apt) }} bloques
-                          </span>
-                        }
-                      </span>
-                      <span class="text-[10.5px] font-semibold px-2 py-px rounded-full"
-                            [style.background]="apt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : apt.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : 'rgba(245,158,11,.1)'"
-                            [style.color]="apt.paymentStatus === 'Pagado' ? '#16a34a' : apt.paymentStatus === 'Finalizada' ? '#2BB8A6' : '#d97706'">
-                        {{ apt.paymentStatus }}
-                      </span>
-                    </div>
-
-                    <!-- Customer -->
-                    <div class="flex items-center gap-1.5">
-                      <div class="w-[22px] h-[22px] rounded-full flex-center text-white text-[9px] font-bold shrink-0"
-                           style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
-                        {{ apt.customer.name.charAt(0).toUpperCase() }}
-                      </div>
-                      <span class="text-[13px] font-bold text-primary truncate">{{ apt.customer.name }}</span>
-                    </div>
-
-                    <!-- Service -->
-                    <div class="text-[11.5px] text-primary-400 truncate">{{ apt.service.name }}</div>
-                  </div>
-                }
-              </div>
+                </div>
+              }
             </div>
-            }
           }
           </div>
         </div>
@@ -379,14 +368,17 @@
           <label class="form-label">Nombre *</label>
           <input type="text" [value]="na_name()"
                  (input)="onNameInput($any($event.target).value)"
+                 (blur)="onNameBlur()"
+                 autocomplete="off"
                  placeholder="Busca o escribe el nombre"
                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
                  style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
           <!-- Sugerencias de clientes existentes -->
-          @if (na_suggestions().length > 0) {
+          @if (na_showSuggestions() && na_suggestions().length > 0) {
             <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-200 rounded-[10px] shadow-lg z-10 overflow-hidden">
               @for (c of na_suggestions(); track c.id) {
                 <button type="button"
+                        (mousedown)="$event.preventDefault()"
                         (click)="selectSuggestedCustomer(c)"
                         class="w-full px-3 py-2 text-left hover:bg-primary-50 transition-colors flex items-center gap-2.5">
                   <div class="w-7 h-7 rounded-full flex-center text-white text-[10px] font-bold shrink-0"
@@ -482,18 +474,30 @@
     </div>
   }
 
+  <!-- ── Reschedule confirmation modal ──────────────────────── -->
+  @if (pendingReschedule()) {
+    <app-reschedule-confirm
+      [customerName]="pendingReschedule()!.apt.customer.name"
+      [newDate]="pendingReschedule()!.newDate"
+      [newTime]="pendingReschedule()!.newTime"
+      [saving]="rescheduleSaving()"
+      (confirmed)="confirmReschedule()"
+      (cancelled)="cancelReschedule()">
+    </app-reschedule-confirm>
+  }
+
   <!-- Appointment detail panel (fixed overlay) -->
   @if (selectedAppointment()) {
     <div @backdrop class="fixed inset-0 z-40"
          style="background:rgba(13,27,42,.45);backdrop-filter:blur(6px);"
-         (click)="selectedAppointment.set(null)"></div>
+         (click)="closeDetailPanel()"></div>
 
     <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
          style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
 
       <div class="px-6 py-5 border-b border-primary-100 flex-between">
         <h3 class="text-[16px] font-bold text-primary tracking-tight">Detalle de la cita</h3>
-        <button (click)="selectedAppointment.set(null)"
+        <button (click)="closeDetailPanel()"
           class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -560,6 +564,67 @@
             <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-2">Notas</div>
             <p class="text-[13px] text-primary-600 leading-relaxed break-words whitespace-pre-wrap">{{ selectedAppointment()!.notes }}</p>
           </div>
+        }
+
+        <!-- Cambiar horario -->
+        @if (selectedAppointment()!.paymentStatus === 'Pagado' || selectedAppointment()!.paymentStatus === 'Pendiente') {
+        <div class="border-t border-primary-100 pt-4">
+          @if (!isRescheduling()) {
+            <button (click)="openRescheduleEdit()"
+              class="w-full py-2.5 rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+              style="border:1.5px solid rgba(0,196,167,.4);color:#00C4A7;background:rgba(0,196,167,.06);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
+              </svg>
+              Cambiar horario
+            </button>
+          } @else {
+            <div class="space-y-3">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-primary-400">Nuevo horario</p>
+
+              <!-- Fecha -->
+              <div>
+                <label class="form-label">Fecha</label>
+                <input type="date" [value]="rs_date()" [min]="todayStr"
+                       (input)="rs_date.set($any($event.target).value); rs_time.set('')"
+                       class="w-full px-3 py-2.5 rounded-[10px] border text-[13px] text-primary focus:outline-none"
+                       style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+              </div>
+
+              <!-- Hora -->
+              <div>
+                <label class="form-label">Hora</label>
+                @if (rs_availableSlots().length === 0) {
+                  <p class="text-[12px] text-primary-400 italic pt-1">Sin horarios disponibles para esa fecha</p>
+                } @else {
+                  <select [value]="rs_time()"
+                          (change)="rs_time.set($any($event.target).value)"
+                          class="w-full px-3 py-2.5 rounded-[10px] border bg-white text-[13px] text-primary focus:outline-none"
+                          style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                    <option value="">Selecciona hora</option>
+                    @for (slot of rs_availableSlots(); track slot) {
+                      <option [value]="slot" [selected]="slot === rs_time()">{{ slot }}</option>
+                    }
+                  </select>
+                }
+              </div>
+
+              <!-- Acciones -->
+              <div class="flex gap-2 pt-1">
+                <button (click)="isRescheduling.set(false)"
+                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-500 hover:bg-primary-50 transition-colors">
+                  Cancelar
+                </button>
+                <button (click)="submitRescheduleFromPanel()"
+                  [disabled]="!rs_time() || (rs_date() === selectedAppointment()!.date && rs_time() === selectedAppointment()!.time)"
+                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-40"
+                  style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          }
+        </div>
         }
       </div>
     </div>

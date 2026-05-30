@@ -28,7 +28,12 @@
       "Bash(Get-ChildItem \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\\\\public-booking-portal\" -Recurse)",
       "Bash(Select-Object FullName)",
       "Bash(sed 's/^[[:space:]]*//')",
-      "Bash(powershell -Command ' *)"
+      "Bash(powershell -Command ' *)",
+      "Bash(dir \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\" /AD /B)",
+      "Bash(findstr \"\\\\\"severity\\\\\": \\\\\"Error\\\\\"\")",
+      "PowerShell(Select-String -Path \"C:\\\\Users\\\\diego\\\\.claude\\\\projects\\\\e--mini-projectos-proyectos-profesionales-desarrollo-agendamiento-Agendamiento-panel-professional-dashboard-angular\\\\76706962-2dee-4055-a79e-da45d0ab36f8\\\\tool-results\\\\hook-toolu_0171bCMz4JrvXaiqg4mZof1a-2-additionalContext.txt\" -Pattern '\"severity\": \"Error\"' | Select-Object -First 5 | ForEach-Object { $_.Line })",
+      "Bash(Get-ChildItem -Path \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\" -Recurse)",
+      "Bash(Select-Object -First 50)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
