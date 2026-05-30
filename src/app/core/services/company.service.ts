@@ -318,6 +318,17 @@ export class CompanyService {
     }
   }
 
+  async rescheduleAppointment(id: string, date: string, time: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.put(`${API_BASE}/company/appointments/${id}/reschedule`, { date, time })
+      );
+      return { success: true, message: res.message };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al reagendar.' };
+    }
+  }
+
   async updateAppointmentStatus(id: string, paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado'): Promise<{ success: boolean; message: string }> {
     try {
       const res: any = await firstValueFrom(

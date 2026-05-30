@@ -124,12 +124,23 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     const service = this.bookingService();
     const avail   = this.availability();
     if (!service) return avail;
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+
     return avail.map(day => {
-      const slotDur     = this._inferSlotDuration(day.slots);
+      const isToday      = day.date === todayStr;
+      const slotDur      = this._inferSlotDuration(day.slots);
       const blocksNeeded = Math.ceil(service.duration / slotDur);
-      if (blocksNeeded <= 1) return day;
-      const slotMap = new Map(day.slots.map(s => [s.time, s.available]));
-      const filteredSlots = day.slots.map(slot => {
+
+      const withPast = day.slots.map(slot => {
+        if (isToday && this._isSlotPast(slot.time)) return { ...slot, available: false };
+        return slot;
+      });
+
+      if (blocksNeeded <= 1) return { ...day, slots: withPast };
+
+      const slotMap = new Map(withPast.map(s => [s.time, s.available]));
+      const filteredSlots = withPast.map(slot => {
         if (!slot.available) return slot;
         const [h, m]   = slot.time.split(':').map(Number);
         const startMin = h * 60 + m;
@@ -144,6 +155,13 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       return { ...day, slots: filteredSlots };
     });
   });
+
+  private _isSlotPast(slotTime: string): boolean {
+    const [h, m] = slotTime.split(':').map(Number);
+    const slot   = new Date();
+    slot.setHours(h, m, 0, 0);
+    return slot < new Date();
+  }
 
   private _inferSlotDuration(slots: ITimeSlot[]): number {
     if (slots.length < 2) return 30;
