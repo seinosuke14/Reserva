@@ -310,10 +310,20 @@
                 @for (m of agendaMembers(); track m.id) {
                 @let appt = agendaApptAt(m, slot);
                 @let cont = agendaIsContinuation(m, slot);
-                <div class="w-[140px] md:w-[180px] shrink-0 border-r border-slate-100 last:border-r-0 p-0.5 md:p-1"
-                  [class.bg-slate-50]="!!cont">
+                @let isDragOver = agendaDragOverSlot()?.memberId === m.id && agendaDragOverSlot()?.slot === slot;
+                <div class="w-[140px] md:w-[180px] shrink-0 border-r border-slate-100 last:border-r-0 p-0.5 md:p-1 transition-colors"
+                  [class.bg-slate-50]="!!cont && !isDragOver"
+                  [style.outline]="isDragOver ? '2px solid #00C4A7' : ''"
+                  [style.background]="isDragOver ? 'rgba(0,196,167,.08)' : ''"
+                  (dragover)="agendaOnSlotDragOver($event, m.id, slot)"
+                  (dragleave)="agendaOnSlotDragLeave()"
+                  (drop)="agendaOnSlotDrop($event, m.id, slot)">
                   @if (appt) {
-                  <button class="w-full rounded-[5px] px-1.5 py-1 h-full flex flex-col gap-0.5 text-left transition-opacity hover:opacity-80"
+                  <button
+                    draggable="true"
+                    (dragstart)="agendaOnDragStart($event, appt, m.id)"
+                    (dragend)="agendaOnDragEnd($event)"
+                    class="w-full rounded-[5px] px-1.5 py-1 h-full flex flex-col gap-0.5 text-left transition-opacity hover:opacity-80 cursor-grab active:cursor-grabbing"
                     [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.1)' : 'rgba(0,196,167,.1)'"
                     [style.border-left]="'3px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : '#00C4A7')"
                     (click)="agendaSelectedAppt.set({ appt: appt, memberName: m.name })">
@@ -339,15 +349,27 @@
       </div>
     </div>
 
+    <!-- ── Reschedule confirmation modal ── -->
+    @if (agendaPendingReschedule()) {
+      <app-reschedule-confirm
+        [customerName]="agendaPendingReschedule()!.appt.customer.name"
+        [newDate]="agendaPendingReschedule()!.newDate"
+        [newTime]="agendaPendingReschedule()!.newTime"
+        [saving]="agendaRescheduleSaving()"
+        (confirmed)="agendaConfirmReschedule()"
+        (cancelled)="agendaCancelReschedule()">
+      </app-reschedule-confirm>
+    }
+
     <!-- ── Modal detalle de cita ── -->
     @if (agendaSelectedAppt()) {
     <div class="fixed inset-0 bg-black/40 z-50 flex-center p-4"
-      (click)="agendaSelectedAppt.set(null)">
+      (click)="closeAgendaDetail()">
       <div class="bg-white rounded-[18px] w-full max-w-sm shadow-2xl p-6 relative"
         (click)="$event.stopPropagation()">
 
         <!-- Cerrar -->
-        <button (click)="agendaSelectedAppt.set(null)"
+        <button (click)="closeAgendaDetail()"
           class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 flex-center text-slate-500 hover:bg-slate-200 transition-colors">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -416,6 +438,64 @@
             class="w-full py-2.5 rounded-[12px] text-[13px] font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all disabled:opacity-60">
             Cancelar reserva
           </button>
+        </div>
+        }
+
+        <!-- Cambiar horario -->
+        @if (agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' || agendaSelectedAppt()!.appt.paymentStatus === 'Pendiente') {
+        <div class="mt-4 pt-4 border-t border-slate-100">
+          @if (!agendaIsRescheduling()) {
+            <button (click)="openAgendaRescheduleEdit()"
+              class="w-full py-2.5 rounded-[12px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+              style="border:1.5px solid rgba(0,196,167,.4);color:#00C4A7;background:rgba(0,196,167,.06);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
+              </svg>
+              Cambiar horario
+            </button>
+          } @else {
+            <div class="space-y-3">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Nuevo horario</p>
+
+              <div>
+                <label class="text-[11px] font-semibold text-slate-500 block mb-1">Fecha</label>
+                <input type="date" [value]="agendaRsDate()" [min]="_todayStr()"
+                       (input)="agendaRsDate.set($any($event.target).value); agendaRsTime.set('')"
+                       class="w-full px-3 py-2 rounded-[10px] border border-slate-200 text-[13px] text-slate-800 focus:outline-none"
+                       style="border-color:rgba(0,196,167,.4);">
+              </div>
+
+              <div>
+                <label class="text-[11px] font-semibold text-slate-500 block mb-1">Hora</label>
+                @if (agendaRsAvailableSlots().length === 0) {
+                  <p class="text-[12px] text-slate-400 italic pt-1">Sin horarios disponibles para esa fecha</p>
+                } @else {
+                <select [value]="agendaRsTime()"
+                        (change)="agendaRsTime.set($any($event.target).value)"
+                        class="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-white text-[13px] text-slate-800 focus:outline-none"
+                        style="border-color:rgba(0,196,167,.4);">
+                  <option value="">Selecciona hora</option>
+                  @for (slot of agendaRsAvailableSlots(); track slot) {
+                    <option [value]="slot" [selected]="slot === agendaRsTime()">{{ slot }}</option>
+                  }
+                </select>
+                }
+              </div>
+
+              <div class="flex gap-2">
+                <button (click)="agendaIsRescheduling.set(false)"
+                  class="flex-1 py-2 rounded-[10px] text-[12.5px] font-semibold border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+                  Cancelar
+                </button>
+                <button (click)="submitAgendaRescheduleFromPanel()"
+                  [disabled]="!agendaRsTime() || (agendaRsDate() === agendaDate() && agendaRsTime() === agendaSelectedAppt()!.appt.time) || _isPastSlot(agendaRsDate(), agendaRsTime())"
+                  class="flex-1 py-2 rounded-[10px] text-[12.5px] font-bold text-white disabled:opacity-40"
+                  style="background:#00C4A7;">
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          }
         </div>
         }
 
