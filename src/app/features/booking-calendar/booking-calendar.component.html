@@ -626,8 +626,40 @@
           }
         </div>
         }
+
+        <!-- Cancelar cita (solo Pagado/Pendiente con más de 24h de antelación) -->
+        @if (canCancelAppointment(selectedAppointment()!)) {
+        <div class="border-t border-primary-100 pt-4">
+          @if (cancelError()) {
+            <p class="text-[11.5px] text-red-500 text-center mb-2">{{ cancelError() }}</p>
+          }
+          <button (click)="requestCancel(selectedAppointment()!)"
+            class="w-full py-2.5 rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+            style="border:1.5px solid rgba(239,68,68,.35);color:#ef4444;background:rgba(239,68,68,.05);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="8" x2="16" y2="16"/>
+              <line x1="16" y1="8" x2="8" y2="16"/>
+            </svg>
+            Cancelar cita
+          </button>
+        </div>
+        }
       </div>
     </div>
   }
 </div>
+
+<!-- ── Cancel confirmation modal ──────────────────────── -->
+@if (pendingCancel()) {
+  <app-cancel-confirm
+    [customerName]="pendingCancel()!.customer.name"
+    [appointmentDate]="pendingCancel()!.date"
+    [appointmentTime]="pendingCancel()!.time"
+    [hasRefund]="isCancellationWithRefund(pendingCancel()!)"
+    [saving]="cancelSaving()"
+    (confirmed)="confirmCancel()"
+    (cancelled)="dismissCancel()">
+  </app-cancel-confirm>
+}
 
