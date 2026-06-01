@@ -1,0 +1,113 @@
+<div class="rating-page">
+  <div class="rating-card">
+
+    <!-- Cargando -->
+    @if (state() === 'loading') {
+      <div class="state-block">
+        <div class="spinner"></div>
+        <p class="loading-text">Cargando formulario...</p>
+      </div>
+    }
+
+    <!-- Inválido -->
+    @if (state() === 'invalid') {
+      <div class="state-block">
+        <div class="state-icon state-icon--error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+        <h2>Enlace no válido</h2>
+        <p>Este enlace no existe o ya ha expirado.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Ya usado -->
+    @if (state() === 'already_used') {
+      <div class="state-block">
+        <div class="state-icon state-icon--success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>Ya registraste tu respuesta</h2>
+        <p>Este formulario ya fue completado. Gracias por dejarnos tu registro.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Enviado -->
+    @if (state() === 'submitted') {
+      <div class="state-block">
+        <div class="state-icon state-icon--success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>¡Registro guardado!</h2>
+        <p>Gracias por dejarnos saber la razón de la cancelación. Tu respuesta nos ayuda a mejorar el servicio.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Formulario -->
+    @if (state() === 'form' && data) {
+      <!-- Professional header -->
+      <div class="professional-header">
+        @if (data.professional.profileImage) {
+          <img [src]="data.professional.profileImage" class="prof-avatar-img" [alt]="data.professional.name">
+        } @else {
+          <div class="prof-avatar">{{ data.professional.name.charAt(0) }}</div>
+        }
+        <div class="prof-info">
+          <h3 class="prof-name">{{ data.professional.name }}</h3>
+          <p class="prof-specialty">{{ data.professional.specialty }}</p>
+        </div>
+      </div>
+
+      <p class="survey-intro">
+        @if (data.reviewerName) {
+          Hola <strong>{{ data.reviewerName }}</strong>,
+        }
+        la cita del <strong>{{ formatDate(data.appointment.date) }}</strong>
+        a las <strong>{{ data.appointment.time }}</strong> fue cancelada.
+        Si lo deseas, puedes dejarnos un registro de la razón.
+      </p>
+
+      <div class="cancellation-notice">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Este registro es voluntario y de uso interno. No afecta la relación con el profesional.
+      </div>
+
+      <!-- Razón de cancelación -->
+      <div class="comment-section">
+        <label class="comment-label" for="cancellation-reason">
+          ¿Cuál es la razón de la cancelación?
+        </label>
+        <textarea
+          id="cancellation-reason"
+          class="comment-textarea"
+          [(ngModel)]="reason"
+          rows="5"
+          maxlength="800"
+          placeholder="Ej: El profesional canceló sin aviso previo, el horario no estaba disponible, etc."></textarea>
+        <span class="char-count">{{ reason.length }}/800</span>
+      </div>
+
+      <button class="btn-primary btn-submit"
+        (click)="submit()"
+        [disabled]="!reason.trim() || submitting()">
+        {{ submitting() ? 'Enviando...' : 'Enviar registro' }}
+      </button>
+    }
+
+  </div>
+</div>

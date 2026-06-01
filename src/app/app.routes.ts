@@ -59,6 +59,11 @@ export const routes: Routes = [
     path: 'valorar/:token',
     loadComponent: () => import('./public/professional-rating/professional-rating.component').then(m => m.ProfessionalRatingComponent)
   },
+  // Registro de razón de cancelación (via link de email)
+  {
+    path: 'cancelar/:token',
+    loadComponent: () => import('./public/cancellation-form/cancellation-form.component').then(m => m.CancellationFormComponent)
+  },
   {
     path: 'planes',
     loadComponent: () => import('./features/plan-selection/plan-selection.component').then(m => m.PlanSelectionComponent)

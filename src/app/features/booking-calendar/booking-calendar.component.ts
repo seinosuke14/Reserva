@@ -9,6 +9,7 @@ import { ScheduleBlockService } from '../../core/services/schedule-block.service
 import { WorkScheduleService, jsToDow } from '../../core/services/work-schedule.service';
 import { environment } from '../../../environments/environment';
 import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
+import { CancelConfirmComponent } from '../../components/cancel-confirm/cancel-confirm.component';
 
 interface IAppointment {
   id: string;
@@ -39,7 +40,7 @@ interface ICustomer {
 @Component({
   selector: 'app-booking-calendar',
   standalone: true,
-  imports: [CommonModule, RescheduleConfirmComponent],
+  imports: [CommonModule, RescheduleConfirmComponent, CancelConfirmComponent],
   templateUrl: './booking-calendar.component.html',
   animations: [
     trigger('fadeSlide', [
@@ -556,6 +557,53 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   cancelReschedule(): void {
     this.pendingReschedule.set(null);
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Cancelación de cita ───────────────────────────────────────
+  readonly pendingCancel  = signal<IAppointment | null>(null);
+  readonly cancelSaving   = signal(false);
+  readonly cancelError    = signal('');
+
+  canCancelAppointment(apt: IAppointment): boolean {
+    return apt.paymentStatus !== 'Cancelado' && apt.paymentStatus !== 'Finalizada';
+  }
+
+  isCancellationWithRefund(apt: IAppointment): boolean {
+    const [y, m, d] = apt.date.split('-').map(Number);
+    const [h, min]  = apt.time.split(':').map(Number);
+    const apptDate  = new Date(y, m - 1, d, h, min, 0, 0);
+    return apptDate.getTime() - Date.now() >= 24 * 60 * 60 * 1000;
+  }
+
+  requestCancel(apt: IAppointment): void {
+    this.cancelError.set('');
+    this.pendingCancel.set(apt);
+  }
+
+  dismissCancel(): void {
+    this.pendingCancel.set(null);
+    this.cancelError.set('');
+  }
+
+  async confirmCancel(): Promise<void> {
+    const apt = this.pendingCancel();
+    if (!apt || this.cancelSaving()) return;
+    this.cancelSaving.set(true);
+    this.cancelError.set('');
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/cancel`, {})
+      );
+      this.pendingCancel.set(null);
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === apt.id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch (err: any) {
+      this.cancelError.set(err?.error?.message ?? 'Error al cancelar la cita.');
+    } finally {
+      this.cancelSaving.set(false);
+    }
   }
   // ─────────────────────────────────────────────────────────────
 
