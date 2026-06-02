@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { IPlan } from '../../../../core/services/subscription.service';
 import { LandingPlan, PlanMeta } from '../../landing.models';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CompanyService } from '../../../../core/services/company.service';
 
 @Component({
   selector: 'app-landing-pricing',
@@ -18,9 +19,12 @@ export class LandingPricingComponent {
   @Input() checkingOut: 'team' | 'pro_max' | null = null;
   @Output() checkoutPlan = new EventEmitter<{ plan: string; members: number }>();
 
-  private readonly auth = inject(AuthService);
-  isAuthenticated   = computed(() => this.auth.isAuthenticated());
-  isProfessional    = computed(() => this.auth.isAuthenticated() && !this.auth.currentUser()?.companyId);
+  private readonly auth    = inject(AuthService);
+  private readonly company = inject(CompanyService);
+
+  isAuthenticated = computed(() => this.auth.isAuthenticated());
+  isProfessional  = computed(() => this.auth.isAuthenticated());
+  isCompany       = computed(() => this.company.isAuthenticated());
 
   readonly PRO_MAX_MIN = 5;
   readonly PRO_MAX_MAX = 25;
@@ -106,8 +110,7 @@ export class LandingPricingComponent {
       })
       .filter((p): p is LandingPlan => p !== null);
 
-    if (this.companyMode)        return all.filter(p => p.id === 'team' || p.id === 'pro_max');
-    if (this.isProfessional())   return all.filter(p => p.id !== 'team' && p.id !== 'pro_max');
+    if (this.companyMode) return all.filter(p => p.id === 'team' || p.id === 'pro_max');
     return all;
   }
 }
