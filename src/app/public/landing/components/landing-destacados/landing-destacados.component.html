@@ -9,7 +9,7 @@
     @if (loading()) {
       <div class="carousel-loading">Cargando destacados...</div>
     } @else if (pros().length === 0) {
-      <div class="carousel-empty">Próximamente los mejores profesionales destacados.</div>
+      <div class="carousel-empty">Sé el primero en ser publicado aquí, en base a tus evaluaciones.</div>
     } @else {
       <div class="carousel">
         <button class="carousel-arrow left" (click)="prevCarousel()" aria-label="Anterior">‹</button>
