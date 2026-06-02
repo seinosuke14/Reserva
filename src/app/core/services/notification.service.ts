@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -33,7 +34,8 @@ type SeenMap = Record<string, string>;
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly http = inject(HttpClient);
+  private readonly http       = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _notifications = signal<INotification[]>([]);
   private _timer: ReturnType<typeof setInterval> | null = null;
@@ -43,6 +45,7 @@ export class NotificationService {
 
   /** Inicia carga y polling automático */
   async load(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
     await this._fetch();
     if (!this._timer) {
       this._timer = setInterval(() => this._fetch(), POLL_MS);
@@ -156,10 +159,12 @@ export class NotificationService {
   }
 
   private _loadSeen(): SeenMap {
+    if (!isPlatformBrowser(this.platformId)) return {};
     try { return JSON.parse(localStorage.getItem(SEEN_KEY) ?? '{}'); } catch { return {}; }
   }
 
   private _writeSeen(seen: SeenMap): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     localStorage.setItem(SEEN_KEY, JSON.stringify(seen));
   }
 

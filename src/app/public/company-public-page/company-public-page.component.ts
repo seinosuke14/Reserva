@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -8,6 +9,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 import {
   CompanyService,
+  ICompanyBrand,
   ICompanyPublicPage,
   ICompanyPublicMember,
   ICompanyPublicService,
@@ -48,12 +50,16 @@ interface IPaymentMethodView {
   styleUrls: ['./company-public-page.component.scss'],
 })
 export class CompanyPublicPageComponent implements OnInit, OnDestroy {
-  private readonly svc    = inject(CompanyService);
-  private readonly route  = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly http   = inject(HttpClient);
-  private readonly fb     = inject(FormBuilder);
-  readonly auth           = inject(AuthService);
+  private readonly svc        = inject(CompanyService);
+  private readonly route      = inject(ActivatedRoute);
+  private readonly router     = inject(Router);
+  private readonly http       = inject(HttpClient);
+  private readonly fb         = inject(FormBuilder);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document   = inject(DOCUMENT);
+  readonly auth               = inject(AuthService);
+  private readonly titleSvc   = inject(Title);
+  private readonly metaSvc    = inject(Meta);
 
   readonly formatCLP  = formatCLP;
   readonly formatDate = formatDateLong;
@@ -190,6 +196,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       this.paymentMethods.set(methods);
       if (methods.length === 1) this.selectedPayment.set(methods[0]);
       this.state.set('ready');
+      this._setMeta(res.company);
     } else {
       this.state.set('error');
     }
@@ -306,7 +313,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
         this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url) {
-        window.location.href = res.url;
+        this.document.defaultView!.location.href = res.url;
       } else {
         this.bookingRef.set(res.bookingRef ?? '');
         this.isBooked.set(true);
@@ -348,6 +355,21 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
+  private _setMeta(company: ICompanyBrand): void {
+    const title = `${company.name} · Reserva tu Hora Online | Agenda Citas | Lets Reserve`;
+    const desc  = `Reserva tu hora con ${company.name} online. Agenda citas, consulta horarios disponibles y reserva en un clic. Sistema de agendamiento online en Lets Reserve.`;
+    const image = company.backgroundImage ?? 'https://letsreserve.cl/letsReserve.png';
+    this.titleSvc.setTitle(title);
+    this.metaSvc.updateTag({ name: 'description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:title', content: title });
+    this.metaSvc.updateTag({ property: 'og:description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:image', content: image });
+    this.metaSvc.updateTag({ property: 'og:url', content: `https://letsreserve.cl/empresa/${this.route.snapshot.paramMap.get('slug')}` });
+    this.metaSvc.updateTag({ name: 'twitter:title', content: title });
+    this.metaSvc.updateTag({ name: 'twitter:description', content: desc });
+    this.metaSvc.updateTag({ name: 'twitter:image', content: image });
+  }
+
   private _buildPaymentMethods(raw: ICompanyPublicPaymentMethod[]): IPaymentMethodView[] {
     return raw.map(m => {
       if (m.provider === 'transfer') {
@@ -370,13 +392,13 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   }
 
   private _loadFontIfNeeded(family: string | null | undefined): void {
-    if (!family) return;
+    if (!family || !isPlatformBrowser(this.platformId)) return;
     const id = `gfont-co-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
+    if (this.document.getElementById(id)) return;
+    const link = this.document.createElement('link');
     link.id = id; link.rel = 'stylesheet';
     link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    document.head.appendChild(link);
+    this.document.head.appendChild(link);
   }
 
   private _normalizePhone(value: string): string {

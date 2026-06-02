@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, inject, signal, computed, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
@@ -31,6 +32,8 @@ export class PlanSelectionComponent implements OnInit {
   private readonly subscriptionSvc = inject(SubscriptionService);
   private readonly authSvc         = inject(AuthService);
   private readonly router          = inject(Router);
+  private readonly titleSvc        = inject(Title);
+  private readonly metaSvc         = inject(Meta);
 
   plans           = signal<IPlan[]>([]);
   activating      = signal<PlanType | null>(null);
@@ -111,6 +114,16 @@ export class PlanSelectionComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.companyMode) {
+      const title = 'Planes y Precios · Sistema de Agendamiento Online | Lets Reserve';
+      const desc  = 'Elige el plan de agendamiento ideal para tu negocio. Sistema de reservas online para gestionar citas, agenda y clientes. Prueba gratis hoy.';
+      this.titleSvc.setTitle(title);
+      this.metaSvc.updateTag({ name: 'description', content: desc });
+      this.metaSvc.updateTag({ name: 'keywords', content: 'precio sistema agendamiento, plan reservas online, software agenda citas precio, agendamiento online Chile' });
+      this.metaSvc.updateTag({ property: 'og:title', content: title });
+      this.metaSvc.updateTag({ property: 'og:description', content: desc });
+      this.metaSvc.updateTag({ property: 'og:url', content: 'https://letsreserve.cl/planes' });
+    }
     this.subscriptionSvc.getPlans().then(p => {
       this.plans.set(p);
       if (this.companySubStatus?.hasPlan && this.companySubStatus.maxMembers) {

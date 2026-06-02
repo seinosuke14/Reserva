@@ -1,5 +1,6 @@
-import { Component, signal, computed, inject, effect, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, inject, effect, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,13 +46,17 @@ type LoadState = 'loading' | 'ready' | 'error';
   styleUrl: './public-booking-portal.component.scss'
 })
 export class PublicBookingPortalComponent implements OnInit, OnDestroy {
-  private readonly fb       = inject(FormBuilder);
-  private readonly route    = inject(ActivatedRoute);
-  private readonly router   = inject(Router);
-  private readonly http     = inject(HttpClient);
-  private readonly quoteSvc = inject(QuoteService);
-  readonly auth             = inject(AuthService);
-  private readonly company  = inject(CompanyService);
+  private readonly fb         = inject(FormBuilder);
+  private readonly route      = inject(ActivatedRoute);
+  private readonly router     = inject(Router);
+  private readonly http       = inject(HttpClient);
+  private readonly quoteSvc   = inject(QuoteService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document   = inject(DOCUMENT);
+  readonly auth               = inject(AuthService);
+  private readonly company    = inject(CompanyService);
+  private readonly titleSvc   = inject(Title);
+  private readonly metaSvc    = inject(Meta);
   readonly formatCLP        = formatCLP;
   readonly formatDate       = formatDateLong;
 
@@ -148,14 +153,30 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     return f ? { 'font-family': `${f}, sans-serif` } : {};
   });
 
+  private _setMeta(prof: { name: string; specialty: string; profileImage?: string | null; bannerImage?: string | null }, slug: string): void {
+    const title = `${prof.name} · ${prof.specialty} | Reserva tu Hora Online | Lets Reserve`;
+    const desc  = `Reserva tu cita con ${prof.name} (${prof.specialty}) online. Agenda tu hora, consulta disponibilidad y confirma tu reserva en segundos. Sistema de agendamiento Lets Reserve.`;
+    const image = prof.bannerImage ?? prof.profileImage ?? 'https://letsreserve.cl/letsReserve.png';
+    this.titleSvc.setTitle(title);
+    this.metaSvc.updateTag({ name: 'description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:title', content: title });
+    this.metaSvc.updateTag({ property: 'og:description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:image', content: image });
+    this.metaSvc.updateTag({ property: 'og:url', content: `https://letsreserve.cl/reservar/${slug}` });
+    this.metaSvc.updateTag({ name: 'twitter:title', content: title });
+    this.metaSvc.updateTag({ name: 'twitter:description', content: desc });
+    this.metaSvc.updateTag({ name: 'twitter:image', content: image });
+  }
+
   private _loadFont(family: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     const id = `gfont-portal-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
+    if (this.document.getElementById(id)) return;
+    const link = this.document.createElement('link');
     link.id   = id;
     link.rel  = 'stylesheet';
     link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    document.head.appendChild(link);
+    this.document.head.appendChild(link);
   }
 
   // ─── Computed ───────────────────────────────────────────────────────────────
@@ -355,6 +376,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.selectedPayment.set(visibleMethods[0]);
       }
       this.loadState.set('ready');
+      this._setMeta(data.professional, slug);
     } catch (err: any) {
       if (err?.status === 404) {
         this.router.navigate(['/app']);
@@ -504,7 +526,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url && res.token) {
-        window.location.href = res.url;
+        this.document.defaultView!.location.href = res.url;
       } else {
         this.bookingRef.set(res.bookingRef);
         this.bookedAppointmentId.set(res.appointmentId ?? '');
