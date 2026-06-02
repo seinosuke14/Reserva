@@ -105,7 +105,9 @@
           } @else if (p.comingSoon) {
             <span class="btn btn-soon" aria-disabled="true">Próximamente</span>
           } @else if (p.id === 'free') {
-            @if (isAuthenticated()) {
+            @if (isCompany()) {
+              <span class="btn btn-outline btn-disabled" aria-disabled="true">Ya estás en una cuenta empresa</span>
+            } @else if (isAuthenticated()) {
               <span [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline') + ' btn-disabled'" aria-disabled="true">
                 Ya tienes una cuenta
               </span>
@@ -115,13 +117,19 @@
               </a>
             }
           } @else if (p.id === 'team' || p.id === 'pro_max') {
-            <a routerLink="/registro-empresa" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
-              Crear cuenta empresa
-            </a>
-            <div class="plan-cta-login">
-              ¿Ya tienes cuenta empresa?
-              <a routerLink="/login" class="plan-cta-login-link">Iniciar sesión</a>
-            </div>
+            @if (isProfessional()) {
+              <span class="btn btn-outline btn-disabled" aria-disabled="true">Ya eres cuenta profesional</span>
+            } @else {
+              <a routerLink="/registro-empresa" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+                Crear cuenta empresa
+              </a>
+              <div class="plan-cta-login">
+                ¿Ya tienes cuenta empresa?
+                <a routerLink="/login" class="plan-cta-login-link">Iniciar sesión</a>
+              </div>
+            }
+          } @else if (isCompany()) {
+            <span class="btn btn-outline btn-disabled" aria-disabled="true">Ya estás en una cuenta empresa</span>
           } @else if (isAuthenticated()) {
             <a routerLink="/planes" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
               Contratar plan

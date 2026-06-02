@@ -131,37 +131,4 @@ export class ProfileComponent {
     }
   }
 
-  // ── Contraseña ──────────────────────────────────────────────────────────────
-  pwCurrent  = signal('');
-  pwNew      = signal('');
-  pwConfirm  = signal('');
-  pwSaving   = signal(false);
-  pwMsg      = signal<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  async changePassword(): Promise<void> {
-    const current = this.pwCurrent().trim();
-    const newPw   = this.pwNew().trim();
-    const confirm = this.pwConfirm().trim();
-
-    if (!current || !newPw || !confirm) {
-      this.pwMsg.set({ type: 'error', text: 'Completa todos los campos.' }); return;
-    }
-    if (newPw !== confirm) {
-      this.pwMsg.set({ type: 'error', text: 'Las contraseñas no coinciden.' }); return;
-    }
-    if (!/^(?=.*[A-Z])(?=.*\d).{6,16}$/.test(newPw)) {
-      this.pwMsg.set({ type: 'error', text: 'Entre 6 y 16 caracteres, 1 mayúscula y 1 número.' }); return;
-    }
-
-    this.pwSaving.set(true);
-    this.pwMsg.set(null);
-    const result = await this.auth.changePassword(current, newPw);
-    this.pwSaving.set(false);
-    if (result.success) {
-      this.pwCurrent.set(''); this.pwNew.set(''); this.pwConfirm.set('');
-      this.pwMsg.set({ type: 'success', text: 'Contraseña actualizada correctamente.' });
-    } else {
-      this.pwMsg.set({ type: 'error', text: result.message });
-    }
-  }
 }
