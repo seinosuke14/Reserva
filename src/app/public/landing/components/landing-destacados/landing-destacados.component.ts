@@ -1,4 +1,5 @@
-import { Component, signal, computed, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, ViewEncapsulation, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface Pro {
   name: string;
@@ -19,6 +20,7 @@ export interface Pro {
 export class LandingDestacadosComponent implements OnInit, OnDestroy {
   carouselIdx = signal(0);
   private intervalId?: ReturnType<typeof setInterval>;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly pros: Pro[] = [
     {
@@ -56,6 +58,7 @@ export class LandingDestacadosComponent implements OnInit, OnDestroy {
   currentPro = computed(() => this.pros[this.carouselIdx()]);
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     this.intervalId = setInterval(() => {
       this.carouselIdx.update(i => (i + 1) % this.pros.length);
     }, 6500);

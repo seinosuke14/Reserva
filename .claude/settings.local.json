@@ -34,7 +34,12 @@
       "PowerShell(Select-String -Path \"C:\\\\Users\\\\diego\\\\.claude\\\\projects\\\\e--mini-projectos-proyectos-profesionales-desarrollo-agendamiento-Agendamiento-panel-professional-dashboard-angular\\\\76706962-2dee-4055-a79e-da45d0ab36f8\\\\tool-results\\\\hook-toolu_0171bCMz4JrvXaiqg4mZof1a-2-additionalContext.txt\" -Pattern '\"severity\": \"Error\"' | Select-Object -First 5 | ForEach-Object { $_.Line })",
       "Bash(Get-ChildItem -Path \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\" -Recurse)",
       "Bash(Select-Object -First 50)",
-      "Bash(Get-ChildItem -Path \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\" -Directory)"
+      "Bash(Get-ChildItem -Path \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\" -Directory)",
+      "PowerShell(npm show @angular/animations@19.2.x version 2>&1)",
+      "Bash(npm view *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"console.log\\('ssr', require\\('@angular/ssr/package.json'\\).version\\)\")",
+      "Bash(npm run *)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

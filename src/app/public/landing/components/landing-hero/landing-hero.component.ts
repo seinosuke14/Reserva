@@ -1,4 +1,5 @@
-import { Component, signal, computed, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, ViewEncapsulation, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 export interface Vertical {
@@ -52,6 +53,7 @@ export class LandingHeroComponent implements OnInit, OnDestroy {
   currentVertical = computed(() => this.verticals[this.vertical()]);
 
   private timer: ReturnType<typeof setInterval> | null = null;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   ngOnInit() { this.startTimer(); }
   ngOnDestroy() { this.stopTimer(); }
@@ -64,6 +66,7 @@ export class LandingHeroComponent implements OnInit, OnDestroy {
   private startTimer() {
     this.stopTimer();
     this.progress.set(0);
+    if (!this.isBrowser) return;
     this.timer = setInterval(() => {
       const next = this.progress() + 1;
       if (next > 100) {
