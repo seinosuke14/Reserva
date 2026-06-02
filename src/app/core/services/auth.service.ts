@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { IProfessional } from './professional.service';
@@ -13,7 +14,8 @@ const API_BASE    = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
+  private readonly http       = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _user = signal<IProfessional | null>(this._loadFromStorage());
 
@@ -31,6 +33,7 @@ export class AuthService {
   // ─── Helpers privados ───────────────────────────────────────────────────────
 
   private _loadFromStorage(): IProfessional | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : null;
@@ -38,6 +41,7 @@ export class AuthService {
   }
 
   private _ensureGuestId(): string {
+    if (!isPlatformBrowser(this.platformId)) return '';
     let id = localStorage.getItem(GUEST_KEY);
     if (!id) {
       id = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
@@ -49,6 +53,7 @@ export class AuthService {
   // ─── Token ──────────────────────────────────────────────────────────────────
 
   getToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
     return localStorage.getItem(TOKEN_KEY);
   }
 
@@ -91,8 +96,10 @@ export class AuthService {
       );
       const user: IProfessional = res.user;
       this._user.set(user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      localStorage.setItem(TOKEN_KEY, res.token);
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(TOKEN_KEY, res.token);
+      }
       return { success: true, message: res.message, user };
     } catch (err: any) {
       const message = err?.error?.message ?? 'Error al iniciar sesión.';
@@ -110,8 +117,10 @@ export class AuthService {
       );
       const user: IProfessional = res.user;
       this._user.set(user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      localStorage.setItem(TOKEN_KEY, res.token);
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(TOKEN_KEY, res.token);
+      }
       // Vincular citas previas de visita anónima
       this.linkGuestAppointments(user.id!);
       return { success: true, message: res.message, user };
@@ -126,6 +135,7 @@ export class AuthService {
    * Esto permite que si un visitante se registra post-reserva, no pierda su historial.
    */
   linkGuestAppointments(newUserId: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     const guestId = localStorage.getItem(GUEST_KEY);
     if (!guestId) return;
     // En producción: llamar a POST /api/appointments/link-guest { guestId, userId }
@@ -160,8 +170,10 @@ export class AuthService {
   /** Establece sesión completa (token + usuario) — usado tras verificación de email */
   setSession(token: string, user: IProfessional): void {
     this._user.set(user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    localStorage.setItem(TOKEN_KEY, token);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      localStorage.setItem(TOKEN_KEY, token);
+    }
   }
 
   /** Actualiza el usuario en memoria y en localStorage (ej: tras editar perfil) */
@@ -170,12 +182,16 @@ export class AuthService {
     if (!current) return;
     const updated = { ...current, ...partial };
     this._user.set(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    }
   }
 
   logout(): void {
     this._user.set(null);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(TOKEN_KEY);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+    }
   }
 }
