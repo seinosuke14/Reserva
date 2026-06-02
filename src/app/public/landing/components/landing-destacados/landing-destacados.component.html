@@ -3,38 +3,58 @@
     <div class="section-head">
       <div class="section-eyebrow">Profesionales destacados</div>
       <h2 class="h2">Los mejor puntuados <span class="serif">optimizan su clientela con LETS RESERVE.</span></h2>
-      <p class="lead">Historias reales de negocios que pasaron del caos al control total.</p>
+      <p class="lead">Negocios reales que pasaron del caos al control total.</p>
     </div>
-    <div class="carousel">
-      <button class="carousel-arrow left" (click)="prevCarousel()" aria-label="Anterior">‹</button>
-      <div class="carousel-card">
-        <div class="carousel-img" [style.background]="currentPro().bg">
-          <div class="carousel-initial">{{ currentPro().initial }}</div>
-          <span class="carousel-photo-label">[ foto · {{ proCategory(currentPro().loc) }} ]</span>
-        </div>
-        <div class="carousel-body">
-          <p class="carousel-quote">{{ currentPro().quote }}</p>
-          <div class="carousel-meta">
-            <div class="carousel-name">{{ currentPro().name }}</div>
-            <div class="carousel-loc">{{ currentPro().loc }}</div>
-          </div>
-          <div class="carousel-stats">
-            @for (s of currentPro().stats; track $index) {
-              <div>
-                <div class="v">{{ s[0] }}</div>
-                <div class="l">{{ s[1] }}</div>
-              </div>
+
+    @if (loading()) {
+      <div class="carousel-loading">Cargando destacados...</div>
+    } @else if (pros().length === 0) {
+      <div class="carousel-empty">Sé el primero en ser publicado aquí, en base a tus evaluaciones.</div>
+    } @else {
+      <div class="carousel">
+        <button class="carousel-arrow left" (click)="prevCarousel()" aria-label="Anterior">‹</button>
+        <div class="carousel-card">
+          <div class="carousel-img" [style.background]="currentPro()!.profileImage ? 'transparent' : fallbackBg(carouselIdx())">
+            @if (currentPro()!.profileImage) {
+              <img
+                [src]="currentPro()!.profileImage!"
+                [alt]="currentPro()!.name"
+                class="carousel-photo"
+                loading="lazy" />
+            } @else {
+              <div class="carousel-initial">{{ initial(currentPro()!.name) }}</div>
             }
+            <span class="carousel-photo-label">{{ proCategory(currentPro()!.specialty) }}</span>
+          </div>
+          <div class="carousel-body">
+            <div class="carousel-meta">
+              <div class="carousel-name">{{ currentPro()!.name }}</div>
+              <div class="carousel-loc">{{ currentPro()!.specialty }}</div>
+            </div>
+            <div class="carousel-stats">
+              <div>
+                <div class="v">{{ currentPro()!.rating }} ★</div>
+                <div class="l">Rating</div>
+              </div>
+              <div>
+                <div class="v">{{ currentPro()!.reviewCount }}</div>
+                <div class="l">Reseñas</div>
+              </div>
+              <div>
+                <div class="v">{{ currentPro()!.appointmentCount }}</div>
+                <div class="l">Citas realizadas</div>
+              </div>
+            </div>
           </div>
         </div>
+        <button class="carousel-arrow right" (click)="nextCarousel()" aria-label="Siguiente">›</button>
       </div>
-      <button class="carousel-arrow right" (click)="nextCarousel()" aria-label="Siguiente">›</button>
-    </div>
-    <div class="carousel-dots">
-      @for (p of pros; track $index; let i = $index) {
-        <button [class]="'dot' + (i === carouselIdx() ? ' active' : '')" (click)="setCarousel(i)"
-          [attr.aria-label]="'Ver profesional ' + (i + 1)"></button>
-      }
-    </div>
+      <div class="carousel-dots">
+        @for (p of pros(); track p.id; let i = $index) {
+          <button [class]="'dot' + (i === carouselIdx() ? ' active' : '')" (click)="setCarousel(i)"
+            [attr.aria-label]="'Ver ' + p.name"></button>
+        }
+      </div>
+    }
   </div>
 </section>

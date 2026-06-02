@@ -7,7 +7,7 @@ html { scroll-behavior: smooth; }
 /* Variables */
 :root {
   --lp-blue-500: #2BB8A6;
-  --lp-blue-600: $accent-hover;
+  --lp-blue-600: #22a494;
   --lp-blue-700: #008c75;
   --lp-gold: #E8943A;
   --lp-gold-soft: #fef4e8;
