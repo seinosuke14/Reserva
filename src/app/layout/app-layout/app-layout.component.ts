@@ -154,6 +154,7 @@ export class AppLayoutComponent {
   }
 
   handleLogout() {
+    this.notifSvc.stopPolling();
     this.auth.logout();
     this.router.navigate(['/landing']);
   }

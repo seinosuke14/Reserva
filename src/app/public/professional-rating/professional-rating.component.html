@@ -1,0 +1,127 @@
+<div class="rating-page">
+  <div class="rating-card">
+
+    <!-- Cargando -->
+    @if (state() === 'loading') {
+      <div class="state-block">
+        <div class="spinner"></div>
+        <p class="loading-text">Cargando encuesta...</p>
+      </div>
+    }
+
+    <!-- Inválido -->
+    @if (state() === 'invalid') {
+      <div class="state-block">
+        <div class="state-icon state-icon--error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+        <h2>Enlace no válido</h2>
+        <p>Este enlace de encuesta no existe o ha expirado.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Ya usado -->
+    @if (state() === 'already_used') {
+      <div class="state-block">
+        <div class="state-icon state-icon--success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>Ya enviaste tu opinión</h2>
+        <p>Esta encuesta ya fue completada. ¡Gracias por tu valoración!</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Enviado -->
+    @if (state() === 'submitted') {
+      <div class="state-block">
+        <div class="state-icon state-icon--success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>¡Gracias por tu valoración!</h2>
+        <p>Tu opinión es muy importante y ayuda a otros clientes a encontrar al profesional ideal.</p>
+        <button class="btn-primary" (click)="goHome()">Volver al inicio</button>
+      </div>
+    }
+
+    <!-- Formulario -->
+    @if (state() === 'form' && data) {
+      <!-- Professional header -->
+      <div class="professional-header">
+        @if (data.professional.profileImage) {
+          <img [src]="data.professional.profileImage" class="prof-avatar-img" [alt]="data.professional.name">
+        } @else {
+          <div class="prof-avatar">{{ data.professional.name.charAt(0) }}</div>
+        }
+        <div class="prof-info">
+          <h3 class="prof-name">{{ data.professional.name }}</h3>
+          <p class="prof-specialty">{{ data.professional.specialty }}</p>
+        </div>
+      </div>
+
+      <p class="survey-intro">
+        @if (data.reviewerName) {
+          Hola <strong>{{ data.reviewerName }}</strong>,
+        }
+        cuéntanos cómo fue tu experiencia con este profesional.
+      </p>
+
+      <!-- Stars -->
+      <div class="stars-section">
+        <p class="stars-label">¿Cómo calificarías la atención?</p>
+        <div class="stars-row">
+          @for (star of stars; track star) {
+            <button class="star-btn"
+              (mouseenter)="hoveredStar.set(star)"
+              (mouseleave)="hoveredStar.set(0)"
+              (click)="selectedRating.set(star)"
+              [class.active]="star <= (hoveredStar() || selectedRating())"
+              [attr.aria-label]="star + ' estrella' + (star > 1 ? 's' : '')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                [attr.fill]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : 'none'"
+                [attr.stroke]="star <= (hoveredStar() || selectedRating()) ? '#FBBF24' : '#CBD5E1'"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          }
+        </div>
+        @if (selectedRating()) {
+          <p class="rating-label">{{ ratingLabel }}</p>
+        }
+      </div>
+
+      <!-- Comment -->
+      <div class="comment-section">
+        <label class="comment-label" for="prof-comment">
+          Comentario <span class="optional">(opcional)</span>
+        </label>
+        <textarea
+          id="prof-comment"
+          class="comment-textarea"
+          [(ngModel)]="comment"
+          rows="4"
+          maxlength="500"
+          placeholder="Comparte detalles de tu experiencia con este profesional..."></textarea>
+        <span class="char-count">{{ comment.length }}/500</span>
+      </div>
+
+      <button class="btn-primary btn-submit"
+        (click)="submit()"
+        [disabled]="!selectedRating() || submitting()">
+        {{ submitting() ? 'Enviando...' : 'Enviar valoración' }}
+      </button>
+    }
+
+  </div>
+</div>

@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -80,6 +81,13 @@ export interface ICompanyPublicService {
   serviceImage: string | null;
 }
 
+export interface ICompanyPublicReview {
+  rating: number;
+  comment: string | null;
+  reviewerName: string | null;
+  createdAt: string;
+}
+
 export interface ICompanyPublicMember {
   id: string;
   name: string;
@@ -87,6 +95,7 @@ export interface ICompanyPublicMember {
   profileImage: string | null;
   slug?: string;
   services: ICompanyPublicService[];
+  reviews: ICompanyPublicReview[];
 }
 
 export interface ICompanyPublicPaymentMethod {
@@ -133,7 +142,8 @@ const API_BASE          = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class CompanyService {
-  private readonly http = inject(HttpClient);
+  private readonly http       = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _company = signal<ICompany | null>(this._load());
 
@@ -141,6 +151,7 @@ export class CompanyService {
   readonly isAuthenticated = computed(() => !!this._company());
 
   private _load(): ICompany | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
     try {
       const saved = localStorage.getItem(COMPANY_KEY);
       return saved ? JSON.parse(saved) : null;
@@ -148,13 +159,16 @@ export class CompanyService {
   }
 
   getToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
     return localStorage.getItem(COMPANY_TOKEN_KEY);
   }
 
   setSession(token: string, company: ICompany): void {
     this._company.set(company);
-    localStorage.setItem(COMPANY_KEY, JSON.stringify(company));
-    localStorage.setItem(COMPANY_TOKEN_KEY, token);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(COMPANY_KEY, JSON.stringify(company));
+      localStorage.setItem(COMPANY_TOKEN_KEY, token);
+    }
   }
 
   patchCompany(partial: Partial<ICompany>): void {
@@ -162,13 +176,17 @@ export class CompanyService {
     if (!current) return;
     const updated = { ...current, ...partial };
     this._company.set(updated);
-    localStorage.setItem(COMPANY_KEY, JSON.stringify(updated));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(COMPANY_KEY, JSON.stringify(updated));
+    }
   }
 
   logout(): void {
     this._company.set(null);
-    localStorage.removeItem(COMPANY_KEY);
-    localStorage.removeItem(COMPANY_TOKEN_KEY);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(COMPANY_KEY);
+      localStorage.removeItem(COMPANY_TOKEN_KEY);
+    }
   }
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -307,6 +325,17 @@ export class CompanyService {
       return { success: true, message: 'Marca actualizada.' };
     } catch (err: any) {
       return { success: false, message: err?.error?.message ?? 'Error al guardar.' };
+    }
+  }
+
+  async rescheduleAppointment(id: string, date: string, time: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.put(`${API_BASE}/company/appointments/${id}/reschedule`, { date, time })
+      );
+      return { success: true, message: res.message };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al reagendar.' };
     }
   }
 

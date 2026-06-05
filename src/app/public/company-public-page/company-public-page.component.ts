@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -8,10 +9,12 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 import {
   CompanyService,
+  ICompanyBrand,
   ICompanyPublicPage,
   ICompanyPublicMember,
   ICompanyPublicService,
   ICompanyPublicPaymentMethod,
+  ICompanyPublicReview,
 } from '../../core/services/company.service';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingStepIndicatorComponent } from '../components/booking-step-indicator/booking-step-indicator.component';
@@ -47,12 +50,16 @@ interface IPaymentMethodView {
   styleUrls: ['./company-public-page.component.scss'],
 })
 export class CompanyPublicPageComponent implements OnInit, OnDestroy {
-  private readonly svc    = inject(CompanyService);
-  private readonly route  = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly http   = inject(HttpClient);
-  private readonly fb     = inject(FormBuilder);
-  readonly auth           = inject(AuthService);
+  private readonly svc        = inject(CompanyService);
+  private readonly route      = inject(ActivatedRoute);
+  private readonly router     = inject(Router);
+  private readonly http       = inject(HttpClient);
+  private readonly fb         = inject(FormBuilder);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document   = inject(DOCUMENT);
+  readonly auth               = inject(AuthService);
+  private readonly titleSvc   = inject(Title);
+  private readonly metaSvc    = inject(Meta);
 
   readonly formatCLP  = formatCLP;
   readonly formatDate = formatDateLong;
@@ -95,9 +102,12 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   copiedTransfer  = signal(false);
   acceptedTerms   = signal(false);
 
-  isSubmitting    = signal(false);
-  isBooked        = signal(false);
-  bookingRef      = signal('');
+  selectedServiceId  = signal<string | null>(null);
+
+  isSubmitting       = signal(false);
+  isBooked           = signal(false);
+  bookingRef         = signal('');
+  bookedAppointmentId = signal('');
 
   emailCheckState = signal<EmailCheckState>('idle');
   private emailDebounce: ReturnType<typeof setTimeout> | null = null;
@@ -120,12 +130,23 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     const service = this.bookingService();
     const avail   = this.availability();
     if (!service) return avail;
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+
     return avail.map(day => {
-      const slotDur     = this._inferSlotDuration(day.slots);
+      const isToday      = day.date === todayStr;
+      const slotDur      = this._inferSlotDuration(day.slots);
       const blocksNeeded = Math.ceil(service.duration / slotDur);
-      if (blocksNeeded <= 1) return day;
-      const slotMap = new Map(day.slots.map(s => [s.time, s.available]));
-      const filteredSlots = day.slots.map(slot => {
+
+      const withPast = day.slots.map(slot => {
+        if (isToday && this._isSlotPast(slot.time)) return { ...slot, available: false };
+        return slot;
+      });
+
+      if (blocksNeeded <= 1) return { ...day, slots: withPast };
+
+      const slotMap = new Map(withPast.map(s => [s.time, s.available]));
+      const filteredSlots = withPast.map(slot => {
         if (!slot.available) return slot;
         const [h, m]   = slot.time.split(':').map(Number);
         const startMin = h * 60 + m;
@@ -140,6 +161,13 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       return { ...day, slots: filteredSlots };
     });
   });
+
+  private _isSlotPast(slotTime: string): boolean {
+    const [h, m] = slotTime.split(':').map(Number);
+    const slot   = new Date();
+    slot.setHours(h, m, 0, 0);
+    return slot < new Date();
+  }
 
   private _inferSlotDuration(slots: ITimeSlot[]): number {
     if (slots.length < 2) return 30;
@@ -168,17 +196,15 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       this.paymentMethods.set(methods);
       if (methods.length === 1) this.selectedPayment.set(methods[0]);
       this.state.set('ready');
+      this._setMeta(res.company);
     } else {
       this.state.set('error');
     }
 
     // Pre-rellena el form si hay sesión (profesional o empresa)
-    const user    = this.auth.currentUser();
-    const company = this.svc.currentCompany();
+    const user = this.auth.currentUser();
     if (user) {
       this.form.patchValue({ name: user.name, email: user.email, phone: this._normalizePhone(user.phone ?? '') });
-    } else if (company) {
-      this.form.patchValue({ name: company.name, email: company.email });
     }
 
     this.sub = this.f['email'].valueChanges.subscribe(email => {
@@ -249,6 +275,22 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
+  goToSurvey(): void {
+    this.router.navigate(['/reservar/encuesta'], { queryParams: { appointmentId: this.bookedAppointmentId() } });
+  }
+
+  toggleServiceReviews(serviceId: string): void {
+    this.selectedServiceId.update(cur => cur === serviceId ? null : serviceId);
+  }
+
+  reviewStars(rating: number): string[] {
+    return Array.from({ length: 5 }, (_, i) => i < rating ? 'filled' : 'empty');
+  }
+
+  formatReviewDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
   async confirmBooking(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (!this.selectedPayment()) return;
@@ -268,9 +310,10 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
       );
       if (this.selectedPayment()!.provider === 'transfer') {
         this.bookingRef.set(res.bookingRef ?? '');
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url) {
-        window.location.href = res.url;
+        this.document.defaultView!.location.href = res.url;
       } else {
         this.bookingRef.set(res.bookingRef ?? '');
         this.isBooked.set(true);
@@ -312,10 +355,26 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
+  private _setMeta(company: ICompanyBrand): void {
+    const title = `${company.name} · Reserva tu Hora Online | Agenda Citas | Lets Reserve`;
+    const desc  = `Reserva tu hora con ${company.name} online. Agenda citas, consulta horarios disponibles y reserva en un clic. Sistema de agendamiento online en Lets Reserve.`;
+    const image = company.backgroundImage ?? 'https://letsreserve.cl/letsReserve.png';
+    this.titleSvc.setTitle(title);
+    this.metaSvc.updateTag({ name: 'description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:title', content: title });
+    this.metaSvc.updateTag({ property: 'og:description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:image', content: image });
+    this.metaSvc.updateTag({ property: 'og:url', content: `https://letsreserve.cl/empresa/${this.route.snapshot.paramMap.get('slug')}` });
+    this.metaSvc.updateTag({ name: 'twitter:title', content: title });
+    this.metaSvc.updateTag({ name: 'twitter:description', content: desc });
+    this.metaSvc.updateTag({ name: 'twitter:image', content: image });
+  }
+
   private _buildPaymentMethods(raw: ICompanyPublicPaymentMethod[]): IPaymentMethodView[] {
     return raw.map(m => {
       if (m.provider === 'transfer') {
-        const c = m.credentials;
+        const raw = m.credentials;
+        const c: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
         return {
           provider: 'transfer' as const,
           transferInfo: {
@@ -333,13 +392,13 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   }
 
   private _loadFontIfNeeded(family: string | null | undefined): void {
-    if (!family) return;
+    if (!family || !isPlatformBrowser(this.platformId)) return;
     const id = `gfont-co-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
+    if (this.document.getElementById(id)) return;
+    const link = this.document.createElement('link');
     link.id = id; link.rel = 'stylesheet';
     link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    document.head.appendChild(link);
+    this.document.head.appendChild(link);
   }
 
   private _normalizePhone(value: string): string {

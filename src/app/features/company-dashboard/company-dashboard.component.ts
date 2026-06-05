@@ -15,6 +15,7 @@ import {
   IAgendaAppt,
 } from '../../core/services/company.service';
 import { PlanSelectionComponent } from '../plan-selection/plan-selection.component';
+import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
 
@@ -120,7 +121,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, RescheduleConfirmComponent],
   templateUrl: './company-dashboard.component.html',
   animations: [
     trigger('sidebarLabel', [
@@ -185,6 +186,125 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   agendaLoading      = signal(false);
   agendaSelectedAppt  = signal<{ appt: IAgendaAppt; memberName: string } | null>(null);
   agendaApptUpdating  = signal(false);
+
+  // ── Drag & Drop agenda ──
+  agendaDragging        = signal<{ appt: IAgendaAppt; memberId: string } | null>(null);
+  agendaDragOverSlot    = signal<{ memberId: string; slot: string } | null>(null);
+  agendaPendingReschedule = signal<{ appt: IAgendaAppt; memberId: string; newDate: string; newTime: string } | null>(null);
+  agendaRescheduleSaving  = signal(false);
+
+  agendaOnDragStart(event: DragEvent, appt: IAgendaAppt, memberId: string): void {
+    this.agendaDragging.set({ appt, memberId });
+    event.dataTransfer?.setData('text/plain', appt.id);
+    (event.target as HTMLElement).style.opacity = '0.45';
+  }
+
+  agendaOnDragEnd(event: DragEvent): void {
+    (event.target as HTMLElement).style.opacity = '';
+    this.agendaDragging.set(null);
+    this.agendaDragOverSlot.set(null);
+  }
+
+  _isPastSlot(dateStr: string, slot: string): boolean {
+    const [h, m] = slot.split(':').map(Number);
+    const dt = new Date(dateStr + 'T00:00:00');
+    dt.setHours(h, m, 0, 0);
+    return dt < new Date();
+  }
+
+  agendaOnSlotDragOver(event: DragEvent, memberId: string, slot: string): void {
+    const drag = this.agendaDragging();
+    if (!drag || drag.memberId !== memberId) return;
+    if (drag.appt.time === slot) return;
+    if (this._isPastSlot(this.agendaDate(), slot)) return;
+    const member = this.agendaMembers().find(m => m.id === memberId);
+    if (!member) return;
+    const occupied = new Set(member.appointments.filter(a => a.id !== drag.appt.id).map(a => a.time));
+    if (occupied.has(slot)) return;
+    event.preventDefault();
+    this.agendaDragOverSlot.set({ memberId, slot });
+  }
+
+  agendaOnSlotDragLeave(): void {
+    this.agendaDragOverSlot.set(null);
+  }
+
+  agendaOnSlotDrop(event: DragEvent, memberId: string, slot: string): void {
+    const drag = this.agendaDragging();
+    if (!drag || drag.memberId !== memberId || drag.appt.time === slot) return;
+    if (this._isPastSlot(this.agendaDate(), slot)) return;
+    event.preventDefault();
+    this.agendaDragOverSlot.set(null);
+    this.agendaPendingReschedule.set({ appt: drag.appt, memberId, newDate: this.agendaDate(), newTime: slot });
+  }
+
+  async agendaConfirmReschedule(): Promise<void> {
+    const pending = this.agendaPendingReschedule();
+    if (!pending) return;
+    this.agendaRescheduleSaving.set(true);
+    const result = await this.svc.rescheduleAppointment(
+      pending.appt.id,
+      pending.newDate,
+      pending.newTime,
+    );
+    this.agendaRescheduleSaving.set(false);
+    if (result.success) {
+      this.agendaPendingReschedule.set(null);
+      await this.loadAgenda(this.agendaDate());
+    }
+  }
+
+  agendaCancelReschedule(): void {
+    this.agendaPendingReschedule.set(null);
+  }
+
+  // ── Reschedule desde modal de detalle (empresa) ──
+  agendaIsRescheduling  = signal(false);
+  agendaRsDate          = signal('');
+  agendaRsTime          = signal('');
+
+  readonly AGENDA_SLOT_OPTIONS = (() => {
+    const slots: string[] = [];
+    for (let h = 8; h < 20; h++) {
+      slots.push(`${String(h).padStart(2,'0')}:00`);
+      slots.push(`${String(h).padStart(2,'0')}:30`);
+    }
+    return slots;
+  })();
+
+  agendaRsAvailableSlots = (): string[] => {
+    const dateStr = this.agendaRsDate();
+    if (!dateStr) return this.AGENDA_SLOT_OPTIONS;
+    return this.AGENDA_SLOT_OPTIONS.filter(s => !this._isPastSlot(dateStr, s));
+  };
+
+  openAgendaRescheduleEdit(): void {
+    const sel = this.agendaSelectedAppt();
+    if (!sel) return;
+    this.agendaRsDate.set(this.agendaDate());
+    this.agendaRsTime.set(sel.appt.time);
+    this.agendaIsRescheduling.set(true);
+  }
+
+  submitAgendaRescheduleFromPanel(): void {
+    const sel = this.agendaSelectedAppt();
+    if (!sel || !this.agendaRsDate() || !this.agendaRsTime()) return;
+    if (this.agendaDate() === this.agendaRsDate() && sel.appt.time === this.agendaRsTime()) return;
+    if (this._isPastSlot(this.agendaRsDate(), this.agendaRsTime())) return;
+    this.agendaPendingReschedule.set({
+      appt:     sel.appt,
+      memberId: this.agendaMembers().find(m => m.appointments.some(a => a.id === sel.appt.id))?.id ?? '',
+      newDate:  this.agendaRsDate(),
+      newTime:  this.agendaRsTime(),
+    });
+    this.agendaSelectedAppt.set(null);
+    this.agendaIsRescheduling.set(false);
+  }
+
+  closeAgendaDetail(): void {
+    this.agendaSelectedAppt.set(null);
+    this.agendaIsRescheduling.set(false);
+  }
   agendaCurrentMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 
   readonly agendaMonthLabel = computed(() =>
@@ -474,7 +594,9 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   togglePaymentExpand(provider: PaymentProvider): void {
     if (this.paymentExpanded() === provider) { this.paymentExpanded.set(null); return; }
     const m = this.getPaymentMethod(provider);
-    this.paymentFormData.set(m?.credentials ? { ...m.credentials } : {});
+    const raw = m?.credentials ?? {};
+    const parsed: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    this.paymentFormData.set({ ...parsed });
     this.paymentExpanded.set(provider);
   }
 

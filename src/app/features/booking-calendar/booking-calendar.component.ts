@@ -8,13 +8,16 @@ import { AuthService } from '../../core/services/auth.service';
 import { ScheduleBlockService } from '../../core/services/schedule-block.service';
 import { WorkScheduleService, jsToDow } from '../../core/services/work-schedule.service';
 import { environment } from '../../../environments/environment';
+import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
+import { CancelConfirmComponent } from '../../components/cancel-confirm/cancel-confirm.component';
 
 interface IAppointment {
   id: string;
   date: string;
   time: string;
   notes: string | null;
-  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
+  rated:    boolean;
   customer: { id: string; name: string; email?: string };
   service:  { id: string; name: string; duration?: number };
 }
@@ -37,7 +40,7 @@ interface ICustomer {
 @Component({
   selector: 'app-booking-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RescheduleConfirmComponent, CancelConfirmComponent],
   templateUrl: './booking-calendar.component.html',
   animations: [
     trigger('fadeSlide', [
@@ -95,6 +98,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   readonly na_submitting   = signal(false);
 
   private readonly na_existingCustomerId = signal<string | null>(null);
+  readonly na_showSuggestions           = signal(false);
 
   readonly na_suggestions = computed(() => {
     const q = this.na_name().trim().toLowerCase();
@@ -270,7 +274,30 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     } catch { /* silencioso */ }
   }
 
-  private _toDateStr(date: Date): string {
+  readonly finalizingId = signal<string | null>(null);
+
+  isAppointmentPast(apt: IAppointment): boolean {
+    const [year, month, day] = apt.date.substring(0, 10).split('-').map(Number);
+    const [hour, minute]     = apt.time.split(':').map(Number);
+    const apptPlusOne = new Date(year, month - 1, day, hour, minute + 1, 0, 0);
+    return new Date() >= apptPlusOne;
+  }
+
+  async markAsFinalized(id: string): Promise<void> {
+    if (this.finalizingId()) return;
+    this.finalizingId.set(id);
+    try {
+      await firstValueFrom(
+        this.http.patch(`${environment.apiUrl}/appointments/${id}/status`, { paymentStatus: 'Finalizada' })
+      );
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch { /* silencioso */ }
+    finally { this.finalizingId.set(null); }
+  }
+
+  _toDateStr(date: Date): string {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
@@ -314,12 +341,12 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     return this.blockSvc.isBlocked(this.selectedDate(), time);
   }
 
-  async toggleBlock(time: string): Promise<void> {
-    const id = this.blockSvc.getBlockId(this.selectedDate(), time);
+  async toggleBlock(time: string, day?: Date): Promise<void> {
+    const date     = day ?? this.selectedDate();
+    const id       = this.blockSvc.getBlockId(date, time);
     if (id) {
       await this.blockSvc.remove(id);
     } else {
-      const date     = this.selectedDate();
       const dateStr  = this._toDateStr(date);
       const duration = this.workSvc.getSlotDuration(jsToDow(date.getDay()));
       const [h, min] = time.split(':').map(Number);
@@ -336,6 +363,335 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   readonly today    = new Date();
   readonly todayStr = this._toDateStr(new Date());
+
+  // ── Reschedule desde panel de detalle ────────────────────────
+  readonly isRescheduling   = signal(false);
+  readonly rs_date          = signal('');
+  readonly rs_time          = signal('');
+
+  readonly rs_availableSlots = computed(() => {
+    const dateStr = this.rs_date();
+    if (!dateStr) return [];
+    const apt = this.selectedAppointment();
+    if (!apt) return [];
+
+    const date    = new Date(dateStr + 'T00:00:00');
+    const dow     = jsToDow(date.getDay());
+    const allSlots = this.workSvc.generateSlots(dow);
+    const slotDur  = this.workSvc.getSlotDuration(dow);
+
+    const dayAppts = this.appointments().filter(
+      a => a.date === dateStr && a.paymentStatus !== 'Cancelado' && a.id !== apt.id
+    );
+    const occupied = new Set<string>();
+    for (const a of dayAppts) {
+      const blocks = Math.ceil((a.service.duration ?? slotDur) / slotDur);
+      const [h, m] = a.time.split(':').map(Number);
+      let cursor = h * 60 + m;
+      for (let b = 0; b < blocks; b++) {
+        occupied.add(`${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`);
+        cursor += slotDur;
+      }
+    }
+
+    return allSlots.filter(slot => {
+      if (this._isPastSlot(dateStr, slot)) return false;
+      if (occupied.has(slot)) return false;
+      if (this.blockSvc.isBlocked(date, slot)) return false;
+      const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      const [h, m] = slot.split(':').map(Number);
+      let cursor = h * 60 + m + slotDur;
+      for (let b = 1; b < blocks; b++) {
+        const cont = `${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`;
+        if (occupied.has(cont)) return false;
+        cursor += slotDur;
+      }
+      return true;
+    });
+  });
+
+  openRescheduleEdit(): void {
+    const apt = this.selectedAppointment();
+    if (!apt) return;
+    this.rs_date.set(apt.date);
+    this.rs_time.set(apt.time);
+    this.isRescheduling.set(true);
+  }
+
+  submitRescheduleFromPanel(): void {
+    const apt = this.selectedAppointment();
+    if (!apt || !this.rs_date() || !this.rs_time()) return;
+    if (apt.date === this.rs_date() && apt.time === this.rs_time()) return;
+    this.pendingReschedule.set({ apt, newDate: this.rs_date(), newTime: this.rs_time() });
+    this.selectedAppointment.set(null);
+    this.isRescheduling.set(false);
+  }
+
+  closeDetailPanel(): void {
+    this.selectedAppointment.set(null);
+    this.isRescheduling.set(false);
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Drag & Drop ───────────────────────────────────────────────
+  readonly draggingAppt     = signal<IAppointment | null>(null);
+  readonly dragOverSlot     = signal<{ dateStr: string; slot: string } | null>(null);
+  readonly dragOverDate     = signal<string | null>(null);
+  readonly pendingReschedule = signal<{ apt: IAppointment; newDate: string; newTime: string } | null>(null);
+  readonly rescheduleSaving  = signal(false);
+
+  onDragStart(event: DragEvent, apt: IAppointment): void {
+    this.draggingAppt.set(apt);
+    event.dataTransfer?.setData('text/plain', apt.id);
+    (event.target as HTMLElement).style.opacity = '0.45';
+  }
+
+  onDragEnd(event: DragEvent): void {
+    (event.target as HTMLElement).style.opacity = '';
+    this.draggingAppt.set(null);
+    this.dragOverSlot.set(null);
+    this.dragOverDate.set(null);
+  }
+
+  onSlotDragOver(event: DragEvent, dateStr: string, slot: string): void {
+    const apt = this.draggingAppt();
+    if (!apt) return;
+    if (!this._isValidDropTarget(apt, dateStr, slot)) return;
+    event.preventDefault();
+    this.dragOverSlot.set({ dateStr, slot });
+  }
+
+  onSlotDragLeave(): void {
+    this.dragOverSlot.set(null);
+  }
+
+  onSlotDrop(event: DragEvent, dateStr: string, slot: string): void {
+    const apt = this.draggingAppt();
+    if (!apt || !this._isValidDropTarget(apt, dateStr, slot)) return;
+    event.preventDefault();
+    this.dragOverSlot.set(null);
+    this.pendingReschedule.set({ apt, newDate: dateStr, newTime: slot });
+  }
+
+  onCalendarDayDragOver(event: DragEvent, day: Date): void {
+    const apt = this.draggingAppt();
+    if (!apt) return;
+    const dateStr = this._toDateStr(day);
+    if (this._isPastSlot(dateStr, apt.time)) return;
+    event.preventDefault();
+    this.dragOverDate.set(dateStr);
+  }
+
+  onCalendarDayDragLeave(): void {
+    this.dragOverDate.set(null);
+  }
+
+  onCalendarDayDrop(event: DragEvent, day: Date): void {
+    event.preventDefault();
+    const apt = this.draggingAppt();
+    if (!apt) return;
+    const newDate = this._toDateStr(day);
+    if (newDate === apt.date) return;
+    if (this._isPastSlot(newDate, apt.time)) return;
+    this.dragOverDate.set(null);
+    this.pendingReschedule.set({ apt, newDate, newTime: apt.time });
+  }
+
+  _isPastSlot(dateStr: string, slot: string): boolean {
+    const [h, m] = slot.split(':').map(Number);
+    const dt = new Date(dateStr + 'T00:00:00');
+    dt.setHours(h, m, 0, 0);
+    return dt < new Date();
+  }
+
+  private _isValidDropTarget(apt: IAppointment, dateStr: string, slot: string): boolean {
+    if (apt.date === dateStr && apt.time === slot) return false;
+    if (this._isPastSlot(dateStr, slot)) return false;
+    const targetDate = new Date(dateStr + 'T00:00:00');
+    if (this.blockSvc.isBlocked(targetDate, slot)) return false;
+    const slotDur = this.workSvc.getSlotDuration(jsToDow(targetDate.getDay()));
+    const dayAppts = this.appointments().filter(
+      a => a.date === dateStr && a.paymentStatus !== 'Cancelado' && a.id !== apt.id
+    );
+    const occupied = new Set<string>();
+    for (const a of dayAppts) {
+      const blocks = Math.ceil((a.service.duration ?? slotDur) / slotDur);
+      const [h, m] = a.time.split(':').map(Number);
+      let cursor = h * 60 + m;
+      for (let b = 0; b < blocks; b++) {
+        occupied.add(`${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`);
+        cursor += slotDur;
+      }
+    }
+    if (occupied.has(slot)) return false;
+    const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+    const [h, m] = slot.split(':').map(Number);
+    let cursor = h * 60 + m + slotDur;
+    for (let b = 1; b < blocks; b++) {
+      const cont = `${String(Math.floor(cursor / 60) % 24).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`;
+      if (occupied.has(cont)) return false;
+      cursor += slotDur;
+    }
+    return true;
+  }
+
+  async confirmReschedule(): Promise<void> {
+    const pending = this.pendingReschedule();
+    if (!pending) return;
+    this.rescheduleSaving.set(true);
+    try {
+      await firstValueFrom(
+        this.http.put(`${environment.apiUrl}/appointments/${pending.apt.id}`, {
+          date: pending.newDate,
+          time: pending.newTime,
+        })
+      );
+      this.pendingReschedule.set(null);
+      await this._loadAppointments();
+      if (!this.isSameDay(this.selectedDate(), new Date(pending.newDate + 'T00:00:00'))) {
+        this.selectDate(new Date(pending.newDate + 'T00:00:00'));
+      }
+    } catch { /* silencioso */ }
+    finally { this.rescheduleSaving.set(false); }
+  }
+
+  cancelReschedule(): void {
+    this.pendingReschedule.set(null);
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Cancelación de cita ───────────────────────────────────────
+  readonly pendingCancel  = signal<IAppointment | null>(null);
+  readonly cancelSaving   = signal(false);
+  readonly cancelError    = signal('');
+
+  canCancelAppointment(apt: IAppointment): boolean {
+    return apt.paymentStatus !== 'Cancelado' && apt.paymentStatus !== 'Finalizada';
+  }
+
+  isCancellationWithRefund(apt: IAppointment): boolean {
+    const [y, m, d] = apt.date.split('-').map(Number);
+    const [h, min]  = apt.time.split(':').map(Number);
+    const apptDate  = new Date(y, m - 1, d, h, min, 0, 0);
+    return apptDate.getTime() - Date.now() >= 24 * 60 * 60 * 1000;
+  }
+
+  requestCancel(apt: IAppointment): void {
+    this.cancelError.set('');
+    this.pendingCancel.set(apt);
+  }
+
+  dismissCancel(): void {
+    this.pendingCancel.set(null);
+    this.cancelError.set('');
+  }
+
+  async confirmCancel(): Promise<void> {
+    const apt = this.pendingCancel();
+    if (!apt || this.cancelSaving()) return;
+    this.cancelSaving.set(true);
+    this.cancelError.set('');
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/cancel`, {})
+      );
+      this.pendingCancel.set(null);
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === apt.id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch (err: any) {
+      this.cancelError.set(err?.error?.message ?? 'Error al cancelar la cita.');
+    } finally {
+      this.cancelSaving.set(false);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Vista semanal ─────────────────────────────────────────────
+  readonly weekDays = computed(() => {
+    const d = this.selectedDate();
+    const jsDay = d.getDay();
+    const daysFromMon = jsDay === 0 ? 6 : jsDay - 1;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - daysFromMon);
+    monday.setHours(0, 0, 0, 0);
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      return day;
+    });
+  });
+
+  readonly weekLabel = computed(() => {
+    const days  = this.weekDays();
+    const first = days[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const last  = days[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${first} – ${last}`;
+  });
+
+  readonly allWeekSlots = computed(() => {
+    const set = new Set<string>();
+    for (const day of this.weekDays()) {
+      for (const s of this.workSvc.generateSlots(jsToDow(day.getDay()))) set.add(s);
+    }
+    const weekDates = new Set(this.weekDays().map(d => this._toDateStr(d)));
+    for (const a of this.appointments()) {
+      if (weekDates.has(a.date) && a.paymentStatus !== 'Cancelado') set.add(a.time);
+    }
+    return [...set].sort();
+  });
+
+  readonly weekStats = computed(() => {
+    const dates = new Set(this.weekDays().map(d => this._toDateStr(d)));
+    const apts  = this.appointments().filter(a => dates.has(a.date) && a.paymentStatus !== 'Cancelado');
+    return {
+      total:      apts.length,
+      pagadas:    apts.filter(a => a.paymentStatus === 'Pagado').length,
+      pendientes: apts.filter(a => a.paymentStatus === 'Pendiente').length,
+    };
+  });
+
+  dayApptCount(day: Date): number {
+    const s = this._toDateStr(day);
+    return this.appointments().filter(a => a.date === s && a.paymentStatus !== 'Cancelado').length;
+  }
+
+  getApptAtDay(day: Date, slot: string): IAppointment | undefined {
+    const s = this._toDateStr(day);
+    return this.appointments().find(a => a.date === s && a.time === slot && a.paymentStatus !== 'Cancelado');
+  }
+
+  getContinuationForDay(day: Date, slot: string): IAppointment | null {
+    const dateStr = this._toDateStr(day);
+    const slotDur = this.workSvc.getSlotDuration(jsToDow(day.getDay()));
+    const [sh, sm] = slot.split(':').map(Number);
+    const slotMin  = sh * 60 + sm;
+    for (const apt of this.appointments()) {
+      if (apt.date !== dateStr || apt.paymentStatus === 'Cancelado') continue;
+      const [ah, am] = apt.time.split(':').map(Number);
+      const startMin = ah * 60 + am;
+      const blocks   = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      if (slotMin > startMin && slotMin < startMin + blocks * slotDur) return apt;
+    }
+    return null;
+  }
+
+  isWorkingSlot(day: Date, slot: string): boolean {
+    return this.workSvc.generateSlots(jsToDow(day.getDay())).includes(slot);
+  }
+
+  isBlockedForDay(day: Date, slot: string): boolean {
+    return this.blockSvc.isBlocked(day, slot);
+  }
+
+  isCurrentTimeSlot(slot: string): boolean {
+    const now    = new Date();
+    const [h, m] = slot.split(':').map(Number);
+    const nowMin  = now.getHours() * 60 + now.getMinutes();
+    const slotMin = h * 60 + m;
+    return nowMin >= slotMin && nowMin < slotMin + 30;
+  }
+  // ─────────────────────────────────────────────────────────────
 
   readonly slots = computed(() => {
     const dow       = jsToDow(this.selectedDate().getDay());
@@ -418,16 +774,22 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     return nowMin >= slotMin && nowMin < slotMin + dur;
   }
 
-  prevDay(): void {
+  prevWeek(): void {
     const d = new Date(this.selectedDate());
-    d.setDate(d.getDate() - 1);
+    d.setDate(d.getDate() - 7);
     this.selectDate(d);
   }
 
-  nextDay(): void {
+  nextWeek(): void {
     const d = new Date(this.selectedDate());
-    d.setDate(d.getDate() + 1);
+    d.setDate(d.getDate() + 7);
     this.selectDate(d);
+  }
+
+  openNewApptForDay(day: Date, slot: string): void {
+    this.selectedDate.set(new Date(day));
+    this.selectedHour.set(slot);
+    this.openNewAppt();
   }
 
   goToToday(): void {
@@ -482,11 +844,13 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     this.na_status.set('Pendiente');
     this.na_error.set('');
     this.na_existingCustomerId.set(null);
+    this.na_showSuggestions.set(false);
     this.showNewAppt.set(true);
   }
 
   closeNewAppt(): void {
     this.showNewAppt.set(false);
+    this.na_showSuggestions.set(false);
   }
 
   selectSuggestedCustomer(c: ICustomer): void {
@@ -494,6 +858,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     this.na_email.set(c.email ?? '');
     this.na_phone.set(c.phone ?? '');
     this.na_existingCustomerId.set(c.id);
+    this.na_showSuggestions.set(false);
   }
 
   onServiceChange(id: string): void {
@@ -506,6 +871,12 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   onNameInput(value: string): void {
     this.na_name.set(value);
     this.na_existingCustomerId.set(null);
+    this.na_showSuggestions.set(value.trim().length >= 2);
+  }
+
+  onNameBlur(): void {
+    // Delay para que el click en una sugerencia se registre antes de cerrar el panel
+    setTimeout(() => this.na_showSuggestions.set(false), 180);
   }
 
   onModalDateChange(value: string): void {

@@ -36,7 +36,7 @@ import { IDayAvailability } from '../../../helpers/models';
         </div>
 
         <div class="cal-grid">
-          @for (cell of calendarGrid(); track cell.dateStr) {
+          @for (cell of calendarGrid(); track $index) {
             <button class="cal-day"
               [ngClass]="['cal-' + cell.state, cell.dateStr === selectedDate() ? 'cal-selected' : '']"
               [disabled]="cell.state === 'past' || cell.state === 'unavailable'"

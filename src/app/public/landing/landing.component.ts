@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, ViewEncapsulation } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { IPlan } from '../../core/services/subscription.service';
 import { LandingNavComponent }        from './components/landing-nav/landing-nav.component';
@@ -33,10 +34,20 @@ import { LandingFooterComponent }     from './components/landing-footer/landing-
 })
 export class LandingComponent implements OnInit {
   private readonly subscriptionSvc = inject(SubscriptionService);
+  private readonly titleSvc        = inject(Title);
+  private readonly metaSvc         = inject(Meta);
 
   plans = signal<IPlan[]>([]);
 
   async ngOnInit() {
+    const title = 'Sistema de Agendamiento y Reservas Online | Lets Reserve';
+    const desc  = 'Sistema de agendamiento online para reservar citas y gestionar tu agenda. Reserva horas para peluquerías, barberías, estéticas y más en Chile. Reduce ausencias y llena tu agenda automáticamente.';
+    this.titleSvc.setTitle(title);
+    this.metaSvc.updateTag({ name: 'description', content: desc });
+    this.metaSvc.updateTag({ name: 'keywords', content: 'agendamiento online, sistema de agendamiento, reservar cita, reservar hora, agenda online, sistema de reservas, citas online, reservas online, software agendamiento Chile' });
+    this.metaSvc.updateTag({ property: 'og:title', content: title });
+    this.metaSvc.updateTag({ property: 'og:description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:url', content: 'https://letsreserve.cl/' });
     this.plans.set(await this.subscriptionSvc.getPlans());
   }
 }

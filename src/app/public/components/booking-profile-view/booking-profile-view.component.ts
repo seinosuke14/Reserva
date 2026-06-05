@@ -13,6 +13,14 @@ export interface IProfileProfessional {
   bannerImage?:     string | null;
 }
 
+export interface IPublicReview {
+  id:           string;
+  rating:       number;
+  comment:      string | null;
+  reviewerName: string | null;
+  createdAt:    string;
+}
+
 @Component({
   selector: 'app-booking-profile-view',
   standalone: true,
@@ -23,6 +31,7 @@ export interface IProfileProfessional {
 export class BookingProfileViewComponent {
   professional    = input.required<IProfileProfessional | null>();
   services        = input.required<IPublicService[]>();
+  reviews         = input<IPublicReview[]>([]);
   isQuoteMode     = input<boolean>(false);
   headingStyle    = input<Record<string, string>>({});
   bodyStyle       = input<Record<string, string>>({});
@@ -36,4 +45,12 @@ export class BookingProfileViewComponent {
 
   readonly stars     = [1, 2, 3, 4, 5];
   readonly formatCLP = formatCLP;
+
+  reviewStars(rating: number): number[] {
+    return [1, 2, 3, 4, 5];
+  }
+
+  formatReviewDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
 }

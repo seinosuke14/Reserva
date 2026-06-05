@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /app/
+Disallow: /login
+Disallow: /registro
+Disallow: /registro-empresa
+Disallow: /aceptar-invitacion
+Allow: /
+
+Sitemap: https://letsreserve.cl/sitemap.xml

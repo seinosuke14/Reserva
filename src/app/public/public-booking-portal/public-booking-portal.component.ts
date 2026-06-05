@@ -1,5 +1,6 @@
-import { Component, signal, computed, inject, effect, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, inject, effect, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,13 +46,17 @@ type LoadState = 'loading' | 'ready' | 'error';
   styleUrl: './public-booking-portal.component.scss'
 })
 export class PublicBookingPortalComponent implements OnInit, OnDestroy {
-  private readonly fb       = inject(FormBuilder);
-  private readonly route    = inject(ActivatedRoute);
-  private readonly router   = inject(Router);
-  private readonly http     = inject(HttpClient);
-  private readonly quoteSvc = inject(QuoteService);
-  readonly auth             = inject(AuthService);
-  private readonly company  = inject(CompanyService);
+  private readonly fb         = inject(FormBuilder);
+  private readonly route      = inject(ActivatedRoute);
+  private readonly router     = inject(Router);
+  private readonly http       = inject(HttpClient);
+  private readonly quoteSvc   = inject(QuoteService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document   = inject(DOCUMENT);
+  readonly auth               = inject(AuthService);
+  private readonly company    = inject(CompanyService);
+  private readonly titleSvc   = inject(Title);
+  private readonly metaSvc    = inject(Meta);
   readonly formatCLP        = formatCLP;
   readonly formatDate       = formatDateLong;
 
@@ -71,9 +76,10 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   } | null>(null);
 
   readonly stars = [1, 2, 3, 4, 5];
-  readonly services     = signal<IPublicService[]>([]);
-  readonly availability = signal<IDayAvailability[]>([]);
+  readonly services       = signal<IPublicService[]>([]);
+  readonly availability   = signal<IDayAvailability[]>([]);
   readonly paymentMethods = signal<IPublicPaymentMethod[]>([]);
+  readonly reviews        = signal<any[]>([]);
 
   // ─── Modo de vista ──────────────────────────────────────────────────────────
   readonly viewMode        = signal<'profile' | 'checkout'>('profile');
@@ -85,8 +91,9 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   readonly selectedHour    = signal<string | null>(null);
   readonly selectedPayment = signal<IPublicPaymentMethod | null>(null);
   readonly isSubmitting    = signal(false);
-  readonly isBooked        = signal(false);
-  readonly bookingRef      = signal('');
+  readonly isBooked           = signal(false);
+  readonly bookingRef         = signal('');
+  readonly bookedAppointmentId = signal('');
   readonly copiedTransfer       = signal(false);
   readonly acceptedClientTerms  = signal(false);
 
@@ -146,14 +153,30 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     return f ? { 'font-family': `${f}, sans-serif` } : {};
   });
 
+  private _setMeta(prof: { name: string; specialty: string; profileImage?: string | null; bannerImage?: string | null }, slug: string): void {
+    const title = `${prof.name} · ${prof.specialty} | Reserva tu Hora Online | Lets Reserve`;
+    const desc  = `Reserva tu cita con ${prof.name} (${prof.specialty}) online. Agenda tu hora, consulta disponibilidad y confirma tu reserva en segundos. Sistema de agendamiento Lets Reserve.`;
+    const image = prof.bannerImage ?? prof.profileImage ?? 'https://letsreserve.cl/letsReserve.png';
+    this.titleSvc.setTitle(title);
+    this.metaSvc.updateTag({ name: 'description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:title', content: title });
+    this.metaSvc.updateTag({ property: 'og:description', content: desc });
+    this.metaSvc.updateTag({ property: 'og:image', content: image });
+    this.metaSvc.updateTag({ property: 'og:url', content: `https://letsreserve.cl/reservar/${slug}` });
+    this.metaSvc.updateTag({ name: 'twitter:title', content: title });
+    this.metaSvc.updateTag({ name: 'twitter:description', content: desc });
+    this.metaSvc.updateTag({ name: 'twitter:image', content: image });
+  }
+
   private _loadFont(family: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     const id = `gfont-portal-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
+    if (this.document.getElementById(id)) return;
+    const link = this.document.createElement('link');
     link.id   = id;
     link.rel  = 'stylesheet';
     link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    document.head.appendChild(link);
+    this.document.head.appendChild(link);
   }
 
   // ─── Computed ───────────────────────────────────────────────────────────────
@@ -170,14 +193,24 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const avail    = this.availability();
     if (!duration) return avail;
 
+    const _d = new Date();
+    const todayStr = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`;
+
     return avail.map(day => {
-      const slotDur      = this._inferSlotDuration(day.slots);
+      const isToday  = day.date === todayStr;
+      const slotDur  = this._inferSlotDuration(day.slots);
       const blocksNeeded = Math.ceil(duration / slotDur);
-      if (blocksNeeded <= 1) return day;
 
-      const slotMap = new Map(day.slots.map(s => [s.time, s.available]));
+      const withPast = day.slots.map(slot => {
+        if (isToday && this._isSlotPast(slot.time)) return { ...slot, available: false };
+        return slot;
+      });
 
-      const filteredSlots = day.slots.map(slot => {
+      if (blocksNeeded <= 1) return { ...day, slots: withPast };
+
+      const slotMap = new Map(withPast.map(s => [s.time, s.available]));
+
+      const filteredSlots = withPast.map(slot => {
         if (!slot.available) return slot;
 
         const [h, m]   = slot.time.split(':').map(Number);
@@ -196,6 +229,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       return { ...day, slots: filteredSlots };
     });
   });
+
+  private _isSlotPast(slotTime: string): boolean {
+    const [h, m] = slotTime.split(':').map(Number);
+    const slot   = new Date();
+    slot.setHours(h, m, 0, 0);
+    return slot < new Date();
+  }
 
   private _inferSlotDuration(slots: ITimeSlot[]): number {
     if (slots.length < 2) return 30;
@@ -324,6 +364,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       if (data.professional.bodyFont)    this._loadFont(data.professional.bodyFont);
       this.services.set(data.services);
       this.availability.set(data.availability);
+      this.reviews.set(data.reviews ?? []);
       const visibleMethods: IPublicPaymentMethod[] = (data.paymentMethods ?? [])
         .filter((m: IPublicPaymentMethod) => m.provider !== 'webpay' && m.provider !== 'mercadopago');
       this.paymentMethods.set(visibleMethods);
@@ -336,6 +377,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.selectedPayment.set(visibleMethods[0]);
       }
       this.loadState.set('ready');
+      this._setMeta(data.professional, slug);
     } catch (err: any) {
       if (err?.status === 404) {
         this.router.navigate(['/app']);
@@ -482,11 +524,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
       if (provider === 'transfer') {
         this.bookingRef.set(res.bookingRef ?? '');
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       } else if (res.url && res.token) {
-        window.location.href = res.url;
+        this.document.defaultView!.location.href = res.url;
       } else {
         this.bookingRef.set(res.bookingRef);
+        this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
       }
     } catch (err: any) {
