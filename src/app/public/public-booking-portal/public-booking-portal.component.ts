@@ -193,7 +193,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const avail    = this.availability();
     if (!duration) return avail;
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const _d = new Date();
+    const todayStr = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`;
 
     return avail.map(day => {
       const isToday  = day.date === todayStr;
