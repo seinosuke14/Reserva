@@ -615,10 +615,77 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => this.paymentFeedback.set(null), 4000);
   }
 
+  // ── Recordatorio ──
+  reminderPref     = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
+  reminderSelected = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
+  reminderSaving   = signal(false);
+  reminderMsg      = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  readonly reminderOptions: { value: '1h_before' | '7h30_same_day' | '24h_before'; label: string; desc: string }[] = [
+    { value: '1h_before',     label: '1 hora antes',          desc: 'Se envía 1 hora antes del inicio de la cita.' },
+    { value: '7h30_same_day', label: '7:30 AM del mismo día', desc: 'Se envía a las 7:30 AM del día de la cita.' },
+    { value: '24h_before',    label: '24 horas antes',         desc: 'Se envía a la misma hora del día anterior.' },
+  ];
+
+  async saveReminderPref(): Promise<void> {
+    const pref = this.reminderSelected();
+    this.reminderSaving.set(true);
+    this.reminderMsg.set(null);
+    const result = await this.svc.saveReminderPreference(pref);
+    this.reminderSaving.set(false);
+    if (result.success) {
+      this.reminderPref.set(pref);
+      this.reminderMsg.set({ type: 'success', text: 'Preferencia guardada.' });
+    } else {
+      this.reminderMsg.set({ type: 'error', text: result.message ?? 'Error al guardar.' });
+    }
+    setTimeout(() => this.reminderMsg.set(null), 3000);
+  }
+
   // ── Planes ──
   subStatus     = signal<ICompanySubStatus>({ hasPlan: false });
   isCheckingOut = signal<'team' | 'pro_max' | null>(null);
   planError     = signal('');
+
+  // ── WhatsApp quota ──
+  waQuota          = signal<{ waMessagesSent: number; waMessagesLimit: number; subscriptionEndDate: string | null; scope: string } | null>(null);
+  waAddonSaving    = signal(false);
+  waAddonMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+  waAddonPanelOpen = signal(false);
+  waAddonBlocks    = signal(1);
+
+  readonly waUsagePct = computed(() => {
+    const q = this.waQuota();
+    if (!q || q.waMessagesLimit === 0) return 0;
+    return Math.min(100, Math.round((q.waMessagesSent / q.waMessagesLimit) * 100));
+  });
+
+  readonly waAddonMessages = computed(() => this.waAddonBlocks() * 50);
+  readonly waAddonTotal    = computed(() =>
+    new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 })
+      .format(this.waAddonBlocks() * 5000)
+  );
+
+  waAddonStepDown(): void {
+    if (this.waAddonBlocks() > 1) this.waAddonBlocks.update(b => b - 1);
+  }
+
+  waAddonStepUp(): void {
+    if (this.waAddonBlocks() < 10) this.waAddonBlocks.update(b => b + 1);
+  }
+
+  async checkoutWaAddon(): Promise<void> {
+    this.waAddonSaving.set(true);
+    this.waAddonMsg.set(null);
+    const result = await this.svc.checkoutWaAddon(this.waAddonBlocks());
+    this.waAddonSaving.set(false);
+    if (result.success && result.url) {
+      window.location.href = result.url;
+    } else {
+      this.waAddonMsg.set({ type: 'error', text: result.message ?? 'No se pudo iniciar el pago.' });
+      setTimeout(() => this.waAddonMsg.set(null), 4000);
+    }
+  }
 
   readonly lcW = LC_W;
   readonly lcH = LC_H;
@@ -700,19 +767,23 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.isLoading.set(true);
-    const [dash, invs, sub, agenda] = await Promise.all([
+    const [dash, invs, sub, agenda, waQ] = await Promise.all([
       this.svc.getDashboard(),
       this.svc.getInvitations(),
       this.svc.getSubscriptionStatus(),
       this.svc.getAgenda(this.agendaDate()),
-      this.loadPaymentMethods(),
+      this.svc.getWaQuota(),
     ]);
+    this.loadPaymentMethods();
     this.members.set(dash.members);
     this.totals.set(dash.totals);
     this.monthly.set(dash.monthly);
     this.invitations.set(invs);
     this.subStatus.set(sub);
     this.agendaMembers.set(agenda.members);
+    this.waQuota.set(waQ);
+    const pref = this.company()?.reminderPreference;
+    if (pref) { this.reminderPref.set(pref); this.reminderSelected.set(pref); }
     const c = this.company();
     if (c) {
       this.brand.set({
