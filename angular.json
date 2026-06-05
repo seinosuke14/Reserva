@@ -21,11 +21,12 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "server": "src/main.server.ts",
+            "outputMode": "server",
             "ssr": {
               "entry": "server.ts"
             },
             "security": {
-              "allowedHosts": ["localhost", "localhost:4000", "localhost:4200","https://reserva-ochre.vercel.app","www.letsreserve.cl", "letsreserve.cl"]
+              "allowedHosts": ["localhost", "localhost:4000", "localhost:4200", "reserva-ochre.vercel.app", "www.letsreserve.cl", "letsreserve.cl"]
             },
             "polyfills": [
               "zone.js"

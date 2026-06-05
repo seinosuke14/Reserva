@@ -721,6 +721,163 @@
     </div>
     }
 
+    <!-- Recordatorio de citas — empresa -->
+    <div class="bg-white rounded-[14px] border border-black/[.05] p-5 mb-6 space-y-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-[10px] bg-primary-50 flex-center shrink-0">
+          <svg width="16" height="16" fill="none" stroke="#64748b" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wide text-primary-400 mb-0.5">Recordatorio de citas</div>
+          <div class="text-[13px] font-semibold text-primary">Aplica a todos los profesionales de la empresa</div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        @for (opt of reminderOptions; track opt.value) {
+          <button type="button" (click)="reminderSelected.set(opt.value)"
+            class="w-full flex items-start gap-3 p-3 rounded-[10px] border-[1.5px] text-left transition-all"
+            [class]="reminderSelected() === opt.value
+              ? 'border-accent bg-accent/5'
+              : 'border-primary-100 hover:border-primary-200'">
+            <div class="w-4 h-4 rounded-full border-[1.5px] flex-center shrink-0 mt-0.5 transition-all"
+              [class]="reminderSelected() === opt.value ? 'border-accent' : 'border-primary-300'">
+              @if (reminderSelected() === opt.value) {
+                <div class="w-2 h-2 rounded-full bg-accent"></div>
+              }
+            </div>
+            <div>
+              <span class="text-[13px] font-semibold text-primary">{{ opt.label }}</span>
+              <p class="text-[11px] text-primary-400 mt-0.5">{{ opt.desc }}</p>
+            </div>
+          </button>
+        }
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <div class="flex items-center gap-2 h-5">
+          @if (reminderSaving()) {
+            <div class="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-[11px] text-primary-400">Guardando...</span>
+          }
+          @if (reminderMsg()) {
+            <p class="text-[11.5px] font-medium"
+              [class]="reminderMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+              {{ reminderMsg()!.text }}
+            </p>
+          }
+        </div>
+        <button type="button" (click)="saveReminderPref()"
+          [disabled]="reminderSaving() || reminderSelected() === reminderPref()"
+          class="px-4 py-1.5 rounded-[8px] text-[12px] font-semibold transition-all"
+          [class]="reminderSelected() === reminderPref()
+            ? 'bg-primary-100 text-primary-300 cursor-not-allowed'
+            : 'bg-accent text-white hover:bg-accent/90'">
+          Confirmar recordatorio
+        </button>
+      </div>
+    </div>
+
+    <!-- WhatsApp quota empresa -->
+    @if (waQuota()) {
+    <div class="bg-white rounded-[14px] border border-black/[.05] p-5 mb-6 space-y-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-[10px] flex-center shrink-0" style="background:#25D366;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12.004 2C6.477 2 2 6.477 2 12.004c0 1.778.466 3.449 1.28 4.9L2 22l5.233-1.26A9.953 9.953 0 0 0 12.004 22C17.53 22 22 17.523 22 12.004 22 6.477 17.53 2 12.004 2zm0 18.18a8.143 8.143 0 0 1-4.148-1.135l-.298-.177-3.108.748.782-2.994-.194-.307A8.15 8.15 0 0 1 3.85 12.004c0-4.5 3.654-8.154 8.154-8.154 4.5 0 8.155 3.654 8.155 8.154 0 4.5-3.655 8.176-8.155 8.176z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wide text-primary-400 mb-0.5">Mensajes WhatsApp</div>
+          <div class="text-[13px] font-semibold text-primary">Cuota compartida por todos los profesionales</div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-end justify-between">
+          <span class="text-[15px] font-bold text-primary">{{ waQuota()!.waMessagesSent }} / {{ waQuota()!.waMessagesLimit }}</span>
+          <span class="text-[11px] text-primary-400">{{ waUsagePct() }}% utilizado</span>
+        </div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div class="h-full rounded-full transition-all"
+            [style.width.%]="waUsagePct()"
+            [class]="waUsagePct() >= 90 ? 'bg-red-400' : waUsagePct() >= 70 ? 'bg-amber-400' : 'bg-[#25D366]'">
+          </div>
+        </div>
+        <p class="text-[10.5px] text-primary-400">Se resetea al renovar la suscripción</p>
+      </div>
+      <div class="pt-3 border-t border-black/[.05]">
+
+        @if (!waAddonPanelOpen()) {
+          <button (click)="waAddonPanelOpen.set(true)"
+            class="inline-flex items-center gap-1.5 text-[12.5px] font-bold px-4 py-2 rounded-[10px] text-white transition-all"
+            style="background:#25D366;box-shadow:0 3px 12px rgba(37,211,102,.3);">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Agregar mensajes WhatsApp
+          </button>
+        }
+
+        @if (waAddonPanelOpen()) {
+          <div class="bg-slate-50 rounded-[12px] border border-black/[.06] p-4 space-y-4">
+
+            <div class="flex items-center justify-between">
+              <p class="text-[12.5px] font-bold text-primary">Mensajes adicionales</p>
+              <button (click)="waAddonPanelOpen.set(false); waAddonBlocks.set(1)"
+                class="text-primary-400 hover:text-primary transition-colors">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <button (click)="waAddonStepDown()" [disabled]="waAddonBlocks() <= 1"
+                  class="w-8 h-8 rounded-full border-[1.5px] border-primary-200 flex-center text-primary font-bold text-lg transition-all hover:border-[#25D366] hover:text-[#25D366] disabled:opacity-30 disabled:cursor-not-allowed">
+                  −
+                </button>
+                <div class="text-center min-w-[80px]">
+                  <span class="text-[20px] font-extrabold text-primary">+{{ waAddonMessages() }}</span>
+                  <p class="text-[10px] text-primary-400 leading-none mt-0.5">mensajes</p>
+                </div>
+                <button (click)="waAddonStepUp()" [disabled]="waAddonBlocks() >= 10"
+                  class="w-8 h-8 rounded-full border-[1.5px] border-primary-200 flex-center text-primary font-bold text-lg transition-all hover:border-[#25D366] hover:text-[#25D366] disabled:opacity-30 disabled:cursor-not-allowed">
+                  +
+                </button>
+              </div>
+              <div class="text-right">
+                <span class="text-[18px] font-extrabold text-primary">{{ waAddonTotal() }}</span>
+                <p class="text-[10px] text-primary-400 leading-none mt-0.5">pago único</p>
+              </div>
+            </div>
+
+            <p class="text-[10.5px] text-primary-400">$5.000 por cada bloque de 50 mensajes · máx. 10 bloques</p>
+
+            <button (click)="checkoutWaAddon()" [disabled]="waAddonSaving()"
+              class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+              style="background:#25D366;box-shadow:0 3px 12px rgba(37,211,102,.3);">
+              @if (waAddonSaving()) {
+                <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                Iniciando pago...
+              } @else {
+                Pagar {{ waAddonTotal() }} con Webpay
+              }
+            </button>
+
+            @if (waAddonMsg()) {
+              <p class="text-[11.5px] font-medium text-center"
+                [class]="waAddonMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+                {{ waAddonMsg()!.text }}
+              </p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+    }
+
     @if (planError()) {
     <div class="bg-red-50 border border-red-200 text-red-700 text-[12.5px] px-4 py-3 rounded-[10px] mb-5">{{ planError() }}</div>
     }

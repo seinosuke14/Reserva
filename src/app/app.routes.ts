@@ -73,6 +73,10 @@ export const routes: Routes = [
     loadComponent: () => import('./public/subscription-payment-result/subscription-payment-result.component').then(m => m.SubscriptionPaymentResultComponent)
   },
   {
+    path: 'wa-addon/pago-resultado',
+    loadComponent: () => import('./public/wa-addon-payment-result/wa-addon-payment-result.component').then(m => m.WaAddonPaymentResultComponent)
+  },
+  {
     path: 'terminos',
     loadComponent: () => import('./public/terminos/terminos.component').then(m => m.TerminosComponent)
   },
