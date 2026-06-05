@@ -26,6 +26,7 @@ export interface ICompany {
   backgroundType: 'color' | 'image';
   headingFont: string | null;
   bodyFont: string | null;
+  reminderPreference?: '1h_before' | '7h30_same_day' | '24h_before';
 }
 
 export interface ICompanyMember {
@@ -362,5 +363,42 @@ export class CompanyService {
     try {
       return await firstValueFrom(this.http.get<ICompanyPublicPage>(`${API_BASE}/company/public/${slug}`));
     } catch { return null; }
+  }
+
+  async getWaQuota(): Promise<{ waMessagesSent: number; waMessagesLimit: number; subscriptionEndDate: string | null; scope: string } | null> {
+    try {
+      return await firstValueFrom(this.http.get<any>(`${API_BASE}/company/wa-quota`));
+    } catch { return null; }
+  }
+
+  async saveReminderPreference(pref: '1h_before' | '7h30_same_day' | '24h_before'): Promise<{ success: boolean; message?: string }> {
+    try {
+      await firstValueFrom(this.http.put(`${API_BASE}/company/reminder-preference`, { reminderPreference: pref }));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al guardar.' };
+    }
+  }
+
+  async checkoutWaAddon(blocks: number): Promise<{ success: boolean; url?: string; message?: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post<any>(`${API_BASE}/wa-addon/company/checkout`, { blocks })
+      );
+      return { success: true, url: res.url };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al iniciar el pago.' };
+    }
+  }
+
+  async confirmWaAddon(token_ws: string): Promise<{ success: boolean; added?: number; waMessagesLimit?: number; waMessagesSent?: number; message?: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post<any>(`${API_BASE}/wa-addon/company/webpay/confirm`, { token_ws })
+      );
+      return { success: true, added: res.added, waMessagesLimit: res.waMessagesLimit, waMessagesSent: res.waMessagesSent, message: res.message };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al confirmar el pago.' };
+    }
   }
 }
