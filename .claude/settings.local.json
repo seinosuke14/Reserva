@@ -39,7 +39,9 @@
       "Bash(npm view *)",
       "Bash(npm install *)",
       "Bash(node -e \"console.log\\('ssr', require\\('@angular/ssr/package.json'\\).version\\)\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\" -Filter \".env*\")",
+      "Bash(Select-Object Name)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
