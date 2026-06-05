@@ -1,0 +1,20 @@
+<div class="mp-callback">
+  @if (state() === 'processing') {
+    <div class="spinner"></div>
+    <h2>Vinculando tu cuenta de MercadoPago…</h2>
+    <p>Un momento, estamos confirmando la conexión.</p>
+  }
+
+  @if (state() === 'success') {
+    <div class="icon icon-ok">✓</div>
+    <h2>¡Cuenta vinculada!</h2>
+    <p>Ya puedes recibir pagos con MercadoPago. Redirigiendo…</p>
+  }
+
+  @if (state() === 'error') {
+    <div class="icon icon-err">✕</div>
+    <h2>No se pudo vincular</h2>
+    <p>{{ errorMsg() }}</p>
+    <button class="back-btn" (click)="goToPayments()">Volver a Métodos de Pago</button>
+  }
+</div>

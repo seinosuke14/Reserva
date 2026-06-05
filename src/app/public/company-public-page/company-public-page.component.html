@@ -305,6 +305,23 @@
                                 <line x1="6" y1="15" x2="10" y2="15"/>
                               </svg>
                             }
+                            @case ('mercadopago') {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                              </svg>
+                            }
+                            @case ('khipu') {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="17 1 21 5 17 9"/>
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                                <polyline points="7 23 3 19 7 15"/>
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                              </svg>
+                            }
                             @case ('transfer') {
                               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -321,14 +338,18 @@
                         <div class="payment-option-info">
                           <h4>
                             @switch (method.provider) {
-                              @case ('flow')     { Flow }
-                              @case ('transfer') { Transferencia Bancaria }
+                              @case ('flow')        { Flow }
+                              @case ('mercadopago') { Mercado Pago }
+                              @case ('khipu')       { Khipu (transferencia instantánea) }
+                              @case ('transfer')    { Transferencia Bancaria }
                             }
                           </h4>
                           <p>
                             @switch (method.provider) {
-                              @case ('flow')     { Tarjetas, débito y transferencia }
-                              @case ('transfer') { Depósito directo a cuenta bancaria }
+                              @case ('flow')        { Tarjetas, débito y transferencia }
+                              @case ('mercadopago') { Tarjetas, transferencia y más }
+                              @case ('khipu')       { Paga desde tu banco, confirmación automática }
+                              @case ('transfer')    { Depósito directo a cuenta bancaria }
                             }
                           </p>
                         </div>

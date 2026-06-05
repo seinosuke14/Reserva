@@ -101,7 +101,7 @@ export interface ICompanyPublicMember {
 
 export interface ICompanyPublicPaymentMethod {
   id: string;
-  provider: 'flow' | 'transfer';
+  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago';
   credentials: Record<string, string>;
 }
 

@@ -280,6 +280,14 @@ export class PaymentResultComponent implements OnInit {
     this.slug = params.get('slug') ?? '';
 
     if (params.get('cancelled') === 'true') {
+      const ref = params.get('ref');
+      if (ref) {
+        try {
+          await firstValueFrom(
+            this.http.post(`${environment.apiUrl}/public/booking/${encodeURIComponent(ref)}/cancel`, {})
+          );
+        } catch { /* si ya estaba Cancelado o no existe, no importa */ }
+      }
       this.showError('Pago cancelado', 'Cancelaste el proceso de pago. Tu reserva ha sido liberada.');
       return;
     }

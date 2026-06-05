@@ -29,7 +29,7 @@ import { environment } from '../../../environments/environment';
 type EmailCheckState = 'idle' | 'checking' | 'exists' | 'not-found';
 
 interface IPaymentMethodView {
-  provider: 'flow' | 'transfer';
+  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago';
   transferInfo?: {
     bankName: string; accountType: string; accountNumber: string;
     rut: string; holderName: string; email: string;
