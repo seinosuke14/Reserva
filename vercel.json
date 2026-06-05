@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/professional-dashboard-angular/browser",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "dist/professional-dashboard-angular/**"
+    }
+  }
+}
