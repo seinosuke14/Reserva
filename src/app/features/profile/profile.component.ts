@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
+import { ProfessionalService } from '../../core/services/professional.service';
 import { environment } from '../../../environments/environment';
 
 const PLAN_LABELS: Record<string, string> = {
@@ -30,10 +31,11 @@ const PLAN_LABELS: Record<string, string> = {
     ])
   ]
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   private readonly auth            = inject(AuthService);
   private readonly http            = inject(HttpClient);
   private readonly subscriptionSvc = inject(SubscriptionService);
+  private readonly proSvc          = inject(ProfessionalService);
 
   readonly user = this.auth.currentUser;
 
@@ -113,9 +115,87 @@ export class ProfileComponent {
     }
   }
 
+  // ── WhatsApp quota ───────────────────────────────────────────────────────────
+  waQuota          = signal<{ waMessagesSent: number; waMessagesLimit: number; subscriptionEndDate: string | null; scope: string } | null>(null);
+  waAddonSaving    = signal(false);
+  waAddonMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+  waAddonPanelOpen = signal(false);
+  waAddonBlocks    = signal(1);
+
+  readonly waUsagePct = computed(() => {
+    const q = this.waQuota();
+    if (!q || q.waMessagesLimit === 0) return 0;
+    return Math.min(100, Math.round((q.waMessagesSent / q.waMessagesLimit) * 100));
+  });
+
+  readonly waAddonMessages = computed(() => this.waAddonBlocks() * 50);
+  readonly waAddonTotal    = computed(() =>
+    new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 })
+      .format(this.waAddonBlocks() * 5000)
+  );
+
+  waAddonStepDown(): void {
+    if (this.waAddonBlocks() > 1) this.waAddonBlocks.update(b => b - 1);
+  }
+
+  waAddonStepUp(): void {
+    if (this.waAddonBlocks() < 10) this.waAddonBlocks.update(b => b + 1);
+  }
+
+  async loadWaQuota(): Promise<void> {
+    const q = await this.proSvc.getWaQuota();
+    this.waQuota.set(q);
+  }
+
+  async checkoutWaAddon(): Promise<void> {
+    this.waAddonSaving.set(true);
+    this.waAddonMsg.set(null);
+    const result = await this.proSvc.checkoutWaAddon(this.waAddonBlocks());
+    this.waAddonSaving.set(false);
+    if (result.success && result.url) {
+      window.location.href = result.url;
+    } else {
+      this.waAddonMsg.set({ type: 'error', text: result.message ?? 'No se pudo iniciar el pago.' });
+      setTimeout(() => this.waAddonMsg.set(null), 4000);
+    }
+  }
+
+  // ── Recordatorio ─────────────────────────────────────────────────────────────
+  reminderPref     = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
+  reminderSelected = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
+  reminderSaving   = signal(false);
+  reminderMsg      = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  readonly reminderOptions: { value: '1h_before' | '7h30_same_day' | '24h_before'; label: string; desc: string }[] = [
+    { value: '1h_before',     label: '1 hora antes',         desc: 'Se envía 1 hora antes del inicio de la cita.' },
+    { value: '7h30_same_day', label: '7:30 AM del mismo día', desc: 'Se envía a las 7:30 AM del día de la cita.' },
+    { value: '24h_before',    label: '24 horas antes',        desc: 'Se envía a la misma hora del día anterior.' },
+  ];
+
+  async saveReminderPref(): Promise<void> {
+    const pref = this.reminderSelected();
+    this.reminderSaving.set(true);
+    this.reminderMsg.set(null);
+    const result = await this.proSvc.saveReminderPreference(pref);
+    this.reminderSaving.set(false);
+    if (result.success) {
+      this.reminderPref.set(pref);
+      this.reminderMsg.set({ type: 'success', text: 'Preferencia guardada.' });
+    } else {
+      this.reminderMsg.set({ type: 'error', text: result.message ?? 'Error al guardar.' });
+    }
+    setTimeout(() => this.reminderMsg.set(null), 3000);
+  }
+
   // ── Renovar plan ─────────────────────────────────────────────────────────────
   renewSaving = signal(false);
   renewMsg    = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  ngOnInit(): void {
+    this.loadWaQuota();
+    const pref = this.user()?.reminderPreference;
+    if (pref) { this.reminderPref.set(pref); this.reminderSelected.set(pref); }
+  }
 
   async renewPlan(): Promise<void> {
     const plan = this.user()?.plan;
