@@ -48,13 +48,12 @@
                   <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
                 </svg>
               }
-              @case ('stripe') {
+              @case ('mercadopago_connect') {
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                  <line x1="1" y1="10" x2="23" y2="10"/>
-                  <line x1="6" y1="15" x2="9" y2="15"/>
-                  <line x1="13" y1="15" x2="18" y2="15"/>
+                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
                 </svg>
               }
               @case ('transfer') {
@@ -77,7 +76,7 @@
                 @case ('flow')        { Flow }
                 @case ('mercadopago') { Mercado Pago }
                 @case ('khipu')       { Khipu (transferencia instantanea) }
-                @case ('stripe')      { Pago con tarjeta }
+                @case ('mercadopago_connect') { Mercado Pago }
                 @case ('transfer')    { Transferencia Bancaria }
               }
             </h4>
@@ -87,7 +86,7 @@
                 @case ('flow')        { Tarjetas, débito y transferencia }
                 @case ('mercadopago') { Tarjetas, transferencia y más }
                 @case ('khipu')       { Paga desde tu banco, confirmacion automatica }
-                @case ('stripe')      { Tarjeta de crédito o débito (comisión incluida) }
+                @case ('mercadopago_connect') { Tarjetas, transferencia y más }
                 @case ('transfer')    { Depósito directo a cuenta bancaria }
               }
             </p>

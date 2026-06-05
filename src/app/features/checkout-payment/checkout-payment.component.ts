@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'stripe';
+type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect';
 
 interface IPaymentMethod {
   id: string;
@@ -19,6 +19,7 @@ interface ProviderConfig {
   label: string;
   description: string;
   icon: string;
+  oauth?: boolean;
   fields: { key: string; label: string; placeholder: string; type: string; maxlength?: number; inputmode?: string; options?: string[] }[];
 }
 
@@ -90,10 +91,11 @@ const PROVIDERS: ProviderConfig[] = [
     ],
   },
   {
-    provider: 'stripe',
-    label: 'Boton de pago de plataforma',
-    description: 'Cobro gestionado por la plataforma. Se descuenta comision + fee Stripe al momento del pago.',
-    icon: 'platform',
+    provider: 'mercadopago_connect',
+    label: 'MercadoPago (gestionado)',
+    description: 'Vincula tu cuenta MercadoPago. El pago llega directo a ti y se descuenta una comision de la plataforma.',
+    icon: 'wallet',
+    oauth: true,
     fields: [],
   },
 ];
@@ -114,8 +116,8 @@ export class CheckoutPaymentComponent implements OnInit {
   readonly providerSections = [
     {
       label: 'Nuestro botón de pago',
-      subtitle: 'Cobro gestionado por la plataforma — comisión fija descontada al profesional',
-      providers: PROVIDERS.filter(p => p.provider === 'stripe'),
+      subtitle: 'Cobro gestionado por la plataforma — se descuenta una comisión por transacción',
+      providers: PROVIDERS.filter(p => p.provider === 'mercadopago_connect'),
     },
     {
       label: 'Métodos de pago externos',
@@ -134,6 +136,7 @@ export class CheckoutPaymentComponent implements OnInit {
   expandedProvider = signal<Provider | null>(null);
   formData = signal<Record<string, string>>({});
   isSaving = signal(false);
+  isConnecting = signal(false);
   feedbackMsg = signal('');
   feedbackType = signal<'success' | 'error' | ''>('');
   visibleFields = signal<Set<string>>(new Set());
@@ -264,6 +267,21 @@ export class CheckoutPaymentComponent implements OnInit {
       this.expandedProvider.set(null);
       this.showFeedback('Metodo de pago eliminado.', 'success');
     } catch { /* silencioso */ }
+  }
+
+  // Inicia el OAuth de MercadoPago: pide el link, guarda el state (CSRF) y redirige.
+  async connectMercadoPago(): Promise<void> {
+    this.isConnecting.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ url: string; state: string }>(`${this.apiUrl}/payment-methods/mp-connect/oauth-url`)
+      );
+      sessionStorage.setItem('mp_oauth_state', res.state);
+      window.location.href = res.url;
+    } catch {
+      this.showFeedback('No se pudo iniciar la conexión con MercadoPago.', 'error');
+      this.isConnecting.set(false);
+    }
   }
 
   private showFeedback(msg: string, type: 'success' | 'error') {

@@ -90,14 +90,6 @@
                           <polygon points="12 2 20 7 4 7"/>
                         </svg>
                       }
-                      @case ('platform') {
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                          <line x1="1" y1="10" x2="23" y2="10"/>
-                          <line x1="6" y1="15" x2="9" y2="15"/>
-                          <line x1="13" y1="15" x2="18" y2="15"/>
-                        </svg>
-                      }
                     }
                   </div>
 
@@ -135,6 +127,44 @@
                 <!-- Expandable form -->
                 @if (expandedProvider() === config.provider) {
                   <div class="border-t border-primary-100/60 p-[18px_20px] space-y-4">
+                    @if (config.oauth) {
+                      <!-- MercadoPago Connect: vinculación OAuth -->
+                      @if (isConfigured(config.provider)) {
+                        <div class="flex items-start gap-2.5 text-[12.5px] bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] px-4 py-3">
+                          <svg width="16" height="16" class="mt-px shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                          Tu cuenta de MercadoPago está vinculada. Los pagos llegan directo a ti; se descuenta la comisión de la plataforma por transacción.
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                          <button (click)="toggleActive(config.provider); $event.stopPropagation()"
+                            class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
+                            {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
+                          </button>
+                          <button (click)="removeMethod(config.provider)"
+                            class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+                            Desvincular
+                          </button>
+                        </div>
+                      } @else {
+                        <p class="text-[12px] text-primary-400 bg-primary-50 rounded-[10px] px-4 py-3">
+                          Vincula tu cuenta de MercadoPago para recibir los pagos directamente. Se descontará una comisión por transacción.
+                        </p>
+                        <button (click)="connectMercadoPago()" [disabled]="isConnecting()"
+                          class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
+                          style="background:#009ee3;box-shadow:0 3px 12px rgba(0,158,227,.38);">
+                          @if (isConnecting()) {
+                            <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                              <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                              <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                            </svg>
+                            Conectando...
+                          } @else {
+                            Conectar con MercadoPago
+                          }
+                        </button>
+                      }
+                    } @else {
                     @for (field of config.fields; track field.key) {
                       <div class="space-y-1.5">
                         <label class="form-hint">{{ field.label }}</label>
@@ -222,6 +252,7 @@
                         </button>
                       }
                     </div>
+                    }
                   </div>
                 }
               </div>

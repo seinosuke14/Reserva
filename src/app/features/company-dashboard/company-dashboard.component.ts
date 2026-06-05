@@ -28,7 +28,7 @@ const LC_PLOT_H = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
 
 type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos';
 
-type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago' | 'stripe';
+type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago';
 
 interface IPaymentMethod {
   id: string;
@@ -82,20 +82,9 @@ const PAYMENT_PROVIDERS: ProviderConfig[] = [
       { key: 'email',         label: 'Email de notificación', placeholder: 'pagos@email.com',              type: 'email', maxlength: 254 },
     ],
   },
-  {
-    provider: 'stripe',
-    label: 'Botón de pago de plataforma',
-    description: 'Cobro gestionado por la plataforma. Se descuenta comisión + fee Stripe al momento del pago.',
-    fields: [],
-  },
 ];
 
 const PAYMENT_SECTIONS = [
-  {
-    label: 'Nuestro botón de pago',
-    subtitle: 'Cobro gestionado por la plataforma — comisión fija descontada al profesional',
-    providers: PAYMENT_PROVIDERS.filter(p => p.provider === 'stripe'),
-  },
   {
     label: 'Métodos de pago externos',
     subtitle: 'El profesional usa sus propias credenciales — el dinero va directo a su cuenta',
