@@ -112,6 +112,7 @@ export const routes: Routes = [
       { path: 'clientes', loadComponent: () => import('./features/customer-directory/customer-directory.component').then(m => m.CustomerDirectoryComponent) },
       { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
+      { path: 'pagos/mp-callback', loadComponent: () => import('./features/mp-connect-callback/mp-connect-callback.component').then(m => m.MpConnectCallbackComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
       { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },

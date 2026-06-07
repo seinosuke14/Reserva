@@ -28,7 +28,7 @@ const LC_PLOT_H = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
 
 type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos';
 
-type PaymentProvider = 'flow' | 'transfer';
+type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago';
 
 interface IPaymentMethod {
   id: string;
@@ -45,18 +45,34 @@ interface ProviderConfig { provider: PaymentProvider; label: string; description
 
 const PAYMENT_PROVIDERS: ProviderConfig[] = [
   {
+    provider: 'khipu',
+    label: 'Khipu',
+    description: 'Transferencia bancaria automática (confirmación instantánea)',
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'Llave de cobrador Khipu', type: 'password', maxlength: 128 },
+    ],
+  },
+  {
     provider: 'flow',
     label: 'Flow',
-    description: 'Tarjetas, débito y transferencia electrónica',
+    description: 'Tarjetas, débito y transferencia electrónica (credenciales propias)',
     fields: [
       { key: 'apiKey',    label: 'API Key',    placeholder: 'API Key de Flow',    type: 'text',     maxlength: 128 },
       { key: 'secretKey', label: 'Secret Key', placeholder: 'Secret Key de Flow', type: 'password', maxlength: 128 },
     ],
   },
   {
+    provider: 'mercadopago',
+    label: 'MercadoPago',
+    description: 'Tarjetas y medios digitales (credenciales propias)',
+    fields: [
+      { key: 'accessToken', label: 'Access Token', placeholder: 'APP_USR-xxxxx... (token de producción)', type: 'password', maxlength: 256 },
+    ],
+  },
+  {
     provider: 'transfer',
-    label: 'Transferencia Bancaria',
-    description: 'Pago directo a cuenta bancaria',
+    label: 'Transferencia Bancaria Manual',
+    description: 'El cliente transfiere directamente y confirmas el pago',
     fields: [
       { key: 'bankName',      label: 'Banco',                 placeholder: 'Selecciona un banco',          type: 'select', options: CHILEAN_BANKS },
       { key: 'accountType',   label: 'Tipo de Cuenta',        placeholder: 'Selecciona el tipo de cuenta', type: 'select', options: ACCOUNT_TYPES },
@@ -65,6 +81,19 @@ const PAYMENT_PROVIDERS: ProviderConfig[] = [
       { key: 'holderName',    label: 'Titular',               placeholder: 'Nombre del titular',           type: 'text',  maxlength: 60 },
       { key: 'email',         label: 'Email de notificación', placeholder: 'pagos@email.com',              type: 'email', maxlength: 254 },
     ],
+  },
+];
+
+const PAYMENT_SECTIONS = [
+  {
+    label: 'Métodos de pago externos',
+    subtitle: 'El profesional usa sus propias credenciales — el dinero va directo a su cuenta',
+    providers: PAYMENT_PROVIDERS.filter(p => (['flow', 'mercadopago'] as PaymentProvider[]).includes(p.provider)),
+  },
+  {
+    label: 'Transferencia bancaria',
+    subtitle: 'El pago va directamente del cliente al profesional',
+    providers: PAYMENT_PROVIDERS.filter(p => (['khipu', 'transfer'] as PaymentProvider[]).includes(p.provider)),
   },
 ];
 
@@ -526,6 +555,7 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
 
   // ── Pagos ──
   readonly paymentProviders = PAYMENT_PROVIDERS;
+  readonly paymentSections  = PAYMENT_SECTIONS;
   paymentMethods     = signal<IPaymentMethod[]>([]);
   paymentLoading     = signal(false);
   paymentExpanded    = signal<PaymentProvider | null>(null);
@@ -572,8 +602,10 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
 
   async savePaymentMethod(config: ProviderConfig): Promise<void> {
     const creds = this.paymentFormData();
-    const missing = config.fields.some(f => !creds[f.key]?.trim());
-    if (missing) { this.showPaymentFeedback('Todos los campos son obligatorios.', 'error'); return; }
+    if (config.fields.length > 0) {
+      const missing = config.fields.some(f => f.type !== 'select' && !creds[f.key]?.trim() || f.type === 'select' && !creds[f.key]);
+      if (missing) { this.showPaymentFeedback('Todos los campos son obligatorios.', 'error'); return; }
+    }
     this.paymentSaving.set(true);
     try {
       const existing = this.getPaymentMethod(config.provider);

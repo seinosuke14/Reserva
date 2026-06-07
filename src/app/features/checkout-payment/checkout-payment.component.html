@@ -31,163 +31,235 @@
       </div>
     }
 
-    <!-- Provider cards -->
-    <div class="flex flex-col gap-3">
-      @for (config of providers; track config.provider) {
-        <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card overflow-hidden transition-all"
-             [class.opacity-70]="!isActive(config.provider) && isConfigured(config.provider)">
+    <!-- Provider cards grouped by section -->
+    <div class="flex flex-col gap-6">
+      @for (section of providerSections; track section.label) {
 
-          <!-- Card header -->
-          <div class="flex items-center gap-4 p-[14px_20px] cursor-pointer select-none"
-               (click)="toggleExpand(config.provider)">
-
-            <!-- Icon -->
-            <div class="w-[42px] h-[42px] rounded-[10px] flex-center shrink-0"
-                 [style.background]="isConfigured(config.provider) && isActive(config.provider)
-                   ? 'rgba(0,196,167,.13)' : 'rgba(100,116,139,.08)'"
-                 [style.color]="isConfigured(config.provider) && isActive(config.provider)
-                   ? '#00C4A7' : '#94a3b8'">
-              @switch (config.icon) {
-                @case ('credit-card') {
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                    <line x1="1" y1="10" x2="23" y2="10"/>
-                  </svg>
-                }
-                @case ('wallet') {
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-                  </svg>
-                }
-                @case ('bank') {
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                    <line x1="3" y1="22" x2="21" y2="22"/>
-                    <line x1="6" y1="18" x2="6" y2="11"/>
-                    <line x1="10" y1="18" x2="10" y2="11"/>
-                    <line x1="14" y1="18" x2="14" y2="11"/>
-                    <line x1="18" y1="18" x2="18" y2="11"/>
-                    <polygon points="12 2 20 7 4 7"/>
-                  </svg>
-                }
-              }
-            </div>
-
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <div class="text-[13.5px] font-bold text-primary tracking-tight">{{ config.label }}</div>
-              <div class="text-[12px] text-primary-400 truncate">{{ config.description }}</div>
-            </div>
-
-            <!-- Status + chevron -->
-            <div class="flex items-center gap-3 shrink-0">
-              @if (isConfigured(config.provider)) {
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
-                      [style.background]="isActive(config.provider) ? 'rgba(34,197,94,.1)' : 'rgba(100,116,139,.1)'"
-                      [style.color]="isActive(config.provider) ? '#16a34a' : '#64748b'">
-                  <span class="w-1.5 h-1.5 rounded-full"
-                        [style.background]="isActive(config.provider) ? '#22c55e' : '#94a3b8'"></span>
-                  {{ isActive(config.provider) ? 'Activo' : 'Inactivo' }}
-                </span>
-              } @else {
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
-                      style="background:rgba(245,158,11,.1);color:#d97706;">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                  Sin configurar
-                </span>
-              }
-              <svg width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"
-                   class="transition-transform duration-200"
-                   [class.rotate-180]="expandedProvider() === config.provider">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </div>
+        <!-- Section header -->
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-[.08em] text-primary-400">{{ section.label }}</span>
+            <div class="flex-1 h-px bg-primary-100"></div>
           </div>
+          <p class="text-[11px] text-primary-300 mb-3">{{ section.subtitle }}</p>
 
-          <!-- Expandable form -->
-          @if (expandedProvider() === config.provider) {
-            <div class="border-t border-primary-100/60 p-[18px_20px] space-y-4">
-              @for (field of config.fields; track field.key) {
-                <div class="space-y-1.5">
-                  <label class="form-hint">{{ field.label }}</label>
-                  <div class="relative">
-                    @if (field.type === 'select') {
-                      <select
-                        class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary bg-white transition-colors focus:border-accent appearance-none cursor-pointer"
-                        [value]="getFieldValue(field.key)"
-                        (change)="setFieldValue(field.key, $any($event.target).value)">
-                        <option value="" disabled>{{ field.placeholder }}</option>
-                        @for (opt of field.options; track opt) {
-                          <option [value]="opt">{{ opt }}</option>
-                        }
-                      </select>
-                      <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-primary-400" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <polyline points="6 9 12 15 18 9"/>
-                      </svg>
-                    } @else {
-                      <input
-                        [type]="getFieldType(field)"
-                        class="form-input border-primary-200 focus:border-accent"
-                        [placeholder]="field.placeholder"
-                        [attr.maxlength]="field.maxlength ?? null"
-                        [attr.inputmode]="field.inputmode ?? null"
-                        [value]="getFieldValue(field.key)"
-                        (input)="setFieldValue(field.key, $any($event.target).value)" />
-                      @if (field.type === 'password') {
-                        <button type="button"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-300 hover:text-primary-500 transition-colors"
-                          (click)="toggleFieldVisibility(field.key)">
-                          @if (isFieldVisible(field.key)) {
-                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                              <line x1="1" y1="1" x2="23" y2="23"/>
-                            </svg>
-                          } @else {
-                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                              <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                          }
-                        </button>
+          <div class="flex flex-col gap-3">
+            @for (config of section.providers; track config.provider) {
+              <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card overflow-hidden transition-all"
+                   [class.opacity-70]="!isActive(config.provider) && isConfigured(config.provider)">
+
+                <!-- Card header -->
+                <div class="flex items-center gap-4 p-[14px_20px] cursor-pointer select-none"
+                     (click)="toggleExpand(config.provider)">
+
+                  <!-- Icon -->
+                  <div class="w-[42px] h-[42px] rounded-[10px] flex-center shrink-0"
+                       [style.background]="isConfigured(config.provider) && isActive(config.provider)
+                         ? 'rgba(0,196,167,.13)' : 'rgba(100,116,139,.08)'"
+                       [style.color]="isConfigured(config.provider) && isActive(config.provider)
+                         ? '#00C4A7' : '#94a3b8'">
+                    @switch (config.icon) {
+                      @case ('credit-card') {
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                          <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                      }
+                      @case ('wallet') {
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                        </svg>
+                      }
+                      @case ('bank-transfer') {
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                          <polyline points="17 1 21 5 17 9"/>
+                          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                          <polyline points="7 23 3 19 7 15"/>
+                          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                        </svg>
+                      }
+                      @case ('bank') {
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                          <line x1="3" y1="22" x2="21" y2="22"/>
+                          <line x1="6" y1="18" x2="6" y2="11"/>
+                          <line x1="10" y1="18" x2="10" y2="11"/>
+                          <line x1="14" y1="18" x2="14" y2="11"/>
+                          <line x1="18" y1="18" x2="18" y2="11"/>
+                          <polygon points="12 2 20 7 4 7"/>
+                        </svg>
                       }
                     }
                   </div>
-                </div>
-              }
 
-              <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                <button (click)="saveMethod(config)" [disabled]="isSaving()"
-                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
-                  style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
-                  @if (isSaving()) {
-                    <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                      <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-                      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-                      <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-                      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[13.5px] font-bold text-primary tracking-tight">{{ config.label }}</div>
+                    <div class="text-[12px] text-primary-400 truncate">{{ config.description }}</div>
+                  </div>
+
+                  <!-- Status + chevron -->
+                  <div class="flex items-center gap-3 shrink-0">
+                    @if (isConfigured(config.provider)) {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
+                            [style.background]="isActive(config.provider) ? 'rgba(34,197,94,.1)' : 'rgba(100,116,139,.1)'"
+                            [style.color]="isActive(config.provider) ? '#16a34a' : '#64748b'">
+                        <span class="w-1.5 h-1.5 rounded-full"
+                              [style.background]="isActive(config.provider) ? '#22c55e' : '#94a3b8'"></span>
+                        {{ isActive(config.provider) ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold"
+                            style="background:rgba(245,158,11,.1);color:#d97706;">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        Sin configurar
+                      </span>
+                    }
+                    <svg width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"
+                         class="transition-transform duration-200"
+                         [class.rotate-180]="expandedProvider() === config.provider">
+                      <polyline points="6 9 12 15 18 9"/>
                     </svg>
-                    Guardando...
-                  } @else {
-                    {{ isConfigured(config.provider) ? 'Actualizar credenciales' : 'Guardar credenciales' }}
-                  }
-                </button>
+                  </div>
+                </div>
 
-                @if (isConfigured(config.provider)) {
-                  <button (click)="toggleActive(config.provider); $event.stopPropagation()"
-                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
-                    {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
-                  </button>
-                  <button (click)="removeMethod(config.provider)"
-                    class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
-                    Eliminar
-                  </button>
+                <!-- Expandable form -->
+                @if (expandedProvider() === config.provider) {
+                  <div class="border-t border-primary-100/60 p-[18px_20px] space-y-4">
+                    @if (config.oauth) {
+                      <!-- MercadoPago Connect: vinculación OAuth -->
+                      @if (isConfigured(config.provider)) {
+                        <div class="flex items-start gap-2.5 text-[12.5px] bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] px-4 py-3">
+                          <svg width="16" height="16" class="mt-px shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                          Tu cuenta de MercadoPago está vinculada. Los pagos llegan directo a ti; se descuenta la comisión de la plataforma por transacción.
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                          <button (click)="toggleActive(config.provider); $event.stopPropagation()"
+                            class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
+                            {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
+                          </button>
+                          <button (click)="removeMethod(config.provider)"
+                            class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+                            Desvincular
+                          </button>
+                        </div>
+                      } @else {
+                        <p class="text-[12px] text-primary-400 bg-primary-50 rounded-[10px] px-4 py-3">
+                          Vincula tu cuenta de MercadoPago para recibir los pagos directamente. Se descontará una comisión por transacción.
+                        </p>
+                        <button (click)="connectMercadoPago()" [disabled]="isConnecting()"
+                          class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
+                          style="background:#009ee3;box-shadow:0 3px 12px rgba(0,158,227,.38);">
+                          @if (isConnecting()) {
+                            <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                              <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                              <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                            </svg>
+                            Conectando...
+                          } @else {
+                            Conectar con MercadoPago
+                          }
+                        </button>
+                      }
+                    } @else {
+                    @for (field of config.fields; track field.key) {
+                      <div class="space-y-1.5">
+                        <label class="form-hint">{{ field.label }}</label>
+                        <div class="relative">
+                          @if (field.type === 'select') {
+                            <select
+                              class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary bg-white transition-colors focus:border-accent appearance-none cursor-pointer"
+                              [value]="getFieldValue(field.key)"
+                              (change)="setFieldValue(field.key, $any($event.target).value)">
+                              <option value="" disabled>{{ field.placeholder }}</option>
+                              @for (opt of field.options; track opt) {
+                                <option [value]="opt">{{ opt }}</option>
+                              }
+                            </select>
+                            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-primary-400" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                          } @else {
+                            <input
+                              [type]="getFieldType(field)"
+                              class="form-input border-primary-200 focus:border-accent"
+                              [placeholder]="field.placeholder"
+                              [attr.maxlength]="field.maxlength ?? null"
+                              [attr.inputmode]="field.inputmode ?? null"
+                              [value]="getFieldValue(field.key)"
+                              (input)="setFieldValue(field.key, $any($event.target).value)" />
+                            @if (field.type === 'password') {
+                              <button type="button"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-300 hover:text-primary-500 transition-colors"
+                                (click)="toggleFieldVisibility(field.key)">
+                                @if (isFieldVisible(field.key)) {
+                                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                  </svg>
+                                } @else {
+                                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                  </svg>
+                                }
+                              </button>
+                            }
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    @if (config.fields.length === 0) {
+                      <p class="text-[12px] text-primary-400 bg-primary-50 rounded-[10px] px-4 py-3">
+                        No requiere credenciales. Al habilitar, los clientes verán el botón de pago de la plataforma al agendar.
+                      </p>
+                    }
+
+                    <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                      <button (click)="saveMethod(config)" [disabled]="isSaving()"
+                        class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
+                        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+                        @if (isSaving()) {
+                          <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                            <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                          </svg>
+                          Guardando...
+                        } @else {
+                          @if (config.fields.length === 0) {
+                            {{ isConfigured(config.provider) ? 'Ya habilitado' : 'Habilitar' }}
+                          } @else {
+                            {{ isConfigured(config.provider) ? 'Actualizar credenciales' : 'Guardar credenciales' }}
+                          }
+                        }
+                      </button>
+
+                      @if (isConfigured(config.provider)) {
+                        <button (click)="toggleActive(config.provider); $event.stopPropagation()"
+                          class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
+                          {{ isActive(config.provider) ? 'Desactivar' : 'Activar' }}
+                        </button>
+                        <button (click)="removeMethod(config.provider)"
+                          class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+                          Eliminar
+                        </button>
+                      }
+                    </div>
+                    }
+                  </div>
                 }
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
+
       }
     </div>
   }
