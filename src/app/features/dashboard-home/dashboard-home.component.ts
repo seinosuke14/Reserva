@@ -14,6 +14,9 @@ interface IAppointment {
   amount: number;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
   cancellationStatus?: 'none' | 'requested' | 'rejected';
+  paymentProvider?: string | null;
+  mpPaymentId?: string | null;
+  refundStatus?: string | null;
   customer: { id: string; name: string };
   service:  { id: string; name: string };
   createdAt?: string;
@@ -86,6 +89,38 @@ export class DashboardHomeComponent implements OnInit {
       a.paymentStatus !== 'Finalizada'
     )
   );
+
+  // Reembolsos de citas canceladas (mercadopago_connect) que NO quedaron aprobados.
+  // Como las citas canceladas no se ven en la agenda, aquí es donde el profesional las gestiona.
+  readonly pendingRefunds = computed(() =>
+    this.allAppointments().filter(a =>
+      a.paymentProvider === 'mercadopago_connect' &&
+      a.paymentStatus === 'Cancelado' &&
+      !!a.mpPaymentId &&
+      a.refundStatus !== 'approved'
+    )
+  );
+
+  readonly retryingRefundId = signal<string | null>(null);
+  readonly refundMsg        = signal<Record<string, string>>({});
+
+  async retryRefund(apt: IAppointment): Promise<void> {
+    if (this.retryingRefundId()) return;
+    this.retryingRefundId.set(apt.id);
+    this.refundMsg.update(m => ({ ...m, [apt.id]: '' }));
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/refund/retry`, {})
+      );
+      this.refundMsg.update(m => ({ ...m, [apt.id]: res?.message ?? 'Reembolso procesado.' }));
+      const all = await firstValueFrom(this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`));
+      this.allAppointments.set(all);
+    } catch (err: any) {
+      this.refundMsg.update(m => ({ ...m, [apt.id]: err?.error?.message ?? 'No se pudo reintentar el reembolso.' }));
+    } finally {
+      this.retryingRefundId.set(null);
+    }
+  }
 
   async copyUrl(): Promise<void> {
     const url = this.linkBanner()?.url;
