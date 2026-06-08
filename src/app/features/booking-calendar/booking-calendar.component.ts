@@ -631,6 +631,36 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     return !!apt && apt.cancellationStatus === 'requested' && this.canCancelAppointment(apt);
   }
 
+  // ── Reintento de reembolso (cuando el refund falló o quedó pendiente) ──
+  readonly retryingRefundId = signal<string | null>(null);
+  readonly retryRefundMsg   = signal<string>('');
+
+  canRetryRefund(apt: IAppointment | null): boolean {
+    return !!apt
+      && apt.paymentProvider === 'mercadopago_connect'
+      && apt.paymentStatus === 'Cancelado'
+      && !!apt.refundStatus
+      && apt.refundStatus !== 'approved';
+  }
+
+  async retryRefund(apt: IAppointment): Promise<void> {
+    if (this.retryingRefundId()) return;
+    this.retryingRefundId.set(apt.id);
+    this.retryRefundMsg.set('');
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/refund/retry`, {})
+      );
+      this.retryRefundMsg.set(res?.message ?? 'Reembolso procesado.');
+      await this._loadAppointments();
+      this.selectedAppointment.set(this.appointments().find(a => a.id === apt.id) ?? null);
+    } catch (err: any) {
+      this.retryRefundMsg.set(err?.error?.message ?? 'No se pudo reintentar el reembolso.');
+    } finally {
+      this.retryingRefundId.set(null);
+    }
+  }
+
   // Indicador del estado del reembolso para mostrar al profesional en una cita cancelada.
   // Devuelve null si no hubo intento de reembolso (ej. método sin devolución automática).
   refundDisplay(apt: IAppointment | null): { label: string; bg: string; color: string } | null {
