@@ -12,7 +12,8 @@ interface IAppointment {
   date: string;
   time: string;
   amount: number;
-  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
+  cancellationStatus?: 'none' | 'requested' | 'rejected';
   customer: { id: string; name: string };
   service:  { id: string; name: string };
   createdAt?: string;
@@ -76,6 +77,15 @@ export class DashboardHomeComponent implements OnInit {
     };
     return null;
   });
+
+  // Solicitudes de cancelación pendientes de revisar (cliente solicitó, aún vigente).
+  readonly cancellationRequests = computed(() =>
+    this.allAppointments().filter(a =>
+      a.cancellationStatus === 'requested' &&
+      a.paymentStatus !== 'Cancelado' &&
+      a.paymentStatus !== 'Finalizada'
+    )
+  );
 
   async copyUrl(): Promise<void> {
     const url = this.linkBanner()?.url;

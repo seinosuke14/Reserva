@@ -1,5 +1,26 @@
 ﻿<div class="flex flex-col gap-[18px] animate-fade-up">
 
+  <!-- ── Aviso: solicitudes de cancelación pendientes ──────────────────── -->
+  @if (cancellationRequests().length > 0) {
+    <button type="button" (click)="goToAgenda()"
+      class="w-full text-left rounded-[16px] p-[14px_20px] flex items-center gap-3 border transition-colors hover:bg-red-50"
+      style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.3);">
+      <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0" style="background:rgba(239,68,68,.14);">
+        <svg width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-[13.5px] font-bold text-red-600">
+          {{ cancellationRequests().length }} solicitud{{ cancellationRequests().length > 1 ? 'es' : '' }} de cancelación pendiente{{ cancellationRequests().length > 1 ? 's' : '' }}
+        </div>
+        <div class="text-[12px] text-primary-500">Un cliente pidió cancelar su cita. Revísala en la agenda para aceptar o rechazar.</div>
+      </div>
+      <span class="text-[12px] font-semibold text-red-600 shrink-0">Revisar →</span>
+    </button>
+  }
+
   <!-- ── Fila 1: Banner + Nueva Cita ───────────────────────────────────── -->
   <div class="grid gap-3 grid-cols-1 sm:grid-cols-[1fr_auto]">
 
