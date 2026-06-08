@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { formatCLP, formatDateLong } from '../../../helpers/formatters';
+import { formatCLP, formatDateLong, withVat } from '../../../helpers/formatters';
 import { IPublicService } from '../../../helpers/models';
 
 @Component({
@@ -109,8 +109,8 @@ import { IPublicService } from '../../../helpers/models';
           </div>
 
           <div class="summary-price">
-            <span>Total</span>
-            <span class="price-amount">{{ formatCLP(bookingPrice() ?? selectedService()?.price ?? 0) }}</span>
+            <span>Total <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
+            <span class="price-amount">{{ formatCLP(withVat(bookingPrice() ?? selectedService()?.price ?? 0)) }}</span>
           </div>
 
           <p class="cancel-notice">Puedes cancelar hasta 24h antes sin costo</p>
@@ -123,6 +123,7 @@ import { IPublicService } from '../../../helpers/models';
 export class BookingFormComponent {
   readonly formatCLP  = formatCLP;
   readonly formatDate = formatDateLong;
+  readonly withVat    = withVat;
 
   readonly bookingForm     = input.required<FormGroup>();
   readonly selectedService = input<IPublicService | null>(null);

@@ -1,0 +1,74 @@
+<div class="manage-container">
+
+  @if (state() === 'loading') {
+    <div class="card centered">
+      <div class="spinner"></div>
+      <p>Cargando tu reserva...</p>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="card centered">
+      <div class="icon error">✕</div>
+      <h2>No se pudo abrir tu reserva</h2>
+      <p class="muted">{{ errorMsg() }}</p>
+      <a routerLink="/" class="btn-secondary">Ir al inicio</a>
+    </div>
+  }
+
+  @if (state() === 'requested') {
+    <div class="card centered">
+      <div class="icon pending">⏳</div>
+      <h2>Solicitud enviada</h2>
+      <p class="muted">
+        Tu solicitud de cancelación fue enviada
+        @if (booking()?.professionalName) { a <strong>{{ booking()?.professionalName }}</strong> }.
+        Recibirás un correo cuando la acepte o rechace.
+      </p>
+      <a routerLink="/" class="btn-secondary">Volver al inicio</a>
+    </div>
+  }
+
+  @if (state() === 'ready' && booking(); as b) {
+    <div class="card">
+      <h2>Tu reserva</h2>
+
+      <div class="details">
+        <div class="row"><span class="label">Referencia</span><span class="value">{{ b.bookingRef }}</span></div>
+        <div class="row"><span class="label">Servicio</span><span class="value">{{ b.serviceName }}</span></div>
+        @if (b.professionalName) {
+          <div class="row"><span class="label">Profesional</span><span class="value">{{ b.professionalName }}</span></div>
+        }
+        <div class="row"><span class="label">Fecha</span><span class="value">{{ formatDateLong(b.date) }}</span></div>
+        <div class="row"><span class="label">Hora</span><span class="value">{{ b.time }}</span></div>
+        <div class="row"><span class="label">Monto (IVA inc)</span><span class="value">{{ formatCLP(b.amountWithVat ?? b.amount) }}</span></div>
+        <div class="row"><span class="label">Estado</span><span class="value">{{ b.paymentStatus }}</span></div>
+      </div>
+
+      @if (isClosed) {
+        <p class="note muted">Esta cita está {{ b.paymentStatus | lowercase }} y no admite solicitudes de cancelación.</p>
+        <a routerLink="/" class="btn-secondary full">Volver al inicio</a>
+      } @else {
+        @if (b.refundEligible) {
+          <p class="note ok">Faltan más de 24 horas para tu cita: si el profesional acepta y pagaste en línea, el reembolso se gestiona automáticamente.</p>
+        } @else {
+          <p class="note warn">Faltan menos de 24 horas para tu cita. Puedes solicitar la cancelación, pero podría no corresponder reembolso.</p>
+        }
+
+        <label class="field">
+          <span>Motivo (opcional)</span>
+          <textarea [ngModel]="reason()" (ngModelChange)="reason.set($event)"
+                    maxlength="500" rows="3" placeholder="Cuéntale al profesional por qué necesitas cancelar..."></textarea>
+        </label>
+
+        @if (errorMsg()) { <p class="error-text">{{ errorMsg() }}</p> }
+
+        <button class="btn-danger full" [disabled]="submitting()" (click)="submitRequest()">
+          {{ submitting() ? 'Enviando...' : 'Solicitar cancelación' }}
+        </button>
+        <p class="hint muted">El profesional revisará tu solicitud y te notificará por correo.</p>
+      }
+    </div>
+  }
+
+</div>
