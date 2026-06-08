@@ -4,6 +4,7 @@ import { IPlan } from '../../../../core/services/subscription.service';
 import { LandingPlan, PlanMeta } from '../../landing.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CompanyService } from '../../../../core/services/company.service';
+import { withVat } from '../../../../helpers/formatters';
 
 @Component({
   selector: 'app-landing-pricing',
@@ -36,14 +37,15 @@ export class LandingPricingComponent {
   proMaxUsers = signal(5);
   teamUsers   = signal(2);
 
+  // Precios con IVA incluido (base + extras por persona). El IVA se aplica al total neto.
   proMaxPrice = computed(() => {
     const base = this.plans.find(p => p.id === 'pro_max')?.price ?? 25000;
-    return base + (this.proMaxUsers() - this.PRO_MAX_MIN) * this.PRO_MAX_EXTRA_USER;
+    return withVat(base + (this.proMaxUsers() - this.PRO_MAX_MIN) * this.PRO_MAX_EXTRA_USER);
   });
 
   teamPrice = computed(() => {
     const base = this.plans.find(p => p.id === 'team')?.price ?? 25000;
-    return base + Math.max(0, this.teamUsers() - this.TEAM_MIN) * this.TEAM_EXTRA_USER;
+    return withVat(base + Math.max(0, this.teamUsers() - this.TEAM_MIN) * this.TEAM_EXTRA_USER);
   });
 
   decrementUsers()      { this.proMaxUsers.update(u => Math.max(u - 1, this.PRO_MAX_MIN)); }
@@ -51,10 +53,11 @@ export class LandingPricingComponent {
   decrementTeamUsers()  { this.teamUsers.update(u => Math.max(u - 1, this.TEAM_MIN)); }
   incrementTeamUsers()  { this.teamUsers.update(u => Math.min(u + 1, this.TEAM_MAX)); }
 
+  // Precio mostrado, siempre con IVA incluido.
   displayPrice(p: LandingPlan): number {
     if (p.id === 'pro_max') return this.proMaxPrice();
     if (p.id === 'team')    return this.teamPrice();
-    return p.price ?? 0;
+    return p.priceWithVat ?? (p.price != null ? withVat(p.price) : 0);
   }
 
   emitCheckout(planId: string): void {
@@ -67,15 +70,15 @@ export class LandingPricingComponent {
       tag: 'Prueba de 2 semanas para que te acostumbres a Lets Reserve',
       cta: 'Empezar gratis',
       ctaRoute: '/registro',
-      features: ['1 usuario', 'Citas ilimitadas', 'Mensajería ilimitada', 'Recordatorio automático 1h antes', 'Perfil público personalizable', 'Analytics completo', 'Trial 2 semanas'],
+      features: ['1 Profesional', 'Prueba Lets Reserve por 2 semanas con todo su catalogo'],
     },
     basic: {
       tag: 'Para freelancers y negocios de 1 persona',
-      cta: 'Empezar gratis',
+      cta: 'Empezar Plan basico ',
       ctaRoute: '/registro',
       badge: 'Más elegido',
       primary: true,
-      features: ['1 usuario', 'Citas ilimitadas', 'Mensajería ilimitada', 'Recordatorio automático 1h antes', 'Perfil público personalizable', 'Analytics básico', 'Trial 2 semanas'],
+      features: ['1 Profesional', 'Citas ilimitadas', 'Emails de Citas ilimitados', 'Recordatorio de citas configurable', 'Perfil público personalizable en formato basico', 'Analytics', ],
     },
     team: {
       tag: 'Para equipos pequeños de 2 a 5 personas',
@@ -87,10 +90,10 @@ export class LandingPricingComponent {
       features: ['Todo lo de PRO', 'Multi-profesional', 'Vista de equipo (citas + ventas)', 'Analytics enfocado en equipo', 'Citas personalizadas por persona', 'Método de pago compartido'],
     },
     pro: {
-      tag: 'Todo el poder de Pro Max, para una sola persona',
-      cta: 'Empezar gratis',
+      tag: 'Todo el poder de Pro, para una sola persona',
+      cta: 'Empezar Pro',
       ctaRoute: '/registro',
-      features: ['1 usuario', 'WhatsApp automático nativo', 'Recordatorios WhatsApp', 'Cupones y descuentos', 'Visibilidad especial en Marketplace', 'Reseñas y ratings', 'Soporte prioritario'],
+      features: ['1 usuario', '60 Recordatorios de WhatsApp incluidos.', 'Visibilidad especial en Marketplace (En Desarrollo)', 'Reseñas y ratings', 'Emails de Citas ilimitados', 'Perfil público personalizable en formato Pro','Analitycs', 'Soporte prioritario','Integración con Google Calendar','Emails Marketing'],
     },
     pro_max: {
       tag: 'Para salones medianos (6+ personas) que quieren crecer',

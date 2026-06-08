@@ -7,7 +7,8 @@ import { PlanType } from './professional.service';
 export interface IPlan {
   id: PlanType;
   name: string;
-  price: number | null;
+  price: number | null;          // neto (sin IVA)
+  priceWithVat?: number | null;  // con IVA incluido — lo que se cobra y se muestra
   duration: string;
   description: string;
   available: boolean;
@@ -22,7 +23,8 @@ export interface ISubscriptionStatus {
   startDate?: string;
   endDate?: string;
   daysLeft?: number;
-  price?: number;
+  price?: number;          // neto
+  priceWithVat?: number;   // con IVA incluido
 }
 
 const API = environment.apiUrl;

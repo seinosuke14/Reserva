@@ -329,6 +329,16 @@
                 <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
               }
             </select>
+            @if (na_servicePrice() > 0) {
+              <div class="mt-2 flex items-baseline justify-between">
+                <span class="text-[13px] font-bold text-primary">{{ formatCLP(na_servicePrice()) }}
+                  <span class="text-[11px] font-medium text-primary-400">sin IVA</span>
+                </span>
+              </div>
+              <p class="text-[11px] text-primary-400 mt-0.5">
+                Precio con IVA: <strong class="text-primary-600">{{ formatCLP(withVat(na_servicePrice())) }}</strong> · es lo que paga el cliente al reservar
+              </p>
+            }
           }
         </div>
 
@@ -534,6 +544,12 @@
                   [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Finalizada' ? '#2BB8A6' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
               {{ selectedAppointment()!.paymentStatus }}
             </span>
+            @if (refundDisplay(selectedAppointment()); as r) {
+              <div class="mt-2 text-[11.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                   [style.background]="r.bg" [style.color]="r.color">
+                {{ r.label }}
+              </div>
+            }
             @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
             <div class="flex gap-2 mt-3">
               <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
@@ -560,6 +576,40 @@
             }
           </div>
         </div>
+
+        <!-- Solicitud de cancelación del cliente -->
+        @if (hasCancellationRequest(selectedAppointment())) {
+          <div class="rounded-[12px] p-4" style="border:1.5px solid rgba(239,68,68,.35);background:rgba(239,68,68,.06);">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[16px]">⏳</span>
+              <span class="text-[12px] font-bold uppercase tracking-wider text-red-500">Solicitud de cancelación</span>
+            </div>
+            <p class="text-[13px] text-primary-600 mb-1">El cliente solicitó cancelar esta cita.</p>
+            @if (isCancellationWithRefund(selectedAppointment()!)) {
+              <p class="text-[12px] text-green-600 mb-2">Faltan +24h: si aceptas y el pago fue en línea, el reembolso se gestiona automáticamente.</p>
+            } @else {
+              <p class="text-[12px] text-amber-600 mb-2">Faltan menos de 24h: si aceptas, no corresponde reembolso automático.</p>
+            }
+            @if (selectedAppointment()!.cancellationReason) {
+              <div class="bg-white/70 rounded-[8px] p-2.5 mb-3">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Motivo del cliente</div>
+                <p class="text-[12.5px] text-primary-600 break-words whitespace-pre-wrap">{{ selectedAppointment()!.cancellationReason }}</p>
+              </div>
+            }
+            <div class="flex gap-2">
+              <button (click)="rejectCancellationRequest(selectedAppointment()!)"
+                [disabled]="rejectingId() === selectedAppointment()!.id"
+                class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-40">
+                {{ rejectingId() === selectedAppointment()!.id ? 'Rechazando...' : 'Rechazar' }}
+              </button>
+              <button (click)="acceptCancellationRequest(selectedAppointment()!)"
+                class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90"
+                style="background:#ef4444;box-shadow:0 3px 10px rgba(239,68,68,.3);">
+                Aceptar y cancelar
+              </button>
+            </div>
+          </div>
+        }
 
         @if (selectedAppointment()!.notes) {
           <div class="bg-primary-50 rounded-[12px] p-4">

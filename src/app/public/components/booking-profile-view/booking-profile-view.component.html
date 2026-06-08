@@ -148,7 +148,7 @@
                   </svg>
                   {{ service.duration }} min
                 </span>
-                <span class="psc-price">{{ formatCLP(service.price) }}</span>
+                <span class="psc-price">{{ formatCLP(withVat(service.price)) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
               </div>
             </div>
             <button class="psc-book-btn" (click)="serviceSelected.emit(service)">

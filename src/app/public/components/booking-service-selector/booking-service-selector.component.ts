@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { formatCLP } from '../../../helpers/formatters';
+import { formatCLP, withVat } from '../../../helpers/formatters';
 import { IPublicService } from '../../../helpers/models';
 
 @Component({
@@ -26,7 +26,7 @@ import { IPublicService } from '../../../helpers/models';
                 <span class="service-duration">
                   ⏱ {{ service.duration }}min
                 </span>
-                <span class="service-price">{{ formatCLP(service.price) }}</span>
+                <span class="service-price">{{ formatCLP(withVat(service.price)) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
               </div>
             </div>
           </div>
@@ -41,6 +41,7 @@ export class BookingServiceSelectorComponent {
   readonly selectedService = input<IPublicService | null>(null);
   readonly serviceSelected = output<IPublicService>();
   readonly formatCLP = formatCLP;
+  readonly withVat = withVat;
 
   onServiceSelect(service: IPublicService): void {
     this.serviceSelected.emit(service);

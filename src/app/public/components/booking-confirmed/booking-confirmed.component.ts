@@ -2,7 +2,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IPublicPaymentMethod } from '../../../helpers/models';
-import { formatCLP } from '../../../helpers/formatters';
+import { formatCLP, withVat } from '../../../helpers/formatters';
 
 @Component({
   selector: 'app-booking-confirmed',
@@ -24,6 +24,7 @@ export class BookingConfirmedComponent {
   transferCopy = output<number>();
 
   readonly formatCLP = formatCLP;
+  readonly withVat = withVat;
 
   goToSurvey(): void {
     this.router.navigate(['/reservar/encuesta'], {

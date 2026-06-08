@@ -125,8 +125,8 @@
         <span class="ps-price-per">/ 14 días</span>
         } @else {
         <span class="ps-price-cur">$</span>
-        <span class="ps-price-num">{{ plan.price | number:'1.0-0' }}</span>
-        <span class="ps-price-per">CLP / mes</span>
+        <span class="ps-price-num">{{ (plan.priceWithVat ?? plan.price) | number:'1.0-0' }}</span>
+        <span class="ps-price-per">CLP / mes · IVA inc</span>
         }
       </div>
 
@@ -190,13 +190,13 @@
           <span class="ps-price-num">
             {{ (plan.id === 'pro_max' ? proMaxDisplayPrice() : teamDisplayPrice()) | number:'1.0-0' }}
           </span>
-          <span class="ps-price-per">CLP / mes</span>
+          <span class="ps-price-per">CLP / mes · IVA inc</span>
         } @else {
           <span class="ps-price-cur">$</span>
           <span class="ps-price-num">
-            {{ (plan.id === 'pro_max' ? proMaxDisplayPrice() : plan.id === 'team' ? teamDisplayPrice() : (plan.price ?? 0)) | number:'1.0-0' }}
+            {{ (plan.id === 'pro_max' ? proMaxDisplayPrice() : plan.id === 'team' ? teamDisplayPrice() : (plan.priceWithVat ?? plan.price ?? 0)) | number:'1.0-0' }}
           </span>
-          <span class="ps-price-per">CLP / mes</span>
+          <span class="ps-price-per">CLP / mes · IVA inc</span>
         }
       </div>
       @if (isActivePlan(plan.id) && hasChange(plan)) {
@@ -211,7 +211,7 @@
       <!-- Selector cantidad team -->
       @if (plan.id === 'team') {
       <div class="ps-quantity">
-        <span class="ps-quantity-label">Profesionales (+${{ TEAM_EXTRA | number }} c/u desde el 3°)</span>
+        <span class="ps-quantity-label">Profesionales (+${{ TEAM_EXTRA_VAT | number }} c/u desde el 3° · IVA inc)</span>
         <div class="ps-quantity-control">
           <button class="ps-qty-btn" (click)="$event.stopPropagation(); decrementTeam()"
             [disabled]="teamUsers() <= teamUsersMin()">−</button>
@@ -227,7 +227,7 @@
       @if (plan.id === 'pro_max') {
       <div class="ps-quantity">
         <span class="ps-quantity-label">Profesionales
-          @if (!isActivePlan('pro_max')) { (+${{ PRO_MAX_EXTRA | number }} c/u) }
+          @if (!isActivePlan('pro_max')) { (+${{ PRO_MAX_EXTRA_VAT | number }} c/u · IVA inc) }
         </span>
         <div class="ps-quantity-control">
           <button class="ps-qty-btn" (click)="$event.stopPropagation(); decrementProMax()"

@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IPublicService } from '../../../helpers/models';
-import { formatCLP } from '../../../helpers/formatters';
+import { formatCLP, withVat } from '../../../helpers/formatters';
 
 export interface IProfileProfessional {
   id: string; name: string; slug: string; specialty: string; phone: string;
@@ -45,6 +45,7 @@ export class BookingProfileViewComponent {
 
   readonly stars     = [1, 2, 3, 4, 5];
   readonly formatCLP = formatCLP;
+  readonly withVat = withVat;
 
   reviewStars(rating: number): number[] {
     return [1, 2, 3, 4, 5];
