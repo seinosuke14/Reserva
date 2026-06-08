@@ -344,7 +344,9 @@
           <div>
             <label class="form-label">Hora *</label>
             @if (na_availableSlots().length === 0) {
-              <p class="text-[12px] text-primary-400 italic pt-2">Sin horario configurado</p>
+              <p class="text-[12px] text-primary-400 italic pt-2">
+                {{ na_date() && na_date() < todayStr ? 'Fecha pasada, no disponible' : 'Sin horario disponible' }}
+              </p>
             } @else {
               <select [value]="na_time()"
                       (change)="na_time.set($any($event.target).value)"
