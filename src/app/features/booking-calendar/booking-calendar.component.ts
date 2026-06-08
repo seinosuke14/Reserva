@@ -112,6 +112,9 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const dateStr = this.na_date();
     if (!dateStr) return [];
 
+    // Fecha anterior a hoy: no se permite agendar (comparacion lexicografica YYYY-MM-DD).
+    if (dateStr < this._toDateStr(new Date())) return [];
+
     const date     = new Date(dateStr + 'T00:00:00');
     const dow      = jsToDow(date.getDay());
     const allSlots = this.workSvc.generateSlots(dow);
