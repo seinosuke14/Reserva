@@ -561,6 +561,17 @@
                 {{ r.label }}
               </div>
             }
+            @if (canRetryRefund(selectedAppointment())) {
+              <button (click)="retryRefund(selectedAppointment()!)"
+                [disabled]="retryingRefundId() === selectedAppointment()!.id"
+                class="mt-2 w-full py-2 rounded-[9px] text-[12px] font-semibold transition-all disabled:opacity-50"
+                style="background:rgba(0,196,167,.1);color:#00A88F;border:1.5px solid rgba(0,196,167,.35);">
+                {{ retryingRefundId() === selectedAppointment()!.id ? 'Reintentando…' : '↻ Reintentar reembolso' }}
+              </button>
+              @if (retryRefundMsg()) {
+                <p class="mt-1.5 text-[11.5px] text-primary-500">{{ retryRefundMsg() }}</p>
+              }
+            }
             @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
             <div class="flex gap-2 mt-3">
               <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
