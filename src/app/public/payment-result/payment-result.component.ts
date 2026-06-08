@@ -79,8 +79,13 @@ type PaymentState = 'checking' | 'success' | 'error';
           <p class="subtitle">{{ errorMessage() }}</p>
 
           <div class="action-buttons">
-            <button (click)="goBack()" class="btn-secondary">Volver a intentar</button>
-            <a routerLink="/" class="btn-primary">Ir a inicio</a>
+            @if (canRetryVerification()) {
+              <button (click)="retryVerification()" class="btn-primary">Verificar de nuevo</button>
+              <a routerLink="/" class="btn-secondary">Ir a inicio</a>
+            } @else {
+              <button (click)="goBack()" class="btn-secondary">Volver a intentar</button>
+              <a routerLink="/" class="btn-primary">Ir a inicio</a>
+            }
           </div>
         </div>
       }
@@ -271,9 +276,13 @@ export class PaymentResultComponent implements OnInit {
 
   readonly errorTitle = signal('Pago no confirmado');
   readonly errorMessage = signal('No se pudo procesar tu pago. Intenta de nuevo.');
+  // true cuando el pago quedó "en verificación": el botón re-consulta el estado
+  // en vez de mandar al cliente a reiniciar la reserva.
+  readonly canRetryVerification = signal(false);
 
   private appointmentId = '';
   private slug = '';
+  private currentRef = '';
 
   async ngOnInit(): Promise<void> {
     const params = this.route.snapshot.queryParamMap;
@@ -336,6 +345,7 @@ export class PaymentResultComponent implements OnInit {
   private async checkBookingByRef(ref: string, attempt = 1): Promise<void> {
     const MAX_ATTEMPTS = 5;
     const RETRY_MS = 2000;
+    this.currentRef = ref;
 
     try {
       const result: any = await firstValueFrom(
@@ -357,8 +367,9 @@ export class PaymentResultComponent implements OnInit {
       }
       this.showError(
         'Pago en verificación',
-        'Aún estamos confirmando tu pago. Si ya pagaste, recarga esta página en unos segundos.'
+        'Aún estamos confirmando tu pago. Si ya pagaste, vuelve a verificar en unos segundos.'
       );
+      this.canRetryVerification.set(true);
     } catch (err: any) {
       const message = err?.error?.message || 'No se pudo verificar tu reserva. Intenta de nuevo.';
       this.showError('Error de verificación', message);
@@ -377,14 +388,25 @@ export class PaymentResultComponent implements OnInit {
   private showError(title: string, message: string): void {
     this.errorTitle.set(title);
     this.errorMessage.set(message);
+    this.canRetryVerification.set(false);
     this.state.set('error');
+  }
+
+  // Re-consulta el estado del pago (para el caso "Pago en verificación").
+  retryVerification(): void {
+    if (!this.currentRef) return;
+    this.canRetryVerification.set(false);
+    this.state.set('checking');
+    this.checkBookingByRef(this.currentRef);
   }
 
   goBack(): void {
     if (this.slug) {
       this.router.navigate(['/reservar', this.slug]);
     } else {
-      this.router.navigate(['/app']);
+      // Sin slug no podemos volver al portal del profesional; el cliente es
+      // público, así que lo enviamos al inicio (no a /app, que exige login).
+      this.router.navigate(['/']);
     }
   }
 
