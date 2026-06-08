@@ -7,6 +7,7 @@ import { SubscriptionService, IPlan } from '../../core/services/subscription.ser
 import { AuthService } from '../../core/services/auth.service';
 import { PlanType } from '../../core/services/professional.service';
 import { ICompanySubStatus } from '../../core/services/company.service';
+import { withVat } from '../../helpers/formatters';
 
 @Component({
   selector: 'app-plan-selection',
@@ -56,19 +57,24 @@ export class PlanSelectionComponent implements OnInit {
   readonly PRO_MAX_MIN = 5;
   readonly PRO_MAX_MAX = 25;
   readonly PRO_MAX_EXTRA = 5000;
+  // Extra por persona con IVA incluido (lo que realmente se cobra por cada profesional adicional).
+  readonly TEAM_EXTRA_VAT    = withVat(this.TEAM_EXTRA);
+  readonly PRO_MAX_EXTRA_VAT  = withVat(this.PRO_MAX_EXTRA);
 
   teamUsers   = signal(2);
   proMaxUsers = signal(5);
 
-  teamDisplayPrice = computed(() => {
-    const base = this.plans().find(p => p.id === 'team')?.price ?? 25000;
-    return base + Math.max(0, this.teamUsers() - this.TEAM_MIN) * this.TEAM_EXTRA;
-  });
+  // Total NETO (base + extras por persona). El IVA se aplica al total, igual que el backend.
+  private _netTotal(planId: 'team' | 'pro_max', users: number): number {
+    const base = this.plans().find(p => p.id === planId)?.price ?? 25000;
+    const min  = planId === 'team' ? this.TEAM_MIN : this.PRO_MAX_MIN;
+    const extra = planId === 'team' ? this.TEAM_EXTRA : this.PRO_MAX_EXTRA;
+    return base + Math.max(0, users - min) * extra;
+  }
 
-  proMaxDisplayPrice = computed(() => {
-    const base = this.plans().find(p => p.id === 'pro_max')?.price ?? 25000;
-    return base + (this.proMaxUsers() - this.PRO_MAX_MIN) * this.PRO_MAX_EXTRA;
-  });
+  // Precios mostrados: con IVA incluido (los extras por persona también quedan con IVA).
+  teamDisplayPrice   = computed(() => withVat(this._netTotal('team',    this.teamUsers())));
+  proMaxDisplayPrice = computed(() => withVat(this._netTotal('pro_max', this.proMaxUsers())));
 
   teamUsersMin   = computed(() => this.isActivePlan('team')    ? Math.max(this.TEAM_MIN,    this.companySubStatus?.maxMembers ?? this.TEAM_MIN)    : this.TEAM_MIN);
   proMaxUsersMin = computed(() => this.isActivePlan('pro_max') ? Math.max(this.PRO_MAX_MIN, this.companySubStatus?.maxMembers ?? this.PRO_MAX_MIN) : this.PRO_MAX_MIN);
@@ -89,16 +95,14 @@ export class PlanSelectionComponent implements OnInit {
     return selected !== current;
   }
 
+  // Diferencia a pagar en un upgrade, con IVA. Espeja el backend: withVat(nuevo) - withVat(actual).
   extraCost(plan: IPlan): number {
     if (!this.isActivePlan(plan.id)) return 0;
-    const current = this.companySubStatus?.maxMembers ?? 0;
-    if (plan.id === 'team') {
-      return Math.max(0, this.teamUsers() - current) * this.TEAM_EXTRA;
-    }
-    if (plan.id === 'pro_max') {
-      return Math.max(0, this.proMaxUsers() - current) * this.PRO_MAX_EXTRA;
-    }
-    return 0;
+    if (plan.id !== 'team' && plan.id !== 'pro_max') return 0;
+    const current  = this.companySubStatus?.maxMembers ?? 0;
+    const selected = plan.id === 'team' ? this.teamUsers() : this.proMaxUsers();
+    const diff = withVat(this._netTotal(plan.id, selected)) - withVat(this._netTotal(plan.id, current));
+    return Math.max(0, diff);
   }
 
   get visiblePlans(): IPlan[] {

@@ -134,7 +134,8 @@ export interface ICompanySubStatus {
   maxMembers?: number;
   endDate?: string;
   daysLeft?: number | null;
-  price?: number | null;
+  price?: number | null;          // neto
+  priceWithVat?: number | null;   // con IVA incluido — lo que paga la empresa
 }
 
 const COMPANY_KEY       = 'crm_company';

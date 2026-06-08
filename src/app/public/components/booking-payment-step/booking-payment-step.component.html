@@ -104,9 +104,9 @@
             <div class="transfer-row"><span>Cuenta</span><strong>{{ method.transferInfo.accountType }} - {{ method.transferInfo.accountNumber }}</strong></div>
             <div class="transfer-row"><span>RUT</span><strong>{{ method.transferInfo.rut }}</strong></div>
             <div class="transfer-row"><span>Titular</span><strong>{{ method.transferInfo.holderName }}</strong></div>
-            <div class="transfer-row highlight"><span>Monto a transferir</span><strong>{{ formatCLP(bookingPrice()) }}</strong></div>
+            <div class="transfer-row highlight"><span>Monto a transferir (IVA inc)</span><strong>{{ formatCLP(withVat(bookingPrice())) }}</strong></div>
             <button class="copy-transfer-btn" [class.copied]="copiedTransfer()"
-              (click)="transferCopy.emit(bookingPrice())">
+              (click)="transferCopy.emit(withVat(bookingPrice()))">
               @if (copiedTransfer()) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

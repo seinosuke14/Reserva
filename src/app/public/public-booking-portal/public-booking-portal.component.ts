@@ -16,7 +16,7 @@ import { BookingProfileViewComponent } from '../components/booking-profile-view/
 import { BookingPaymentStepComponent } from '../components/booking-payment-step/booking-payment-step.component';
 import { BookingConfirmedComponent } from '../components/booking-confirmed/booking-confirmed.component';
 
-import { formatCLP, formatDateLong } from '../../helpers/formatters';
+import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
 import { AuthService } from '../../core/services/auth.service';
 import { CompanyService } from '../../core/services/company.service';
@@ -59,6 +59,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly metaSvc    = inject(Meta);
   readonly formatCLP        = formatCLP;
   readonly formatDate       = formatDateLong;
+  readonly withVat          = withVat;
 
   // ─── Perfil del profesional ─────────────────────────────────────────────────
   readonly loadState    = signal<LoadState>('loading');

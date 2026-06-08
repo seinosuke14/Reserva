@@ -64,6 +64,11 @@ export const routes: Routes = [
     path: 'cancelar/:token',
     loadComponent: () => import('./public/cancellation-form/cancellation-form.component').then(m => m.CancellationFormComponent)
   },
+  // Gestión pública de reserva por el cliente (solicitar cancelación, via link de email)
+  {
+    path: 'gestionar-reserva/:token',
+    loadComponent: () => import('./public/manage-booking/manage-booking.component').then(m => m.ManageBookingComponent)
+  },
   {
     path: 'planes',
     loadComponent: () => import('./features/plan-selection/plan-selection.component').then(m => m.PlanSelectionComponent)
