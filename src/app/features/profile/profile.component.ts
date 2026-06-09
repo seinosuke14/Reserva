@@ -160,41 +160,12 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  // ── Recordatorio ─────────────────────────────────────────────────────────────
-  reminderPref     = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
-  reminderSelected = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
-  reminderSaving   = signal(false);
-  reminderMsg      = signal<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  readonly reminderOptions: { value: '1h_before' | '7h30_same_day' | '24h_before'; label: string; desc: string }[] = [
-    { value: '1h_before',     label: '1 hora antes',         desc: 'Se envía 1 hora antes del inicio de la cita.' },
-    { value: '7h30_same_day', label: '7:30 AM del mismo día', desc: 'Se envía a las 7:30 AM del día de la cita.' },
-    { value: '24h_before',    label: '24 horas antes',        desc: 'Se envía a la misma hora del día anterior.' },
-  ];
-
-  async saveReminderPref(): Promise<void> {
-    const pref = this.reminderSelected();
-    this.reminderSaving.set(true);
-    this.reminderMsg.set(null);
-    const result = await this.proSvc.saveReminderPreference(pref);
-    this.reminderSaving.set(false);
-    if (result.success) {
-      this.reminderPref.set(pref);
-      this.reminderMsg.set({ type: 'success', text: 'Preferencia guardada.' });
-    } else {
-      this.reminderMsg.set({ type: 'error', text: result.message ?? 'Error al guardar.' });
-    }
-    setTimeout(() => this.reminderMsg.set(null), 3000);
-  }
-
   // ── Renovar plan ─────────────────────────────────────────────────────────────
   renewSaving = signal(false);
   renewMsg    = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   ngOnInit(): void {
     this.loadWaQuota();
-    const pref = this.user()?.reminderPreference;
-    if (pref) { this.reminderPref.set(pref); this.reminderSelected.set(pref); }
   }
 
   async renewPlan(): Promise<void> {

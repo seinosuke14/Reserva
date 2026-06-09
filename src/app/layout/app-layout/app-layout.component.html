@@ -41,115 +41,179 @@
       }
     </div>
 
+    <!-- Icon template (reutilizable) -->
+    <ng-template #iconTpl let-name>
+      <ng-container [ngSwitch]="name">
+        <svg *ngSwitchCase="'dashboard'" width="17" height="17" fill="none" stroke="currentColor"
+          stroke-width="1.75" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        <svg *ngSwitchCase="'briefcase'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+        </svg>
+        <svg *ngSwitchCase="'calendar'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M3 9h18M8 2v4M16 2v4" />
+        </svg>
+        <svg *ngSwitchCase="'users'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+        </svg>
+        <svg *ngSwitchCase="'file-text'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+        </svg>
+        <svg *ngSwitchCase="'package'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+          <rect x="9" y="3" width="6" height="4" rx="1" />
+          <path d="M9 12h6M9 16h4" />
+        </svg>
+        <svg *ngSwitchCase="'credit-card'" width="17" height="17" fill="none" stroke="currentColor"
+          stroke-width="1.75" viewBox="0 0 24 24">
+          <rect x="1" y="4" width="22" height="16" rx="2" />
+          <path d="M1 10h22" />
+        </svg>
+        <svg *ngSwitchCase="'clock'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+        <svg *ngSwitchCase="'globe'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+        </svg>
+        <svg *ngSwitchCase="'settings'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+        <svg *ngSwitchCase="'bar-chart'" width="17" height="17" fill="none" stroke="currentColor"
+          stroke-width="1.75" viewBox="0 0 24 24">
+          <rect x="3" y="12" width="4" height="9" rx="1" />
+          <rect x="10" y="7" width="4" height="14" rx="1" />
+          <rect x="17" y="3" width="4" height="18" rx="1" />
+        </svg>
+      </ng-container>
+    </ng-template>
+
     <!-- Nav -->
     <nav class="flex-1 px-2 py-2.5 overflow-y-auto overflow-x-hidden">
-      @for (section of navSections(); track section.label; let si = $index) {
-      @if (isSidebarOpen()) {
-      <div class="text-[9.5px] font-bold uppercase tracking-[.12em] text-white/[.22]"
-        [style.padding]="si === 0 ? '4px 12px 7px' : '14px 12px 7px'">
-        {{ section.label }}
-      </div>
-      } @else if (si > 0) {
-      <div class="h-px bg-white/[.07] mx-2 my-2.5"></div>
-      }
+      @for (group of navSections(); track group.label; let gi = $index) {
 
-      @for (item of section.items; track item.path) {
-      <a [routerLink]="item.path" [title]="!isSidebarOpen() ? item.label : ''"
+      <!-- ── Enlace directo (Vista rápida) ── -->
+      @if (group.path) {
+      <a [routerLink]="group.path" [title]="!isSidebarOpen() ? group.label : ''"
         class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
-        [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(item.path)
+        [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(group.path)
                ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
-               : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
-        [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
-
-        @if (isActive(item.path)) {
+               : ''" [style.color]="isActive(group.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [class.hover:bg-white]="!isActive(group.path)" [class.hover:bg-opacity-5]="!isActive(group.path)">
+        @if (isActive(group.path)) {
         <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
         }
-
-        <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
-          [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
-          <ng-container [ngSwitch]="item.icon">
-            <svg *ngSwitchCase="'dashboard'" width="17" height="17" fill="none" stroke="currentColor"
-              stroke-width="1.75" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" />
-            </svg>
-            <svg *ngSwitchCase="'calendar'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
-              viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M3 9h18M8 2v4M16 2v4" />
-            </svg>
-            <svg *ngSwitchCase="'users'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
-              viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-            </svg>
-            <svg *ngSwitchCase="'package'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
-              viewBox="0 0 24 24">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-              <rect x="9" y="3" width="6" height="4" rx="1" />
-              <path d="M9 12h6M9 16h4" />
-            </svg>
-            <svg *ngSwitchCase="'credit-card'" width="17" height="17" fill="none" stroke="currentColor"
-              stroke-width="1.75" viewBox="0 0 24 24">
-              <rect x="1" y="4" width="22" height="16" rx="2" />
-              <path d="M1 10h22" />
-            </svg>
-            <svg *ngSwitchCase="'clock'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
-              viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            <svg *ngSwitchCase="'shield-alert'" width="17" height="17" fill="none" stroke="currentColor"
-              stroke-width="1.75" viewBox="0 0 24 24">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <svg *ngSwitchCase="'settings'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
-              viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-            </svg>
-            <svg *ngSwitchCase="'bar-chart'" width="17" height="17" fill="none" stroke="currentColor"
-              stroke-width="1.75" viewBox="0 0 24 24">
-              <rect x="3" y="12" width="4" height="9" rx="1" />
-              <rect x="10" y="7" width="4" height="14" rx="1" />
-              <rect x="17" y="3" width="4" height="18" rx="1" />
-            </svg>
-            <svg *ngSwitchCase="'sliders'" width="17" height="17" fill="none" stroke="currentColor"
-              stroke-width="1.75" viewBox="0 0 24 24">
-              <line x1="4" y1="21" x2="4" y2="14" />
-              <line x1="4" y1="10" x2="4" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12" y2="3" />
-              <line x1="20" y1="21" x2="20" y2="16" />
-              <line x1="20" y1="12" x2="20" y2="3" />
-              <line x1="1" y1="14" x2="7" y2="14" />
-              <line x1="9" y1="8" x2="15" y2="8" />
-              <line x1="17" y1="16" x2="23" y2="16" />
-            </svg>
-          </ng-container>
+        <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(group.path)"
+          [style.color]="isActive(group.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: group.icon }"></ng-container>
         </span>
-
         @if (isSidebarOpen()) {
         <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1"
-          [class.font-semibold]="isActive(item.path)" [class.font-medium]="!isActive(item.path)">
-          {{ item.label }}
+          [class.font-semibold]="isActive(group.path)" [class.font-medium]="!isActive(group.path)">
+          {{ group.label }}
         </span>
-        @if (item.badge) {
-        <span @sidebarLabel class="text-[9.5px] font-bold px-[6px] py-px rounded-full text-white tracking-wider"
-          style="background:#00C4A7;">
-          {{ item.badge }}
-        </span>
-        }
         }
       </a>
       }
+
+      <!-- ── Grupo desplegable ── -->
+      @if (!group.path) {
+      @if (isSidebarOpen()) {
+      <!-- Cabecera del grupo (toggle) -->
+      <button type="button" (click)="toggleGroup(group.label)"
+        class="group w-full flex items-center rounded-[10px] mb-px cursor-pointer transition-all duration-150 hover:bg-white/[.05]"
+        [style.padding]="'9px 12px'" [style.gap]="'9px'"
+        [style.margin-top]="gi > 0 ? '8px' : '0'"
+        [style.color]="isGroupActive(group) ? '#00C4A7' : 'rgba(255,255,255,.4)'">
+        <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isGroupActive(group)"
+          [style.color]="isGroupActive(group) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: group.icon }"></ng-container>
+        </span>
+        <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1 text-left font-semibold">
+          {{ group.label }}
+        </span>
+        <svg @sidebarLabel width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.25"
+          viewBox="0 0 24 24" class="shrink-0 transition-transform duration-200"
+          [class.rotate-180]="isGroupOpen(group.label)" style="color:rgba(255,255,255,.4);">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <!-- Items del grupo -->
+      @if (isGroupOpen(group.label)) {
+      <div @collapse class="overflow-hidden">
+        @for (item of group.items; track item.path) {
+        <a [routerLink]="item.path"
+          class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
+          style="padding:8px 12px 8px 22px;gap:9px;" [style.background]="isActive(item.path)
+                 ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
+                 : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+          [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
+          @if (isActive(item.path)) {
+          <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+          }
+          <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
+            [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+            <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
+          </span>
+          <span class="text-[13.5px] whitespace-nowrap tracking-tight flex-1"
+            [class.font-semibold]="isActive(item.path)" [class.font-medium]="!isActive(item.path)">
+            {{ item.label }}
+          </span>
+          @if (item.badge) {
+          <span class="text-[9.5px] font-bold px-[6px] py-px rounded-full text-white tracking-wider"
+            style="background:#00C4A7;">
+            {{ item.badge }}
+          </span>
+          }
+        </a>
+        }
+      </div>
+      }
+
+      } @else {
+      <!-- Sidebar colapsado: items planos como íconos -->
+      <div class="h-px bg-white/[.07] mx-2 my-2.5"></div>
+      @for (item of group.items; track item.path) {
+      <a [routerLink]="item.path" [title]="item.label"
+        class="group flex items-center justify-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
+        style="padding:9px 0;" [style.background]="isActive(item.path)
+               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
+               : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
+        @if (isActive(item.path)) {
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        }
+        <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
+          [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
+        </span>
+      </a>
+      }
+      }
+      }
+
       }
     </nav>
 

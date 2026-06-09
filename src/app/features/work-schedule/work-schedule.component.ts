@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { WorkScheduleService, IWorkDay } from '../../core/services/work-schedule.service';
+import { ProfessionalService } from '../../core/services/professional.service';
+import { AuthService } from '../../core/services/auth.service';
+
+type ReminderPref = '1h_before' | '7h30_same_day' | '24h_before';
 
 @Component({
   selector: 'app-work-schedule',
@@ -22,7 +26,9 @@ import { WorkScheduleService, IWorkDay } from '../../core/services/work-schedule
   ]
 })
 export class WorkScheduleComponent implements OnInit {
-  private readonly svc = inject(WorkScheduleService);
+  private readonly svc    = inject(WorkScheduleService);
+  private readonly proSvc = inject(ProfessionalService);
+  private readonly auth   = inject(AuthService);
 
   days:      IWorkDay[] = [];
   isSaving   = signal(false);
@@ -34,11 +40,43 @@ export class WorkScheduleComponent implements OnInit {
 
   readonly slotDuration = signal(30);
 
+  // ── Recordatorio de citas ──────────────────────────────────────────────────
+  reminderPref     = signal<ReminderPref>('24h_before');
+  reminderSelected = signal<ReminderPref>('24h_before');
+  reminderSaving   = signal(false);
+  reminderMsg      = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  readonly reminderOptions: { value: ReminderPref; label: string; desc: string }[] = [
+    { value: '1h_before',     label: '1 hora antes',          desc: 'Se envía 1 hora antes del inicio de la cita.' },
+    { value: '7h30_same_day', label: '7:30 AM del mismo día', desc: 'Se envía a las 7:30 AM del día de la cita.' },
+    { value: '24h_before',    label: '24 horas antes',        desc: 'Se envía a la misma hora del día anterior.' },
+  ];
+
   async ngOnInit(): Promise<void> {
     await this.svc.load();
     this.days = this.svc.schedule().map(d => ({ ...d }));
     if (this.days.length) this.slotDuration.set(this.days[0].slotDuration);
+
+    const pref = this.auth.currentUser()?.reminderPreference;
+    if (pref) { this.reminderPref.set(pref); this.reminderSelected.set(pref); }
+
     this.isLoading.set(false);
+  }
+
+  async saveReminderPref(): Promise<void> {
+    const pref = this.reminderSelected();
+    this.reminderSaving.set(true);
+    this.reminderMsg.set(null);
+    const result = await this.proSvc.saveReminderPreference(pref);
+    this.reminderSaving.set(false);
+    if (result.success) {
+      this.reminderPref.set(pref);
+      this.auth.patchUser({ reminderPreference: pref });
+      this.reminderMsg.set({ type: 'success', text: 'Preferencia guardada.' });
+    } else {
+      this.reminderMsg.set({ type: 'error', text: result.message ?? 'Error al guardar.' });
+    }
+    setTimeout(() => this.reminderMsg.set(null), 3000);
   }
 
   onToggle(day: IWorkDay): void {
