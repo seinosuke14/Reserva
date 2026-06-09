@@ -85,9 +85,15 @@
 
       @for (apt of dayAppointments(); track apt.id) {
         <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-primary-50 border-l-[3px] cursor-pointer hover:bg-primary-100 transition-colors"
-             style="border-left-color:#00C4A7;"
+             [style.border-left-color]="apt.cancellationStatus === 'requested' ? '#ef4444' : '#00C4A7'"
              (click)="selectedAppointment.set(apt)">
-          <div class="text-[11.5px] font-bold mb-0.5" style="color:#00C4A7;">{{ apt.time }}</div>
+          <div class="flex items-center justify-between gap-1">
+            <div class="text-[11.5px] font-bold mb-0.5" style="color:#00C4A7;">{{ apt.time }}</div>
+            @if (apt.cancellationStatus === 'requested') {
+              <span class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+                    style="background:rgba(239,68,68,.12);color:#dc2626;">Solicitó cancelar</span>
+            }
+          </div>
           <div class="text-[12.5px] font-semibold text-primary">{{ apt.customer.name }}</div>
           <div class="text-[11px] text-primary-400">{{ apt.service?.name ?? 'Sin servicio' }}</div>
         </div>
@@ -229,7 +235,8 @@
                       class="rounded-[9px] p-[5px_7px] flex flex-col gap-0.5 h-full transition-all hover:opacity-90 select-none"
                       [class.cursor-grab]="appt.paymentStatus === 'Pagado' || appt.paymentStatus === 'Pendiente'"
                       [class.cursor-pointer]="appt.paymentStatus !== 'Pagado' && appt.paymentStatus !== 'Pendiente'"
-                      style="border:1.5px solid rgba(0,196,167,.25);border-top:3px solid #00C4A7;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+                      style="border:1.5px solid rgba(0,196,167,.25);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);"
+                      [style.border-top]="appt.cancellationStatus === 'requested' ? '3px solid #ef4444' : '3px solid #00C4A7'">
                       <span class="text-[9.5px] font-bold tabular-nums leading-none" style="color:#00C4A7;">
                         {{ appt.time }}
                         <span class="ml-1 px-1 rounded text-[8.5px] font-semibold"
@@ -238,6 +245,10 @@
                           {{ appt.paymentStatus }}
                         </span>
                       </span>
+                      @if (appt.cancellationStatus === 'requested') {
+                        <span class="text-[8.5px] font-bold uppercase tracking-wide px-1 py-0.5 rounded leading-none"
+                              style="background:rgba(239,68,68,.12);color:#dc2626;">⚠ Solicitó cancelar</span>
+                      }
                       <span class="text-[10.5px] font-bold text-primary truncate">{{ appt.customer.name }}</span>
                       <span class="text-[9.5px] text-primary-400 truncate">{{ appt.service?.name ?? 'Sin servicio' }}</span>
                     </div>
@@ -329,6 +340,16 @@
                 <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
               }
             </select>
+            @if (na_servicePrice() > 0) {
+              <div class="mt-2 flex items-baseline justify-between">
+                <span class="text-[13px] font-bold text-primary">{{ formatCLP(na_servicePrice()) }}
+                  <span class="text-[11px] font-medium text-primary-400">sin IVA</span>
+                </span>
+              </div>
+              <p class="text-[11px] text-primary-400 mt-0.5">
+                Precio con IVA: <strong class="text-primary-600">{{ formatCLP(withVat(na_servicePrice())) }}</strong> · es lo que paga el cliente al reservar
+              </p>
+            }
           }
         </div>
 
@@ -534,6 +555,23 @@
                   [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Finalizada' ? '#2BB8A6' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
               {{ selectedAppointment()!.paymentStatus }}
             </span>
+            @if (refundDisplay(selectedAppointment()); as r) {
+              <div class="mt-2 text-[11.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                   [style.background]="r.bg" [style.color]="r.color">
+                {{ r.label }}
+              </div>
+            }
+            @if (canRetryRefund(selectedAppointment())) {
+              <button (click)="retryRefund(selectedAppointment()!)"
+                [disabled]="retryingRefundId() === selectedAppointment()!.id"
+                class="mt-2 w-full py-2 rounded-[9px] text-[12px] font-semibold transition-all disabled:opacity-50"
+                style="background:rgba(0,196,167,.1);color:#00A88F;border:1.5px solid rgba(0,196,167,.35);">
+                {{ retryingRefundId() === selectedAppointment()!.id ? 'Reintentando…' : '↻ Reintentar reembolso' }}
+              </button>
+              @if (retryRefundMsg()) {
+                <p class="mt-1.5 text-[11.5px] text-primary-500">{{ retryRefundMsg() }}</p>
+              }
+            }
             @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
             <div class="flex gap-2 mt-3">
               <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
@@ -560,6 +598,40 @@
             }
           </div>
         </div>
+
+        <!-- Solicitud de cancelación del cliente -->
+        @if (hasCancellationRequest(selectedAppointment())) {
+          <div class="rounded-[12px] p-4" style="border:1.5px solid rgba(239,68,68,.35);background:rgba(239,68,68,.06);">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[16px]">⏳</span>
+              <span class="text-[12px] font-bold uppercase tracking-wider text-red-500">Solicitud de cancelación</span>
+            </div>
+            <p class="text-[13px] text-primary-600 mb-1">El cliente solicitó cancelar esta cita.</p>
+            @if (isCancellationWithRefund(selectedAppointment()!)) {
+              <p class="text-[12px] text-green-600 mb-2">Faltan +24h: si aceptas y el pago fue en línea, el reembolso se gestiona automáticamente.</p>
+            } @else {
+              <p class="text-[12px] text-amber-600 mb-2">Faltan menos de 24h: si aceptas, no corresponde reembolso automático.</p>
+            }
+            @if (selectedAppointment()!.cancellationReason) {
+              <div class="bg-white/70 rounded-[8px] p-2.5 mb-3">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Motivo del cliente</div>
+                <p class="text-[12.5px] text-primary-600 break-words whitespace-pre-wrap">{{ selectedAppointment()!.cancellationReason }}</p>
+              </div>
+            }
+            <div class="flex gap-2">
+              <button (click)="rejectCancellationRequest(selectedAppointment()!)"
+                [disabled]="rejectingId() === selectedAppointment()!.id"
+                class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-40">
+                {{ rejectingId() === selectedAppointment()!.id ? 'Rechazando...' : 'Rechazar' }}
+              </button>
+              <button (click)="acceptCancellationRequest(selectedAppointment()!)"
+                class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90"
+                style="background:#ef4444;box-shadow:0 3px 10px rgba(239,68,68,.3);">
+                Aceptar y cancelar
+              </button>
+            </div>
+          </div>
+        }
 
         @if (selectedAppointment()!.notes) {
           <div class="bg-primary-50 rounded-[12px] p-4">

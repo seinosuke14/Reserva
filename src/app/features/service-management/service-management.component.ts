@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
-import { formatCLP } from '../../helpers/formatters';
+import { formatCLP, withVat } from '../../helpers/formatters';
 import { IService } from '../../helpers/models';
 import { environment } from '../../../environments/environment';
 import { WorkScheduleService } from '../../core/services/work-schedule.service';
@@ -34,6 +34,7 @@ export class ServiceManagementComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly scheduleSvc = inject(WorkScheduleService);
   readonly formatCLP    = formatCLP;
+  readonly withVat      = withVat;
 
   services       = signal<IService[]>([]);
   readonly activeCount   = computed(() => this.services().filter(s => s.isActive).length);

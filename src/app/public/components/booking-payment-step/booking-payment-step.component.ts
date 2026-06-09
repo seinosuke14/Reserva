@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IPublicPaymentMethod } from '../../../helpers/models';
-import { formatCLP } from '../../../helpers/formatters';
+import { formatCLP, withVat } from '../../../helpers/formatters';
 
 @Component({
   selector: 'app-booking-payment-step',
@@ -22,4 +22,5 @@ export class BookingPaymentStepComponent {
   termsToggled    = output<void>();
 
   readonly formatCLP = formatCLP;
+  readonly withVat = withVat;
 }

@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ScheduleBlockService } from '../../core/services/schedule-block.service';
 import { WorkScheduleService, jsToDow } from '../../core/services/work-schedule.service';
 import { environment } from '../../../environments/environment';
+import { formatCLP, withVat } from '../../helpers/formatters';
 import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
 import { CancelConfirmComponent } from '../../components/cancel-confirm/cancel-confirm.component';
 
@@ -17,6 +18,11 @@ interface IAppointment {
   time: string;
   notes: string | null;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
+  paymentProvider?: string | null;
+  cancellationStatus?: 'none' | 'requested' | 'rejected';
+  cancellationReason?: string | null;
+  refundStatus?: string | null;
+  refundId?: string | null;
   rated:    boolean;
   customer: { id: string; name: string; email?: string };
   service:  { id: string; name: string; duration?: number } | null;
@@ -87,6 +93,14 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   private readonly customers = signal<ICustomer[]>([]);
 
   readonly na_serviceId    = signal('');
+
+  // Precio del servicio seleccionado en el modal de nueva cita.
+  // na_servicePrice = neto (lo que pone el profesional); con IVA = lo que paga el cliente.
+  readonly formatCLP = formatCLP;
+  readonly withVat   = withVat;
+  readonly na_servicePrice = computed(() =>
+    Number(this.services().find(s => s.id === this.na_serviceId())?.price ?? 0)
+  );
   readonly na_date         = signal('');
   readonly na_time         = signal('');
   readonly na_name         = signal('');
@@ -607,6 +621,81 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     } finally {
       this.cancelSaving.set(false);
     }
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Solicitud de cancelación del cliente ──────────────────────
+  readonly rejectingId = signal<string | null>(null);
+
+  hasCancellationRequest(apt: IAppointment | null): boolean {
+    return !!apt && apt.cancellationStatus === 'requested' && this.canCancelAppointment(apt);
+  }
+
+  // ── Reintento de reembolso (cuando el refund falló o quedó pendiente) ──
+  readonly retryingRefundId = signal<string | null>(null);
+  readonly retryRefundMsg   = signal<string>('');
+
+  canRetryRefund(apt: IAppointment | null): boolean {
+    return !!apt
+      && apt.paymentProvider === 'mercadopago_connect'
+      && apt.paymentStatus === 'Cancelado'
+      && !!apt.refundStatus
+      && apt.refundStatus !== 'approved';
+  }
+
+  async retryRefund(apt: IAppointment): Promise<void> {
+    if (this.retryingRefundId()) return;
+    this.retryingRefundId.set(apt.id);
+    this.retryRefundMsg.set('');
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/refund/retry`, {})
+      );
+      this.retryRefundMsg.set(res?.message ?? 'Reembolso procesado.');
+      await this._loadAppointments();
+      this.selectedAppointment.set(this.appointments().find(a => a.id === apt.id) ?? null);
+    } catch (err: any) {
+      this.retryRefundMsg.set(err?.error?.message ?? 'No se pudo reintentar el reembolso.');
+    } finally {
+      this.retryingRefundId.set(null);
+    }
+  }
+
+  // Indicador del estado del reembolso para mostrar al profesional en una cita cancelada.
+  // Devuelve null si no hubo intento de reembolso (ej. método sin devolución automática).
+  refundDisplay(apt: IAppointment | null): { label: string; bg: string; color: string } | null {
+    const s = apt?.refundStatus;
+    if (!s) return null;
+    switch (s) {
+      case 'approved':
+        return { label: 'Reembolso realizado', bg: 'rgba(34,197,94,.1)',  color: '#16a34a' };
+      case 'pending':
+      case 'in_process':
+        return { label: 'Reembolso pendiente (revisar en MercadoPago)', bg: 'rgba(245,158,11,.12)', color: '#d97706' };
+      case 'error':
+        return { label: 'El reembolso falló — gestiónalo manualmente', bg: 'rgba(239,68,68,.1)', color: '#dc2626' };
+      default:
+        return { label: `Reembolso: ${s}`, bg: 'rgba(100,116,139,.12)', color: '#475569' };
+    }
+  }
+
+  // Aceptar = cancelar la cita (dispara reembolso si corresponde). Reutiliza el flujo de cancelación.
+  acceptCancellationRequest(apt: IAppointment): void {
+    this.requestCancel(apt);
+  }
+
+  async rejectCancellationRequest(apt: IAppointment): Promise<void> {
+    if (this.rejectingId()) return;
+    this.rejectingId.set(apt.id);
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/appointments/${apt.id}/cancellation/reject`, {})
+      );
+      await this._loadAppointments();
+      const updated = this.appointments().find(a => a.id === apt.id) ?? null;
+      this.selectedAppointment.set(updated);
+    } catch { /* silencioso */ }
+    finally { this.rejectingId.set(null); }
   }
   // ─────────────────────────────────────────────────────────────
 

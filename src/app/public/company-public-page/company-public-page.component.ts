@@ -22,7 +22,7 @@ import { BookingDatetimeSelectorComponent } from '../components/booking-datetime
 import { BookingFormComponent } from '../components/booking-form/booking-form.component';
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
 import { IDayAvailability, ITimeSlot } from '../../helpers/models';
-import { formatCLP, formatDateLong } from '../../helpers/formatters';
+import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
 import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
@@ -62,6 +62,7 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   private readonly metaSvc    = inject(Meta);
 
   readonly formatCLP  = formatCLP;
+  readonly withVat    = withVat;
   readonly formatDate = formatDateLong;
 
   // ── Page state ───────────────────────────────────────────────────────────────

@@ -56,7 +56,7 @@
             <div class="checkout-service-badge">
               <span class="csb-name">{{ bookingLabel() }}</span>
               <span class="csb-sep">·</span>
-              <span class="csb-price">{{ formatCLP(bookingPrice()) }}</span>
+              <span class="csb-price">{{ formatCLP(withVat(bookingPrice())) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
             </div>
             @if (auth.isAuthenticated()) {
               <button class="btn-text-sm" (click)="auth.logout()"

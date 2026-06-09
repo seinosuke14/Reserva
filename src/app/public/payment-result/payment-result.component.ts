@@ -53,7 +53,7 @@ type PaymentState = 'checking' | 'success' | 'error';
               <span class="value">{{ appointmentTime() }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Monto:</span>
+              <span class="label">Monto (IVA inc):</span>
               <span class="value">{{ formatCLP(appointmentAmount()) }}</span>
             </div>
           </div>
@@ -376,11 +376,12 @@ export class PaymentResultComponent implements OnInit {
     }
   }
 
-  private applySuccess(bookingRef: string, appointment: { id: string; date: string; time: string; amount: number }): void {
+  private applySuccess(bookingRef: string, appointment: { id: string; date: string; time: string; amount: number; amountWithVat?: number }): void {
     this.bookingRef.set(bookingRef);
     this.appointmentDate.set(formatDateLong(appointment.date));
     this.appointmentTime.set(appointment.time);
-    this.appointmentAmount.set(appointment.amount);
+    // Mostramos el monto realmente cobrado (con IVA).
+    this.appointmentAmount.set(appointment.amountWithVat ?? appointment.amount);
     this.appointmentId = appointment.id;
     this.state.set('success');
   }
