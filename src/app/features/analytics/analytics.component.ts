@@ -9,8 +9,9 @@ interface IAppointment {
   id: string;
   date: string;
   time: string;
-  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
   service?: { id: string; name: string } | null;
+  quoteId?: string | null;
   amount?: number | string;
 }
 
@@ -28,13 +29,44 @@ interface IMonthData {
   paid: number;      // solo pagadas
 }
 
-interface IChartPoint {
-  x: number;
-  y: number;
+interface IChartBar {
+  i: number;
   month: string;
+  cx: number;        // centro del slot (eje X)
+  barX: number;      // borde izquierdo de la barra
+  barW: number;
+  barY: number;      // tope de la barra (ingresos)
+  barH: number;
   revenue: number;
   bookings: number;
   paid: number;
+}
+
+interface IMonthStat {
+  reserved: number;
+  paid: number;
+  incomplete: number;
+  pending: number;
+  revenue: number;
+}
+
+interface ISeriesPoint {
+  i: number;
+  cx: number;
+  cy: number;
+  month: string;
+  count: number;       // reservadas (total)
+  paid: number;        // pagadas (Pagado / Finalizada)
+  incomplete: number;  // canceladas o reembolsadas
+  pending: number;     // pendientes
+  revenue: number;     // ganancia real (monto de las pagadas)
+}
+
+interface IServiceSeries {
+  name: string;
+  color: string;
+  linePath: string;
+  points: ISeriesPoint[];
 }
 
 interface IServiceStat {
@@ -53,15 +85,15 @@ interface IDonutSegment {
   dashOffset: number;
 }
 
-// Line chart layout
-const LC_PAD_LEFT   = 52;  // room for Y-axis labels
-const LC_PAD_RIGHT  = 12;
-const LC_PAD_TOP    = 16;
-const LC_PAD_BOTTOM = 28;
-const LC_W          = 580;
-const LC_H          = 150;
-const LC_PLOT_W     = LC_W - LC_PAD_LEFT - LC_PAD_RIGHT;
-const LC_PLOT_H     = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
+// Combo chart layout (barras de ganancia + líneas de reservas)
+const CH_PAD_LEFT   = 54;  // eje Y izquierdo (ingresos)
+const CH_PAD_RIGHT  = 32;  // eje Y derecho (reservas)
+const CH_PAD_TOP    = 18;
+const CH_PAD_BOTTOM = 30;
+const CH_W          = 580;
+const CH_H          = 250;
+const CH_PLOT_W     = CH_W - CH_PAD_LEFT - CH_PAD_RIGHT;
+const CH_PLOT_H     = CH_H - CH_PAD_TOP - CH_PAD_BOTTOM;
 
 @Component({
   selector: 'app-analytics',
@@ -74,17 +106,28 @@ export class AnalyticsComponent implements OnInit {
   readonly formatCLP = formatCLP;
 
   readonly circumference = 2 * Math.PI * 48;
-  readonly lcW = LC_W;
-  readonly lcH = LC_H;
+  readonly chW = CH_W;
+  readonly chH = CH_H;
+  readonly plotLeft  = CH_PAD_LEFT;
+  readonly plotRight = CH_W - CH_PAD_RIGHT;
 
   appointments = signal<IAppointment[]>([]);
   customers    = signal<ICustomer[]>([]);
   isLoading    = signal(true);
   errorMsg     = signal<string | null>(null);
-  hoveredBar   = signal<number | null>(null);
+  hoveredBar    = signal<number | null>(null);   // mes (columna) activo
+  hoveredSeries = signal<number | null>(null);   // servicio (línea) activo
 
   private readonly MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  private readonly DONUT_COLORS = ['#00C4A7','#0D1B2A','#64748b','#94a3b8','#cbd5e1'];
+  // Paleta de servicios: colores vivos y distintos (sin blanco/negro/gris)
+  readonly DONUT_COLORS = ['#6366f1','#f59e0b','#ec4899','#0ea5e9','#8b5cf6','#14b8a6','#f43f5e'];
+
+  /** Una cita cuenta como pagada (ingreso real) si está Pagada o Finalizada. */
+  private readonly isPaid = (status: string): boolean => status === 'Pagado' || status === 'Finalizada';
+
+  /** Grupo de la cita para las líneas del gráfico: las cotizaciones se agrupan en una sola serie. */
+  private readonly groupOf = (apt: IAppointment): string =>
+    apt.quoteId ? 'Cotizaciones' : (apt.service?.name ?? 'Otro');
 
   readonly monthlyData = computed<IMonthData[]>(() => {
     const apts  = this.appointments();
@@ -98,7 +141,7 @@ export class AnalyticsComponent implements OnInit {
       const key   = `${year}-${String(month + 1).padStart(2, '0')}`;
 
       const inMonth = apts.filter(a => a.date.startsWith(key));
-      const paidApts = inMonth.filter(a => a.paymentStatus === 'Pagado');
+      const paidApts = inMonth.filter(a => this.isPaid(a.paymentStatus));
       const revenue  = paidApts.reduce((sum, a) => sum + Number(a.amount ?? 0), 0);
 
       result.push({
@@ -112,43 +155,151 @@ export class AnalyticsComponent implements OnInit {
     return result;
   });
 
-  readonly lineMaxRev = computed(() => Math.max(...this.monthlyData().map(d => d.revenue), 1));
+  readonly maxRevenue = computed(() => Math.max(...this.monthlyData().map(d => d.revenue), 1));
 
-  readonly lineChartPoints = computed<IChartPoint[]>(() => {
+  /** Paso del eje de ingresos: 10 mil; solo crece (en múltiplos de 10 mil) si hubiera demasiadas marcas. */
+  readonly revStep = computed(() => {
+    const rough = Math.max(Math.ceil(this.maxRevenue() / 10000) * 10000, 10000);
+    return 10000 * Math.max(1, Math.ceil(rough / 10000 / 20));
+  });
+
+  /** Tope del eje de ingresos: el valor más alto redondeado hacia arriba al múltiplo del paso (la marca superior coincide con el tope). */
+  readonly revAxisMax = computed(() => {
+    const step = this.revStep();
+    return Math.max(Math.ceil(this.maxRevenue() / step) * step, step);
+  });
+
+  readonly slotW = computed(() => CH_PLOT_W / Math.max(this.monthlyData().length, 1));
+
+  readonly chartBars = computed<IChartBar[]>(() => {
     const data   = this.monthlyData();
-    const maxRev = this.lineMaxRev();
-    const xStep  = LC_PLOT_W / (data.length - 1);
+    const maxRev = this.revAxisMax();
+    const slotW  = this.slotW();
+    const barW   = slotW * 0.5;
+    const baseY  = CH_PAD_TOP + CH_PLOT_H;
 
-    return data.map((d, i) => ({
-      x: +(LC_PAD_LEFT + i * xStep).toFixed(1),
-      y: +(LC_PAD_TOP + (1 - d.revenue / maxRev) * LC_PLOT_H).toFixed(1),
-      month: d.month,
-      revenue: d.revenue,
-      bookings: d.bookings,
-      paid: d.paid,
-    }));
+    return data.map((d, i) => {
+      const cx   = CH_PAD_LEFT + (i + 0.5) * slotW;
+      const barH = (d.revenue / maxRev) * CH_PLOT_H;
+      return {
+        i,
+        month: d.month,
+        cx:   +cx.toFixed(1),
+        barX: +(cx - barW / 2).toFixed(1),
+        barW: +barW.toFixed(1),
+        barY: +(baseY - barH).toFixed(1),
+        barH: +barH.toFixed(1),
+        revenue: d.revenue,
+        bookings: d.bookings,
+        paid: d.paid,
+      };
+    });
   });
 
-  readonly lineChartPath = computed(() =>
-    this.lineChartPoints().map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ')
-  );
+  /** Conteo de reservas por servicio y por mes (clave YYYY-MM). */
+  private readonly serviceMonthlyStats = computed(() => {
+    // grupo (servicio o "Cotizaciones") -> (monthKey -> stats)
+    const stats = new Map<string, Map<string, IMonthStat>>();
+    for (const apt of this.appointments()) {
+      const name = this.groupOf(apt);
+      const key  = apt.date.slice(0, 7);                      // YYYY-MM
+      let byMonth = stats.get(name);
+      if (!byMonth) { byMonth = new Map(); stats.set(name, byMonth); }
+      let s = byMonth.get(key);
+      if (!s) { s = { reserved: 0, paid: 0, incomplete: 0, pending: 0, revenue: 0 }; byMonth.set(key, s); }
 
-  readonly lineChartArea = computed(() => {
-    const pts    = this.lineChartPoints();
-    if (!pts.length) return '';
-    const bottom = LC_PAD_TOP + LC_PLOT_H;
-    return `M${pts[0].x},${pts[0].y} ` +
-           pts.slice(1).map(p => `L${p.x},${p.y}`).join(' ') +
-           ` L${pts[pts.length - 1].x},${bottom} L${pts[0].x},${bottom} Z`;
+      s.reserved++;
+      if (this.isPaid(apt.paymentStatus)) {
+        s.paid++;
+        s.revenue += Number(apt.amount ?? 0);
+      } else if (apt.paymentStatus === 'Cancelado') {
+        s.incomplete++;
+      } else {
+        s.pending++;
+      }
+    }
+    return stats;
   });
 
-  readonly lineYTicks = computed(() => {
-    const max = this.lineMaxRev();
-    return [0, 0.33, 0.66, 1].map(f => ({
-      y: +(LC_PAD_TOP + (1 - f) * LC_PLOT_H).toFixed(1),
-      label: formatCLP(Math.round(max * f)),
-    }));
+  /** Grupos a graficar: top servicios por reservas + la línea agregada de "Cotizaciones" si existe. */
+  readonly chartGroups = computed<string[]>(() => {
+    const stats  = this.serviceMonthlyStats();
+    const totals = new Map<string, number>();
+    for (const [name, byMonth] of stats) {
+      let t = 0;
+      for (const s of byMonth.values()) t += s.reserved;
+      totals.set(name, t);
+    }
+    const sorted = [...totals.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const quotes = sorted.filter(n => n === 'Cotizaciones');
+    const others = sorted.filter(n => n !== 'Cotizaciones').slice(0, 5);
+    return [...others, ...quotes];
   });
+
+  /** Una serie de puntos por cada grupo a graficar. La altura de la línea = ganancia del servicio (mismo eje $ que las barras). */
+  readonly serviceSeries = computed<IServiceSeries[]>(() => {
+    const months = this.monthlyData();
+    const stats  = this.serviceMonthlyStats();
+    const slotW  = this.slotW();
+    const maxRev = this.revAxisMax();
+
+    return this.chartGroups().map((name, si) => {
+      const byMonth = stats.get(name);
+      const points: ISeriesPoint[] = months.map((m, i) => {
+        const s = byMonth?.get(m.key);
+        const revenue = s?.revenue ?? 0;
+        return {
+          i,
+          cx: +(CH_PAD_LEFT + (i + 0.5) * slotW).toFixed(1),
+          cy: +(CH_PAD_TOP + (1 - revenue / maxRev) * CH_PLOT_H).toFixed(1),
+          month: m.month,
+          count: s?.reserved ?? 0,
+          paid:       s?.paid ?? 0,
+          incomplete: s?.incomplete ?? 0,
+          pending:    s?.pending ?? 0,
+          revenue,
+        };
+      });
+      return {
+        name,
+        color: this.DONUT_COLORS[si % this.DONUT_COLORS.length],
+        linePath: points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.cx},${p.cy}`).join(' '),
+        points,
+      };
+    });
+  });
+
+  /** Eje izquierdo: ingresos (CLP), marcas de 10 mil en 10 mil. */
+  readonly revYTicks = computed(() => {
+    const axisMax = this.revAxisMax();
+    const step    = this.revStep();
+    const ticks: { y: number; label: string }[] = [];
+    for (let v = 0; v <= axisMax; v += step) {
+      ticks.push({
+        y: +(CH_PAD_TOP + (1 - v / axisMax) * CH_PLOT_H).toFixed(1),
+        label: formatCLP(v),
+      });
+    }
+    return ticks;
+  });
+
+  readonly tipW    = 168;
+  readonly tipBoxH = 104;   // alto del tooltip de servicio
+
+  /** Etiqueta compacta de dinero para los puntos (ej: $90k). */
+  moneyK(v: number): string {
+    return v > 0 ? '$' + Math.round(v / 1000) + 'k' : '';
+  }
+
+  /** Posición X del tooltip, acotada para no salir del gráfico. */
+  tooltipX(cx: number): number {
+    return Math.min(Math.max(cx - this.tipW / 2, 2), CH_W - this.tipW - 2);
+  }
+
+  /** Posición Y del tooltip de servicio: arriba del punto, acotada al gráfico. */
+  tipY(cy: number): number {
+    return Math.min(Math.max(cy - this.tipBoxH - 8, 4), CH_H - this.tipBoxH - 4);
+  }
 
   readonly totalRevenue12m   = computed(() => this.monthlyData().reduce((s, m) => s + m.revenue, 0));
   readonly avgMonthlyRevenue = computed(() => Math.round(this.totalRevenue12m() / 12));
@@ -174,7 +325,7 @@ export class AnalyticsComponent implements OnInit {
 
     for (const apt of this.appointments()) {
       const name = apt.service?.name ?? 'Otro';
-      const rev  = apt.paymentStatus === 'Pagado' ? Number(apt.amount ?? 0) : 0;
+      const rev  = this.isPaid(apt.paymentStatus) ? Number(apt.amount ?? 0) : 0;
       const cur  = map.get(name);
       if (cur) { cur.bookings++; cur.revenue += rev; }
       else      map.set(name, { name, bookings: 1, revenue: rev });

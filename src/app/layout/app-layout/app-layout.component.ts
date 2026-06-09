@@ -15,9 +15,13 @@ interface NavItem {
   badge?: string;
 }
 
-interface NavSection {
+interface NavGroup {
   label: string;
-  items: NavItem[];
+  icon: string;
+  /** Si está definido es un enlace directo (sin desplegable). */
+  path?: string;
+  /** Si está definido es un grupo desplegable. */
+  items?: NavItem[];
 }
 
 interface PageMeta {
@@ -39,6 +43,15 @@ interface PageMeta {
       transition(':leave', [
         animate('150ms ease-in', style({ opacity: 0, transform: 'translateX(-10px)' }))
       ])
+    ]),
+    trigger('collapse', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0 }),
+        animate('200ms ease-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ height: 0, opacity: 0 }))
+      ])
     ])
   ]
 })
@@ -51,40 +64,44 @@ export class AppLayoutComponent {
   isNotificationsOpen = signal(false);
   currentPath         = signal('');
   isMobile            = signal(window.innerWidth < 768);
+  openGroups          = signal<Set<string>>(new Set());
 
   readonly requiresQuote = computed(() =>
     !!this.user()?.profession?.requiresQuote
   );
 
-  readonly navSections = computed<NavSection[]>(() => [
+  readonly navSections = computed<NavGroup[]>(() => [
+    { label: 'Vista rápida', icon: 'dashboard', path: '/app' },
     {
-      label: 'Principal',
+      label: 'Gestión',
+      icon: 'briefcase',
       items: [
-        { path: '/app',               label: 'Dashboard',    icon: 'dashboard' },
-        { path: '/app/agenda',        label: 'Agenda',       icon: 'calendar' },
-        { path: '/app/clientes',      label: 'Clientes',     icon: 'users' },
-        { path: '/app/servicios',     label: 'Servicios',    icon: 'package' },
+        { path: '/app/agenda',   label: 'Agenda',   icon: 'calendar' },
+        { path: '/app/clientes', label: 'Clientes', icon: 'users' },
         ...(this.requiresQuote() ? [{ path: '/app/cotizaciones', label: 'Cotizaciones', icon: 'file-text' }] : []),
       ],
     },
     {
       label: 'Análisis',
+      icon: 'bar-chart',
       items: [
         { path: '/app/analytics', label: 'Analytics', icon: 'bar-chart' },
       ],
     },
     {
       label: 'Configuración',
+      icon: 'settings',
       items: [
-        { path: '/app/pagos',         label: 'Métodos de Pago', icon: 'credit-card' },
-        { path: '/app/horario',       label: 'Horario',         icon: 'clock' },
-        { path: '/app/editar',        label: 'Editar',          icon: 'sliders' },
+        { path: '/app/pagos',     label: 'Métodos de Pago', icon: 'credit-card' },
+        { path: '/app/servicios', label: 'Servicios',       icon: 'package' },
+        { path: '/app/horario',   label: 'Horario',         icon: 'clock' },
+        { path: '/app/editar',    label: 'Perfil público',  icon: 'globe' },
       ],
     },
   ]);
 
   private readonly pageTitles: Record<string, PageMeta> = {
-    '/app':              { title: 'Dashboard',      sub: 'Bienvenido de vuelta' },
+    '/app':              { title: 'Vista rápida',   sub: 'Bienvenido de vuelta' },
     '/app/agenda':        { title: 'Agenda',         sub: 'Gestiona tus citas y disponibilidad' },
     '/app/clientes':      { title: 'Clientes',       sub: 'Tu base de clientes' },
     '/app/servicios':     { title: 'Servicios',      sub: 'Administra tu oferta de servicios' },
@@ -93,7 +110,7 @@ export class AppLayoutComponent {
     '/app/analytics':     { title: 'Analytics',        sub: 'Métricas y rendimiento de tu negocio' },
     '/app/cotizaciones':  { title: 'Cotizaciones',    sub: 'Gestiona las solicitudes de cotización' },
     '/app/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
-    '/app/editar':        { title: 'Editar Portal',  sub: 'Personaliza la apariencia de tu portal de reservas' },
+    '/app/editar':        { title: 'Perfil público', sub: 'Personaliza la apariencia de tu portal de reservas' },
   };
 
   private readonly subscriptionSvc = inject(SubscriptionService);
@@ -140,9 +157,11 @@ export class AppLayoutComponent {
     this.notifSvc.load();
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.currentPath.set(e.urlAfterRedirects);
+      this.openActiveGroup();
       if (this.isMobile()) this.isSidebarOpen.set(false);
     });
     this.currentPath.set(this.router.url);
+    this.openActiveGroup();
     window.addEventListener('resize', this._resizeListener);
   }
 
@@ -151,6 +170,29 @@ export class AppLayoutComponent {
 
   isActive(path: string): boolean {
     return this.currentPath() === path;
+  }
+
+  /** Un grupo está "activo" si contiene la ruta actual. */
+  isGroupActive(group: NavGroup): boolean {
+    return !!group.items?.some(i => this.isActive(i.path));
+  }
+
+  isGroupOpen(label: string): boolean {
+    return this.openGroups().has(label);
+  }
+
+  toggleGroup(label: string): void {
+    this.openGroups.update(set => {
+      const next = new Set(set);
+      next.has(label) ? next.delete(label) : next.add(label);
+      return next;
+    });
+  }
+
+  /** Asegura que el grupo que contiene la ruta actual quede desplegado. */
+  private openActiveGroup(): void {
+    const group = this.navSections().find(g => this.isGroupActive(g));
+    if (group) this.openGroups.update(set => new Set(set).add(group.label));
   }
 
   handleLogout() {
