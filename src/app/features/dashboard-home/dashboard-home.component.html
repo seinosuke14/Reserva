@@ -195,11 +195,31 @@
     <div class="bg-white rounded-[16px] p-[19px_21px] border border-black/[.06]"
          style="animation:fadeUp .4s ease 180ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
       <div class="flex justify-between items-start mb-4">
-        <div>
-          <h3 class="text-[14.5px] font-bold text-primary tracking-tight">Ingresos esta semana</h3>
-          <p class="text-[11.5px] text-primary-400 mt-0.5">{{ weekLabels()[0] }} — {{ weekLabels()[6] }}</p>
+        <div class="min-w-0">
+          <h3 class="text-[14.5px] font-bold text-primary tracking-tight">
+            {{ isCurrentWeek() ? 'Ingresos esta semana' : 'Ingresos por semana' }}
+          </h3>
+          <div class="flex items-center gap-1.5 mt-1">
+            <!-- Semana anterior -->
+            <button (click)="prevWeek()" [disabled]="!canPrevWeek()"
+              class="w-[22px] h-[22px] rounded-[7px] flex-center border border-primary-100 transition-colors"
+              [class.text-primary-300]="!canPrevWeek()" [class.cursor-not-allowed]="!canPrevWeek()"
+              [class.text-primary-500]="canPrevWeek()" [class.hover:bg-primary-50]="canPrevWeek()"
+              title="Semana anterior">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="text-[11.5px] font-semibold text-primary-500 tabular-nums whitespace-nowrap">{{ weekRangeLabel() }}</span>
+            <!-- Semana siguiente -->
+            <button (click)="nextWeek()" [disabled]="!canNextWeek()"
+              class="w-[22px] h-[22px] rounded-[7px] flex-center border border-primary-100 transition-colors"
+              [class.text-primary-300]="!canNextWeek()" [class.cursor-not-allowed]="!canNextWeek()"
+              [class.text-primary-500]="canNextWeek()" [class.hover:bg-primary-50]="canNextWeek()"
+              title="Semana siguiente">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="text-right">
+        <div class="text-right shrink-0">
           <div class="text-[21px] font-extrabold text-primary tracking-tight leading-none">{{ formatCLP(weekTotal()) }}</div>
           @if (weekTrend() !== 0) {
             <div class="text-[11.5px] font-semibold mt-1"

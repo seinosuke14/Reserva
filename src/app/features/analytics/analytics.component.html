@@ -59,112 +59,152 @@
 
   </div>
 
-  <!-- ── Line chart: ingresos mensuales ────────────────────────── -->
+  <!-- ── Combo chart: ganancia (barras) + reservas (puntos) ──────── -->
   <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-    <div class="flex-between mb-4">
+    <div class="flex-between mb-3 flex-wrap gap-2">
       <div>
-        <div class="text-[13.5px] font-bold text-slate-900">Ingresos por mes</div>
-        <div class="text-[11.5px] text-slate-400 mt-0.5">Últimos 12 meses · solo citas pagadas</div>
+        <div class="text-[13.5px] font-bold text-slate-900">Ganancia por mes y servicio</div>
+        <div class="text-[11.5px] text-slate-400 mt-0.5">Últimos 12 meses · barras: ganancia total · líneas: ganancia por servicio</div>
+      </div>
+      <!-- Leyenda -->
+      <div class="flex items-center gap-x-3.5 gap-y-1 flex-wrap text-[10.5px] font-semibold">
+        <span class="flex items-center gap-1.5 text-slate-500">
+          <span class="w-2.5 h-2.5 rounded-sm" style="background:#00C4A7;"></span> Ganancia
+        </span>
+        @for (s of serviceSeries(); track s.name) {
+        <span class="flex items-center gap-1.5 text-slate-500">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background]="s.color"></span>
+          <span class="truncate max-w-[120px]">{{ s.name }}</span>
+        </span>
+        }
       </div>
     </div>
 
-    <!-- SVG line chart -->
-    <svg width="100%" [attr.viewBox]="'0 0 ' + lcW + ' ' + lcH"
+    <!-- SVG combo chart -->
+    <svg width="100%" [attr.viewBox]="'0 0 ' + chW + ' ' + chH"
          preserveAspectRatio="xMidYMid meet" class="overflow-visible">
       <defs>
-        <linearGradient id="lcGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#00C4A7" stop-opacity=".18"/>
-          <stop offset="100%" stop-color="#00C4A7" stop-opacity="0"/>
+        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#00C4A7" stop-opacity=".95"/>
+          <stop offset="100%" stop-color="#00C4A7" stop-opacity=".5"/>
         </linearGradient>
       </defs>
 
-      <!-- Y-axis grid lines + labels -->
-      @for (tick of lineYTicks(); track tick.y) {
-      <line [attr.x1]="52" [attr.y1]="tick.y" [attr.x2]="lcW - 12" [attr.y2]="tick.y"
+      <!-- Grid + eje izquierdo (ingresos) -->
+      @for (tick of revYTicks(); track tick.y) {
+      <line [attr.x1]="plotLeft" [attr.y1]="tick.y" [attr.x2]="plotRight" [attr.y2]="tick.y"
             stroke="#f1f5f9" stroke-width="1"/>
-      <text [attr.x]="48" [attr.y]="tick.y + 3.5" text-anchor="end"
+      <text [attr.x]="plotLeft - 6" [attr.y]="tick.y + 3.5" text-anchor="end"
             font-size="8" fill="#94a3b8" font-family="inherit">{{ tick.label }}</text>
       }
 
-      <!-- Area fill -->
-      <path [attr.d]="lineChartArea()" fill="url(#lcGrad)"/>
+      <!-- Barras de ganancia + zona hover por columna -->
+      @for (b of chartBars(); track b.month) {
+      <rect [attr.x]="b.cx - slotW() / 2" y="0" [attr.width]="slotW()" [attr.height]="chH"
+            fill="transparent" style="cursor:pointer;"
+            (mouseenter)="hoveredBar.set(b.i); hoveredSeries.set(null)" (mouseleave)="hoveredBar.set(null)"/>
+      <rect [attr.x]="b.barX" [attr.y]="b.barY" [attr.width]="b.barW" [attr.height]="b.barH" rx="3"
+            [attr.fill]="hoveredBar() === b.i ? '#00a98e' : 'url(#barGrad)'" style="pointer-events:none;"/>
+      <text [attr.x]="b.cx" [attr.y]="chH - 6" text-anchor="middle"
+            font-size="9" fill="#94a3b8" font-family="inherit" style="pointer-events:none;">{{ b.month }}</text>
+      }
 
-      <!-- Line -->
-      <path [attr.d]="lineChartPath()" fill="none" stroke="#00C4A7" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Una línea + puntos por servicio -->
+      @for (s of serviceSeries(); track s.name; let si = $index) {
+      <path [attr.d]="s.linePath" fill="none" [attr.stroke]="s.color"
+            [attr.stroke-width]="hoveredSeries() === si ? 3 : 2"
+            [style.opacity]="hoveredSeries() === null || hoveredSeries() === si ? 1 : 0.15"
+            stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"/>
+      @for (p of s.points; track p.i) {
+      @if (p.revenue > 0) {
+      <circle [attr.cx]="p.cx" [attr.cy]="p.cy" [attr.r]="hoveredSeries() === si ? 4 : 2.6"
+              [attr.fill]="s.color" stroke="#fff" stroke-width="1.5"
+              [style.opacity]="hoveredSeries() === null || hoveredSeries() === si ? 1 : 0.15"
+              style="pointer-events:none;"/>
+      <!-- etiqueta de ganancia en la serie activa -->
+      @if (hoveredSeries() === si) {
+      <text [attr.x]="p.cx" [attr.y]="p.cy - 7" text-anchor="middle"
+            font-size="8" font-weight="700" [attr.fill]="s.color" font-family="inherit"
+            style="pointer-events:none;">{{ moneyK(p.revenue) }}</text>
+      }
+      }
+      }
+      }
 
-      <!-- Dots, labels, X-axis month labels -->
-      @for (pt of lineChartPoints(); track pt.month; let i = $index) {
+      <!-- Zonas hover sobre cada punto (al frente) -->
+      @for (s of serviceSeries(); track s.name; let si = $index) {
+      @for (p of s.points; track p.i) {
+      @if (p.revenue > 0) {
+      <circle [attr.cx]="p.cx" [attr.cy]="p.cy" r="8" fill="transparent" style="cursor:pointer;"
+              (mouseenter)="hoveredSeries.set(si); hoveredBar.set(p.i)" (mouseleave)="hoveredSeries.set(null)"/>
+      }
+      }
+      }
 
-        <!-- Dot -->
-        <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4"
-                [attr.fill]="hoveredBar() === i ? '#00a98e' : '#00C4A7'"
-                stroke="#fff" stroke-width="2"
-                style="cursor:pointer;"
-                (mouseenter)="hoveredBar.set(i)"
-                (mouseleave)="hoveredBar.set(null)"/>
-
-        <!-- Revenue label above dot (always visible) -->
-        @if (pt.revenue > 0) {
-        <text [attr.x]="pt.x" [attr.y]="pt.y - 9" text-anchor="middle"
-              font-size="7.5" font-weight="700" fill="#00C4A7" font-family="inherit">
-          {{ formatCLP(pt.revenue) }}
+      <!-- Tooltip de ganancia (al pasar por la columna/barra) -->
+      @for (b of chartBars(); track b.month) {
+      @if (hoveredSeries() === null && hoveredBar() === b.i) {
+      <g style="pointer-events:none;">
+        <rect [attr.x]="tooltipX(b.cx)" y="6" [attr.width]="tipW" height="42" rx="7" fill="#0D1B2A" opacity=".95"/>
+        <text [attr.x]="tooltipX(b.cx) + 9" y="22" font-size="9" font-weight="700" fill="#fff" font-family="inherit">{{ b.month }}</text>
+        <text [attr.x]="tooltipX(b.cx) + 9" y="35" font-size="8.5" fill="#00C4A7" font-family="inherit">
+          Ganancia: {{ formatCLP(b.revenue) }}
         </text>
-        }
+      </g>
+      }
+      }
 
-        <!-- X-axis month label -->
-        <text [attr.x]="pt.x" [attr.y]="lcH - 4" text-anchor="middle"
-              font-size="9" fill="#94a3b8" font-family="inherit">{{ pt.month }}</text>
+      <!-- Tooltip de servicio (al pasar por una línea/punto) -->
+      @for (s of serviceSeries(); track s.name; let si = $index) {
+      @for (p of s.points; track p.i) {
+      @if (hoveredSeries() === si && hoveredBar() === p.i) {
+      <g style="pointer-events:none;">
+        <rect [attr.x]="tooltipX(p.cx)" [attr.y]="tipY(p.cy)" [attr.width]="tipW" [attr.height]="tipBoxH" rx="7" fill="#0D1B2A" opacity=".96"/>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 15"
+              font-size="9" font-weight="700" [attr.fill]="s.color" font-family="inherit">{{ s.name }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 26"
+              font-size="7.5" fill="#94a3b8" font-family="inherit">{{ p.month }}</text>
 
-        <!-- Hover tooltip -->
-        @if (hoveredBar() === i) {
-        <g>
-          <rect [attr.x]="pt.x - 38" [attr.y]="pt.y - 46" width="76" height="34" rx="6"
-                fill="#0D1B2A" opacity=".92"/>
-          <polygon [attr.points]="pt.x + ',' + (pt.y - 8) + ' ' + (pt.x - 5) + ',' + (pt.y - 14) + ' ' + (pt.x + 5) + ',' + (pt.y - 14)"
-                   fill="#0D1B2A" opacity=".92"/>
-          <text [attr.x]="pt.x" [attr.y]="pt.y - 33" text-anchor="middle"
-                font-size="8.5" font-weight="700" fill="#00C4A7" font-family="inherit">
-            {{ pt.revenue > 0 ? formatCLP(pt.revenue) : 'Sin ingresos' }}
-          </text>
-          <text [attr.x]="pt.x" [attr.y]="pt.y - 21" text-anchor="middle"
-                font-size="7.5" fill="#94a3b8" font-family="inherit">
-            {{ pt.bookings }} cita{{ pt.bookings !== 1 ? 's' : '' }} · {{ pt.paid }} pagada{{ pt.paid !== 1 ? 's' : '' }}
-          </text>
-        </g>
-        }
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 40" font-size="8.5" fill="#e2e8f0" font-family="inherit">Reservadas: {{ p.count }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 52" font-size="8.5" fill="#4ade80" font-family="inherit">Pagadas: {{ p.paid }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 64" font-size="8.5" fill="#f87171" font-family="inherit">Incompletas: {{ p.incomplete }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 76" font-size="8.5" fill="#fbbf24" font-family="inherit">Pendientes: {{ p.pending }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 92" font-size="9" font-weight="700" fill="#2dd4bf" font-family="inherit">Ganancia: {{ formatCLP(p.revenue) }}</text>
+      </g>
+      }
+      }
       }
     </svg>
 
-    <!-- Monthly summary table -->
+    <!-- Resumen mensual -->
     <div class="mt-4 border-t border-slate-100 pt-3 overflow-x-auto">
       <table class="w-full text-center border-collapse">
         <thead>
           <tr>
-            @for (pt of lineChartPoints(); track pt.month) {
-            <th class="text-[9.5px] font-bold text-slate-400 pb-1 px-0.5" style="min-width:42px;">{{ pt.month }}</th>
+            @for (b of chartBars(); track b.month) {
+            <th class="text-[9.5px] font-bold text-slate-400 pb-1 px-0.5" style="min-width:42px;">{{ b.month }}</th>
             }
           </tr>
         </thead>
         <tbody>
           <tr>
-            @for (pt of lineChartPoints(); track pt.month) {
+            @for (b of chartBars(); track b.month) {
             <td class="text-[9.5px] font-semibold px-0.5 pb-0.5"
-                [style.color]="pt.revenue > 0 ? '#00C4A7' : '#cbd5e1'">
-              {{ pt.revenue > 0 ? formatCLP(pt.revenue) : '—' }}
+                [style.color]="b.revenue > 0 ? '#00C4A7' : '#cbd5e1'">
+              {{ b.revenue > 0 ? formatCLP(b.revenue) : '—' }}
             </td>
             }
           </tr>
           <tr>
-            @for (pt of lineChartPoints(); track pt.month) {
+            @for (b of chartBars(); track b.month) {
             <td class="text-[9px] text-slate-400 px-0.5">
-              {{ pt.bookings > 0 ? pt.bookings + 'c / ' + pt.paid + 'p' : '—' }}
+              {{ b.bookings > 0 ? b.bookings + 'r / ' + b.paid + 'p' : '—' }}
             </td>
             }
           </tr>
         </tbody>
       </table>
-      <div class="text-[9.5px] text-slate-300 mt-1.5">c = citas totales · p = pagadas</div>
+      <div class="text-[9.5px] text-slate-300 mt-1.5">r = reservas totales · p = pagadas</div>
     </div>
   </div>
 
@@ -187,7 +227,7 @@
           <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500"
               [style.width]="svc.pct + '%'"
-              [style.background]="i === 0 ? '#00C4A7' : i === 1 ? '#0D1B2A' : '#94a3b8'">
+              [style.background]="DONUT_COLORS[i % DONUT_COLORS.length]">
             </div>
           </div>
         </div>

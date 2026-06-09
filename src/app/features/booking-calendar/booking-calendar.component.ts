@@ -19,7 +19,7 @@ interface IAppointment {
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
   rated:    boolean;
   customer: { id: string; name: string; email?: string };
-  service:  { id: string; name: string; duration?: number };
+  service:  { id: string; name: string; duration?: number } | null;
 }
 
 interface IService {
@@ -126,7 +126,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     );
     const occupied = new Set<string>();
     for (const apt of dayAppts) {
-      const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      const blocks = Math.ceil((apt.service?.duration ?? slotDur) / slotDur);
       const [h, m] = apt.time.split(':').map(Number);
       let cursor   = h * 60 + m;
       for (let b = 0; b < blocks; b++) {
@@ -388,7 +388,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     );
     const occupied = new Set<string>();
     for (const a of dayAppts) {
-      const blocks = Math.ceil((a.service.duration ?? slotDur) / slotDur);
+      const blocks = Math.ceil((a.service?.duration ?? slotDur) / slotDur);
       const [h, m] = a.time.split(':').map(Number);
       let cursor = h * 60 + m;
       for (let b = 0; b < blocks; b++) {
@@ -401,7 +401,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       if (this._isPastSlot(dateStr, slot)) return false;
       if (occupied.has(slot)) return false;
       if (this.blockSvc.isBlocked(date, slot)) return false;
-      const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      const blocks = Math.ceil((apt.service?.duration ?? slotDur) / slotDur);
       const [h, m] = slot.split(':').map(Number);
       let cursor = h * 60 + m + slotDur;
       for (let b = 1; b < blocks; b++) {
@@ -518,7 +518,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     );
     const occupied = new Set<string>();
     for (const a of dayAppts) {
-      const blocks = Math.ceil((a.service.duration ?? slotDur) / slotDur);
+      const blocks = Math.ceil((a.service?.duration ?? slotDur) / slotDur);
       const [h, m] = a.time.split(':').map(Number);
       let cursor = h * 60 + m;
       for (let b = 0; b < blocks; b++) {
@@ -527,7 +527,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       }
     }
     if (occupied.has(slot)) return false;
-    const blocks = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+    const blocks = Math.ceil((apt.service?.duration ?? slotDur) / slotDur);
     const [h, m] = slot.split(':').map(Number);
     let cursor = h * 60 + m + slotDur;
     for (let b = 1; b < blocks; b++) {
@@ -673,7 +673,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       if (apt.date !== dateStr || apt.paymentStatus === 'Cancelado') continue;
       const [ah, am] = apt.time.split(':').map(Number);
       const startMin = ah * 60 + am;
-      const blocks   = Math.ceil((apt.service.duration ?? slotDur) / slotDur);
+      const blocks   = Math.ceil((apt.service?.duration ?? slotDur) / slotDur);
       if (slotMin > startMin && slotMin < startMin + blocks * slotDur) return apt;
     }
     return null;
@@ -724,7 +724,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const slotDur = this.slotDuration();
     const map = new Map<string, IAppointment>();
     for (const apt of this.dayAppointments()) {
-      const duration = apt.service.duration ?? slotDur;
+      const duration = apt.service?.duration ?? slotDur;
       const blocks = Math.ceil(duration / slotDur);
       if (blocks <= 1) continue;
       const [h, m] = apt.time.split(':').map(Number);
@@ -744,11 +744,11 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   }
 
   getAppointmentBlocks(apt: IAppointment): number {
-    return Math.max(1, Math.ceil((apt.service.duration ?? this.slotDuration()) / this.slotDuration()));
+    return Math.max(1, Math.ceil((apt.service?.duration ?? this.slotDuration()) / this.slotDuration()));
   }
 
   getAppointmentEndTime(apt: IAppointment): string {
-    const duration = apt.service.duration ?? this.slotDuration();
+    const duration = apt.service?.duration ?? this.slotDuration();
     const [h, m]   = apt.time.split(':').map(Number);
     const endMin   = h * 60 + m + duration;
     return `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
@@ -822,7 +822,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     );
     const occupied = new Set<string>();
     for (const apt of dayAppts) {
-      const duration = apt.service.duration ?? slotDur;
+      const duration = apt.service?.duration ?? slotDur;
       const blocks   = Math.ceil(duration / slotDur);
       const [h, m]   = apt.time.split(':').map(Number);
       let cursor     = h * 60 + m;

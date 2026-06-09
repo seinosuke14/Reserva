@@ -89,7 +89,7 @@
              (click)="selectedAppointment.set(apt)">
           <div class="text-[11.5px] font-bold mb-0.5" style="color:#00C4A7;">{{ apt.time }}</div>
           <div class="text-[12.5px] font-semibold text-primary">{{ apt.customer.name }}</div>
-          <div class="text-[11px] text-primary-400">{{ apt.service.name }}</div>
+          <div class="text-[11px] text-primary-400">{{ apt.service?.name ?? 'Sin servicio' }}</div>
         </div>
       }
     </div>
@@ -239,7 +239,7 @@
                         </span>
                       </span>
                       <span class="text-[10.5px] font-bold text-primary truncate">{{ appt.customer.name }}</span>
-                      <span class="text-[9.5px] text-primary-400 truncate">{{ appt.service.name }}</span>
+                      <span class="text-[9.5px] text-primary-400 truncate">{{ appt.service?.name ?? 'Sin servicio' }}</span>
                     </div>
 
                   } @else if (cont) {
@@ -517,7 +517,7 @@
           </div>
           <div>
             <div class="text-[16px] font-bold text-primary">{{ selectedAppointment()!.customer.name }}</div>
-            <div class="text-[12.5px] text-primary-400 mt-0.5">{{ selectedAppointment()!.service.name }}</div>
+            <div class="text-[12.5px] text-primary-400 mt-0.5">{{ selectedAppointment()!.service?.name ?? 'Sin servicio' }}</div>
           </div>
         </div>
 
