@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
+import { FontLoaderService } from '../../core/services/font-loader.service';
 import { environment } from '../../../environments/environment';
 
 export interface FontOption {
@@ -45,8 +46,9 @@ export const FONT_OPTIONS: FontOption[] = [
   ]
 })
 export class BrandEditorComponent {
-  private readonly auth = inject(AuthService);
-  private readonly http = inject(HttpClient);
+  private readonly auth       = inject(AuthService);
+  private readonly http       = inject(HttpClient);
+  private readonly fontLoader = inject(FontLoaderService);
 
   readonly user            = this.auth.currentUser;
   readonly isCompanyMember = computed(() => !!this.auth.currentUser()?.companyId);
@@ -230,28 +232,18 @@ export class BrandEditorComponent {
   fontMsg     = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   constructor() {
-    this._loadFont(this.headingFont());
-    this._loadFont(this.bodyFont());
+    this.fontLoader.load(this.headingFont());
+    this.fontLoader.load(this.bodyFont());
   }
 
   onHeadingFontChange(value: string): void {
     this.headingFont.set(value);
-    this._loadFont(value);
+    this.fontLoader.load(value);
   }
 
   onBodyFontChange(value: string): void {
     this.bodyFont.set(value);
-    this._loadFont(value);
-  }
-
-  private _loadFont(family: string): void {
-    const id = `gfont-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id   = id;
-    link.rel  = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    document.head.appendChild(link);
+    this.fontLoader.load(value);
   }
 
   async saveFonts(): Promise<void> {

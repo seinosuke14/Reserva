@@ -11,8 +11,28 @@ export const VAT_RATE = 0.19;
 /** Valor con IVA incluido, redondeado al peso (igual criterio que el backend). */
 export const withVat = (net: number): number => Math.round((net || 0) * (1 + VAT_RATE));
 
+/** Parse seguro: "YYYY-MM-DD" se ancla a mediodía local para evitar desfase de zona horaria */
+const parseDate = (dateStr: string): Date =>
+  dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T12:00:00');
+
 /** Formatea una fecha YYYY-MM-DD a texto legible (ej: "lunes, 5 de mayo") */
 export const formatDateLong = (dateStr: string): string =>
   new Intl.DateTimeFormat('es-ES', {
     weekday: 'long', day: 'numeric', month: 'long'
-  }).format(new Date(dateStr + 'T12:00:00'));
+  }).format(parseDate(dateStr));
+
+/** Fecha completa con año (ej: "lunes, 5 de mayo de 2025") */
+export const formatDateFull = (dateStr: string | null): string =>
+  dateStr
+    ? parseDate(dateStr).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+
+/** Fecha corta (ej: "05 may. 2025") */
+export const formatDateShort = (dateStr: string): string =>
+  parseDate(dateStr).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+
+/** Fecha media sin día de semana (ej: "5 de mayo de 2025") */
+export const formatDateMedium = (dateStr: string | null): string =>
+  dateStr
+    ? parseDate(dateStr).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '';

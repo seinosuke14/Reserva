@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { QuoteService, IQuoteRequest } from '../../core/services/quote.service';
-import { formatCLP } from '../../helpers/formatters';
+import { formatCLP, formatDateShort } from '../../helpers/formatters';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type FilterTab = 'all' | 'pending' | 'reviewed' | 'booked';
@@ -139,7 +139,5 @@ export class QuotesComponent implements OnInit {
     return map[status] ?? status;
   }
 
-  formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
+  readonly formatDate = formatDateShort;
 }

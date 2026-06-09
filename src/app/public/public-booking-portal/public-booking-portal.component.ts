@@ -1,11 +1,11 @@
-import { Component, signal, computed, inject, effect, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Component, signal, computed, inject, effect, OnInit, OnDestroy } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
-import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { BookingStepIndicatorComponent } from '../components/booking-step-indicator/booking-step-indicator.component';
 import { BookingDatetimeSelectorComponent } from '../components/booking-datetime-selector/booking-datetime-selector.component';
@@ -17,14 +17,17 @@ import { BookingPaymentStepComponent } from '../components/booking-payment-step/
 import { BookingConfirmedComponent } from '../components/booking-confirmed/booking-confirmed.component';
 
 import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
-import { IPublicService, IDayAvailability, ITimeSlot, IPublicPaymentMethod } from '../../helpers/models';
+import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
+import { filterAvailabilityByDuration } from '../../helpers/availability-utils';
+import { brandBgStyle, fontFamilyStyle } from '../../helpers/brand-styles';
+import { buildBookingForm, normalizePhone, buildTransferText, transferReceiptMessage, EmailChecker } from '../../helpers/booking-utils';
+import { setSocialMeta } from '../../helpers/seo';
 import { AuthService } from '../../core/services/auth.service';
 import { CompanyService } from '../../core/services/company.service';
+import { FontLoaderService } from '../../core/services/font-loader.service';
 import { QuoteService, IQuoteTokenData } from '../../core/services/quote.service';
-import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
-type EmailCheckState = 'idle' | 'checking' | 'exists' | 'not-found';
 type LoadState = 'loading' | 'ready' | 'error';
 
 @Component({
@@ -51,7 +54,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly router     = inject(Router);
   private readonly http       = inject(HttpClient);
   private readonly quoteSvc   = inject(QuoteService);
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly fontLoader = inject(FontLoaderService);
   private readonly document   = inject(DOCUMENT);
   readonly auth               = inject(AuthService);
   private readonly company    = inject(CompanyService);
@@ -124,60 +127,21 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   );
 
   // ─── Email check ────────────────────────────────────────────────────────────
-  readonly emailCheckState = signal<EmailCheckState>('idle');
-  private emailDebounce: ReturnType<typeof setTimeout> | null = null;
-  private sub: Subscription | null = null;
+  private readonly emailChecker = new EmailChecker();
+  readonly emailCheckState      = this.emailChecker.state;
 
   // ─── Estilos dinámicos del portal ──────────────────────────────────────────
-  readonly portalBgStyle = computed((): Record<string, string> => {
-    const p = this.professional();
-    if (!p) return {};
-    if (p.backgroundType === 'image' && p.backgroundImage) {
-      return {
-        'background-image':      `url(${p.backgroundImage})`,
-        'background-size':       'cover',
-        'background-position':   'center',
-        'background-attachment': 'fixed',
-      };
-    }
-    if (p.backgroundColor) return { 'background-color': p.backgroundColor };
-    return {};
-  });
-
-  readonly headingFontStyle = computed((): Record<string, string> => {
-    const f = this.professional()?.headingFont;
-    return f ? { 'font-family': `${f}, sans-serif` } : {};
-  });
-
-  readonly bodyFontStyle = computed((): Record<string, string> => {
-    const f = this.professional()?.bodyFont;
-    return f ? { 'font-family': `${f}, sans-serif` } : {};
-  });
+  readonly portalBgStyle    = computed(() => brandBgStyle(this.professional(), { fixed: true }));
+  readonly headingFontStyle = computed(() => fontFamilyStyle(this.professional()?.headingFont));
+  readonly bodyFontStyle    = computed(() => fontFamilyStyle(this.professional()?.bodyFont));
 
   private _setMeta(prof: { name: string; specialty: string; profileImage?: string | null; bannerImage?: string | null }, slug: string): void {
-    const title = `${prof.name} · ${prof.specialty} | Reserva tu Hora Online | Lets Reserve`;
-    const desc  = `Reserva tu cita con ${prof.name} (${prof.specialty}) online. Agenda tu hora, consulta disponibilidad y confirma tu reserva en segundos. Sistema de agendamiento Lets Reserve.`;
-    const image = prof.bannerImage ?? prof.profileImage ?? 'https://letsreserve.cl/letsReserve.png';
-    this.titleSvc.setTitle(title);
-    this.metaSvc.updateTag({ name: 'description', content: desc });
-    this.metaSvc.updateTag({ property: 'og:title', content: title });
-    this.metaSvc.updateTag({ property: 'og:description', content: desc });
-    this.metaSvc.updateTag({ property: 'og:image', content: image });
-    this.metaSvc.updateTag({ property: 'og:url', content: `https://letsreserve.cl/reservar/${slug}` });
-    this.metaSvc.updateTag({ name: 'twitter:title', content: title });
-    this.metaSvc.updateTag({ name: 'twitter:description', content: desc });
-    this.metaSvc.updateTag({ name: 'twitter:image', content: image });
-  }
-
-  private _loadFont(family: string): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const id = `gfont-portal-${family.replace(/\s+/g, '-').toLowerCase()}`;
-    if (this.document.getElementById(id)) return;
-    const link = this.document.createElement('link');
-    link.id   = id;
-    link.rel  = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
-    this.document.head.appendChild(link);
+    setSocialMeta(this.titleSvc, this.metaSvc, {
+      title:       `${prof.name} · ${prof.specialty} | Reserva tu Hora Online | Lets Reserve`,
+      description: `Reserva tu cita con ${prof.name} (${prof.specialty}) online. Agenda tu hora, consulta disponibilidad y confirma tu reserva en segundos. Sistema de agendamiento Lets Reserve.`,
+      image:       prof.bannerImage ?? prof.profileImage ?? 'https://letsreserve.cl/letsReserve.png',
+      url:         `https://letsreserve.cl/reservar/${slug}`,
+    });
   }
 
   // ─── Computed ───────────────────────────────────────────────────────────────
@@ -186,64 +150,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   /**
    * Disponibilidad filtrada según la duración del servicio seleccionado.
-   * Un slot solo está disponible si hay suficientes bloques consecutivos libres
-   * para completar el servicio (ej: 90min = 3 bloques de 30min seguidos).
+   * Ver helpers/availability-utils.ts.
    */
-  readonly filteredAvailability = computed((): IDayAvailability[] => {
-    const duration = this._bookingDuration();
-    const avail    = this.availability();
-    if (!duration) return avail;
-
-    const _d = new Date();
-    const todayStr = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`;
-
-    return avail.map(day => {
-      const isToday  = day.date === todayStr;
-      const slotDur  = this._inferSlotDuration(day.slots);
-      const blocksNeeded = Math.ceil(duration / slotDur);
-
-      const withPast = day.slots.map(slot => {
-        if (isToday && this._isSlotPast(slot.time)) return { ...slot, available: false };
-        return slot;
-      });
-
-      if (blocksNeeded <= 1) return { ...day, slots: withPast };
-
-      const slotMap = new Map(withPast.map(s => [s.time, s.available]));
-
-      const filteredSlots = withPast.map(slot => {
-        if (!slot.available) return slot;
-
-        const [h, m]   = slot.time.split(':').map(Number);
-        const startMin = h * 60 + m;
-        let canBook    = true;
-
-        for (let b = 1; b < blocksNeeded; b++) {
-          const nextMin  = startMin + b * slotDur;
-          const nextTime = `${String(Math.floor(nextMin / 60)).padStart(2, '0')}:${String(nextMin % 60).padStart(2, '0')}`;
-          if (!slotMap.get(nextTime)) { canBook = false; break; }
-        }
-
-        return canBook ? slot : { ...slot, available: false };
-      });
-
-      return { ...day, slots: filteredSlots };
-    });
-  });
-
-  private _isSlotPast(slotTime: string): boolean {
-    const [h, m] = slotTime.split(':').map(Number);
-    const slot   = new Date();
-    slot.setHours(h, m, 0, 0);
-    return slot < new Date();
-  }
-
-  private _inferSlotDuration(slots: ITimeSlot[]): number {
-    if (slots.length < 2) return 30;
-    const [h1, m1] = slots[0].time.split(':').map(Number);
-    const [h2, m2] = slots[1].time.split(':').map(Number);
-    return (h2 * 60 + m2) - (h1 * 60 + m1);
-  }
+  readonly filteredAvailability = computed((): IDayAvailability[] =>
+    filterAvailabilityByDuration(this.availability(), this._bookingDuration())
+  );
 
   /** Resumen del horario laboral derivado de la disponibilidad (ej: "Lun - Vie · 09:00 - 18:00") */
   readonly scheduleSummary = computed(() => {
@@ -271,12 +182,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   });
 
   // ─── Form ───────────────────────────────────────────────────────────────────
-  readonly form = this.fb.group({
-    name:  ['', [Validators.required, Validators.minLength(3), Validators.maxLength(60), Validators.pattern(/^[A-Za-zÀ-ÿñÑ]+(\s[A-Za-zÀ-ÿñÑ]+)*$/)]],
-    email: ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
-    phone: ['+569', [Validators.required, chileanPhoneValidator]],
-    notes: ['', [Validators.maxLength(200)]],
-  });
+  readonly form = buildBookingForm(this.fb);
 
   // form.valid no es una signal — toSignal hace que canProceed reaccione cuando el formulario se valida
   private readonly _formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
@@ -288,7 +194,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       const user    = this.auth.currentUser();
       const company = this.company.currentCompany();
       if (user) {
-        this.form.patchValue({ name: user.name, email: user.email, phone: this._normalizePhone(user.phone ?? '') });
+        this.form.patchValue({ name: user.name, email: user.email, phone: normalizePhone(user.phone ?? '') });
       } else if (company) {
         this.form.patchValue({ name: company.name, email: company.email });
       } else {
@@ -323,23 +229,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.viewMode.set('checkout');
     }
 
-    this.sub = this.f['email'].valueChanges.subscribe(email => {
-      if (!email || this.f['email'].invalid || !this.isGuest()) {
-        this.emailCheckState.set('idle');
-        return;
-      }
-      if (this.emailDebounce) clearTimeout(this.emailDebounce);
-      this.emailCheckState.set('checking');
-      this.emailDebounce = setTimeout(async () => {
-        const exists = await this.auth.checkEmailExists(email);
-        this.emailCheckState.set(exists ? 'exists' : 'not-found');
-      }, 700);
-    });
+    this.emailChecker.watch(this.f['email'], () => this.isGuest(), email => this.auth.checkEmailExists(email));
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-    if (this.emailDebounce) clearTimeout(this.emailDebounce);
+    this.emailChecker.destroy();
   }
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────
@@ -361,8 +255,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       }
 
       this.professional.set(data.professional);
-      if (data.professional.headingFont) this._loadFont(data.professional.headingFont);
-      if (data.professional.bodyFont)    this._loadFont(data.professional.bodyFont);
+      this.fontLoader.load(data.professional.headingFont);
+      this.fontLoader.load(data.professional.bodyFont);
       this.services.set(data.services);
       this.availability.set(data.availability);
       this.reviews.set(data.reviews ?? []);
@@ -447,20 +341,13 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.router.navigate(['/cotizar', slug]);
   }
 
-  private _normalizePhone(value: string): string {
-    const digits = value.replace(/\D/g, '').replace(/^569/, '');
-    return '+569' + digits.slice(0, 8);
-  }
-
   getWhatsappLink(): string {
     const phone = this.professional()?.phone?.replace(/\D/g, '') ?? '';
     const service = this.selectedService()?.name ?? '';
     const date = this.selectedDate() ? this.formatDate(this.selectedDate()) : '';
     const hour = this.selectedHour() ?? '';
     const name = this.form.value.name ?? '';
-    const msg = encodeURIComponent(
-      `Hola! Soy ${name}, he realizado una transferencia por la reserva de ${service} el ${date} a las ${hour}. Adjunto comprobante.`
-    );
+    const msg = encodeURIComponent(transferReceiptMessage(name, service, date, hour));
     return `https://wa.me/${phone}?text=${msg}`;
   }
 
@@ -468,17 +355,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     const info = this.selectedPayment()?.transferInfo;
     if (!info) return;
 
-    const lines = [
-      `Banco: ${info.bankName}`,
-      `Tipo de cuenta: ${info.accountType}`,
-      `Número de cuenta: ${info.accountNumber}`,
-      `RUT: ${info.rut}`,
-      `Nombre: ${info.holderName}`,
-      `Email: ${info.email}`,
-    ];
-    if (amount != null) lines.push(`Monto: ${this.formatCLP(amount)}`);
-
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    navigator.clipboard.writeText(buildTransferText(info, amount)).then(() => {
       this.copiedTransfer.set(true);
       setTimeout(() => this.copiedTransfer.set(false), 2500);
     });
