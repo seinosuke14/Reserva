@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { formatDateFull } from '../../helpers/formatters';
 import { environment } from '../../../environments/environment';
 
 type PageState = 'loading' | 'form' | 'submitted' | 'already_used' | 'invalid';
@@ -73,13 +74,7 @@ export class CancellationFormComponent implements OnInit {
     }
   }
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '';
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    });
-  }
+  readonly formatDate = formatDateFull;
 
   goHome(): void {
     this.router.navigate(['/']);

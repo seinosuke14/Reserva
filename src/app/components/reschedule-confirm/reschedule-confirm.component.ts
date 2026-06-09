@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { formatDateLong } from '../../helpers/formatters';
 
 @Component({
   selector: 'app-reschedule-confirm',
@@ -17,10 +18,5 @@ export class RescheduleConfirmComponent {
   readonly confirmed  = output<void>();
   readonly cancelled  = output<void>();
 
-  formatDate(dateStr: string): string {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long',
-    });
-  }
+  readonly formatDate = formatDateLong;
 }

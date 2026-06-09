@@ -5,6 +5,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PlanType } from '../../core/services/professional.service';
+import { formatDateMedium } from '../../helpers/formatters';
 
 type ResultState = 'loading' | 'success' | 'error' | 'cancelled';
 
@@ -88,8 +89,5 @@ export class SubscriptionPaymentResultComponent implements OnInit {
     return plan ? names[plan] : '';
   }
 
-  formatDate(date: string | null): string {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
+  readonly formatDate = formatDateMedium;
 }

@@ -34,15 +34,18 @@ export interface IDayAvailability {
   slots: ITimeSlot[];
 }
 
+/** Datos bancarios para pago por transferencia */
+export interface ITransferInfo {
+  bankName: string;
+  accountType: string;
+  accountNumber: string;
+  rut: string;
+  holderName: string;
+  email: string;
+}
+
 /** Método de pago público */
 export interface IPublicPaymentMethod {
   provider: 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect';
-  transferInfo?: {
-    bankName: string;
-    accountType: string;
-    accountNumber: string;
-    rut: string;
-    holderName: string;
-    email: string;
-  };
+  transferInfo?: ITransferInfo;
 }
