@@ -89,7 +89,7 @@ export class AuthService {
 
   // ─── Autenticación ──────────────────────────────────────────────────────────
 
-  async login(email: string, password: string): Promise<{ success: boolean; message: string; needsVerification?: boolean; verificationExpired?: boolean; email?: string; user?: IProfessional }> {
+  async login(email: string, password: string): Promise<{ success: boolean; message: string; needsVerification?: boolean; verificationExpired?: boolean; email?: string; user?: IProfessional; lastAttempt?: boolean; blocked?: boolean }> {
     try {
       const res: any = await firstValueFrom(
         this.http.post(`${API_BASE}/auth/login`, { email, password })
@@ -106,7 +106,10 @@ export class AuthService {
       const needsVerification = err?.error?.needsVerification === true;
       const verificationExpired = err?.error?.verificationExpired === true;
       const errEmail = err?.error?.email as string | undefined;
-      return { success: false, message, needsVerification, verificationExpired, email: errEmail };
+      // 429 = bloqueado por rate limit; lastAttempt = aviso de último intento.
+      const blocked = err?.status === 429 || err?.error?.blocked === true;
+      const lastAttempt = err?.error?.lastAttempt === true;
+      return { success: false, message, needsVerification, verificationExpired, email: errEmail, lastAttempt, blocked };
     }
   }
 

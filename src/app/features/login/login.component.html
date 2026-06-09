@@ -128,9 +128,9 @@
               </svg>
               <input formControlName="email" type="email" placeholder="ejemplo@clinica.com"
                 class="form-input-icon"
-                [class.border-red-300]="(email.invalid && email.touched) || error()"
-                [class.border-primary-200]="!((email.invalid && email.touched) || error())"
-                [class.focus:border-accent]="!((email.invalid && email.touched) || error())" />
+                [class.border-red-300]="(email.invalid && email.touched) || hardError()"
+                [class.border-primary-200]="!((email.invalid && email.touched) || hardError())"
+                [class.focus:border-accent]="!((email.invalid && email.touched) || hardError())" />
             </div>
             @if (email.invalid && email.touched) {
             <p class="form-error">Email inválido</p>
@@ -152,25 +152,42 @@
               </svg>
               <input formControlName="password" type="password" placeholder="••••••••"
                 class="form-input-icon"
-                [class.border-red-300]="(password.invalid && password.touched) || error()"
-                [class.border-primary-200]="!((password.invalid && password.touched) || error())"
-                [class.focus:border-accent]="!((password.invalid && password.touched) || error())" />
+                [class.border-red-300]="(password.invalid && password.touched) || hardError()"
+                [class.border-primary-200]="!((password.invalid && password.touched) || hardError())"
+                [class.focus:border-accent]="!((password.invalid && password.touched) || hardError())" />
             </div>
             @if (password.invalid && password.touched) {
             <p class="form-error">Mínimo 6 caracteres</p>
             }
           </div>
 
-          <!-- Error -->
+          <!-- Error / aviso / bloqueo -->
           @if (error()) {
-          <div @errorAnim class="bg-red-50 border border-red-100 p-3.5 rounded-[12px] space-y-2.5">
-            <div class="flex items-start gap-2.5 text-red-600">
-              <svg class="shrink-0 mt-0.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
+          <div @errorAnim class="p-3.5 rounded-[12px] space-y-2.5 border"
+            [class.bg-red-50]="errorKind() !== 'warning'"
+            [class.border-red-100]="errorKind() !== 'warning'"
+            [class.bg-amber-50]="errorKind() === 'warning'"
+            [class.border-amber-200]="errorKind() === 'warning'">
+            <div class="flex items-start gap-2.5"
+              [class.text-red-600]="errorKind() !== 'warning'"
+              [class.text-amber-700]="errorKind() === 'warning'">
+              <!-- Icono candado para bloqueo, advertencia para último intento, info para error normal -->
+              @if (errorKind() === 'blocked') {
+              <svg class="shrink-0 mt-0.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              } @else if (errorKind() === 'warning') {
+              <svg class="shrink-0 mt-0.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              } @else {
+              <svg class="shrink-0 mt-0.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
+              }
               <p class="text-[12.5px] font-medium leading-snug">{{ error() }}</p>
             </div>
             @if (error().includes('no se encuentra registrada') || error().includes('no encontrada')) {

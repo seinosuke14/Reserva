@@ -43,6 +43,8 @@ export class LoginComponent {
   isSubmitting  = signal(false);
   isRedirecting = signal(false);
   error         = signal('');
+  // Tipo de mensaje: 'error' (rojo), 'warning' (último intento, ámbar), 'blocked' (bloqueo, rojo intenso).
+  errorKind     = signal<'error' | 'warning' | 'blocked'>('error');
   step          = signal<'login' | 'forgot' | 'forgot-sent'>('login');
 
   // Forgot password
@@ -58,6 +60,9 @@ export class LoginComponent {
   get email()    { return this.form.get('email')!; }
   get password() { return this.form.get('password')!; }
 
+  // Borde rojo solo en errores "duros" (credenciales/ bloqueo), no en el aviso de último intento.
+  hardError(): boolean { return !!this.error() && this.errorKind() !== 'warning'; }
+
   onForgotEmailInput(event: Event): void {
     this.forgotEmail.set((event.target as HTMLInputElement).value);
   }
@@ -71,13 +76,21 @@ export class LoginComponent {
   setAccountType(type: 'professional' | 'company'): void {
     this.accountType.set(type);
     this.error.set('');
+    this.errorKind.set('error');
     this.step.set('login');
+  }
+
+  // Traduce los flags del backend (lastAttempt / blocked) al tipo de mensaje a mostrar.
+  private _setError(message: string, opts?: { lastAttempt?: boolean; blocked?: boolean }): void {
+    this.errorKind.set(opts?.blocked ? 'blocked' : opts?.lastAttempt ? 'warning' : 'error');
+    this.error.set(message);
   }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
     this.error.set('');
+    this.errorKind.set('error');
 
     if (this.accountType() === 'company') {
       const result = await this.companySvc.login(this.form.value.email!, this.form.value.password!);
@@ -85,7 +98,7 @@ export class LoginComponent {
       if (result.success) {
         this.router.navigate(['/empresa']);
       } else {
-        this.error.set(result.message);
+        this._setError(result.message, result);
       }
       return;
     }
@@ -99,7 +112,7 @@ export class LoginComponent {
     } else if (result.needsVerification && result.email) {
       await this._redirectToVerify(result.email, result.verificationExpired ?? false);
     } else {
-      this.error.set(result.message);
+      this._setError(result.message, result);
     }
   }
 
