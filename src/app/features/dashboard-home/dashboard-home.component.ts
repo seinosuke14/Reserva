@@ -48,7 +48,19 @@ export class DashboardHomeComponent implements OnInit {
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
   readonly formatCLP      = formatCLP;
-  readonly today          = new Date().toISOString().split('T')[0];
+
+  /** Fecha local de hoy (YYYY-MM-DD), sin corrimiento por zona horaria. */
+  private _localDateStr(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  readonly today = this._localDateStr(new Date());
+
+  /** Una cita cuenta como ingreso real si está Pagada o Finalizada. */
+  private readonly isPaid = (status: string): boolean => status === 'Pagado' || status === 'Finalizada';
 
   todayAppointments = signal<IAppointment[]>([]);
   allAppointments   = signal<IAppointment[]>([]);
@@ -57,6 +69,8 @@ export class DashboardHomeComponent implements OnInit {
   copied            = signal(false);
   aptFilter         = signal<'todos' | 'Pagado' | 'Pendiente' | 'Cancelado'>('todos');
   hoveredBar        = signal<number | null>(null);
+  /** Semana mostrada en el gráfico: 0 = actual, -1 = anterior, … (acotado al mes actual). */
+  weekOffset        = signal(0);
 
   readonly linkBanner = computed(() => {
     const user = this.auth.currentUser();
@@ -145,7 +159,7 @@ export class DashboardHomeComponent implements OnInit {
     return {
       totalCitas:  apts.length,
       confirmadas: apts.filter(a => a.paymentStatus !== 'Cancelado').length,
-      ingresosHoy: apts.filter(a => a.paymentStatus === 'Pagado').reduce((s, a) => s + Number(a.amount), 0),
+      ingresosHoy: apts.filter(a => this.isPaid(a.paymentStatus)).reduce((s, a) => s + Number(a.amount), 0),
       pendientes:  apts.filter(a => a.paymentStatus === 'Pendiente').length,
     };
   });
@@ -165,25 +179,25 @@ export class DashboardHomeComponent implements OnInit {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const ds = d.toISOString().slice(0, 10);
-      return all.filter(a => a.date === ds && a.paymentStatus === 'Pagado')
+      const ds = this._localDateStr(d);
+      return all.filter(a => a.date === ds && this.isPaid(a.paymentStatus))
                 .reduce((s, a) => s + Number(a.amount), 0);
     });
   }
 
-  readonly weeklyRevenue = computed(() => this._weekRevenue(0));
+  readonly weeklyRevenue = computed(() => this._weekRevenue(this.weekOffset()));
 
   readonly weekTotal = computed(() => this.weeklyRevenue().reduce((s, v) => s + v, 0));
 
   readonly weekTrend = computed(() => {
-    const prev = this._weekRevenue(-1).reduce((s, v) => s + v, 0);
+    const prev = this._weekRevenue(this.weekOffset() - 1).reduce((s, v) => s + v, 0);
     if (!prev) return 0;
     return Math.round(((this.weekTotal() - prev) / prev) * 100);
   });
 
   readonly weekLabels = computed(() => {
     const days   = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    const monday = this._getMondayOf(0);
+    const monday = this._getMondayOf(this.weekOffset());
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
@@ -195,7 +209,7 @@ export class DashboardHomeComponent implements OnInit {
     const data    = this.weeklyRevenue();
     const max     = Math.max(...data, 1);
     const BAR     = 28, GAP = 12, CHART_H = 110;
-    const monday  = this._getMondayOf(0);
+    const monday  = this._getMondayOf(this.weekOffset());
     return data.map((v, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
@@ -204,16 +218,46 @@ export class DashboardHomeComponent implements OnInit {
         barH:   Math.max((v / max) * CHART_H, v > 0 ? 3 : 0),
         value:  v,
         label:  this.weekLabels()[i],
-        isToday: d.toISOString().slice(0, 10) === this.today,
+        isToday: this._localDateStr(d) === this.today,
       };
     });
   });
+
+  // ── Navegación de semanas (solo dentro del mes actual) ─────────────────────
+  /** Offset mínimo permitido: la semana que contiene el día 1 del mes actual. */
+  readonly minWeekOffset = computed(() => {
+    const now     = new Date();
+    const curMon  = this._getMondayOf(0);
+    const first   = new Date(now.getFullYear(), now.getMonth(), 1);
+    const dow     = first.getDay();
+    const firstMon = new Date(first);
+    firstMon.setDate(first.getDate() - (dow === 0 ? 6 : dow - 1));
+    firstMon.setHours(0, 0, 0, 0);
+    const weeks = Math.round((curMon.getTime() - firstMon.getTime()) / (7 * 86400000));
+    return -weeks;
+  });
+
+  readonly canPrevWeek = computed(() => this.weekOffset() > this.minWeekOffset());
+  readonly canNextWeek = computed(() => this.weekOffset() < 0);
+  readonly isCurrentWeek = computed(() => this.weekOffset() === 0);
+
+  /** Rango de la semana mostrada, ej: "2 – 8 jun". */
+  readonly weekRangeLabel = computed(() => {
+    const monday = this._getMondayOf(this.weekOffset());
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const month = new Intl.DateTimeFormat('es-CL', { month: 'short' }).format(sunday);
+    return `${monday.getDate()} – ${sunday.getDate()} ${month}`;
+  });
+
+  prevWeek(): void { if (this.canPrevWeek()) this.weekOffset.update(v => v - 1); }
+  nextWeek(): void { if (this.canNextWeek()) this.weekOffset.update(v => v + 1); }
 
   readonly monthlyIncome = computed(() => {
     const now    = new Date();
     const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     return this.allAppointments()
-      .filter(a => a.paymentStatus === 'Pagado' && a.date.startsWith(prefix))
+      .filter(a => this.isPaid(a.paymentStatus) && a.date.startsWith(prefix))
       .reduce((s, a) => s + Number(a.amount), 0);
   });
 
@@ -222,7 +266,7 @@ export class DashboardHomeComponent implements OnInit {
     const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const prefix = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
     const prevIncome = this.allAppointments()
-      .filter(a => a.paymentStatus === 'Pagado' && a.date.startsWith(prefix))
+      .filter(a => this.isPaid(a.paymentStatus) && a.date.startsWith(prefix))
       .reduce((s, a) => s + Number(a.amount), 0);
     if (!prevIncome) return 0;
     return Math.round(((this.monthlyIncome() - prevIncome) / prevIncome) * 100);
