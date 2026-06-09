@@ -229,7 +229,7 @@ export class CompanyService {
     }
   }
 
-  async login(email: string, password: string): Promise<{ success: boolean; message: string; needsVerification?: boolean; email?: string }> {
+  async login(email: string, password: string): Promise<{ success: boolean; message: string; needsVerification?: boolean; email?: string; lastAttempt?: boolean; blocked?: boolean }> {
     try {
       const res: any = await firstValueFrom(this.http.post(`${API_BASE}/company/login`, { email, password }));
       this.setSession(res.token, res.company);
@@ -240,6 +240,9 @@ export class CompanyService {
         message: err?.error?.message ?? 'Error al iniciar sesión.',
         needsVerification: err?.error?.needsVerification === true,
         email: err?.error?.email,
+        // 429 = bloqueado por rate limit; lastAttempt = aviso de último intento.
+        blocked: err?.status === 429 || err?.error?.blocked === true,
+        lastAttempt: err?.error?.lastAttempt === true,
       };
     }
   }
