@@ -674,6 +674,8 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
         return { label: 'Reembolso pendiente (revisar en MercadoPago)', bg: 'rgba(245,158,11,.12)', color: '#d97706' };
       case 'error':
         return { label: 'El reembolso falló — gestiónalo manualmente', bg: 'rgba(239,68,68,.1)', color: '#dc2626' };
+      case 'wrong_account':
+        return { label: 'La cuenta MP vinculada no es la que cobró — reembolsa desde el panel de MercadoPago', bg: 'rgba(239,68,68,.1)', color: '#dc2626' };
       default:
         return { label: `Reembolso: ${s}`, bg: 'rgba(100,116,139,.12)', color: '#475569' };
     }
