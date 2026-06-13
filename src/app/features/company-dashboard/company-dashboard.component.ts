@@ -14,6 +14,7 @@ import {
   IAgendaMember,
   IAgendaAppt,
 } from '../../core/services/company.service';
+import { IServiceCategory } from '../../helpers/models';
 import { PlanSelectionComponent } from '../plan-selection/plan-selection.component';
 import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
@@ -26,7 +27,7 @@ const LC_W = 580, LC_H = 150;
 const LC_PLOT_W = LC_W - LC_PAD_LEFT - LC_PAD_RIGHT;
 const LC_PLOT_H = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
 
-type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos';
+type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos' | 'categorias';
 
 type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago';
 
@@ -101,6 +102,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
   { tab: 'analytics',    label: 'Analytics',    icon: 'bar-chart'   },
   { tab: 'agenda',       label: 'Agenda',       icon: 'calendar'    },
   { tab: 'equipo',       label: 'Equipo',       icon: 'users'       },
+  { tab: 'categorias',   label: 'Categorías',   icon: 'tag'         },
   { tab: 'invitaciones', label: 'Invitaciones', icon: 'mail'        },
   { tab: 'planes',       label: 'Planes',       icon: 'credit-card' },
   { tab: 'marca',        label: 'Marca',        icon: 'sliders'     },
@@ -807,6 +809,7 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
       this.svc.getWaQuota(),
     ]);
     this.loadPaymentMethods();
+    this.loadServiceCategories();
     this.members.set(dash.members);
     this.totals.set(dash.totals);
     this.monthly.set(dash.monthly);
@@ -834,6 +837,76 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
       this.brandSlugValue.set(c.slug ?? '');
     }
     this.isLoading.set(false);
+  }
+
+  // ── Categorías de servicios (compartidas por el equipo, tope 5) ──
+  readonly maxCategories = 5;
+  svcCategories     = signal<IServiceCategory[]>([]);
+  newSvcCatName     = signal('');
+  svcCatError       = signal('');
+  svcCatSaving      = signal(false);
+  svcCatEditingId   = signal<string | null>(null);
+  svcCatEditingName = signal('');
+  svcCatDeletingId  = signal<string | null>(null);
+
+  private async loadServiceCategories(): Promise<void> {
+    this.svcCategories.set(await this.svc.getServiceCategories());
+  }
+
+  async onCreateServiceCategory(): Promise<void> {
+    const name = this.newSvcCatName().trim();
+    if (!name || this.svcCatSaving()) return;
+    this.svcCatSaving.set(true);
+    this.svcCatError.set('');
+    const result = await this.svc.createServiceCategory(name);
+    this.svcCatSaving.set(false);
+    if (result.success && result.category) {
+      this.svcCategories.update(list =>
+        [...list, result.category!].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      this.newSvcCatName.set('');
+    } else {
+      this.svcCatError.set(result.message ?? 'Error al crear la categoría.');
+    }
+  }
+
+  startEditServiceCategory(cat: IServiceCategory): void {
+    this.svcCatError.set('');
+    this.svcCatDeletingId.set(null);
+    this.svcCatEditingId.set(cat.id);
+    this.svcCatEditingName.set(cat.name);
+  }
+
+  async onSaveServiceCategory(): Promise<void> {
+    const id = this.svcCatEditingId();
+    const name = this.svcCatEditingName().trim();
+    if (!id || !name || this.svcCatSaving()) return;
+    this.svcCatSaving.set(true);
+    this.svcCatError.set('');
+    const result = await this.svc.updateServiceCategory(id, name);
+    this.svcCatSaving.set(false);
+    if (result.success && result.category) {
+      this.svcCategories.update(list =>
+        list.map(c => c.id === id ? result.category! : c).sort((a, b) => a.name.localeCompare(b.name))
+      );
+      this.svcCatEditingId.set(null);
+    } else {
+      this.svcCatError.set(result.message ?? 'Error al actualizar la categoría.');
+    }
+  }
+
+  async onDeleteServiceCategory(id: string): Promise<void> {
+    if (this.svcCatSaving()) return;
+    this.svcCatSaving.set(true);
+    this.svcCatError.set('');
+    const result = await this.svc.deleteServiceCategory(id);
+    this.svcCatSaving.set(false);
+    if (result.success) {
+      this.svcCategories.update(list => list.filter(c => c.id !== id));
+      this.svcCatDeletingId.set(null);
+    } else {
+      this.svcCatError.set(result.message ?? 'Error al eliminar la categoría.');
+    }
   }
 
   // ── Invitaciones ──

@@ -101,11 +101,20 @@
             </div>
           </div>
 
+          <!-- Filtro por categoría -->
+          <app-category-filter-chips
+            [categories]="usedCategories()"
+            [selected]="selectedCategory()"
+            [showUncategorized]="hasUncategorized()"
+            (selectedChange)="selectedCategory.set($event)" />
+
           <!-- Miembros y sus servicios -->
           @if (!members.length) {
             <div class="no-members">Aún no hay servicios publicados.</div>
+          } @else if (!filteredMembers().length) {
+            <div class="no-members">No hay servicios en esta categoría.</div>
           } @else {
-            @for (m of members; track m.id) {
+            @for (m of filteredMembers(); track m.id) {
               <div class="member-section">
                 <div class="member-header">
                   @if (m.profileImage) {
