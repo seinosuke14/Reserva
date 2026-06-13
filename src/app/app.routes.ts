@@ -105,6 +105,14 @@ export const routes: Routes = [
     loadComponent: () => import('./public/quote-request/quote-request.component').then(m => m.QuoteRequestComponent)
   },
 
+  // Callback de MercadoPago Connect (OAuth). Top-level y SIN guard de profesional:
+  // la URL de redirect de MP es fija y la usan tanto profesionales como empresas
+  // (el componente resuelve el contexto y llama al endpoint correcto).
+  {
+    path: 'app/pagos/mp-callback',
+    loadComponent: () => import('./features/mp-connect-callback/mp-connect-callback.component').then(m => m.MpConnectCallbackComponent)
+  },
+
   // Rutas protegidas (Dashboard)
   {
     path: 'app',
@@ -117,7 +125,6 @@ export const routes: Routes = [
       { path: 'clientes', loadComponent: () => import('./features/customer-directory/customer-directory.component').then(m => m.CustomerDirectoryComponent) },
       { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
-      { path: 'pagos/mp-callback', loadComponent: () => import('./features/mp-connect-callback/mp-connect-callback.component').then(m => m.MpConnectCallbackComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
       { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },

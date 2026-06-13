@@ -28,6 +28,7 @@ export interface ICompany {
   headingFont: string | null;
   bodyFont: string | null;
   reminderPreference?: '1h_before' | '7h30_same_day' | '24h_before';
+  paymentRouting?: 'company' | 'professional';
 }
 
 export interface ICompanyMember {
@@ -72,6 +73,7 @@ export interface ICompanyBrand {
   backgroundType: 'color' | 'image';
   headingFont: string | null;
   bodyFont: string | null;
+  paymentRouting?: 'company' | 'professional';
 }
 
 export interface ICompanyPublicService {
@@ -99,12 +101,15 @@ export interface ICompanyPublicMember {
   slug?: string;
   services: ICompanyPublicService[];
   reviews: ICompanyPublicReview[];
+  // Solo presentes cuando la empresa usa ruteo de pagos 'professional'.
+  paymentMethods?: ICompanyPublicPaymentMethod[];
 }
 
 export interface ICompanyPublicPaymentMethod {
   id: string;
-  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago';
-  credentials: Record<string, string>;
+  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago' | 'mercadopago_connect';
+  // Solo para 'transfer': datos bancarios públicos que el cliente necesita para pagar.
+  transferInfo?: Record<string, string>;
 }
 
 export interface ICompanyPublicPage {
@@ -126,7 +131,22 @@ export interface IAgendaMember {
   id: string;
   name: string;
   profileImage: string | null;
+  profession: string | null;
   appointments: IAgendaAppt[];
+}
+
+export interface IMemberAgendaAppt {
+  id: string;
+  date: string;
+  time: string;
+  paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  service: { name: string; duration: number };
+  customer: { name: string; phone: string | null; email: string | null };
+}
+
+export interface IMemberAgenda {
+  member: { id: string; name: string; profileImage: string | null; profession: string | null };
+  appointments: IMemberAgendaAppt[];
 }
 
 export interface ICompanySubStatus {
@@ -366,6 +386,15 @@ export class CompanyService {
     } catch { return { date, members: [] }; }
   }
 
+  // Citas próximas (desde hoy) de un profesional del equipo.
+  async getMemberAgenda(professionalId: string): Promise<IMemberAgenda | null> {
+    try {
+      return await firstValueFrom(
+        this.http.get<IMemberAgenda>(`${API_BASE}/company/agenda/member/${professionalId}`)
+      );
+    } catch { return null; }
+  }
+
   // ── Categorías de servicios (compartidas por el equipo, tope 5) ────────────
 
   async getServiceCategories(): Promise<IServiceCategory[]> {
@@ -421,6 +450,16 @@ export class CompanyService {
   async saveReminderPreference(pref: '1h_before' | '7h30_same_day' | '24h_before'): Promise<{ success: boolean; message?: string }> {
     try {
       await firstValueFrom(this.http.put(`${API_BASE}/company/reminder-preference`, { reminderPreference: pref }));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al guardar.' };
+    }
+  }
+
+  async savePaymentRouting(routing: 'company' | 'professional'): Promise<{ success: boolean; message?: string }> {
+    try {
+      await firstValueFrom(this.http.put(`${API_BASE}/company/payment-routing`, { paymentRouting: routing }));
+      this.patchCompany({ paymentRouting: routing });
       return { success: true };
     } catch (err: any) {
       return { success: false, message: err?.error?.message ?? 'Error al guardar.' };

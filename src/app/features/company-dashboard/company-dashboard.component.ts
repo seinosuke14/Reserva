@@ -13,10 +13,10 @@ import {
   ICompanyBrand,
   IAgendaMember,
   IAgendaAppt,
+  IMemberAgendaAppt,
 } from '../../core/services/company.service';
 import { IServiceCategory } from '../../helpers/models';
 import { PlanSelectionComponent } from '../plan-selection/plan-selection.component';
-import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
 
@@ -29,7 +29,7 @@ const LC_PLOT_H = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
 
 type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos' | 'categorias';
 
-type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago';
+type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago' | 'mercadopago_connect';
 
 interface IPaymentMethod {
   id: string;
@@ -112,7 +112,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, RescheduleConfirmComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent],
   templateUrl: './company-dashboard.component.html',
   animations: [
     trigger('sidebarLabel', [
@@ -393,6 +393,42 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     this.agendaLoading.set(false);
   }
 
+  // ── Agenda por profesional (tarjetas → citas por día) ──
+  agendaSelectedMember = signal<{ id: string; name: string; profileImage: string | null; profession: string | null } | null>(null);
+  memberAppts          = signal<IMemberAgendaAppt[]>([]);
+  memberAgendaLoading  = signal(false);
+
+  // Agrupa las citas próximas del profesional por día, ordenadas.
+  readonly memberApptsByDay = computed(() => {
+    const groups = new Map<string, IMemberAgendaAppt[]>();
+    for (const a of this.memberAppts()) {
+      (groups.get(a.date) ?? groups.set(a.date, []).get(a.date)!).push(a);
+    }
+    return [...groups.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, appts]) => {
+        const [y, m, d] = date.split('-').map(Number);
+        const label = new Date(y, m - 1, d).toLocaleDateString('es-ES', {
+          weekday: 'long', day: 'numeric', month: 'long',
+        });
+        return { date, label, appts };
+      });
+  });
+
+  async selectAgendaMember(m: IAgendaMember): Promise<void> {
+    this.agendaSelectedMember.set({ id: m.id, name: m.name, profileImage: m.profileImage, profession: m.profession });
+    this.memberAppts.set([]);
+    this.memberAgendaLoading.set(true);
+    const res = await this.svc.getMemberAgenda(m.id);
+    this.memberAppts.set(res?.appointments ?? []);
+    this.memberAgendaLoading.set(false);
+  }
+
+  backToAgendaMembers(): void {
+    this.agendaSelectedMember.set(null);
+    this.memberAppts.set([]);
+  }
+
   agendaPrevDay(): void {
     const [y, m, d] = this.agendaDate().split('-').map(Number);
     const prev = new Date(y, m - 1, d - 1);
@@ -649,6 +685,48 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => this.paymentFeedback.set(null), 4000);
   }
 
+  // ── MercadoPago Connect (nuestro botón) para empresa ──
+  mpConnecting = signal(false);
+
+  get mpConnectUserId(): string | null {
+    return (this.getPaymentMethod('mercadopago_connect')?.credentials as any)?.mpUserId ?? null;
+  }
+
+  // Inicia el OAuth de MercadoPago: pide el link, guarda el state (CSRF) y el contexto, y redirige.
+  async connectCompanyMercadoPago(): Promise<void> {
+    this.mpConnecting.set(true);
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/company/payment-methods/mp-connect/oauth-url`)
+      );
+      sessionStorage.setItem('mp_oauth_state', res.state);
+      sessionStorage.setItem('mp_oauth_context', 'company');
+      window.location.href = res.url;
+    } catch {
+      this.showPaymentFeedback('No se pudo iniciar la conexión con MercadoPago.', 'error');
+      this.mpConnecting.set(false);
+    }
+  }
+
+  // ── Ruteo de pagos: a la empresa o a cada profesional ──
+  paymentRouting       = signal<'company' | 'professional'>('company');
+  paymentRoutingSaving = signal(false);
+
+  async savePaymentRouting(routing: 'company' | 'professional'): Promise<void> {
+    if (this.paymentRoutingSaving() || this.paymentRouting() === routing) return;
+    const previous = this.paymentRouting();
+    this.paymentRouting.set(routing);
+    this.paymentRoutingSaving.set(true);
+    const result = await this.svc.savePaymentRouting(routing);
+    this.paymentRoutingSaving.set(false);
+    if (result.success) {
+      this.showPaymentFeedback('Preferencia de cobro actualizada.', 'success');
+    } else {
+      this.paymentRouting.set(previous);
+      this.showPaymentFeedback(result.message ?? 'Error al guardar.', 'error');
+    }
+  }
+
   // ── Recordatorio ──
   reminderPref     = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
   reminderSelected = signal<'1h_before' | '7h30_same_day' | '24h_before'>('24h_before');
@@ -819,6 +897,7 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     this.waQuota.set(waQ);
     const pref = this.company()?.reminderPreference;
     if (pref) { this.reminderPref.set(pref); this.reminderSelected.set(pref); }
+    this.paymentRouting.set(this.company()?.paymentRouting ?? 'company');
     const c = this.company();
     if (c) {
       this.brand.set({

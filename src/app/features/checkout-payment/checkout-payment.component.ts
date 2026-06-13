@@ -277,6 +277,9 @@ export class CheckoutPaymentComponent implements OnInit {
         this.http.get<{ url: string; state: string }>(`${this.apiUrl}/payment-methods/mp-connect/oauth-url`)
       );
       sessionStorage.setItem('mp_oauth_state', res.state);
+      // Contexto profesional (default): limpiar cualquier marca previa de empresa
+      // por si quedó de un intento abandonado en la misma pestaña.
+      sessionStorage.removeItem('mp_oauth_context');
       window.location.href = res.url;
     } catch {
       this.showFeedback('No se pudo iniciar la conexión con MercadoPago.', 'error');
