@@ -59,6 +59,7 @@ export class EmailChecker {
     control: AbstractControl,
     isGuest: () => boolean,
     checkExists: (email: string) => Promise<boolean>,
+    onSettled?: (email: string) => void,
   ): void {
     this.sub = control.valueChanges.subscribe(email => {
       if (!email || control.invalid || !isGuest()) {
@@ -70,6 +71,7 @@ export class EmailChecker {
       this.debounce = setTimeout(async () => {
         const exists = await checkExists(email);
         this.state.set(exists ? 'exists' : 'not-found');
+        onSettled?.(email);
       }, 700);
     });
   }

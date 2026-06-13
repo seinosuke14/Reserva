@@ -280,7 +280,12 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     return raw.map(m => {
       if (m.provider === 'transfer') {
         const raw = m.credentials;
-        const c: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        let c: Record<string, string> = {};
+        try {
+          c = (typeof raw === 'string' ? JSON.parse(raw) : raw) ?? {};
+        } catch {
+          c = {};
+        }
         return {
           provider: 'transfer' as const,
           transferInfo: {

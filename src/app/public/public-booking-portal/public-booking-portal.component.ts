@@ -15,6 +15,7 @@ import { BookingFooterComponent } from '../components/booking-footer/booking-foo
 import { BookingProfileViewComponent } from '../components/booking-profile-view/booking-profile-view.component';
 import { BookingPaymentStepComponent } from '../components/booking-payment-step/booking-payment-step.component';
 import { BookingConfirmedComponent } from '../components/booking-confirmed/booking-confirmed.component';
+import { NameChangeConfirmComponent } from '../../components/name-change-confirm/name-change-confirm.component';
 
 import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
 import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
@@ -44,6 +45,7 @@ type LoadState = 'loading' | 'ready' | 'error';
     BookingProfileViewComponent,
     BookingPaymentStepComponent,
     BookingConfirmedComponent,
+    NameChangeConfirmComponent,
   ],
   templateUrl: './public-booking-portal.component.html',
   styleUrl: './public-booking-portal.component.scss'
@@ -129,6 +131,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   // ─── Email check ────────────────────────────────────────────────────────────
   private readonly emailChecker = new EmailChecker();
   readonly emailCheckState      = this.emailChecker.state;
+
+  // Nombre guardado en BD para el correo ingresado (cliente recurrente).
+  readonly storedCustomerName = signal<string | null>(null);
+  // Confirmación pendiente de cambio de nombre (from = guardado, to = nuevo).
+  readonly pendingNameChange  = signal<{ from: string; to: string } | null>(null);
 
   // ─── Estilos dinámicos del portal ──────────────────────────────────────────
   readonly portalBgStyle    = computed(() => brandBgStyle(this.professional(), { fixed: true }));
@@ -229,11 +236,61 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.viewMode.set('checkout');
     }
 
-    this.emailChecker.watch(this.f['email'], () => this.isGuest(), email => this.auth.checkEmailExists(email));
+    this.emailChecker.watch(
+      this.f['email'],
+      () => this.isGuest(),
+      email => this.auth.checkEmailExists(email),
+      email => this._prefillFromEmail(email),
+    );
   }
 
   ngOnDestroy(): void {
     this.emailChecker.destroy();
+  }
+
+  /**
+   * Busca el cliente recurrente (mismo profesional + email) y guarda su nombre para
+   * detectar cambios. Autocompleta el nombre solo si está vacío: si el cliente ya
+   * escribió uno, se respeta.
+   */
+  private async _prefillFromEmail(email: string): Promise<void> {
+    const slug = this.professional()?.slug;
+    if (!slug) return;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/public/customer-lookup`, { params: { slug, email } })
+      );
+      if (!res?.found) { this.storedCustomerName.set(null); return; }
+      this.storedCustomerName.set(res.name ?? null);
+
+      const nameCtrl = this.f['name'];
+      if (!nameCtrl.value?.trim() && res.name) nameCtrl.setValue(res.name);
+    } catch {
+      // Autocompletado best-effort: si falla, el cliente llena los datos manualmente.
+    }
+  }
+
+  /** True si el cliente recurrente ingresó un nombre distinto al que tiene guardado. */
+  private _nameChangePending(): boolean {
+    const stored  = this.storedCustomerName()?.trim();
+    const entered = (this.f['name'].value ?? '').trim();
+    return !!stored && !!entered && stored.toLowerCase() !== entered.toLowerCase();
+  }
+
+  /** El cliente confirma cambiar el nombre asociado a su correo: continúa al pago. */
+  confirmNameChange(): void {
+    this.storedCustomerName.set((this.f['name'].value ?? '').trim());
+    this.pendingNameChange.set(null);
+    this.step.set(3);
+  }
+
+  /** El cliente prefiere mantener el nombre que suele usar: lo restaura y continúa. */
+  keepStoredName(): void {
+    const stored = this.storedCustomerName();
+    if (stored) this.f['name'].setValue(stored);
+    this.pendingNameChange.set(null);
+    this.step.set(3);
   }
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────
@@ -322,7 +379,19 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   goNext(): void {
     const current = this.step();
-    if (current < 3 && this.canProceed()) this.step.set((current + 1) as 1 | 2 | 3);
+    if (current >= 3 || !this.canProceed()) return;
+
+    // Al salir del paso de datos, si el cliente recurrente cambió su nombre habitual,
+    // pedir confirmación antes de continuar (el cambio se guarda al reservar).
+    if (current === 2 && this._nameChangePending()) {
+      this.pendingNameChange.set({
+        from: this.storedCustomerName()!.trim(),
+        to:   (this.f['name'].value ?? '').trim(),
+      });
+      return;
+    }
+
+    this.step.set((current + 1) as 1 | 2 | 3);
   }
 
   readonly canProceed = computed(() => {
