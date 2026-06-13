@@ -15,10 +15,6 @@
         </div>
       }
       @default {
-        @let c = data()!.company;
-        @let members = data()!.members;
-
-        <!-- ══ BOOKING CONFIRMADO ══ -->
         @if (isBooked()) {
           <div class="booked-card">
             <div class="booked-icon">
@@ -75,8 +71,8 @@
           <!-- Hero: banner + info card -->
           <div class="profile-hero-section">
             <div class="hero-image">
-              @if (c.bannerImage) {
-                <img [src]="c.bannerImage" class="hero-banner-img" [alt]="c.name">
+              @if (company()?.bannerImage) {
+                <img [src]="company()?.bannerImage" class="hero-banner-img" [alt]="company()?.name">
               } @else {
                 <div class="hero-placeholder">
                   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
@@ -89,23 +85,32 @@
             </div>
 
             <div class="hero-info-card">
-              @if (c.profileImage) {
-                <img [src]="c.profileImage" class="info-avatar-img" [alt]="c.name">
+              @if (company()?.profileImage) {
+                <img [src]="company()?.profileImage" class="info-avatar-img" [alt]="company()?.name">
               } @else {
-                <div class="info-avatar">{{ c.name.charAt(0).toUpperCase() }}</div>
+                <div class="info-avatar">{{ company()?.name?.charAt(0)?.toUpperCase() }}</div>
               }
-              <h2 class="info-name" [ngStyle]="headingFontStyle()">{{ c.name }}</h2>
-              @if (c.description) {
-                <p class="info-desc" [ngStyle]="bodyFontStyle()">{{ c.description }}</p>
+              <h2 class="info-name" [ngStyle]="headingFontStyle()">{{ company()?.name }}</h2>
+              @if (company()?.description) {
+                <p class="info-desc" [ngStyle]="bodyFontStyle()">{{ company()?.description }}</p>
               }
             </div>
           </div>
 
+          <!-- Filtro por categoría -->
+          <app-category-filter-chips
+            [categories]="usedCategories()"
+            [selected]="selectedCategory()"
+            [showUncategorized]="hasUncategorized()"
+            (selectedChange)="selectedCategory.set($event)" />
+
           <!-- Miembros y sus servicios -->
-          @if (!members.length) {
+          @if (!members().length) {
             <div class="no-members">Aún no hay servicios publicados.</div>
+          } @else if (!filteredMembers().length) {
+            <div class="no-members">No hay servicios en esta categoría.</div>
           } @else {
-            @for (m of members; track m.id) {
+            @for (m of filteredMembers(); track m.id) {
               <div class="member-section">
                 <div class="member-header">
                   @if (m.profileImage) {

@@ -1,0 +1,32 @@
+<div class="step-content">
+  <div class="step-header">
+    <h3 class="step-title">Selecciona el servicio</h3>
+    <p class="step-desc">Elige el servicio que deseas reservar</p>
+  </div>
+
+  <app-category-filter-chips
+    [categories]="usedCategories()"
+    [selected]="selectedCategory()"
+    [showUncategorized]="hasUncategorized()"
+    (selectedChange)="selectedCategory.set($event)" />
+
+  <div class="services-grid">
+    @for (service of filteredServices(); track service.id) {
+      <div class="service-card"
+        [class.selected]="selectedService()?.id === service.id"
+        (click)="onServiceSelect(service)">
+        <div class="service-check">✓</div>
+        <div class="service-body">
+          <p class="service-name">{{ service.name }}</p>
+          <p class="service-desc">{{ service.description }}</p>
+          <div class="service-meta">
+            <span class="service-duration">
+              ⏱ {{ service.duration }}min
+            </span>
+            <span class="service-price">{{ formatCLP(withVat(service.price)) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

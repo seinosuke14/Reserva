@@ -18,7 +18,7 @@ import { BookingConfirmedComponent } from '../components/booking-confirmed/booki
 import { NameChangeConfirmComponent } from '../../components/name-change-confirm/name-change-confirm.component';
 
 import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
-import { IPublicService, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
+import { IPublicService, IServiceCategory, IDayAvailability, IPublicPaymentMethod } from '../../helpers/models';
 import { filterAvailabilityByDuration } from '../../helpers/availability-utils';
 import { brandBgStyle, fontFamilyStyle } from '../../helpers/brand-styles';
 import { buildBookingForm, normalizePhone, buildTransferText, transferReceiptMessage, EmailChecker } from '../../helpers/booking-utils';
@@ -83,6 +83,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   readonly stars = [1, 2, 3, 4, 5];
   readonly services       = signal<IPublicService[]>([]);
+  readonly categories     = signal<IServiceCategory[]>([]);
   readonly availability   = signal<IDayAvailability[]>([]);
   readonly paymentMethods = signal<IPublicPaymentMethod[]>([]);
   readonly reviews        = signal<any[]>([]);
@@ -315,6 +316,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       this.fontLoader.load(data.professional.headingFont);
       this.fontLoader.load(data.professional.bodyFont);
       this.services.set(data.services);
+      this.categories.set(data.categories ?? []);
       this.availability.set(data.availability);
       this.reviews.set(data.reviews ?? []);
       const visibleMethods: IPublicPaymentMethod[] = (data.paymentMethods ?? [])

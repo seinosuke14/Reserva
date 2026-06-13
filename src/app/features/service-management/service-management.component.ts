@@ -5,14 +5,16 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { formatCLP, withVat } from '../../helpers/formatters';
-import { IService } from '../../helpers/models';
+import { IService, IServiceCategory } from '../../helpers/models';
 import { environment } from '../../../environments/environment';
 import { WorkScheduleService } from '../../core/services/work-schedule.service';
+import { AuthService } from '../../core/services/auth.service';
+import { CategoryFilterChipsComponent } from '../../components/category-filter-chips/category-filter-chips.component';
 
 @Component({
   selector: 'app-service-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CategoryFilterChipsComponent],
   templateUrl: './service-management.component.html',
   animations: [
     trigger('modalAnim', [
@@ -33,6 +35,7 @@ export class ServiceManagementComponent implements OnInit {
   private readonly fb   = inject(FormBuilder);
   private readonly http = inject(HttpClient);
   private readonly scheduleSvc = inject(WorkScheduleService);
+  private readonly auth = inject(AuthService);
   readonly formatCLP    = formatCLP;
   readonly withVat      = withVat;
 
@@ -44,6 +47,28 @@ export class ServiceManagementComponent implements OnInit {
   isLoading      = signal(true);
   isSaving       = signal(false);
   errorMsg       = signal<string | null>(null);
+
+  // ── Categorías ──────────────────────────────────────────────────────────────
+  readonly maxCategories = 5;
+  // Miembro de empresa: las categorías son compartidas y las gestiona la empresa
+  readonly isCompanyMember = computed(() => !!this.auth.currentUser()?.companyId);
+  categories       = signal<IServiceCategory[]>([]);
+  selectedCategory = signal<string | null>(null); // null = Todas | id | 'none'
+  isCatModalOpen   = signal(false);
+  catSaving        = signal(false);
+  catError         = signal<string | null>(null);
+  newCatName       = signal('');
+  editingCatId     = signal<string | null>(null);
+  editingCatName   = signal('');
+  deletingCatId    = signal<string | null>(null);
+
+  readonly filteredServices = computed(() => {
+    const filter = this.selectedCategory();
+    const list = this.services();
+    if (filter === null) return list;
+    if (filter === 'none') return list.filter(s => !s.categoryId);
+    return list.filter(s => s.categoryId === filter);
+  });
 
   imgPreview     = signal<string | null>(null);
   imgFile        = signal<File | null>(null);
@@ -60,12 +85,13 @@ export class ServiceManagementComponent implements OnInit {
     description: ['', Validators.required],
     duration:    [30, [Validators.required, Validators.min(1)]],
     price:       [0,  [Validators.required, Validators.min(1000)]],
+    categoryId:  [null as string | null],
   });
 
   get f() { return this.form.controls; }
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.loadServices(), this.loadSlotDuration()]);
+    await Promise.all([this.loadServices(), this.loadCategories(), this.loadSlotDuration()]);
   }
 
   private async loadSlotDuration(): Promise<void> {
@@ -97,10 +123,105 @@ export class ServiceManagementComponent implements OnInit {
     }
   }
 
+  async loadCategories(): Promise<void> {
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ categories: IServiceCategory[]; readOnly: boolean }>(`${environment.apiUrl}/service-categories`)
+      );
+      this.categories.set(res.categories);
+    } catch {
+      this.categories.set([]);
+    }
+  }
+
+  // ── Gestión de categorías (solo profesional independiente) ──────────────────
+
+  openCatModal(): void {
+    this.catError.set(null);
+    this.newCatName.set('');
+    this.editingCatId.set(null);
+    this.deletingCatId.set(null);
+    this.isCatModalOpen.set(true);
+  }
+
+  async createCategory(): Promise<void> {
+    const name = this.newCatName().trim();
+    if (!name || this.catSaving()) return;
+    this.catSaving.set(true);
+    this.catError.set(null);
+    try {
+      const created = await firstValueFrom(
+        this.http.post<IServiceCategory>(`${environment.apiUrl}/service-categories`, { name })
+      );
+      this.categories.update(list => [...list, created].sort((a, b) => a.name.localeCompare(b.name)));
+      this.newCatName.set('');
+    } catch (err: any) {
+      this.catError.set(err?.error?.message ?? 'No se pudo crear la categoría.');
+    } finally {
+      this.catSaving.set(false);
+    }
+  }
+
+  startEditCategory(cat: IServiceCategory): void {
+    this.catError.set(null);
+    this.deletingCatId.set(null);
+    this.editingCatId.set(cat.id);
+    this.editingCatName.set(cat.name);
+  }
+
+  async saveCategoryName(): Promise<void> {
+    const id = this.editingCatId();
+    const name = this.editingCatName().trim();
+    if (!id || !name || this.catSaving()) return;
+    this.catSaving.set(true);
+    this.catError.set(null);
+    try {
+      const updated = await firstValueFrom(
+        this.http.put<IServiceCategory>(`${environment.apiUrl}/service-categories/${id}`, { name })
+      );
+      this.categories.update(list =>
+        list.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.name.localeCompare(b.name))
+      );
+      // Refrescar el nombre en las cards de servicios
+      this.services.update(list =>
+        list.map(s => s.categoryId === updated.id ? { ...s, category: updated } : s)
+      );
+      this.editingCatId.set(null);
+    } catch (err: any) {
+      this.catError.set(err?.error?.message ?? 'No se pudo actualizar la categoría.');
+    } finally {
+      this.catSaving.set(false);
+    }
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    if (this.catSaving()) return;
+    this.catSaving.set(true);
+    this.catError.set(null);
+    try {
+      await firstValueFrom(this.http.delete(`${environment.apiUrl}/service-categories/${id}`));
+      this.categories.update(list => list.filter(c => c.id !== id));
+      // Los servicios asignados quedan sin categoría
+      this.services.update(list =>
+        list.map(s => s.categoryId === id ? { ...s, categoryId: null, category: null } : s)
+      );
+      if (this.selectedCategory() === id) this.selectedCategory.set(null);
+      if (this.form.value.categoryId === id) this.form.patchValue({ categoryId: null });
+      this.deletingCatId.set(null);
+    } catch (err: any) {
+      this.catError.set(err?.error?.message ?? 'No se pudo eliminar la categoría.');
+    } finally {
+      this.catSaving.set(false);
+    }
+  }
+
   openAddForm(): void {
     this.editingService.set(null);
     this.blocksCount.set(1);
-    this.form.reset({ duration: this.slotDuration(), price: 0 });
+    // Si hay un filtro de categoría activo, el nuevo servicio la hereda por comodidad
+    const preselected = this.selectedCategory();
+    const categoryId = preselected && preselected !== 'none' ? preselected : null;
+    this.form.reset({ duration: this.slotDuration(), price: 0, categoryId });
     this.imgPreview.set(null);
     this.imgFile.set(null);
     this.isFormOpen.set(true);
@@ -110,7 +231,12 @@ export class ServiceManagementComponent implements OnInit {
     this.editingService.set(service);
     const blocks = Math.max(1, Math.round(service.duration / this.slotDuration()));
     this.blocksCount.set(blocks);
-    this.form.patchValue({ ...service, price: Number(service.price), duration: blocks * this.slotDuration() });
+    this.form.patchValue({
+      ...service,
+      price: Number(service.price),
+      duration: blocks * this.slotDuration(),
+      categoryId: service.categoryId ?? null,
+    });
     this.imgPreview.set(service.serviceImage ?? null);
     this.imgFile.set(null);
     this.isFormOpen.set(true);
