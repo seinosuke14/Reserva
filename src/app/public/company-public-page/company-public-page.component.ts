@@ -74,6 +74,11 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   readonly headingFontStyle = computed(() => fontFamilyStyle(this.data()?.company?.headingFont));
   readonly bodyFontStyle    = computed(() => fontFamilyStyle(this.data()?.company?.bodyFont));
 
+  // Derivados de data() — se exponen como computed (no @let en plantilla) para que
+  // la hidratación SSR no falle con "claim a node which was claimed already".
+  readonly company = computed((): ICompanyBrand | null => this.data()?.company ?? null);
+  readonly members = computed((): ICompanyPublicMember[] => this.data()?.members ?? []);
+
   // ── Filtro por categoría ─────────────────────────────────────────────────────
   selectedCategory = signal<string | null>(null);
 
@@ -311,7 +316,12 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     return raw.map(m => {
       if (m.provider === 'transfer') {
         const raw = m.credentials;
-        const c: Record<string, string> = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        let c: Record<string, string> = {};
+        try {
+          c = (typeof raw === 'string' ? JSON.parse(raw) : raw) ?? {};
+        } catch {
+          c = {};
+        }
         return {
           provider: 'transfer' as const,
           transferInfo: {

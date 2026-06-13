@@ -1,0 +1,35 @@
+<div class="backdrop" (click)="cancelled.emit()"></div>
+
+<div class="modal">
+  <div class="modal-icon">
+    <svg width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+    </svg>
+  </div>
+
+  <h3 class="modal-title">¿Cambiar el nombre de tu reserva?</h3>
+
+  <p class="modal-sub">
+    Para este correo normalmente agendas con otro nombre. Si confirmas, se actualizará
+    el nombre asociado a tu correo.
+  </p>
+
+  <div class="modal-detail">
+    <span class="detail-label">Nombre actual</span>
+    <span class="detail-value">{{ fromName() }}</span>
+  </div>
+  <div class="modal-detail">
+    <span class="detail-label">Nombre nuevo</span>
+    <span class="detail-value">{{ toName() }}</span>
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn-back" (click)="cancelled.emit()">
+      Mantener actual
+    </button>
+    <button class="btn-confirm" (click)="confirmed.emit()">
+      Sí, cambiarlo
+    </button>
+  </div>
+</div>
