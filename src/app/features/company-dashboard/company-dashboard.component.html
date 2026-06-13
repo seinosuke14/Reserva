@@ -194,317 +194,135 @@
     <!-- ══════════ AGENDA ══════════ -->
     @if (activeTab() === 'agenda') {
 
-    <div class="flex flex-col md:flex-row gap-5 items-start">
+    <!-- ── Estado 1: tarjetas de profesionales ── -->
+    @if (!agendaSelectedMember()) {
 
-      <!-- ── Sidebar: mini calendario (oculto en mobile) ── -->
-      <div class="hidden md:block w-[220px] shrink-0 bg-white rounded-[14px] border border-black/[.05] p-4 sticky top-24">
+      @if (agendaLoading()) {
+      <div class="flex-center py-16 text-[13px] text-slate-400 gap-2">
+        <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+          <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+        </svg>
+        Cargando equipo...
+      </div>
+      } @else if (!agendaMembers().length) {
+      <div class="text-center py-16 text-[13px] text-slate-400">No hay profesionales en el equipo aún.</div>
+      } @else {
 
-        <!-- Navegación mes -->
-        <div class="flex-between mb-3">
-          <button (click)="agendaPrevMonth()"
-            class="w-7 h-7 rounded-[7px] border border-slate-200 flex-center hover:bg-slate-50 transition-colors">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="text-[11.5px] font-bold text-slate-700 capitalize">{{ agendaMonthLabel() }}</span>
-          <button (click)="agendaNextMonth()"
-            class="w-7 h-7 rounded-[7px] border border-slate-200 flex-center hover:bg-slate-50 transition-colors">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
+      <p class="text-[13px] text-slate-500 mb-4">Selecciona un profesional para ver sus citas agendadas.</p>
 
-        <!-- Cabeceras días -->
-        <div class="grid grid-cols-7 mb-1">
-          @for (d of ['L','M','X','J','V','S','D']; track d) {
-          <div class="text-center text-[9px] font-bold text-slate-400 py-0.5">{{ d }}</div>
-          }
-        </div>
-
-        <!-- Grid días -->
-        <div class="grid grid-cols-7 gap-y-0.5">
-          @for (day of agendaCalendarGrid(); track $index) {
-          @if (day) {
-          <button (click)="agendaSelectCalDate(day)"
-            class="aspect-square flex-center rounded-full text-[11px] font-medium transition-all"
-            [style.background]="agendaIsSameDayStr(day, agendaDate()) ? '#00C4A7' : ''"
-            [style.color]="agendaIsSameDayStr(day, agendaDate()) ? '#fff' : agendaIsSameDayStr(day, _todayStr()) ? '#00C4A7' : '#334155'"
-            [style.fontWeight]="agendaIsSameDayStr(day, _todayStr()) ? '700' : '500'">
-            {{ day.getDate() }}
-          </button>
-          } @else {
-          <div></div>
-          }
-          }
-        </div>
-
-        <!-- Ir a hoy -->
-        @if (!agendaIsToday()) {
-        <button (click)="agendaGoToday()"
-          class="mt-3 w-full py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors"
-          style="border:1.5px solid #00C4A7;background:rgba(0,196,167,.08);color:#00C4A7;">
-          Ir a hoy
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (m of agendaMembers(); track m.id) {
+        <button (click)="selectAgendaMember(m)"
+          class="bg-white rounded-[16px] border border-black/[.05] p-4 flex items-center gap-3 text-left hover:shadow-md hover:border-[#00C4A7]/40 transition-all">
+          <div class="w-14 h-14 rounded-full bg-slate-100 shrink-0 flex-center text-[18px] font-bold text-slate-500 overflow-hidden">
+            @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
+            @else { {{ m.name.charAt(0).toUpperCase() }} }
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-[15px] font-bold text-slate-800 truncate">{{ m.name }}</div>
+            <div class="text-[12px] text-slate-400 truncate">{{ m.profession || 'Profesional' }}</div>
+          </div>
+          <svg class="text-slate-300 shrink-0" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
         </button>
         }
       </div>
+      }
 
-      <!-- ── Contenido principal ── -->
-      <div class="flex-1 min-w-0 w-full">
+    } @else {
+    <!-- ── Estado 2: citas del profesional agrupadas por día ── -->
 
-        <!-- Fecha seleccionada + navegación móvil -->
-        <div class="flex items-center gap-2 mb-3">
-          <button (click)="agendaPrevDay()"
-            class="w-8 h-8 rounded-[8px] border border-slate-200 bg-white flex-center hover:bg-slate-50 transition-colors shrink-0">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="text-[13px] font-bold text-slate-800 capitalize flex-1 text-center leading-tight">{{ agendaDateLabel() }}</span>
-          <button (click)="agendaNextDay()"
-            class="w-8 h-8 rounded-[8px] border border-slate-200 bg-white flex-center hover:bg-slate-50 transition-colors shrink-0">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          @if (!agendaIsToday()) {
-          <button (click)="agendaGoToday()"
-            class="md:hidden shrink-0 px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold"
-            style="border:1.5px solid #00C4A7;background:rgba(0,196,167,.08);color:#00C4A7;">
-            Hoy
-          </button>
-          }
+      <!-- Cabecera profesional + volver -->
+      <div class="flex items-center gap-3 mb-5">
+        <button (click)="backToAgendaMembers()"
+          class="w-9 h-9 rounded-[10px] border border-slate-200 bg-white flex-center hover:bg-slate-50 transition-colors shrink-0">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="w-11 h-11 rounded-full bg-slate-100 shrink-0 flex-center text-[15px] font-bold text-slate-500 overflow-hidden">
+          @if (agendaSelectedMember()!.profileImage) { <img [src]="agendaSelectedMember()!.profileImage" [alt]="agendaSelectedMember()!.name" class="w-full h-full object-cover"/> }
+          @else { {{ agendaSelectedMember()!.name.charAt(0).toUpperCase() }} }
         </div>
-
-        @if (agendaLoading()) {
-        <div class="flex-center py-16 text-[13px] text-slate-400 gap-2">
-          <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-            <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
-          </svg>
-          Cargando agenda...
+        <div class="min-w-0">
+          <div class="text-[16px] font-bold text-slate-800 truncate">{{ agendaSelectedMember()!.name }}</div>
+          <div class="text-[12px] text-slate-400 truncate">{{ agendaSelectedMember()!.profession || 'Profesional' }}</div>
         </div>
-        } @else if (!agendaMembers().length) {
-        <div class="text-center py-16 text-[13px] text-slate-400">No hay profesionales en el equipo aún.</div>
-        } @else {
+      </div>
 
-        <!-- Grid multi-profesional (scroll horizontal en mobile) -->
-        <div class="bg-white rounded-[14px] border border-black/[.05] overflow-hidden">
-          <div class="overflow-x-auto">
+      @if (memberAgendaLoading()) {
+      <div class="flex-center py-16 text-[13px] text-slate-400 gap-2">
+        <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+          <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+        </svg>
+        Cargando citas...
+      </div>
+      } @else if (!memberApptsByDay().length) {
+      <div class="text-center py-16 text-[13px] text-slate-400">Este profesional no tiene citas próximas agendadas.</div>
+      } @else {
 
-            <!-- Cabecera profesionales -->
-            <div class="flex border-b border-slate-100 bg-white z-10 sticky top-[60px] md:top-[72px]" style="min-width:max-content;">
-              <div class="w-12 md:w-14 shrink-0 border-r border-slate-100"></div>
-              @for (m of agendaMembers(); track m.id) {
-              <div class="w-[140px] md:w-[180px] shrink-0 px-2 md:px-3 py-2.5 border-r border-slate-100 last:border-r-0 flex items-center gap-1.5">
-                <div class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-slate-100 shrink-0 flex-center text-[10px] font-bold text-slate-500 overflow-hidden">
-                  @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
-                  @else { {{ m.name.charAt(0).toUpperCase() }} }
-                </div>
-                <div class="min-w-0">
-                  <div class="text-[11px] md:text-[12px] font-semibold text-slate-700 truncate">{{ m.name }}</div>
-                  <div class="text-[9px] md:text-[10px] text-slate-400">{{ m.appointments.length }} cita{{ m.appointments.length !== 1 ? 's' : '' }}</div>
-                </div>
+      <div class="flex flex-col gap-6">
+        @for (day of memberApptsByDay(); track day.date) {
+        <div>
+          <!-- Encabezado del día -->
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="text-[13px] font-bold text-slate-700 capitalize">{{ day.label }}</span>
+            <span class="text-[11px] text-slate-400">{{ day.appts.length }} cita{{ day.appts.length !== 1 ? 's' : '' }}</span>
+          </div>
+
+          <!-- Citas del día -->
+          <div class="flex flex-col gap-2">
+            @for (appt of day.appts; track appt.id) {
+            <div class="bg-white rounded-[14px] border border-black/[.05] p-3.5 flex items-start gap-3"
+              [style.border-left]="'4px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : '#00C4A7')">
+
+              <!-- Hora -->
+              <div class="shrink-0 text-center">
+                <div class="text-[15px] font-bold text-slate-800 leading-none">{{ appt.time }}</div>
               </div>
-              }
-            </div>
 
-            <!-- Filas de horarios -->
-            <div style="min-width:max-content;">
-              @for (slot of AGENDA_SLOTS; track slot) {
-              <div class="flex border-b border-slate-50 last:border-b-0" style="min-height:44px;">
-                <div class="w-12 md:w-14 shrink-0 border-r border-slate-100 flex items-start justify-end pr-2 pt-1.5">
-                  <span class="text-[9px] md:text-[10px] font-medium text-slate-400">{{ slot }}</span>
-                </div>
-                @for (m of agendaMembers(); track m.id) {
-                @let appt = agendaApptAt(m, slot);
-                @let cont = agendaIsContinuation(m, slot);
-                @let isDragOver = agendaDragOverSlot()?.memberId === m.id && agendaDragOverSlot()?.slot === slot;
-                <div class="w-[140px] md:w-[180px] shrink-0 border-r border-slate-100 last:border-r-0 p-0.5 md:p-1 transition-colors"
-                  [class.bg-slate-50]="!!cont && !isDragOver"
-                  [style.outline]="isDragOver ? '2px solid #00C4A7' : ''"
-                  [style.background]="isDragOver ? 'rgba(0,196,167,.08)' : ''"
-                  (dragover)="agendaOnSlotDragOver($event, m.id, slot)"
-                  (dragleave)="agendaOnSlotDragLeave()"
-                  (drop)="agendaOnSlotDrop($event, m.id, slot)">
-                  @if (appt) {
-                  <button
-                    draggable="true"
-                    (dragstart)="agendaOnDragStart($event, appt, m.id)"
-                    (dragend)="agendaOnDragEnd($event)"
-                    class="w-full rounded-[5px] px-1.5 py-1 h-full flex flex-col gap-0.5 text-left transition-opacity hover:opacity-80 cursor-grab active:cursor-grabbing"
-                    [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.1)' : 'rgba(0,196,167,.1)'"
-                    [style.border-left]="'3px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : '#00C4A7')"
-                    (click)="agendaSelectedAppt.set({ appt: appt, memberName: m.name })">
-                    <span class="text-[10px] font-bold text-slate-800 leading-tight truncate">{{ appt.customer.name }}</span>
-                    <span class="text-[9px] text-slate-500 truncate">{{ appt.service.name }}</span>
-                  </button>
-                  } @else if (cont) {
-                  <div class="h-full rounded-[5px]"
-                    [style.background]="cont.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.06)' : 'rgba(0,196,167,.06)'"
-                    [style.border-left]="'3px solid ' + (cont.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.3)' : 'rgba(0,196,167,.3)')">
-                  </div>
+              <div class="w-px self-stretch bg-slate-100"></div>
+
+              <!-- Detalle -->
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] font-bold text-slate-900 truncate">{{ appt.customer.name }}</div>
+                <div class="text-[12.5px] text-slate-500 truncate mb-1.5">{{ appt.service.name }}</div>
+
+                <div class="flex flex-col gap-0.5">
+                  @if (appt.customer.phone) {
+                  <a [href]="'tel:' + appt.customer.phone" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#00C4A7] transition-colors w-fit">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    {{ appt.customer.phone }}
+                  </a>
+                  }
+                  @if (appt.customer.email) {
+                  <a [href]="'mailto:' + appt.customer.email" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#00C4A7] transition-colors w-fit">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                    <span class="truncate">{{ appt.customer.email }}</span>
+                  </a>
                   }
                 </div>
-                }
               </div>
-              }
+
+              <!-- Estado -->
+              <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.12)' : 'rgba(245,158,11,.12)'"
+                [style.color]="appt.paymentStatus === 'Pagado' ? '#059669' : '#b45309'">
+                {{ appt.paymentStatus }}
+              </span>
             </div>
-
-          </div>
-        </div>
-        }
-
-      </div>
-    </div>
-
-    <!-- ── Reschedule confirmation modal ── -->
-    @if (agendaPendingReschedule()) {
-      <app-reschedule-confirm
-        [customerName]="agendaPendingReschedule()!.appt.customer.name"
-        [newDate]="agendaPendingReschedule()!.newDate"
-        [newTime]="agendaPendingReschedule()!.newTime"
-        [saving]="agendaRescheduleSaving()"
-        (confirmed)="agendaConfirmReschedule()"
-        (cancelled)="agendaCancelReschedule()">
-      </app-reschedule-confirm>
-    }
-
-    <!-- ── Modal detalle de cita ── -->
-    @if (agendaSelectedAppt()) {
-    <div class="fixed inset-0 bg-black/40 z-50 flex-center p-4"
-      (click)="closeAgendaDetail()">
-      <div class="bg-white rounded-[18px] w-full max-w-sm shadow-2xl p-6 relative"
-        (click)="$event.stopPropagation()">
-
-        <!-- Cerrar -->
-        <button (click)="closeAgendaDetail()"
-          class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 flex-center text-slate-500 hover:bg-slate-200 transition-colors">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-
-        <!-- Hora + profesional -->
-        <div class="flex items-center gap-2 mb-4">
-          <span class="px-2.5 py-1 rounded-full text-[12px] font-bold"
-            style="background:rgba(0,196,167,.12);color:#b45309;">
-            {{ agendaSelectedAppt()!.appt.time }}
-          </span>
-          <span class="text-[12px] text-slate-500">{{ agendaSelectedAppt()!.memberName }}</span>
-        </div>
-
-        <!-- Cliente -->
-        <div class="mb-4">
-          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Cliente</div>
-          <div class="text-[16px] font-bold text-slate-900">{{ agendaSelectedAppt()!.appt.customer.name }}</div>
-        </div>
-
-        <!-- Servicio -->
-        <div class="mb-4">
-          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Servicio</div>
-          <div class="flex-between">
-            <span class="text-[14px] font-semibold text-slate-800">{{ agendaSelectedAppt()!.appt.service.name }}</span>
-            <span class="text-[12px] text-slate-500">{{ agendaSelectedAppt()!.appt.service.duration }} min</span>
-          </div>
-        </div>
-
-        <!-- Estado de pago -->
-        <div class="mb-5">
-          <div class="text-[10px] font-bold uppercase tracking-[.07em] text-slate-400 mb-1">Estado</div>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-            [style.background]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? 'rgba(16,185,129,.12)' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? 'rgba(239,68,68,.10)' : 'rgba(245,158,11,.12)'"
-            [style.color]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? '#059669' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? '#dc2626' : '#b45309'">
-            <span class="w-1.5 h-1.5 rounded-full"
-              [style.background]="agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' ? '#10b981' : agendaSelectedAppt()!.appt.paymentStatus === 'Cancelado' ? '#ef4444' : '#f59e0b'"></span>
-            {{ agendaSelectedAppt()!.appt.paymentStatus }}
-          </span>
-        </div>
-
-        <!-- Acciones -->
-        @if (agendaSelectedAppt()!.appt.paymentStatus !== 'Cancelado') {
-        <div class="flex flex-col gap-2 pt-4 border-t border-slate-100">
-          @if (agendaSelectedAppt()!.appt.paymentStatus !== 'Pagado') {
-          <button (click)="updateAgendaApptStatus('Pagado')" [disabled]="agendaApptUpdating()"
-            class="w-full py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all disabled:opacity-60 flex-center gap-2"
-            style="background:#10b981;">
-            @if (agendaApptUpdating()) {
-              <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-                <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
-              </svg>
-            } @else {
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
             }
-            Confirmar pago
-          </button>
-          }
-          <button (click)="updateAgendaApptStatus('Cancelado')" [disabled]="agendaApptUpdating()"
-            class="w-full py-2.5 rounded-[12px] text-[13px] font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all disabled:opacity-60">
-            Cancelar reserva
-          </button>
+          </div>
         </div>
         }
-
-        <!-- Cambiar horario -->
-        @if (agendaSelectedAppt()!.appt.paymentStatus === 'Pagado' || agendaSelectedAppt()!.appt.paymentStatus === 'Pendiente') {
-        <div class="mt-4 pt-4 border-t border-slate-100">
-          @if (!agendaIsRescheduling()) {
-            <button (click)="openAgendaRescheduleEdit()"
-              class="w-full py-2.5 rounded-[12px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
-              style="border:1.5px solid rgba(0,196,167,.4);color:#00C4A7;background:rgba(0,196,167,.06);">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
-              </svg>
-              Cambiar horario
-            </button>
-          } @else {
-            <div class="space-y-3">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Nuevo horario</p>
-
-              <div>
-                <label class="text-[11px] font-semibold text-slate-500 block mb-1">Fecha</label>
-                <input type="date" [value]="agendaRsDate()" [min]="_todayStr()"
-                       (input)="agendaRsDate.set($any($event.target).value); agendaRsTime.set('')"
-                       class="w-full px-3 py-2 rounded-[10px] border border-slate-200 text-[13px] text-slate-800 focus:outline-none"
-                       style="border-color:rgba(0,196,167,.4);">
-              </div>
-
-              <div>
-                <label class="text-[11px] font-semibold text-slate-500 block mb-1">Hora</label>
-                @if (agendaRsAvailableSlots().length === 0) {
-                  <p class="text-[12px] text-slate-400 italic pt-1">Sin horarios disponibles para esa fecha</p>
-                } @else {
-                <select [value]="agendaRsTime()"
-                        (change)="agendaRsTime.set($any($event.target).value)"
-                        class="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-white text-[13px] text-slate-800 focus:outline-none"
-                        style="border-color:rgba(0,196,167,.4);">
-                  <option value="">Selecciona hora</option>
-                  @for (slot of agendaRsAvailableSlots(); track slot) {
-                    <option [value]="slot" [selected]="slot === agendaRsTime()">{{ slot }}</option>
-                  }
-                </select>
-                }
-              </div>
-
-              <div class="flex gap-2">
-                <button (click)="agendaIsRescheduling.set(false)"
-                  class="flex-1 py-2 rounded-[10px] text-[12.5px] font-semibold border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
-                  Cancelar
-                </button>
-                <button (click)="submitAgendaRescheduleFromPanel()"
-                  [disabled]="!agendaRsTime() || (agendaRsDate() === agendaDate() && agendaRsTime() === agendaSelectedAppt()!.appt.time) || _isPastSlot(agendaRsDate(), agendaRsTime())"
-                  class="flex-1 py-2 rounded-[10px] text-[12.5px] font-bold text-white disabled:opacity-40"
-                  style="background:#00C4A7;">
-                  Confirmar
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-        }
-
       </div>
-    </div>
+      }
+
     }
     }
 
@@ -1186,6 +1004,121 @@
       <div class="px-4 py-3 rounded-[12px] text-[13px] font-medium"
         [class]="paymentFeedback()!.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'">
         {{ paymentFeedback()!.text }}
+      </div>
+      }
+
+      <!-- ── ¿A qué cuenta van los pagos? ── -->
+      <div class="bg-white rounded-[16px] border-[1.5px] border-primary-100 p-5">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-[.08em] text-primary-400">Destino de los pagos</span>
+          <div class="flex-1 h-px bg-primary-100"></div>
+        </div>
+        <p class="text-[11px] text-primary-300 mb-3">Elige a qué cuenta se acreditan los pagos de las reservas.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button (click)="savePaymentRouting('company')" [disabled]="paymentRoutingSaving()"
+            class="text-left rounded-[14px] border-[1.5px] p-4 transition-all disabled:opacity-60"
+            [class]="paymentRouting() === 'company' ? 'border-accent bg-[rgba(0,196,167,.06)]' : 'border-primary-100 hover:border-primary-200'">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-4 h-4 rounded-full border-[2px] flex-center shrink-0"
+                [class]="paymentRouting() === 'company' ? 'border-accent' : 'border-primary-300'">
+                @if (paymentRouting() === 'company') { <span class="w-2 h-2 rounded-full bg-accent"></span> }
+              </span>
+              <span class="text-[13.5px] font-bold text-primary">Cuenta de la empresa</span>
+            </div>
+            <p class="text-[12px] text-primary-400 leading-snug">Todos los pagos se acreditan en los métodos configurados aquí abajo.</p>
+          </button>
+
+          <button (click)="savePaymentRouting('professional')" [disabled]="paymentRoutingSaving()"
+            class="text-left rounded-[14px] border-[1.5px] p-4 transition-all disabled:opacity-60"
+            [class]="paymentRouting() === 'professional' ? 'border-accent bg-[rgba(0,196,167,.06)]' : 'border-primary-100 hover:border-primary-200'">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-4 h-4 rounded-full border-[2px] flex-center shrink-0"
+                [class]="paymentRouting() === 'professional' ? 'border-accent' : 'border-primary-300'">
+                @if (paymentRouting() === 'professional') { <span class="w-2 h-2 rounded-full bg-accent"></span> }
+              </span>
+              <span class="text-[13.5px] font-bold text-primary">Cuenta de cada profesional</span>
+            </div>
+            <p class="text-[12px] text-primary-400 leading-snug">Cada profesional cobra con los métodos de pago de su propia cuenta.</p>
+          </button>
+        </div>
+      </div>
+
+      @if (paymentRouting() === 'professional') {
+      <div class="px-4 py-3 rounded-[12px] text-[12.5px] bg-amber-50 text-amber-700 border border-amber-200">
+        Los pagos van a cada profesional. Cada uno debe configurar sus propios métodos de pago desde su cuenta. Los métodos de abajo (de la empresa) no se usarán.
+      </div>
+      }
+
+      <!-- ── Nuestro botón de pago: MercadoPago Connect ── -->
+      @if (paymentRouting() === 'company') {
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-[.08em] text-primary-400">Nuestro botón de pago</span>
+          <div class="flex-1 h-px bg-primary-100"></div>
+        </div>
+        <p class="text-[11px] text-primary-300 mb-3">Cobro gestionado por la plataforma — se descuenta una comisión por transacción.</p>
+
+        <div class="bg-white rounded-[16px] border-[1.5px] transition-all"
+          [class.border-accent]="isPaymentConfigured('mercadopago_connect')"
+          [class.border-primary-100]="!isPaymentConfigured('mercadopago_connect')">
+          <div class="flex items-center gap-3 px-5 py-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-bold text-primary">MercadoPago (gestionado)</span>
+                @if (isPaymentConfigured('mercadopago_connect')) {
+                  @if (isPaymentActive('mercadopago_connect')) {
+                    <span class="text-[10.5px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Activo</span>
+                  } @else {
+                    <span class="text-[10.5px] font-bold text-primary-400 bg-primary-100 px-2 py-0.5 rounded-full">Inactivo</span>
+                  }
+                }
+              </div>
+              <p class="text-[12px] text-primary-400 mt-0.5">
+                Vincula la cuenta MercadoPago de la empresa. El pago llega a la empresa y se descuenta la comisión de la plataforma.
+                @if (mpConnectUserId) { <span class="text-primary-300">· Cuenta MP: {{ mpConnectUserId }}</span> }
+              </p>
+            </div>
+          </div>
+
+          <div class="border-t border-primary-100 px-5 py-4">
+            @if (isPaymentConfigured('mercadopago_connect')) {
+            <div class="flex items-start gap-2.5 text-[12.5px] bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] px-4 py-3 mb-3">
+              <svg width="16" height="16" class="mt-px shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+              La cuenta de MercadoPago de la empresa está vinculada.
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <button (click)="togglePaymentActive('mercadopago_connect')"
+                class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 transition-all hover:bg-primary-50 text-primary-500">
+                {{ isPaymentActive('mercadopago_connect') ? 'Desactivar' : 'Activar' }}
+              </button>
+              <button (click)="removePaymentMethod('mercadopago_connect')"
+                class="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+                Desvincular
+              </button>
+            </div>
+            } @else {
+            <p class="text-[12px] text-primary-400 bg-primary-50 rounded-[10px] px-4 py-3 mb-3">
+              Vincula la cuenta de MercadoPago de la empresa para recibir los pagos directamente. Se descontará una comisión por transacción.
+            </p>
+            <button (click)="connectCompanyMercadoPago()" [disabled]="mpConnecting()"
+              class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
+              style="background:#009ee3;box-shadow:0 3px 12px rgba(0,158,227,.38);">
+              @if (mpConnecting()) {
+                <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                  <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                  <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                  <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                </svg>
+                Conectando...
+              } @else {
+                Conectar con MercadoPago
+              }
+            </button>
+            }
+          </div>
+        </div>
       </div>
       }
 

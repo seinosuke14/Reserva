@@ -23,6 +23,7 @@ export class MpConnectCallbackComponent implements OnInit {
 
   readonly state = signal<CallbackState>('processing');
   readonly errorMsg = signal('');
+  private returnUrl = '/app/pagos';
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -31,7 +32,10 @@ export class MpConnectCallbackComponent implements OnInit {
     const code = params.get('code');
     const returnedState = params.get('state');
     const savedState = sessionStorage.getItem('mp_oauth_state');
+    // Contexto: 'company' (vinculación de empresa) o profesional (default).
+    const context = sessionStorage.getItem('mp_oauth_context');
     sessionStorage.removeItem('mp_oauth_state');
+    sessionStorage.removeItem('mp_oauth_context');
 
     if (params.get('error')) {
       this.fail('Cancelaste o se rechazó la conexión con MercadoPago.');
@@ -47,14 +51,18 @@ export class MpConnectCallbackComponent implements OnInit {
       return;
     }
 
+    const isCompany   = context === 'company';
+    const callbackUrl = isCompany
+      ? `${this.apiUrl}/company/payment-methods/mp-connect/callback`
+      : `${this.apiUrl}/payment-methods/mp-connect/callback`;
+    this.returnUrl = isCompany ? '/empresa' : '/app/pagos';
+
     try {
-      await firstValueFrom(
-        this.http.post(`${this.apiUrl}/payment-methods/mp-connect/callback`, { code })
-      );
+      await firstValueFrom(this.http.post(callbackUrl, { code }));
       this.state.set('success');
-      setTimeout(() => this.router.navigate(['/app/pagos']), 1800);
+      setTimeout(() => this.router.navigate([this.returnUrl]), 1800);
     } catch (err: any) {
-      this.fail(err?.error?.message ?? 'No se pudo vincular tu cuenta de MercadoPago.');
+      this.fail(err?.error?.message ?? 'No se pudo vincular la cuenta de MercadoPago.');
     }
   }
 
@@ -64,6 +72,6 @@ export class MpConnectCallbackComponent implements OnInit {
   }
 
   goToPayments(): void {
-    this.router.navigate(['/app/pagos']);
+    this.router.navigate([this.returnUrl]);
   }
 }

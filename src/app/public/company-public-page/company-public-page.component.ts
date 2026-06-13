@@ -32,7 +32,7 @@ import { FontLoaderService } from '../../core/services/font-loader.service';
 import { environment } from '../../../environments/environment';
 
 interface IPaymentMethodView {
-  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago';
+  provider: 'flow' | 'transfer' | 'khipu' | 'mercadopago' | 'mercadopago_connect';
   transferInfo?: ITransferInfo;
 }
 
@@ -192,6 +192,14 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     this.step.set(1);
     this.selectedHour.set(null);
     this.viewMode.set('booking');
+
+    // Con ruteo 'professional', cada profesional cobra con sus propios métodos.
+    if (this.data()?.company?.paymentRouting === 'professional') {
+      const methods = this._buildPaymentMethods(member.paymentMethods ?? []);
+      this.paymentMethods.set(methods);
+      this.selectedPayment.set(methods.length === 1 ? methods[0] : null);
+    }
+
     if (member.slug) {
       this.availLoading.set(true);
       try {
@@ -315,10 +323,10 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   private _buildPaymentMethods(raw: ICompanyPublicPaymentMethod[]): IPaymentMethodView[] {
     return raw.map(m => {
       if (m.provider === 'transfer') {
-        const raw = m.credentials;
+        const info = m.transferInfo;
         let c: Record<string, string> = {};
         try {
-          c = (typeof raw === 'string' ? JSON.parse(raw) : raw) ?? {};
+          c = (typeof info === 'string' ? JSON.parse(info) : info) ?? {};
         } catch {
           c = {};
         }
