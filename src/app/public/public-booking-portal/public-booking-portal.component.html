@@ -119,6 +119,15 @@
             (next)="goNext()"
             (confirm)="confirmBooking()">
           </app-booking-actions>
+
+          @if (pendingNameChange(); as change) {
+            <app-name-change-confirm
+              [fromName]="change.from"
+              [toName]="change.to"
+              (confirmed)="confirmNameChange()"
+              (cancelled)="keepStoredName()">
+            </app-name-change-confirm>
+          }
         }
       }
     }
