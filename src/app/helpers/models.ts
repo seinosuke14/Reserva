@@ -1,6 +1,12 @@
 // ─── Interfaces compartidas del dominio ──────────────────────────────────────
 // Archivo centralizado para evitar duplicación de interfaces en componentes.
 
+/** Categoría de servicios (propia del profesional o compartida por la empresa) */
+export interface IServiceCategory {
+  id: string;
+  name: string;
+}
+
 /** Servicio interno (dashboard) — incluye estado activo */
 export interface IService {
   id: string;
@@ -10,6 +16,8 @@ export interface IService {
   price: number;
   isActive: boolean;
   serviceImage?: string | null;
+  categoryId?: string | null;
+  category?: IServiceCategory | null;
 }
 
 /** Servicio público (portal de reservas) — sin estado activo */
@@ -20,6 +28,7 @@ export interface IPublicService {
   duration: number;
   price: number;
   serviceImage?: string | null;
+  categoryId?: string | null;
 }
 
 /** Slot de tiempo */

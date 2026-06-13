@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { IServiceCategory } from '../../helpers/models';
 
 export interface ICompany {
   id: string;
@@ -80,6 +81,7 @@ export interface ICompanyPublicService {
   price: number;
   description: string | null;
   serviceImage: string | null;
+  categoryId: string | null;
 }
 
 export interface ICompanyPublicReview {
@@ -108,6 +110,7 @@ export interface ICompanyPublicPaymentMethod {
 export interface ICompanyPublicPage {
   company: ICompanyBrand;
   members: ICompanyPublicMember[];
+  categories?: IServiceCategory[];
   paymentMethods: ICompanyPublicPaymentMethod[];
 }
 
@@ -361,6 +364,46 @@ export class CompanyService {
         this.http.get<any>(`${API_BASE}/company/agenda`, { params: { date } })
       );
     } catch { return { date, members: [] }; }
+  }
+
+  // ── Categorías de servicios (compartidas por el equipo, tope 5) ────────────
+
+  async getServiceCategories(): Promise<IServiceCategory[]> {
+    try {
+      const res: any = await firstValueFrom(this.http.get(`${API_BASE}/company/service-categories`));
+      return res.categories ?? [];
+    } catch { return []; }
+  }
+
+  async createServiceCategory(name: string): Promise<{ success: boolean; message?: string; category?: IServiceCategory }> {
+    try {
+      const category = await firstValueFrom(
+        this.http.post<IServiceCategory>(`${API_BASE}/company/service-categories`, { name })
+      );
+      return { success: true, category };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al crear la categoría.' };
+    }
+  }
+
+  async updateServiceCategory(id: string, name: string): Promise<{ success: boolean; message?: string; category?: IServiceCategory }> {
+    try {
+      const category = await firstValueFrom(
+        this.http.put<IServiceCategory>(`${API_BASE}/company/service-categories/${id}`, { name })
+      );
+      return { success: true, category };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al actualizar la categoría.' };
+    }
+  }
+
+  async deleteServiceCategory(id: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      await firstValueFrom(this.http.delete(`${API_BASE}/company/service-categories/${id}`));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'Error al eliminar la categoría.' };
+    }
   }
 
   async getPublicPage(slug: string): Promise<ICompanyPublicPage | null> {

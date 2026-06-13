@@ -104,6 +104,13 @@
   <!-- Servicios -->
   <div class="profile-services-section">
     <h3 class="section-title" [ngStyle]="headingStyle()">Servicios disponibles</h3>
+
+    <app-category-filter-chips
+      [categories]="usedCategories()"
+      [selected]="selectedCategory()"
+      [showUncategorized]="hasUncategorized()"
+      (selectedChange)="selectedCategory.set($event)" />
+
     <div class="profile-services-list">
       @if (professional()?.requiresQuote && !isQuoteMode()) {
         <div class="profile-service-card">
@@ -126,10 +133,10 @@
           </div>
         </div>
       }
-      @if (professional()?.requiresQuote && !isQuoteMode() && services().length) {
+      @if (professional()?.requiresQuote && !isQuoteMode() && filteredServices().length) {
         <div class="services-divider"><span>Servicios</span></div>
       }
-      @for (service of services(); track service.id) {
+      @for (service of filteredServices(); track service.id) {
         <div class="profile-service-card">
           @if (service.serviceImage) {
             <div class="psc-image">

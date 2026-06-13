@@ -21,7 +21,8 @@ import { BookingStepIndicatorComponent } from '../components/booking-step-indica
 import { BookingDatetimeSelectorComponent } from '../components/booking-datetime-selector/booking-datetime-selector.component';
 import { BookingFormComponent } from '../components/booking-form/booking-form.component';
 import { BookingActionsComponent } from '../components/booking-actions/booking-actions.component';
-import { IDayAvailability, ITransferInfo } from '../../helpers/models';
+import { IDayAvailability, ITransferInfo, IServiceCategory } from '../../helpers/models';
+import { CategoryFilterChipsComponent } from '../../components/category-filter-chips/category-filter-chips.component';
 import { formatCLP, formatDateLong, withVat } from '../../helpers/formatters';
 import { filterAvailabilityByDuration } from '../../helpers/availability-utils';
 import { brandBgStyle, fontFamilyStyle } from '../../helpers/brand-styles';
@@ -44,6 +45,7 @@ interface IPaymentMethodView {
     BookingDatetimeSelectorComponent,
     BookingFormComponent,
     BookingActionsComponent,
+    CategoryFilterChipsComponent,
   ],
   templateUrl: './company-public-page.component.html',
   styleUrls: ['./company-public-page.component.scss'],
@@ -71,6 +73,35 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
   readonly portalBgStyle    = computed(() => brandBgStyle(this.data()?.company, { fallbackColor: '#f8fafc' }));
   readonly headingFontStyle = computed(() => fontFamilyStyle(this.data()?.company?.headingFont));
   readonly bodyFontStyle    = computed(() => fontFamilyStyle(this.data()?.company?.bodyFont));
+
+  // ── Filtro por categoría ─────────────────────────────────────────────────────
+  selectedCategory = signal<string | null>(null);
+
+  // Solo categorías con al menos un servicio asignado entre todos los miembros
+  readonly usedCategories = computed((): IServiceCategory[] => {
+    const members = this.data()?.members ?? [];
+    return (this.data()?.categories ?? []).filter(c =>
+      members.some(m => m.services.some(s => s.categoryId === c.id))
+    );
+  });
+
+  readonly hasUncategorized = computed(() =>
+    this.usedCategories().length > 0 &&
+    (this.data()?.members ?? []).some(m => m.services.some(s => !s.categoryId))
+  );
+
+  // Miembros con sus servicios filtrados por categoría (oculta miembros sin resultados)
+  readonly filteredMembers = computed((): ICompanyPublicMember[] => {
+    const members = this.data()?.members ?? [];
+    const filter = this.selectedCategory();
+    if (filter === null) return members;
+    return members
+      .map(m => ({
+        ...m,
+        services: m.services.filter(s => filter === 'none' ? !s.categoryId : s.categoryId === filter),
+      }))
+      .filter(m => m.services.length > 0);
+  });
 
   // ── Booking state ────────────────────────────────────────────────────────────
   viewMode        = signal<'profile' | 'booking'>('profile');

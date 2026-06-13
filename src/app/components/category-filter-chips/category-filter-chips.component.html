@@ -1,0 +1,31 @@
+@if (categories().length > 0) {
+  <div class="chips-row">
+    <button
+      type="button"
+      class="chip"
+      [class.chip-active]="selected() === null"
+      (click)="select(null)">
+      Todas
+    </button>
+
+    @for (cat of categories(); track cat.id) {
+      <button
+        type="button"
+        class="chip"
+        [class.chip-active]="selected() === cat.id"
+        (click)="select(cat.id)">
+        {{ cat.name }}
+      </button>
+    }
+
+    @if (showUncategorized()) {
+      <button
+        type="button"
+        class="chip"
+        [class.chip-active]="selected() === 'none'"
+        (click)="select('none')">
+        Sin categoría
+      </button>
+    }
+  </div>
+}
