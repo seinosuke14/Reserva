@@ -32,7 +32,7 @@ app.get('/sitemap.xml', async (_req, res) => {
   try {
     const apiUrl = process.env['API_URL'] ?? 'https://reserva-api-production-095e.up.railway.app/api';
     const data   = await fetchJson(`${apiUrl}/public/sitemap-slugs`);
-    const base   = 'https://letsreserve.cl';
+    const base   = 'https://www.letsreserve.cl';
     const now    = new Date().toISOString().slice(0, 10);
 
     const staticUrls = [
