@@ -147,9 +147,9 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     setSocialMeta(this.titleSvc, this.metaSvc, {
       title:       `${prof.name} · ${prof.specialty} | Reserva tu Hora Online | Lets Reserve`,
       description: `Reserva tu cita con ${prof.name} (${prof.specialty}) online. Agenda tu hora, consulta disponibilidad y confirma tu reserva en segundos. Sistema de agendamiento Lets Reserve.`,
-      image:       prof.bannerImage ?? prof.profileImage ?? 'https://letsreserve.cl/letsReserve.png',
-      url:         `https://letsreserve.cl/reservar/${slug}`,
-    });
+      image:       prof.bannerImage ?? prof.profileImage ?? 'https://www.letsreserve.cl/letsReserve.png',
+      url:         `https://www.letsreserve.cl/reservar/${slug}`,
+    }, this.document);
   }
 
   // ─── Computed ───────────────────────────────────────────────────────────────

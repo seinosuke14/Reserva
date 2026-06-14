@@ -315,9 +315,9 @@ export class CompanyPublicPageComponent implements OnInit, OnDestroy {
     setSocialMeta(this.titleSvc, this.metaSvc, {
       title:       `${company.name} · Reserva tu Hora Online | Agenda Citas | Lets Reserve`,
       description: `Reserva tu hora con ${company.name} online. Agenda citas, consulta horarios disponibles y reserva en un clic. Sistema de agendamiento online en Lets Reserve.`,
-      image:       company.backgroundImage ?? 'https://letsreserve.cl/letsReserve.png',
-      url:         `https://letsreserve.cl/empresa/${this.route.snapshot.paramMap.get('slug')}`,
-    });
+      image:       company.backgroundImage ?? 'https://www.letsreserve.cl/letsReserve.png',
+      url:         `https://www.letsreserve.cl/empresa/${this.route.snapshot.paramMap.get('slug')}`,
+    }, this.document);
   }
 
   private _buildPaymentMethods(raw: ICompanyPublicPaymentMethod[]): IPaymentMethodView[] {

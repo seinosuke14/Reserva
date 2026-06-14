@@ -1,5 +1,7 @@
 import { Component, inject, signal, OnInit, ViewEncapsulation } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
+import { setCanonicalUrl } from '../../helpers/seo';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { IPlan } from '../../core/services/subscription.service';
 import { LandingNavComponent }        from './components/landing-nav/landing-nav.component';
@@ -36,6 +38,7 @@ export class LandingComponent implements OnInit {
   private readonly subscriptionSvc = inject(SubscriptionService);
   private readonly titleSvc        = inject(Title);
   private readonly metaSvc         = inject(Meta);
+  private readonly document        = inject(DOCUMENT);
 
   plans = signal<IPlan[]>([]);
 
@@ -47,7 +50,8 @@ export class LandingComponent implements OnInit {
     this.metaSvc.updateTag({ name: 'keywords', content: 'agendamiento online, sistema de agendamiento, reservar cita, reservar hora, agenda online, sistema de reservas, citas online, reservas online, software agendamiento Chile' });
     this.metaSvc.updateTag({ property: 'og:title', content: title });
     this.metaSvc.updateTag({ property: 'og:description', content: desc });
-    this.metaSvc.updateTag({ property: 'og:url', content: 'https://letsreserve.cl/' });
+    this.metaSvc.updateTag({ property: 'og:url', content: 'https://www.letsreserve.cl/' });
+    setCanonicalUrl(this.document, 'https://www.letsreserve.cl/');
     this.plans.set(await this.subscriptionSvc.getPlans());
   }
 }

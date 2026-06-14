@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter, inject, signal, computed, OnInit } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { setCanonicalUrl } from '../../helpers/seo';
 import { SubscriptionService, IPlan } from '../../core/services/subscription.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PlanType } from '../../core/services/professional.service';
@@ -35,6 +36,7 @@ export class PlanSelectionComponent implements OnInit {
   private readonly router          = inject(Router);
   private readonly titleSvc        = inject(Title);
   private readonly metaSvc         = inject(Meta);
+  private readonly document        = inject(DOCUMENT);
 
   plans           = signal<IPlan[]>([]);
   activating      = signal<PlanType | null>(null);
@@ -126,7 +128,8 @@ export class PlanSelectionComponent implements OnInit {
       this.metaSvc.updateTag({ name: 'keywords', content: 'precio sistema agendamiento, plan reservas online, software agenda citas precio, agendamiento online Chile' });
       this.metaSvc.updateTag({ property: 'og:title', content: title });
       this.metaSvc.updateTag({ property: 'og:description', content: desc });
-      this.metaSvc.updateTag({ property: 'og:url', content: 'https://letsreserve.cl/planes' });
+      this.metaSvc.updateTag({ property: 'og:url', content: 'https://www.letsreserve.cl/planes' });
+      setCanonicalUrl(this.document, 'https://www.letsreserve.cl/planes');
     }
     this.subscriptionSvc.getPlans().then(p => {
       this.plans.set(p);
