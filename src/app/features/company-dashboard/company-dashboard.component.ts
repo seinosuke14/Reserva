@@ -19,6 +19,7 @@ import { IServiceCategory } from '../../helpers/models';
 import { PlanSelectionComponent } from '../plan-selection/plan-selection.component';
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
+import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
 
 const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
@@ -112,7 +113,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, GoogleCalendarConnectComponent],
   templateUrl: './company-dashboard.component.html',
   animations: [
     trigger('sidebarLabel', [

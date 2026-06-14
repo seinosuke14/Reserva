@@ -32,7 +32,7 @@ import { RouterModule } from '@angular/router';
             </div>
             <div>
               <h1 class="terms-title">Política de Privacidad</h1>
-              <p class="terms-updated">Última actualización: mayo 2025</p>
+              <p class="terms-updated">Última actualización: junio 2026</p>
             </div>
           </div>
 
@@ -52,6 +52,8 @@ import { RouterModule } from '@angular/router';
               <li>Profesión y descripción del perfil</li>
               <li>Datos bancarios para transferencias (ingresados voluntariamente para recibir pagos)</li>
               <li>Historial de citas y pagos gestionados en la Plataforma</li>
+              <li>Datos de integraciones que el profesional conecte voluntariamente (ej. token de acceso a Google Calendar)</li>
+              <li>Plan contratado, historial de suscripción y comisiones</li>
             </ul>
             <h3>2.2 Clientes que realizan reservas</h3>
             <ul>
@@ -74,7 +76,7 @@ import { RouterModule } from '@angular/router';
               <li>Procesar pagos a través de los proveedores habilitados</li>
               <li>Cumplir con obligaciones legales vigentes</li>
             </ul>
-            <p>No utilizamos los datos para publicidad de terceros ni los cedemos a empresas externas salvo los proveedores de pago estrictamente necesarios (Webpay, Flow, Mercado Pago) para procesar transacciones.</p>
+            <p>No utilizamos los datos para publicidad de terceros. Únicamente compartimos datos con terceros cuando es estrictamente necesario para prestar el servicio que el profesional activa: proveedores de pago, Google (si se conecta el calendario) y proveedores de mensajería (WhatsApp/Meta), según se detalla en las secciones 8, 9 y 10.</p>
           </section>
 
           <!-- 4 -->
@@ -116,24 +118,38 @@ import { RouterModule } from '@angular/router';
           <!-- 8 -->
           <section class="terms-section">
             <h2>8. Proveedores de pago</h2>
-            <p>Los pagos con tarjeta son procesados íntegramente por Webpay (Transbank), Flow y Mercado Pago. Lets Reserve no almacena ni tiene acceso a los datos de tarjetas de crédito o débito. Cada proveedor aplica su propia política de privacidad y seguridad.</p>
+            <p>Los pagos con tarjeta son procesados íntegramente por Webpay (Transbank), Flow y Mercado Pago / Mercado Pago Connect. Lets Reserve no almacena ni tiene acceso a los datos de tarjetas de crédito o débito. Cada proveedor aplica su propia política de privacidad y seguridad.</p>
+            <p>En transferencias bancarias directas y otros medios de pago externos, los fondos se transan directamente entre cliente y profesional, sin intervención ni acceso de Lets Reserve.</p>
           </section>
 
           <!-- 9 -->
           <section class="terms-section">
-            <h2>9. Menores de edad</h2>
-            <p>La Plataforma no está dirigida a menores de 18 años. No recopilamos conscientemente datos de menores. Si detectamos que se han recopilado datos de un menor sin autorización, los eliminaremos de inmediato.</p>
+            <h2>9. Integración con Google Calendar</h2>
+            <p>Si el profesional conecta su cuenta de Google, accedemos a los permisos mínimos necesarios para crear, editar y eliminar eventos en su calendario. Solo enviamos a Google la información de las citas gestionadas en la Plataforma. <strong>No leemos ni almacenamos otros eventos</strong> de su calendario con fines distintos a la sincronización.</p>
+            <p>El uso de la información obtenida de las APIs de Google se ajusta a la <em>Google API Services User Data Policy</em>, incluidos sus requisitos de uso limitado (<em>Limited Use</em>). El profesional puede revocar este acceso en cualquier momento desde su cuenta de Google o desde la Plataforma.</p>
           </section>
 
           <!-- 10 -->
           <section class="terms-section">
-            <h2>10. Modificaciones a esta política</h2>
-            <p>Lets Reserve se reserva el derecho de actualizar esta Política en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de la nueva versión.</p>
+            <h2>10. Mensajería (WhatsApp)</h2>
+            <p>Para el envío de confirmaciones y recordatorios compartimos el número de teléfono del destinatario con nuestro proveedor de mensajería (Meta y/o terceros autorizados). Estos datos se usan únicamente para la entrega del mensaje y se rigen también por las políticas de privacidad de dichos proveedores.</p>
           </section>
 
           <!-- 11 -->
           <section class="terms-section">
-            <h2>11. Contacto</h2>
+            <h2>11. Menores de edad</h2>
+            <p>La Plataforma no está dirigida a menores de 18 años. No recopilamos conscientemente datos de menores. Si detectamos que se han recopilado datos de un menor sin autorización, los eliminaremos de inmediato.</p>
+          </section>
+
+          <!-- 12 -->
+          <section class="terms-section">
+            <h2>12. Modificaciones a esta política</h2>
+            <p>Lets Reserve se reserva el derecho de actualizar esta Política en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de la nueva versión.</p>
+          </section>
+
+          <!-- 13 -->
+          <section class="terms-section">
+            <h2>13. Contacto</h2>
             <p>Para consultas relacionadas con esta Política de Privacidad o para ejercer tus derechos, puedes contactarnos a través del correo indicado en el panel de la Plataforma.</p>
           </section>
 
