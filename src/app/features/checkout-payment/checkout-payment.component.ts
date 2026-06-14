@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
+import { PaymentProvider } from '../../core/config/plan-capabilities';
 
 type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect';
 
@@ -110,10 +112,11 @@ const PROVIDERS: ProviderConfig[] = [
 export class CheckoutPaymentComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
+  private readonly caps = inject(PlanCapabilitiesService);
 
   readonly providers = PROVIDERS;
 
-  readonly providerSections = [
+  private readonly allSections = [
     {
       label: 'Nuestro botón de pago',
       subtitle: 'Cobro gestionado por la plataforma — se descuenta una comisión por transacción',
@@ -130,6 +133,23 @@ export class CheckoutPaymentComponent implements OnInit {
       providers: PROVIDERS.filter(p => (['khipu', 'transfer'] as Provider[]).includes(p.provider)),
     },
   ];
+
+  // Solo las secciones/proveedores que el plan permite (descarta secciones vacías).
+  get providerSections() {
+    return this.allSections
+      .map(s => ({
+        ...s,
+        providers: s.providers.filter(p => this.caps.isProviderAllowed(p.provider as PaymentProvider)),
+      }))
+      .filter(s => s.providers.length > 0);
+  }
+
+  // True si el plan bloquea al menos un método de pago disponible en la plataforma.
+  get hasLockedMethods(): boolean {
+    const total = this.allSections.reduce((n, s) => n + s.providers.length, 0);
+    const visible = this.providerSections.reduce((n, s) => n + s.providers.length, 0);
+    return visible < total;
+  }
 
   isLoading = signal(true);
   savedMethods = signal<IPaymentMethod[]>([]);
