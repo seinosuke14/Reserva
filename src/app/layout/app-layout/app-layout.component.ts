@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationCenterComponent } from '../notification-center/notification-center.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
+import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
 
 interface NavItem {
   path: string;
@@ -58,6 +59,7 @@ interface PageMeta {
 export class AppLayoutComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly caps = inject(PlanCapabilitiesService);
   readonly notifSvc = inject(NotificationService);
 
   isSidebarOpen       = signal(window.innerWidth >= 768);
@@ -81,13 +83,13 @@ export class AppLayoutComponent {
         ...(this.requiresQuote() ? [{ path: '/app/cotizaciones', label: 'Cotizaciones', icon: 'file-text' }] : []),
       ],
     },
-    {
+    ...(this.caps.can('analyticsFull') ? [{
       label: 'Análisis',
       icon: 'bar-chart',
       items: [
         { path: '/app/analytics', label: 'Analytics', icon: 'bar-chart' },
       ],
-    },
+    }] : []),
     {
       label: 'Configuración',
       icon: 'settings',

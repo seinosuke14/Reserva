@@ -191,6 +191,8 @@
     }
   </div>
 
+  @if (canCustomize()) {
+
   <!-- ── Fondo del Portal ── -->
   <div class="bg-white rounded-[16px] border border-black/[.06] shadow-card p-[18px_20px] space-y-4">
     <div>
@@ -437,6 +439,28 @@
       </button>
     </div>
   </div>
+
+  } @else {
+
+  <!-- Aviso de upgrade: el plan básico no personaliza fondo ni tipografía -->
+  <div class="bg-white rounded-[16px] border border-amber-200 p-[18px_20px] flex items-start gap-3">
+    <div class="w-9 h-9 rounded-[10px] bg-amber-50 flex-center shrink-0">
+      <svg width="18" height="18" fill="none" stroke="#b45309" stroke-width="1.75" viewBox="0 0 24 24">
+        <circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/>
+        <circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/>
+        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+      </svg>
+    </div>
+    <div>
+      <h3 class="text-[13px] font-bold text-primary">Personalización avanzada del portal</h3>
+      <p class="text-[12px] text-primary-400 mt-1 leading-relaxed">
+        El fondo del portal y la tipografía están disponibles desde el plan <b>Pro</b>.
+        Mejora tu plan para personalizar por completo la apariencia de tu portal de reservas.
+      </p>
+    </div>
+  </div>
+
+  }
 
   } <!-- end @else isCompanyMember -->
 
