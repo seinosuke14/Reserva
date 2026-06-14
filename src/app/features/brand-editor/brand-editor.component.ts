@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { AuthService } from '../../core/services/auth.service';
 import { FontLoaderService } from '../../core/services/font-loader.service';
+import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
 import { environment } from '../../../environments/environment';
 
 export interface FontOption {
@@ -49,9 +50,12 @@ export class BrandEditorComponent {
   private readonly auth       = inject(AuthService);
   private readonly http       = inject(HttpClient);
   private readonly fontLoader = inject(FontLoaderService);
+  private readonly caps       = inject(PlanCapabilitiesService);
 
   readonly user            = this.auth.currentUser;
   readonly isCompanyMember = computed(() => !!this.auth.currentUser()?.companyId);
+  // Fondo y tipografía solo para planes con personalización completa (no basic).
+  readonly canCustomize    = computed(() => this.caps.can('profileCustomization'));
   readonly companySlug     = computed(() => this.auth.currentUser()?.companySlug ?? null);
   readonly fontOptions = FONT_OPTIONS;
 

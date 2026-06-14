@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { subscriptionGuard } from './core/guards/subscription.guard';
 import { companyAuthGuard } from './core/guards/company-auth.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
 
 export const routes: Routes = [
   // Landing page (pública, ruta raíz)
@@ -126,7 +127,7 @@ export const routes: Routes = [
       { path: 'servicios', loadComponent: () => import('./features/service-management/service-management.component').then(m => m.ServiceManagementComponent) },
       { path: 'pagos', loadComponent: () => import('./features/checkout-payment/checkout-payment.component').then(m => m.CheckoutPaymentComponent) },
       { path: 'horario', loadComponent: () => import('./features/work-schedule/work-schedule.component').then(m => m.WorkScheduleComponent) },
-      { path: 'analytics', loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
+      { path: 'analytics', canActivate: [capabilityGuard('analyticsFull')], loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
       { path: 'editar', loadComponent: () => import('./features/brand-editor/brand-editor.component').then(m => m.BrandEditorComponent) },
       { path: '**', redirectTo: '' }
