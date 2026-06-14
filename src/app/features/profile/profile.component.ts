@@ -9,6 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { ProfessionalService } from '../../core/services/professional.service';
 import { environment } from '../../../environments/environment';
+import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
 
 const PLAN_LABELS: Record<string, string> = {
   free:    'Gratuito',
@@ -20,7 +21,7 @@ const PLAN_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, GoogleCalendarConnectComponent],
   templateUrl: './profile.component.html',
   animations: [
     trigger('fadeUp', [

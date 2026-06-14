@@ -995,6 +995,9 @@
     @if (activeTab() === 'pagos') {
     <div class="flex flex-col gap-4 max-w-2xl">
 
+      <!-- Integración con Google Calendar (a nivel empresa) -->
+      <app-google-calendar-connect scope="company" />
+
       <div class="mb-1">
         <h2 class="text-[15px] font-bold text-primary">Métodos de pago</h2>
         <p class="text-[12.5px] text-primary-400 mt-0.5">Configura cómo los clientes pagan al agendar a través de tu página de empresa.</p>
