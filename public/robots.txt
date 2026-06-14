@@ -6,4 +6,4 @@ Disallow: /registro-empresa
 Disallow: /aceptar-invitacion
 Allow: /
 
-Sitemap: https://letsreserve.cl/sitemap.xml
+Sitemap: https://www.letsreserve.cl/sitemap.xml
