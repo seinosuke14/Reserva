@@ -13,6 +13,7 @@ interface IAppointment {
   service?: { id: string; name: string } | null;
   quoteId?: string | null;
   amount?: number | string;
+  refundStatus?: string | null;
 }
 
 interface ICustomer {
@@ -25,8 +26,10 @@ interface IMonthData {
   month: string;   // 'Ene'
   key: string;     // 'YYYY-MM'
   revenue: number;
-  bookings: number;  // todas las citas del mes
-  paid: number;      // solo pagadas
+  bookings: number;    // todas las citas del mes
+  paid: number;        // solo pagadas (Pagado / Finalizada)
+  cancelled: number;   // canceladas
+  refunded: number;    // canceladas reembolsadas con nuestro botón (refundStatus 'approved')
 }
 
 interface IChartBar {
@@ -125,6 +128,10 @@ export class AnalyticsComponent implements OnInit {
   /** Una cita cuenta como pagada (ingreso real) si está Pagada o Finalizada. */
   private readonly isPaid = (status: string): boolean => status === 'Pagado' || status === 'Finalizada';
 
+  /** Reembolsada con nuestro botón: cita cancelada cuyo reembolso quedó aprobado. */
+  private readonly isRefunded = (apt: IAppointment): boolean =>
+    apt.paymentStatus === 'Cancelado' && apt.refundStatus === 'approved';
+
   /** Grupo de la cita para las líneas del gráfico: las cotizaciones se agrupan en una sola serie. */
   private readonly groupOf = (apt: IAppointment): string =>
     apt.quoteId ? 'Cotizaciones' : (apt.service?.name ?? 'Otro');
@@ -150,6 +157,8 @@ export class AnalyticsComponent implements OnInit {
         revenue,
         bookings: inMonth.length,
         paid: paidApts.length,
+        cancelled: inMonth.filter(a => a.paymentStatus === 'Cancelado').length,
+        refunded: inMonth.filter(a => this.isRefunded(a)).length,
       });
     }
     return result;
@@ -305,6 +314,10 @@ export class AnalyticsComponent implements OnInit {
   readonly avgMonthlyRevenue = computed(() => Math.round(this.totalRevenue12m() / 12));
   readonly totalBookings12m  = computed(() => this.monthlyData().reduce((s, m) => s + m.bookings, 0));
   readonly totalPaid12m      = computed(() => this.monthlyData().reduce((s, m) => s + m.paid, 0));
+  readonly totalCancelled12m = computed(() => this.monthlyData().reduce((s, m) => s + m.cancelled, 0));
+  readonly totalRefunded12m  = computed(() => this.monthlyData().reduce((s, m) => s + m.refunded, 0));
+  /** Pendientes reales: total menos pagadas menos canceladas (sin contar canceladas como pendientes). */
+  readonly totalPending12m   = computed(() => this.totalBookings12m() - this.totalPaid12m() - this.totalCancelled12m());
 
   readonly revTrend = computed(() => {
     const d = this.monthlyData();
