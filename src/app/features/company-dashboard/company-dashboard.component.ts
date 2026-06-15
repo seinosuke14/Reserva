@@ -749,6 +749,7 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     this.reminderSaving.set(false);
     if (result.success) {
       this.reminderPref.set(pref);
+      this.svc.patchCompany({ reminderPreference: pref });
       this.reminderMsg.set({ type: 'success', text: 'Preferencia guardada.' });
     } else {
       this.reminderMsg.set({ type: 'error', text: result.message ?? 'Error al guardar.' });
