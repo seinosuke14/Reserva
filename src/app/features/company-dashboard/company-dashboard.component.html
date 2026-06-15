@@ -361,7 +361,8 @@
           </span>
         </div>
         <div class="text-[1.625rem] font-black text-slate-900 leading-none tracking-tight">{{ totalApts12m() }}</div>
-        <div class="text-[11.5px] text-slate-400">{{ totalPaid12m() }} pagadas · {{ totalApts12m() - totalPaid12m() }} pendientes</div>
+        <div class="text-[11.5px] text-slate-400">{{ totalPaid12m() }} pagadas · {{ totalPending12m() }} pendientes</div>
+        <div class="text-[11.5px] text-slate-400">{{ totalCancelled12m() }} canceladas · {{ totalRefunded12m() }} reembolsadas</div>
       </div>
     </div>
 
