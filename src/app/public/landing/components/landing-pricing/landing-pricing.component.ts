@@ -33,6 +33,9 @@ export class LandingPricingComponent {
   readonly TEAM_MIN = 2;
   readonly TEAM_MAX = 4;
   readonly TEAM_EXTRA_USER = 9000;
+  // Extra por persona con IVA incluido (lo que se muestra en la etiqueta del selector).
+  readonly TEAM_EXTRA_USER_VAT    = withVat(this.TEAM_EXTRA_USER);
+  readonly PRO_MAX_EXTRA_USER_VAT = withVat(this.PRO_MAX_EXTRA_USER);
 
   proMaxUsers = signal(5);
   teamUsers   = signal(2);
