@@ -20,6 +20,7 @@ import { PlanSelectionComponent } from '../plan-selection/plan-selection.compone
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
 import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
+import { planLabel } from '../../helpers/formatters';
 
 const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
@@ -1035,6 +1036,8 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   formatCLP(amount: number): string {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
   }
+
+  readonly planLabel = planLabel;
 
   logout(): void {
     this.svc.logout();
