@@ -51,7 +51,7 @@
         <!-- Selector usuarios: team (interactivo 2–4) -->
         @if (p.id === 'team') {
         <div class="plan-users plan-users--selector">
-          <span class="users-label">Profesionales (+$5.950 c/u desde el 3° · IVA inc)</span>
+          <span class="users-label">Profesionales (+${{ TEAM_EXTRA_USER_VAT.toLocaleString('es-CL') }} c/u desde el 3° · IVA inc)</span>
           <div class="users-control">
             <button class="users-btn" (click)="decrementTeamUsers()" [disabled]="teamUsers() <= TEAM_MIN"
               aria-label="Quitar usuario">−</button>
@@ -66,7 +66,7 @@
         <!-- Selector usuarios: pro_max (interactivo 5–25) -->
         @if (p.id === 'pro_max') {
         <div class="plan-users plan-users--selector">
-          <span class="users-label">Usuarios (5.950 CLP c/u · IVA inc)</span>
+          <span class="users-label">Usuarios (${{ PRO_MAX_EXTRA_USER_VAT.toLocaleString('es-CL') }} CLP c/u · IVA inc)</span>
           <div class="users-control">
             <button class="users-btn" (click)="decrementUsers()" [disabled]="proMaxUsers() <= PRO_MAX_MIN"
               aria-label="Quitar usuario">−</button>
