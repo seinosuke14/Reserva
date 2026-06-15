@@ -55,10 +55,10 @@ export class PlanSelectionComponent implements OnInit {
   // ── Company mode: selectores de cantidad ──
   readonly TEAM_MIN    = 2;
   readonly TEAM_MAX    = 4;
-  readonly TEAM_EXTRA  = 5000;
+  readonly TEAM_EXTRA  = 9000;
   readonly PRO_MAX_MIN = 5;
   readonly PRO_MAX_MAX = 25;
-  readonly PRO_MAX_EXTRA = 5000;
+  readonly PRO_MAX_EXTRA = 8000;
   // Extra por persona con IVA incluido (lo que realmente se cobra por cada profesional adicional).
   readonly TEAM_EXTRA_VAT    = withVat(this.TEAM_EXTRA);
   readonly PRO_MAX_EXTRA_VAT  = withVat(this.PRO_MAX_EXTRA);
