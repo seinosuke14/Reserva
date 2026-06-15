@@ -53,6 +53,8 @@ export interface ICompanyMonthly {
   revenue: number;
   appointments: number;
   paid: number;
+  cancelled: number;
+  refunded: number;
 }
 
 export interface ICompanyDashboard {

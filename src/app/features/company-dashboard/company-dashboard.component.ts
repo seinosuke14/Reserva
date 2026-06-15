@@ -813,7 +813,7 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
       const d   = new Date(today.getFullYear(), today.getMonth() - (11 - i), 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const found = raw.find(m => m.key === key);
-      return { month: MONTH_LABELS[d.getMonth()], key, revenue: found?.revenue ?? 0, appointments: found?.appointments ?? 0, paid: found?.paid ?? 0 };
+      return { month: MONTH_LABELS[d.getMonth()], key, revenue: found?.revenue ?? 0, appointments: found?.appointments ?? 0, paid: found?.paid ?? 0, cancelled: found?.cancelled ?? 0, refunded: found?.refunded ?? 0 };
     });
   });
 
@@ -855,6 +855,10 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   readonly avgRev       = computed(() => Math.round(this.totalRev12m() / 12));
   readonly totalApts12m = computed(() => this.monthlyData().reduce((s, m) => s + m.appointments, 0));
   readonly totalPaid12m = computed(() => this.monthlyData().reduce((s, m) => s + m.paid, 0));
+  readonly totalCancelled12m = computed(() => this.monthlyData().reduce((s, m) => s + m.cancelled, 0));
+  readonly totalRefunded12m  = computed(() => this.monthlyData().reduce((s, m) => s + m.refunded, 0));
+  /** Pendientes reales: total menos pagadas menos canceladas. */
+  readonly totalPending12m   = computed(() => this.totalApts12m() - this.totalPaid12m() - this.totalCancelled12m());
 
   readonly revTrend = computed(() => {
     const d = this.monthlyData();
