@@ -11,6 +11,15 @@ export const VAT_RATE = 0.19;
 /** Valor con IVA incluido, redondeado al peso (igual criterio que el backend). */
 export const withVat = (net: number): number => Math.round((net || 0) * (1 + VAT_RATE));
 
+/** Nombres visibles de los planes. El id interno no cambia (ej: 'pro_max' → 'Empresa'). */
+const PLAN_LABELS: Record<string, string> = {
+  free: 'Gratuito', basic: 'Básico', pro: 'Pro', team: 'Equipo', pro_max: 'Empresa',
+};
+
+/** Devuelve el nombre visible de un plan a partir de su id. */
+export const planLabel = (plan: string | null | undefined): string =>
+  plan ? (PLAN_LABELS[plan] ?? plan) : '';
+
 /** Parse seguro: "YYYY-MM-DD" se ancla a mediodía local para evitar desfase de zona horaria */
 const parseDate = (dateStr: string): Date =>
   dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T12:00:00');

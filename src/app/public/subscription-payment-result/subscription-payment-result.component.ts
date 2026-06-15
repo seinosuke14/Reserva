@@ -84,7 +84,7 @@ export class SubscriptionPaymentResultComponent implements OnInit {
       basic:   'Básico',
       pro:     'Pro',
       team:    'Equipo',
-      pro_max: 'Pro Max',
+      pro_max: 'Empresa',
     };
     return plan ? names[plan] : '';
   }

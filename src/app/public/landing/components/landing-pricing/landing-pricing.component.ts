@@ -29,10 +29,10 @@ export class LandingPricingComponent {
 
   readonly PRO_MAX_MIN = 5;
   readonly PRO_MAX_MAX = 25;
-  readonly PRO_MAX_EXTRA_USER = 5000;
+  readonly PRO_MAX_EXTRA_USER = 8000;
   readonly TEAM_MIN = 2;
   readonly TEAM_MAX = 4;
-  readonly TEAM_EXTRA_USER = 5000;
+  readonly TEAM_EXTRA_USER = 9000;
 
   proMaxUsers = signal(5);
   teamUsers   = signal(2);
@@ -76,9 +76,7 @@ export class LandingPricingComponent {
       tag: 'Para freelancers y negocios de 1 persona',
       cta: 'Empezar Plan basico ',
       ctaRoute: '/registro',
-      badge: 'Más elegido',
-      primary: true,
-      features: ['1 Profesional', 'Citas ilimitadas', 'Emails de Citas ilimitados', 'Recordatorio de citas configurable', 'Perfil público personalizable en formato basico', 'Analytics', ],
+      features: ['1 Profesional', 'Citas ilimitadas', 'Emails de Citas ilimitados','50 confirmaciones de citas por whatsapp incluidos.','Recordatorio de citas configurable', 'Perfil público personalizable en formato basico', 'Analytics basico' ],
     },
     team: {
       tag: 'Para equipos pequeños de 2 a 5 personas',
@@ -87,20 +85,22 @@ export class LandingPricingComponent {
       suffix: '/usuario · mín. 2',
       badge: 'Más popular',
       primary: true,
-      features: ['Todo lo de PRO', 'Multi-profesional', 'Vista de equipo (citas + ventas)', 'Analytics enfocado en equipo', 'Citas personalizadas por persona', 'Método de pago compartido'],
+      features: ['Todo lo de PRO','100 confirmaciones de citas por whatsapp incluidos', 'Multi-profesional', 'Vista de equipo (citas + ventas)', 'Analytics enfocado en equipo', 'Citas personalizadas por persona', 'Método de pago compartido', 'reseñas y ratings', 'Soporte prioritario', 'perfil publico equipo'],
     },
     pro: {
       tag: 'Todo el poder de Pro, para una sola persona',
       cta: 'Empezar Pro',
       ctaRoute: '/registro',
-      features: ['1 usuario', '60 Recordatorios de WhatsApp incluidos.', 'Visibilidad especial en Marketplace (En Desarrollo)', 'Reseñas y ratings', 'Emails de Citas ilimitados', 'Perfil público personalizable en formato Pro','Analitycs', 'Soporte prioritario','Integración con Google Calendar','Emails Marketing'],
+      badge: 'Más elegido',
+      primary: true,
+      features: ['1 usuario', '60 confirmaciones de citas por whatsapp incluidos', 'Visibilidad en Marketplace ( Proximamente )', 'Reseñas y ratings', 'Emails de Citas ilimitados', 'Perfil público personalizable en formato Pro','Analitycs profesioanl', 'Soporte prioritario','Integración con Google Calendar','Emails Marketing ( Proximamente )'],
     },
     pro_max: {
       tag: 'Para salones medianos (6+ personas) que quieren crecer',
       cta: 'Crear cuenta empresa',
       ctaRoute: '/registro-empresa',
       suffix: '/usuario · mín. 6',
-      features: ['Todo lo de UNIDOS', 'WhatsApp automático nativo', 'Recordatorios WhatsApp', 'Cupones y descuentos', 'Visibilidad especial en Marketplace', 'Reseñas y ratings', 'Soporte prioritario'],
+      features: ['Todo lo de Equipo', '200 confirmaciones de citas por whatsapp incluidos','Cupones y descuentos', 'Visibilidad en Marketplace ( Proximamente ) ' , 'Reseñas y ratings' , 'Soporte prioritario'],
     },
   };
 

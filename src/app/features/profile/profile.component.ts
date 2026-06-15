@@ -15,7 +15,7 @@ const PLAN_LABELS: Record<string, string> = {
   free:    'Gratuito',
   basic:   'Básico',
   team:    'Equipo',
-  pro_max: 'Pro Max',
+  pro_max: 'Empresa',
 };
 
 @Component({
