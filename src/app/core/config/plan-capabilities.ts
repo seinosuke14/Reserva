@@ -61,7 +61,7 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     paymentProviders:     ['transfer', 'mercadopago_connect'],
   },
   team:    { ...PRO_CAPABILITIES, multiProfessional: true, waLimit: 100 },
-  pro_max: { ...PRO_CAPABILITIES, multiProfessional: true, waLimit: 100 },
+  pro_max: { ...PRO_CAPABILITIES, multiProfessional: true, waLimit: 200 },
 };
 
 // Fallback al plan más restrictivo si el plan es null/desconocido.

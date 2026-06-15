@@ -21,7 +21,7 @@
       <div @sidebarLabel class="leading-none flex-1 min-w-0">
         <div class="text-[13px] font-extrabold tracking-tight text-white truncate">{{ company()?.name }}</div>
         <div class="text-[9.5px] font-medium tracking-[.08em] text-white/35 mt-[2px]">
-          @if (company()?.plan) { PLAN {{ company()?.plan?.toUpperCase() }} } @else { SIN PLAN }
+          @if (company()?.plan) { PLAN {{ planLabel(company()?.plan).toUpperCase() }} } @else { SIN PLAN }
         </div>
       </div>
       <button @sidebarLabel (click)="toggleSidebar()"
