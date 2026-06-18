@@ -5,6 +5,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { QuoteService } from '../../core/services/quote.service';
+import { MetaPixelService } from '../../core/services/meta-pixel.service';
 import { chileanPhoneValidator, strictEmailValidator } from '../../core/validators/custom-validators';
 import { environment } from '../../../environments/environment';
 
@@ -35,6 +36,7 @@ export class QuoteRequestComponent implements OnInit {
   private readonly router   = inject(Router);
   private readonly http     = inject(HttpClient);
   private readonly quoteSvc = inject(QuoteService);
+  private readonly pixel    = inject(MetaPixelService);
 
   readonly pageState      = signal<PageState>('loading');
   readonly professional   = signal<{ name: string; slug: string; profileImage?: string | null } | null>(null);
@@ -130,6 +132,9 @@ export class QuoteRequestComponent implements OnInit {
       const res = await this.quoteSvc.submitQuote(this.slug, fd);
       this.submittedRef.set(res.quoteRef);
       this.pageState.set('success');
+
+      // Cotización enviada → evento de conversión Lead (Meta Pixel).
+      this.pixel.track('Lead');
     } catch (err: any) {
       alert(err?.error?.message ?? 'No se pudo enviar la cotización. Intenta de nuevo.');
       this.pageState.set('ready');

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { MetaPixelService } from './core/services/meta-pixel.service';
 
 @Component({
   selector: 'app-root',
@@ -9,4 +10,9 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'professional-dashboard-angular';
+
+  constructor() {
+    // Carga el Meta Pixel y rastrea PageView solo en vistas públicas (no en /app).
+    inject(MetaPixelService).init();
+  }
 }
