@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { CompanyService } from '../../core/services/company.service';
+import { MetaPixelService } from '../../core/services/meta-pixel.service';
 import {
   rutValidator,
   strictEmailValidator,
@@ -34,6 +35,7 @@ import {
 export class RegisterCompanyComponent {
   private readonly fb      = inject(FormBuilder);
   private readonly svc     = inject(CompanyService);
+  private readonly pixel   = inject(MetaPixelService);
   private readonly router  = inject(Router);
 
   step             = signal<'register' | 'verify'>('register');
@@ -100,6 +102,8 @@ export class RegisterCompanyComponent {
     const result = await this.svc.verifyEmail(this.pendingEmail(), code);
     this.isVerifying.set(false);
     if (result.success && result.token && result.company) {
+      // Registro de empresa completado (email verificado) → CompleteRegistration.
+      this.pixel.track('CompleteRegistration', { content_name: 'company' });
       this.svc.setSession(result.token, result.company);
       this.router.navigate(['/empresa']);
     } else {

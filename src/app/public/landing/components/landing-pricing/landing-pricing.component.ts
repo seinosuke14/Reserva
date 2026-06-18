@@ -4,6 +4,7 @@ import { IPlan } from '../../../../core/services/subscription.service';
 import { LandingPlan, PlanMeta } from '../../landing.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CompanyService } from '../../../../core/services/company.service';
+import { MetaPixelService } from '../../../../core/services/meta-pixel.service';
 import { withVat } from '../../../../helpers/formatters';
 
 @Component({
@@ -22,6 +23,7 @@ export class LandingPricingComponent {
 
   private readonly auth    = inject(AuthService);
   private readonly company = inject(CompanyService);
+  private readonly pixel   = inject(MetaPixelService);
 
   isAuthenticated = computed(() => this.auth.isAuthenticated());
   isProfessional  = computed(() => this.auth.isAuthenticated());
@@ -66,6 +68,19 @@ export class LandingPricingComponent {
   emitCheckout(planId: string): void {
     const members = planId === 'team' ? this.teamUsers() : this.proMaxUsers();
     this.checkoutPlan.emit({ plan: planId, members });
+  }
+
+  /**
+   * Un visitante eligió un plan en la landing (clic en la CTA) → conversión
+   * InitiateCheckout (Meta Pixel). Señal de alta intención para captar prospectos.
+   */
+  trackPlanSelect(p: LandingPlan): void {
+    this.pixel.track('InitiateCheckout', {
+      content_name: p.name,
+      content_ids: [p.id],
+      value: this.displayPrice(p),
+      currency: 'CLP',
+    });
   }
 
   private readonly PLAN_META: Record<string, PlanMeta> = {

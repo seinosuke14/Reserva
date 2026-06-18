@@ -113,7 +113,7 @@
                 Ya tienes una cuenta
               </span>
             } @else {
-              <a routerLink="/registro" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+              <a routerLink="/registro" (click)="trackPlanSelect(p)" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
                 {{ p.cta }}
               </a>
             }
@@ -121,7 +121,7 @@
             @if (isProfessional()) {
               <span class="btn btn-outline btn-disabled" aria-disabled="true">Ya eres cuenta profesional</span>
             } @else {
-              <a routerLink="/registro-empresa" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+              <a routerLink="/registro-empresa" (click)="trackPlanSelect(p)" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
                 Crear cuenta empresa
               </a>
               <div class="plan-cta-login">
@@ -136,7 +136,7 @@
               Contratar plan
             </a>
           } @else {
-            <a routerLink="/registro" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
+            <a routerLink="/registro" (click)="trackPlanSelect(p)" [class]="'btn ' + (p.primary ? 'btn-primary' : 'btn-outline')">
               Crear cuenta
             </a>
             <div class="plan-cta-login">
