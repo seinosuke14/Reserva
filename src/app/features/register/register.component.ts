@@ -6,6 +6,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { ProfessionalService } from '../../core/services/professional.service';
 import { ProfessionService, IProfession } from '../../core/services/profession.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MetaPixelService } from '../../core/services/meta-pixel.service';
 import {
   rutValidator,
   chileanPhoneValidator,
@@ -39,6 +40,7 @@ export class RegisterComponent implements OnInit {
   private readonly svc           = inject(ProfessionalService);
   private readonly professionSvc = inject(ProfessionService);
   private readonly authSvc       = inject(AuthService);
+  private readonly pixel         = inject(MetaPixelService);
   private readonly router        = inject(Router);
   private readonly route         = inject(ActivatedRoute);
 
@@ -143,6 +145,8 @@ export class RegisterComponent implements OnInit {
     const result = await this.svc.verifyEmail(this.pendingEmail(), code);
     this.isVerifying.set(false);
     if (result.success && result.token && result.user) {
+      // Registro completado (email verificado) → conversión CompleteRegistration.
+      this.pixel.track('CompleteRegistration', { content_name: 'professional' });
       this.authSvc.setSession(result.token, result.user);
       this.router.navigate(['/app']);
     } else {

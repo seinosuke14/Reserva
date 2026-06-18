@@ -26,6 +26,7 @@ import { setSocialMeta } from '../../helpers/seo';
 import { AuthService } from '../../core/services/auth.service';
 import { CompanyService } from '../../core/services/company.service';
 import { FontLoaderService } from '../../core/services/font-loader.service';
+import { MetaPixelService } from '../../core/services/meta-pixel.service';
 import { QuoteService, IQuoteTokenData } from '../../core/services/quote.service';
 import { environment } from '../../../environments/environment';
 
@@ -57,6 +58,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   private readonly http       = inject(HttpClient);
   private readonly quoteSvc   = inject(QuoteService);
   private readonly fontLoader = inject(FontLoaderService);
+  private readonly pixel      = inject(MetaPixelService);
   private readonly document   = inject(DOCUMENT);
   readonly auth               = inject(AuthService);
   private readonly company    = inject(CompanyService);
@@ -470,6 +472,11 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       const res: any = await firstValueFrom(
         this.http.post(`${environment.apiUrl}/public/book`, body)
       );
+
+      // Reserva creada con éxito → evento de conversión Schedule (Meta Pixel).
+      // Se dispara para todos los métodos; el Purchase (pago real) se registra
+      // luego en payment-result. sendBeacon hace que llegue aun si redirigimos.
+      this.pixel.track('Schedule', { value: this.bookingPrice(), currency: 'CLP' });
 
       if (provider === 'transfer') {
         this.bookingRef.set(res.bookingRef ?? '');
