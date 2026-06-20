@@ -112,7 +112,8 @@ import { RouterModule } from '@angular/router';
           <!-- 7 -->
           <section class="terms-section">
             <h2>7. Cookies y tecnologías de seguimiento</h2>
-            <p>La Plataforma puede utilizar cookies de sesión estrictamente necesarias para el funcionamiento del sistema de autenticación. No utilizamos cookies de rastreo publicitario ni compartimos datos de navegación con terceros.</p>
+            <p>La Plataforma utiliza <strong>cookies estrictamente necesarias</strong> para el funcionamiento del sistema de autenticación, que no requieren consentimiento.</p>
+            <p>En las páginas públicas, y <strong>solo si lo aceptas</strong> en el aviso de cookies, utilizamos cookies de analítica y medición de terceros (<em>Meta Pixel</em> de Meta Platforms) para entender el tráfico y mejorar nuestros servicios. Estas cookies <strong>no se cargan hasta que otorgas tu consentimiento</strong>, y puedes rechazarlas en cualquier momento sin afectar el uso de la Plataforma. Si las aceptas, se comparten datos de navegación con Meta conforme a su propia política de privacidad. El dashboard privado nunca carga estas cookies.</p>
           </section>
 
           <!-- 8 -->

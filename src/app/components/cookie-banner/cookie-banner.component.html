@@ -1,0 +1,16 @@
+@if (visible()) {
+<div class="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
+  <div class="cookie-banner__text">
+    <strong class="cookie-banner__title">🍪 Usamos cookies</strong>
+    <p>
+      Usamos cookies propias y de terceros (Meta) para medir el tráfico y mejorar tu
+      experiencia. Puedes aceptarlas o rechazarlas. Más información en nuestra
+      <a routerLink="/privacidad">Política de Privacidad</a>.
+    </p>
+  </div>
+  <div class="cookie-banner__actions">
+    <button type="button" class="cookie-btn cookie-btn--ghost" (click)="reject()">Rechazar</button>
+    <button type="button" class="cookie-btn cookie-btn--primary" (click)="accept()">Aceptar</button>
+  </div>
+</div>
+}

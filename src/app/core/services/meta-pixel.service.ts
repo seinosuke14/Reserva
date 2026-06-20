@@ -1,8 +1,9 @@
-import { Injectable, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { Injectable, inject, effect, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ConsentService } from './consent.service';
 
 declare global {
   interface Window {
@@ -25,9 +26,12 @@ export class MetaPixelService {
   private readonly doc        = inject(DOCUMENT);
   private readonly router     = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly consent    = inject(ConsentService);
 
   private readonly pixelId = environment.metaPixelId;
   private initialized = false;
+  /** Si la última vista navegada es pública (rastreable). */
+  private onPublicView = false;
 
   /**
    * Determina si una ruta es pública (rastreable). Son privados:
@@ -54,19 +58,34 @@ export class MetaPixelService {
     // destino real sea /app — eso cargaría el pixel en el dashboard. Solo lo
     // evaluamos si la navegación YA terminó (router.navigated); el resto de cargas
     // iniciales las captura el primer NavigationEnd de la suscripción de abajo.
-    if (this.router.navigated && this.isPublicUrl(this.router.url)) this.trackPageView();
+    if (this.router.navigated && this.isPublicUrl(this.router.url)) {
+      this.onPublicView = true;
+      this.trackPageView();
+    }
 
     const sub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
-        if (this.isPublicUrl(e.urlAfterRedirects)) this.trackPageView();
+        this.onPublicView = this.isPublicUrl(e.urlAfterRedirects);
+        if (this.onPublicView) this.trackPageView();
       });
 
     this.destroyRef.onDestroy(() => sub.unsubscribe());
+
+    // Si el usuario acepta las cookies más tarde (desde el banner), carga el pixel
+    // y registra la vista pública actual sin esperar a la siguiente navegación.
+    effect(() => {
+      if (this.consent.analyticsAllowed() && this.onPublicView) this.trackPageView();
+    });
   }
 
-  /** Dispara un PageView, cargando el pixel la primera vez. */
+  /**
+   * Dispara un PageView, cargando el pixel la primera vez. No hace NADA sin
+   * consentimiento explícito del usuario (Ley 21.719): el script de Meta ni
+   * siquiera se inyecta hasta que se acepta.
+   */
   private trackPageView(): void {
+    if (!this.consent.analyticsAllowed()) return;
     this.ensureLoaded();
     window.fbq?.('track', 'PageView');
   }
@@ -78,6 +97,7 @@ export class MetaPixelService {
    */
   track(event: string, params?: Record<string, unknown>): void {
     if (!isPlatformBrowser(this.platformId) || !this.pixelId) return;
+    if (!this.consent.analyticsAllowed()) return;
     this.ensureLoaded();
     window.fbq?.('track', event, params);
   }
