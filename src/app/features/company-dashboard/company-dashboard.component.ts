@@ -1048,4 +1048,59 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     this.svc.logout();
     this.router.navigate(['/login']);
   }
+
+  // ── Privacidad / datos de la empresa (Ley 21.719) ──────────────────────────────
+  // Tanto descargar como eliminar reconfirman la contraseña en un mismo modal.
+  exportMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  confirmIntent   = signal<'export' | 'delete' | null>(null);
+  confirmPassword = signal('');
+  confirmBusy     = signal(false);
+  confirmError    = signal<string | null>(null);
+
+  openExport(): void { this.openConfirm('export'); }
+  openDeleteModal(): void { this.openConfirm('delete'); }
+
+  private openConfirm(intent: 'export' | 'delete'): void {
+    this.confirmPassword.set('');
+    this.confirmError.set(null);
+    this.confirmIntent.set(intent);
+  }
+
+  closeConfirm(): void {
+    if (this.confirmBusy()) return;
+    this.confirmIntent.set(null);
+  }
+
+  async submitConfirm(): Promise<void> {
+    if (!this.confirmPassword()) {
+      this.confirmError.set('Ingresa la contraseña de la empresa para confirmar.');
+      return;
+    }
+    this.confirmBusy.set(true);
+    this.confirmError.set(null);
+    const password = this.confirmPassword();
+
+    if (this.confirmIntent() === 'export') {
+      const result = await this.svc.exportData(password);
+      this.confirmBusy.set(false);
+      if (result.success) {
+        this.confirmIntent.set(null);
+        this.exportMsg.set({ type: 'success', text: 'Descarga iniciada. Revisa tu carpeta de descargas.' });
+        setTimeout(() => this.exportMsg.set(null), 5000);
+      } else {
+        this.confirmError.set(result.message ?? 'No se pudieron exportar los datos.');
+      }
+      return;
+    }
+
+    const result = await this.svc.deleteAccount(password);
+    if (result.success) {
+      this.svc.logout();
+      this.router.navigate(['/login']);
+    } else {
+      this.confirmBusy.set(false);
+      this.confirmError.set(result.message ?? 'No se pudo eliminar la empresa.');
+    }
+  }
 }

@@ -28,7 +28,9 @@
       "Bash(Get-ChildItem \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\professional-dashboard-angular\\\\src\\\\app\\\\public\\\\public-booking-portal\" -Recurse)",
       "Bash(Select-Object FullName)",
       "Bash(sed 's/^[[:space:]]*//')",
-      "Bash(powershell -Command ' *)"
+      "Bash(powershell -Command ' *)",
+      "Bash(node -e \"require\\('./src/controllers/privacy.controller.js'\\);require\\('./src/routes/company.routes.js'\\);console.log\\('OK empresa rutas+controller'\\)\")",
+      "Bash(node -e \"require\\('./src/routes/professional.routes.js'\\);require\\('./src/routes/company.routes.js'\\);console.log\\('OK rutas'\\)\")"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

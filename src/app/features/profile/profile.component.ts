@@ -1,7 +1,7 @@
 import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { trigger, style, animate, transition } from '@angular/animations';
@@ -37,6 +37,7 @@ export class ProfileComponent implements OnInit {
   private readonly http            = inject(HttpClient);
   private readonly subscriptionSvc = inject(SubscriptionService);
   private readonly proSvc          = inject(ProfessionalService);
+  private readonly router          = inject(Router);
 
   readonly user = this.auth.currentUser;
 
@@ -180,6 +181,61 @@ export class ProfileComponent implements OnInit {
       window.location.href = result.url;
     } else {
       this.renewMsg.set({ type: 'error', text: result.message ?? 'No se pudo iniciar el pago.' });
+    }
+  }
+
+  // ── Privacidad / datos personales (Ley 21.719) ─────────────────────────────────
+  // Tanto descargar como eliminar reconfirman la contraseña en un mismo modal.
+  exportMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  confirmIntent   = signal<'export' | 'delete' | null>(null);
+  confirmPassword = signal('');
+  confirmBusy     = signal(false);
+  confirmError    = signal<string | null>(null);
+
+  openExport(): void { this.openConfirm('export'); }
+  openDelete(): void { this.openConfirm('delete'); }
+
+  private openConfirm(intent: 'export' | 'delete'): void {
+    this.confirmPassword.set('');
+    this.confirmError.set(null);
+    this.confirmIntent.set(intent);
+  }
+
+  closeConfirm(): void {
+    if (this.confirmBusy()) return;
+    this.confirmIntent.set(null);
+  }
+
+  async submitConfirm(): Promise<void> {
+    if (!this.confirmPassword()) {
+      this.confirmError.set('Ingresa tu contraseña para confirmar.');
+      return;
+    }
+    this.confirmBusy.set(true);
+    this.confirmError.set(null);
+    const password = this.confirmPassword();
+
+    if (this.confirmIntent() === 'export') {
+      const result = await this.proSvc.exportMyData(password);
+      this.confirmBusy.set(false);
+      if (result.success) {
+        this.confirmIntent.set(null);
+        this.exportMsg.set({ type: 'success', text: 'Descarga iniciada. Revisa tu carpeta de descargas.' });
+        setTimeout(() => this.exportMsg.set(null), 5000);
+      } else {
+        this.confirmError.set(result.message ?? 'No se pudieron exportar tus datos.');
+      }
+      return;
+    }
+
+    const result = await this.proSvc.deleteAccount(password);
+    if (result.success) {
+      this.auth.logout();
+      this.router.navigate(['/login']);
+    } else {
+      this.confirmBusy.set(false);
+      this.confirmError.set(result.message ?? 'No se pudo eliminar la cuenta.');
     }
   }
 

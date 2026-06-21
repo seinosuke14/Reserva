@@ -989,6 +989,44 @@
         {{ brandSaving() ? 'Guardando...' : 'Guardar cambios' }}
       </button>
 
+      <!-- Privacidad y datos de la empresa (Ley 21.719) -->
+      <div class="bg-white rounded-[16px] border border-slate-200 p-5 mt-2">
+        <h3 class="text-[14px] font-bold text-primary mb-1">Privacidad y datos de la empresa</h3>
+        <p class="text-[12px] text-primary-400 mb-4">
+          Ejerce los derechos sobre los datos de la empresa conforme a la Ley N° 21.719.
+        </p>
+
+        <!-- Exportar datos -->
+        <div class="flex items-center justify-between gap-3 py-3 border-t border-slate-100">
+          <div>
+            <p class="text-[13px] font-semibold text-primary">Descargar datos de la empresa</p>
+            <p class="text-[11.5px] text-primary-400">Exporta un Excel con los datos de cuenta y datos bancarios.</p>
+          </div>
+          <button (click)="openExport()"
+            class="shrink-0 px-4 py-2 rounded-[10px] text-[12.5px] font-bold border-[1.5px] border-primary-200 text-primary transition-all hover:border-accent hover:text-accent">
+            Descargar
+          </button>
+        </div>
+        @if (exportMsg()) {
+          <p class="text-[11.5px] font-medium mb-1"
+            [class]="exportMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+            {{ exportMsg()!.text }}
+          </p>
+        }
+
+        <!-- Eliminar empresa -->
+        <div class="flex items-center justify-between gap-3 py-3 border-t border-slate-100">
+          <div>
+            <p class="text-[13px] font-semibold text-red-600">Eliminar la empresa</p>
+            <p class="text-[11.5px] text-primary-400">Borra permanentemente la empresa y sus datos. Debes quitar antes a todos los profesionales del equipo.</p>
+          </div>
+          <button (click)="openDeleteModal()"
+            class="shrink-0 px-4 py-2 rounded-[10px] text-[12.5px] font-bold border-[1.5px] border-red-200 text-red-600 transition-all hover:bg-red-50">
+            Eliminar
+          </button>
+        </div>
+      </div>
+
     </div>
     }
 
@@ -1372,3 +1410,50 @@
   </main><!-- /content -->
   </div><!-- /flex-1 main col -->
 </div><!-- /flex h-screen -->
+
+<!-- Modal: confirmar con contraseña (descargar o eliminar) -->
+@if (confirmIntent()) {
+  <div class="fixed inset-0 z-[1000] flex-center p-4 bg-black/50" (click)="closeConfirm()">
+    <div class="bg-white rounded-[18px] w-full max-w-md p-6 shadow-2xl" (click)="$event.stopPropagation()">
+      @if (confirmIntent() === 'export') {
+        <h3 class="text-[17px] font-extrabold text-primary mb-1">Descargar datos de la empresa</h3>
+        <p class="text-[12.5px] text-primary-400 leading-relaxed mb-4">
+          Por seguridad, confirma la contraseña de la empresa para descargar los datos.
+        </p>
+      } @else {
+        <h3 class="text-[17px] font-extrabold text-primary mb-1">Eliminar la empresa</h3>
+        <p class="text-[12.5px] text-primary-400 leading-relaxed mb-4">
+          Esta acción es <strong class="text-red-600">permanente</strong>. Se eliminarán la cuenta de la
+          empresa, sus métodos de pago, categorías y suscripciones. Ingresa la contraseña de la empresa
+          para confirmar.
+        </p>
+      }
+
+      <input type="password" placeholder="Contraseña de la empresa" autocomplete="current-password"
+        [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)"
+        (keyup.enter)="submitConfirm()" [disabled]="confirmBusy()"
+        class="w-full px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none text-[13.5px] text-primary focus:border-accent transition-colors" />
+
+      @if (confirmError()) {
+        <p class="text-[12px] text-red-500 font-medium mt-2">{{ confirmError() }}</p>
+      }
+
+      <div class="flex gap-3 mt-5">
+        <button (click)="closeConfirm()" [disabled]="confirmBusy()"
+          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold border-[1.5px] border-primary-200 text-primary transition-all hover:bg-slate-50 disabled:opacity-60">
+          Cancelar
+        </button>
+        <button (click)="submitConfirm()" [disabled]="confirmBusy()"
+          class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 flex-center gap-2"
+          [style.background]="confirmIntent() === 'export' ? '#00C4A7' : '#dc2626'">
+          @if (confirmBusy()) {
+            <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            {{ confirmIntent() === 'export' ? 'Verificando...' : 'Eliminando...' }}
+          } @else {
+            {{ confirmIntent() === 'export' ? 'Confirmar y descargar' : 'Eliminar definitivamente' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
