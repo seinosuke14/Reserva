@@ -20,6 +20,7 @@ import { PlanSelectionComponent } from '../plan-selection/plan-selection.compone
 import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
 import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
+import { ConfirmPasswordModalComponent } from '../../components/confirm-password-modal/confirm-password-modal.component';
 import { planLabel } from '../../helpers/formatters';
 
 const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -114,7 +115,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, GoogleCalendarConnectComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, GoogleCalendarConnectComponent, ConfirmPasswordModalComponent],
   templateUrl: './company-dashboard.component.html',
   animations: [
     trigger('sidebarLabel', [
@@ -1051,18 +1052,16 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
 
   // ── Privacidad / datos de la empresa (Ley 21.719) ──────────────────────────────
   // Tanto descargar como eliminar reconfirman la contraseña en un mismo modal.
-  exportMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+  exportMsg     = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  confirmIntent   = signal<'export' | 'delete' | null>(null);
-  confirmPassword = signal('');
-  confirmBusy     = signal(false);
-  confirmError    = signal<string | null>(null);
+  confirmIntent = signal<'export' | 'delete' | null>(null);
+  confirmBusy   = signal(false);
+  confirmError  = signal<string | null>(null);
 
   openExport(): void { this.openConfirm('export'); }
   openDeleteModal(): void { this.openConfirm('delete'); }
 
   private openConfirm(intent: 'export' | 'delete'): void {
-    this.confirmPassword.set('');
     this.confirmError.set(null);
     this.confirmIntent.set(intent);
   }
@@ -1072,14 +1071,13 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
     this.confirmIntent.set(null);
   }
 
-  async submitConfirm(): Promise<void> {
-    if (!this.confirmPassword()) {
+  async submitConfirm(password: string): Promise<void> {
+    if (!password) {
       this.confirmError.set('Ingresa la contraseña de la empresa para confirmar.');
       return;
     }
     this.confirmBusy.set(true);
     this.confirmError.set(null);
-    const password = this.confirmPassword();
 
     if (this.confirmIntent() === 'export') {
       const result = await this.svc.exportData(password);

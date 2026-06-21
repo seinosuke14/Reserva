@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ConsentService } from './consent.service';
+import { isPublicUrl } from '../../helpers/url';
 
 declare global {
   interface Window {
@@ -34,19 +35,6 @@ export class MetaPixelService {
   private onPublicView = false;
 
   /**
-   * Determina si una ruta es pública (rastreable). Son privados:
-   * - el dashboard del profesional: /app y /app/...
-   * - el dashboard de la empresa: /empresa exacto (OJO: /empresa/:slug SÍ es público,
-   *   es la página pública de la empresa).
-   */
-  private isPublicUrl(url: string): boolean {
-    const path = url.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
-    if (path === '/app' || path.startsWith('/app/')) return false;
-    if (path === '/empresa') return false;
-    return true;
-  }
-
-  /**
    * Empieza a escuchar la navegación. Llamar una sola vez al arrancar la app
    * (desde AppComponent). Si no hay pixelId configurado, no hace nada.
    */
@@ -58,7 +46,7 @@ export class MetaPixelService {
     // destino real sea /app — eso cargaría el pixel en el dashboard. Solo lo
     // evaluamos si la navegación YA terminó (router.navigated); el resto de cargas
     // iniciales las captura el primer NavigationEnd de la suscripción de abajo.
-    if (this.router.navigated && this.isPublicUrl(this.router.url)) {
+    if (this.router.navigated && isPublicUrl(this.router.url)) {
       this.onPublicView = true;
       this.trackPageView();
     }
@@ -66,7 +54,7 @@ export class MetaPixelService {
     const sub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
-        this.onPublicView = this.isPublicUrl(e.urlAfterRedirects);
+        this.onPublicView = isPublicUrl(e.urlAfterRedirects);
         if (this.onPublicView) this.trackPageView();
       });
 

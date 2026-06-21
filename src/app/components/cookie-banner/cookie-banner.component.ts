@@ -4,6 +4,7 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ConsentService } from '../../core/services/consent.service';
+import { isPublicUrl } from '../../helpers/url';
 
 /**
  * Banner de consentimiento de cookies. Aparece solo en vistas públicas mientras
@@ -28,7 +29,7 @@ export class CookieBannerComponent {
   readonly visible = computed(() =>
     isPlatformBrowser(this.platformId) &&
     this.consent.needsDecision() &&
-    this.isPublicUrl(this.currentUrl())
+    isPublicUrl(this.currentUrl())
   );
 
   constructor() {
@@ -39,12 +40,4 @@ export class CookieBannerComponent {
 
   accept(): void { this.consent.accept(); }
   reject(): void { this.consent.reject(); }
-
-  /** Mismas reglas que MetaPixelService: /app y /empresa (exacto) son privados. */
-  private isPublicUrl(url: string): boolean {
-    const path = url.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
-    if (path === '/app' || path.startsWith('/app/')) return false;
-    if (path === '/empresa') return false;
-    return true;
-  }
 }

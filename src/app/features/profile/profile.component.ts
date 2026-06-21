@@ -10,6 +10,7 @@ import { SubscriptionService } from '../../core/services/subscription.service';
 import { ProfessionalService } from '../../core/services/professional.service';
 import { environment } from '../../../environments/environment';
 import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
+import { ConfirmPasswordModalComponent } from '../../components/confirm-password-modal/confirm-password-modal.component';
 
 const PLAN_LABELS: Record<string, string> = {
   free:    'Gratuito',
@@ -21,7 +22,7 @@ const PLAN_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, GoogleCalendarConnectComponent],
+  imports: [CommonModule, FormsModule, RouterModule, GoogleCalendarConnectComponent, ConfirmPasswordModalComponent],
   templateUrl: './profile.component.html',
   animations: [
     trigger('fadeUp', [
@@ -186,18 +187,16 @@ export class ProfileComponent implements OnInit {
 
   // ── Privacidad / datos personales (Ley 21.719) ─────────────────────────────────
   // Tanto descargar como eliminar reconfirman la contraseña en un mismo modal.
-  exportMsg       = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+  exportMsg     = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  confirmIntent   = signal<'export' | 'delete' | null>(null);
-  confirmPassword = signal('');
-  confirmBusy     = signal(false);
-  confirmError    = signal<string | null>(null);
+  confirmIntent = signal<'export' | 'delete' | null>(null);
+  confirmBusy   = signal(false);
+  confirmError  = signal<string | null>(null);
 
   openExport(): void { this.openConfirm('export'); }
   openDelete(): void { this.openConfirm('delete'); }
 
   private openConfirm(intent: 'export' | 'delete'): void {
-    this.confirmPassword.set('');
     this.confirmError.set(null);
     this.confirmIntent.set(intent);
   }
@@ -207,14 +206,13 @@ export class ProfileComponent implements OnInit {
     this.confirmIntent.set(null);
   }
 
-  async submitConfirm(): Promise<void> {
-    if (!this.confirmPassword()) {
+  async submitConfirm(password: string): Promise<void> {
+    if (!password) {
       this.confirmError.set('Ingresa tu contraseña para confirmar.');
       return;
     }
     this.confirmBusy.set(true);
     this.confirmError.set(null);
-    const password = this.confirmPassword();
 
     if (this.confirmIntent() === 'export') {
       const result = await this.proSvc.exportMyData(password);
