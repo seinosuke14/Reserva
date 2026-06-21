@@ -989,6 +989,44 @@
         {{ brandSaving() ? 'Guardando...' : 'Guardar cambios' }}
       </button>
 
+      <!-- Privacidad y datos de la empresa (Ley 21.719) -->
+      <div class="bg-white rounded-[16px] border border-slate-200 p-5 mt-2">
+        <h3 class="text-[14px] font-bold text-primary mb-1">Privacidad y datos de la empresa</h3>
+        <p class="text-[12px] text-primary-400 mb-4">
+          Ejerce los derechos sobre los datos de la empresa conforme a la Ley N° 21.719.
+        </p>
+
+        <!-- Exportar datos -->
+        <div class="flex items-center justify-between gap-3 py-3 border-t border-slate-100">
+          <div>
+            <p class="text-[13px] font-semibold text-primary">Descargar datos de la empresa</p>
+            <p class="text-[11.5px] text-primary-400">Exporta un Excel con los datos de cuenta y datos bancarios.</p>
+          </div>
+          <button (click)="openExport()"
+            class="shrink-0 px-4 py-2 rounded-[10px] text-[12.5px] font-bold border-[1.5px] border-primary-200 text-primary transition-all hover:border-accent hover:text-accent">
+            Descargar
+          </button>
+        </div>
+        @if (exportMsg()) {
+          <p class="text-[11.5px] font-medium mb-1"
+            [class]="exportMsg()!.type === 'success' ? 'text-emerald-600' : 'text-red-500'">
+            {{ exportMsg()!.text }}
+          </p>
+        }
+
+        <!-- Eliminar empresa -->
+        <div class="flex items-center justify-between gap-3 py-3 border-t border-slate-100">
+          <div>
+            <p class="text-[13px] font-semibold text-red-600">Eliminar la empresa</p>
+            <p class="text-[11.5px] text-primary-400">Borra permanentemente la empresa y sus datos. Debes quitar antes a todos los profesionales del equipo.</p>
+          </div>
+          <button (click)="openDeleteModal()"
+            class="shrink-0 px-4 py-2 rounded-[10px] text-[12.5px] font-bold border-[1.5px] border-red-200 text-red-600 transition-all hover:bg-red-50">
+            Eliminar
+          </button>
+        </div>
+      </div>
+
     </div>
     }
 
@@ -1372,3 +1410,18 @@
   </main><!-- /content -->
   </div><!-- /flex-1 main col -->
 </div><!-- /flex h-screen -->
+
+<!-- Modal: confirmar con contraseña (descargar o eliminar) -->
+@if (confirmIntent(); as intent) {
+  <app-confirm-password-modal
+    [title]="intent === 'export' ? 'Descargar datos de la empresa' : 'Eliminar la empresa'"
+    [message]="intent === 'export'
+      ? 'Por seguridad, confirma la contraseña de la empresa para descargar los datos.'
+      : 'Esta acción es permanente: se eliminarán la cuenta de la empresa, sus métodos de pago, categorías y suscripciones. Ingresa la contraseña de la empresa para confirmar.'"
+    [confirmLabel]="intent === 'export' ? 'Confirmar y descargar' : 'Eliminar definitivamente'"
+    [busyLabel]="intent === 'export' ? 'Verificando...' : 'Eliminando...'"
+    [variant]="intent === 'export' ? 'primary' : 'danger'"
+    placeholder="Contraseña de la empresa"
+    [busy]="confirmBusy()" [error]="confirmError()"
+    (confirm)="submitConfirm($event)" (cancel)="closeConfirm()" />
+}

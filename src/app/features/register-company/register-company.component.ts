@@ -42,6 +42,7 @@ export class RegisterCompanyComponent {
   pendingEmail     = signal('');
   isSubmitting     = signal(false);
   errorMsg         = signal('');
+  acceptedTerms    = signal(false);
 
   verificationCode = signal('');
   verifyError      = signal('');
@@ -65,6 +66,7 @@ export class RegisterCompanyComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (!this.acceptedTerms()) { this.errorMsg.set('Debes aceptar los Términos y la Política de Privacidad.'); return; }
     this.isSubmitting.set(true);
     this.errorMsg.set('');
 

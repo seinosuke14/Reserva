@@ -48,7 +48,7 @@ import { RouterModule } from '@angular/router';
           <section class="terms-section">
             <h2>1. Aceptación de los términos</h2>
             <p>Si no estás de acuerdo con alguna de estas condiciones, debes abstenerte de usar la Plataforma. La aceptación queda registrada mediante el marcado del checkbox correspondiente en el momento del registro o de la confirmación de reserva, junto con la fecha y hora exacta de dicha aceptación.</p>
-            <p>Estos Términos se rigen por las leyes de la República de Chile y complementan, sin reemplazar, lo dispuesto en la Ley N° 19.628 (Protección de la Vida Privada) y la Ley N° 19.496 (Protección de los Derechos del Consumidor).</p>
+            <p>Estos Términos se rigen por las leyes de la República de Chile y complementan, sin reemplazar, lo dispuesto en la Ley N° 21.719 (Protección de Datos Personales) y la Ley N° 19.496 (Protección de los Derechos del Consumidor).</p>
           </section>
 
           <!-- 2 -->
@@ -66,8 +66,8 @@ import { RouterModule } from '@angular/router';
             <p>Para acceder al panel de gestión, el profesional debe crear una cuenta proporcionando información veraz, completa y actualizada. El profesional es responsable de mantener la confidencialidad de sus credenciales y de toda actividad que ocurra bajo su cuenta.</p>
             <h3>3.2 Clientes</h3>
             <p>Los clientes pueden realizar reservas sin necesidad de crear una cuenta. Al proporcionar sus datos para una reserva, confirman que la información entregada es verídica.</p>
-            <h3>3.3 Datos personales y derechos ARCO</h3>
-            <p>Los datos recopilados se tratan según nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>. De acuerdo a la Ley N° 19.628, tienes derecho a <strong>Acceder, Rectificar, Cancelar y Oponerte</strong> (derechos ARCO) al tratamiento de tus datos personales. Para ejercer estos derechos, contáctanos a través del correo indicado en la Plataforma.</p>
+            <h3>3.3 Datos personales y derechos ARCO+P</h3>
+            <p>Los datos recopilados se tratan según nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>. De acuerdo a la Ley N° 21.719, tienes derecho a <strong>Acceder, Rectificar, Cancelar, Oponerte y a la Portabilidad</strong> (derechos ARCO+P) respecto del tratamiento de tus datos personales. Para ejercer estos derechos, contáctanos a través del correo indicado en la Plataforma.</p>
           </section>
 
           <!-- 4 -->
@@ -162,7 +162,7 @@ import { RouterModule } from '@angular/router';
           <!-- 11 -->
           <section class="terms-section">
             <h2>11. Privacidad y datos personales</h2>
-            <p>El tratamiento de los datos personales de los usuarios se rige por nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>, disponible en la Plataforma. Los datos recopilados se utilizan exclusivamente para la gestión de reservas y comunicaciones relacionadas con el servicio, en conformidad con la Ley N° 19.628.</p>
+            <p>El tratamiento de los datos personales de los usuarios se rige por nuestra <a routerLink="/privacidad" class="terms-inline-link">Política de Privacidad</a>, disponible en la Plataforma. Los datos recopilados se utilizan exclusivamente para la gestión de reservas y comunicaciones relacionadas con el servicio, en conformidad con la Ley N° 21.719.</p>
             <p>Lets Reserve implementa medidas técnicas y organizativas para prevenir accesos no autorizados, fraude o uso indebido de la información. <strong>No venderemos ni cederemos tus datos personales a terceros con fines comerciales o publicitarios.</strong></p>
           </section>
 
