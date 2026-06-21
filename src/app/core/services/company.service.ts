@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { IServiceCategory } from '../../helpers/models';
+import { blobErrorMessage } from '../../helpers/http-errors';
 
 export interface ICompany {
   id: string;
@@ -213,6 +214,38 @@ export class CompanyService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(COMPANY_KEY);
       localStorage.removeItem(COMPANY_TOKEN_KEY);
+    }
+  }
+
+  // ── Privacidad / datos de la empresa (Ley 21.719) ───────────────────────────
+
+  /** Descarga un Excel con los datos de la empresa. Reconfirma la contraseña. */
+  async exportData(password: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const blob = await firstValueFrom(
+        this.http.post(`${API_BASE}/company/me/export`, { password }, { responseType: 'blob' })
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `datos-empresa-letsreserve-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: await blobErrorMessage(err, 'No se pudieron exportar los datos.') };
+    }
+  }
+
+  /** Elimina permanentemente la empresa y sus datos. Bloqueado si tiene miembros. */
+  async deleteAccount(password: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.request('DELETE', `${API_BASE}/company/me`, { body: { password } })
+      );
+      return { success: true, message: res?.message };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'No se pudo eliminar la empresa.' };
     }
   }
 

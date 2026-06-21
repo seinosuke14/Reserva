@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { blobErrorMessage } from '../../helpers/http-errors';
 
 export type PlanType = 'free' | 'basic' | 'pro' | 'team' | 'pro_max';
 export type SubscriptionStatus = 'active' | 'suspended' | 'expired';
@@ -151,6 +152,38 @@ export class ProfessionalService {
       return { success: true, added: res.added, waMessagesLimit: res.waMessagesLimit, waMessagesSent: res.waMessagesSent, message: res.message };
     } catch (err: any) {
       return { success: false, message: err?.error?.message ?? 'Error al confirmar el pago.' };
+    }
+  }
+
+  // ── Privacidad / datos personales (Ley 21.719) ─────────────────────────────────
+
+  /** Descarga un Excel con los datos del profesional. Reconfirma la contraseña. */
+  async exportMyData(password: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const blob = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/professionals/me/export`, { password }, { responseType: 'blob' })
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mis-datos-letsreserve-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: await blobErrorMessage(err, 'No se pudieron exportar tus datos.') };
+    }
+  }
+
+  /** Elimina permanentemente la cuenta y todos los datos asociados (supresión). */
+  async deleteAccount(password: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.request('DELETE', `${environment.apiUrl}/professionals/me`, { body: { password } })
+      );
+      return { success: true, message: res?.message };
+    } catch (err: any) {
+      return { success: false, message: err?.error?.message ?? 'No se pudo eliminar la cuenta.' };
     }
   }
 }

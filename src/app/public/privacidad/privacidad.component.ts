@@ -39,12 +39,25 @@ import { RouterModule } from '@angular/router';
           <!-- 1 -->
           <section class="terms-section">
             <h2>1. Responsable del tratamiento</h2>
-            <p><strong>Lets Reserve</strong> es responsable del tratamiento de los datos personales recopilados a través de esta Plataforma, en conformidad con la Ley N° 19.628 sobre Protección de la Vida Privada de la República de Chile.</p>
+            <p><strong>Lets Reserve</strong> es responsable del tratamiento de los datos personales recopilados a través de esta Plataforma, en conformidad con la <strong>Ley N° 21.719</strong>, que regula la protección y el tratamiento de los datos personales en la República de Chile (y que actualiza la antigua Ley N° 19.628).</p>
+            <p>La autoridad de control en esta materia es la <strong>Agencia de Protección de Datos Personales</strong>, ante la cual el titular puede presentar reclamos si considera que sus derechos no han sido debidamente atendidos.</p>
+          </section>
+
+          <!-- 1.b -->
+          <section class="terms-section">
+            <h2>2. Bases que legitiman el tratamiento</h2>
+            <p>Tratamos tus datos personales amparados en una o más de las siguientes bases de licitud:</p>
+            <ul>
+              <li><strong>Consentimiento</strong>: cuando aceptas esta Política y, de forma separada, cuando autorizas usos opcionales (por ejemplo, cookies de medición).</li>
+              <li><strong>Ejecución de un contrato</strong>: para prestar el servicio de agenda y reservas que solicitas.</li>
+              <li><strong>Cumplimiento de obligaciones legales</strong>: por ejemplo, respaldos tributarios o contables.</li>
+              <li><strong>Interés legítimo</strong>: para la seguridad de la Plataforma y la prevención de fraudes, sin afectar tus derechos fundamentales.</li>
+            </ul>
           </section>
 
           <!-- 2 -->
           <section class="terms-section">
-            <h2>2. Datos que recopilamos</h2>
+            <h2>3. Datos que recopilamos</h2>
             <h3>2.1 Profesionales registrados</h3>
             <ul>
               <li>Nombre completo y RUT</li>
@@ -67,7 +80,7 @@ import { RouterModule } from '@angular/router';
 
           <!-- 3 -->
           <section class="terms-section">
-            <h2>3. Finalidad del tratamiento</h2>
+            <h2>4. Finalidad del tratamiento</h2>
             <p>Los datos recopilados se utilizan exclusivamente para:</p>
             <ul>
               <li>Gestionar y confirmar reservas de servicios</li>
@@ -81,14 +94,16 @@ import { RouterModule } from '@angular/router';
 
           <!-- 4 -->
           <section class="terms-section">
-            <h2>4. Almacenamiento y seguridad</h2>
+            <h2>5. Almacenamiento, seguridad y transferencia internacional</h2>
             <p>Los datos se almacenan en servidores protegidos. Aplicamos medidas técnicas razonables para prevenir accesos no autorizados, pérdida o alteración de la información. Sin embargo, ningún sistema de transmisión por internet es 100% seguro, por lo que no podemos garantizar seguridad absoluta.</p>
-            <p>Las contraseñas de los profesionales se almacenan cifradas y nunca en texto plano.</p>
+            <p>Las contraseñas se almacenan cifradas (nunca en texto plano) y las credenciales de cobro se guardan cifradas en reposo.</p>
+            <p><strong>Transferencia internacional:</strong> algunos de nuestros proveedores de infraestructura (alojamiento, base de datos y almacenamiento de archivos) pueden encontrarse fuera de Chile. En esos casos, la transferencia se realiza adoptando resguardos que aseguran un nivel de protección adecuado, conforme a la Ley N° 21.719.</p>
+            <p><strong>Notificación de brechas:</strong> ante una vulneración de seguridad que afecte tus datos personales y suponga un riesgo, notificaremos a la Agencia de Protección de Datos Personales y, cuando corresponda, a los titulares afectados, en los plazos que exige la ley.</p>
           </section>
 
           <!-- 5 -->
           <section class="terms-section">
-            <h2>5. Retención de datos</h2>
+            <h2>6. Retención de datos</h2>
             <ul>
               <li>Los datos de clientes se conservan mientras el profesional mantenga su cuenta activa en Lets Reserve.</li>
               <li>Los datos del profesional se conservan mientras su cuenta esté activa y por un período adicional de 2 años tras su baja, por razones de respaldo legal.</li>
@@ -98,58 +113,62 @@ import { RouterModule } from '@angular/router';
 
           <!-- 6 -->
           <section class="terms-section">
-            <h2>6. Derechos del titular</h2>
-            <p>De acuerdo a la Ley N° 19.628, tienes derecho a:</p>
+            <h2>7. Derechos del titular</h2>
+            <p>De acuerdo a la Ley N° 21.719, como titular de datos tienes derecho a:</p>
             <ul>
               <li><strong>Acceder</strong> a los datos personales que tenemos sobre ti</li>
-              <li><strong>Rectificar</strong> datos inexactos o desactualizados</li>
-              <li><strong>Cancelar</strong> o eliminar tus datos cuando ya no sean necesarios</li>
-              <li><strong>Oponerte</strong> al tratamiento de tus datos en ciertos casos</li>
+              <li><strong>Rectificar</strong> datos inexactos, incompletos o desactualizados</li>
+              <li><strong>Cancelar</strong> o suprimir tus datos cuando ya no sean necesarios o retires tu consentimiento</li>
+              <li><strong>Oponerte</strong> al tratamiento de tus datos en los casos que la ley permite</li>
+              <li><strong>Portabilidad</strong>: recibir tus datos en un formato estructurado y de uso común, y reutilizarlos</li>
             </ul>
-            <p>Para ejercer cualquiera de estos derechos, contáctanos a través del correo indicado en la Plataforma.</p>
+            <p>Si tienes una cuenta como profesional o empresa, puedes ejercer directamente y sin costo los derechos de <strong>acceso y portabilidad</strong> (descargando tus datos) y de <strong>supresión</strong> (eliminando tu cuenta) desde la sección de privacidad de tu panel. Para cualquier otro caso, o si reservas como cliente, puedes ejercer estos derechos escribiéndonos al correo indicado en la Plataforma; responderemos en los plazos legales.</p>
+            <p>Si no quedas conforme con la respuesta, puedes reclamar ante la <strong>Agencia de Protección de Datos Personales</strong>.</p>
           </section>
 
           <!-- 7 -->
           <section class="terms-section">
-            <h2>7. Cookies y tecnologías de seguimiento</h2>
-            <p>La Plataforma puede utilizar cookies de sesión estrictamente necesarias para el funcionamiento del sistema de autenticación. No utilizamos cookies de rastreo publicitario ni compartimos datos de navegación con terceros.</p>
+            <h2>8. Cookies y tecnologías de seguimiento</h2>
+            <p>La Plataforma utiliza <strong>cookies estrictamente necesarias</strong> para el funcionamiento del sistema de autenticación, que no requieren consentimiento.</p>
+            <p>En las páginas públicas, y <strong>solo si lo aceptas</strong> en el aviso de cookies, utilizamos cookies de analítica y medición de terceros (<em>Meta Pixel</em> de Meta Platforms) para entender el tráfico y mejorar nuestros servicios. Estas cookies <strong>no se cargan hasta que otorgas tu consentimiento</strong>, y puedes rechazarlas en cualquier momento sin afectar el uso de la Plataforma. Si las aceptas, se comparten datos de navegación con Meta conforme a su propia política de privacidad. El dashboard privado nunca carga estas cookies.</p>
           </section>
 
           <!-- 8 -->
           <section class="terms-section">
-            <h2>8. Proveedores de pago</h2>
+            <h2>9. Proveedores de pago</h2>
             <p>Los pagos con tarjeta son procesados íntegramente por Webpay (Transbank), Flow y Mercado Pago / Mercado Pago Connect. Lets Reserve no almacena ni tiene acceso a los datos de tarjetas de crédito o débito. Cada proveedor aplica su propia política de privacidad y seguridad.</p>
             <p>En transferencias bancarias directas y otros medios de pago externos, los fondos se transan directamente entre cliente y profesional, sin intervención ni acceso de Lets Reserve.</p>
           </section>
 
           <!-- 9 -->
           <section class="terms-section">
-            <h2>9. Integración con Google Calendar</h2>
+            <h2>10. Integración con Google Calendar</h2>
             <p>Si el profesional conecta su cuenta de Google, accedemos a los permisos mínimos necesarios para crear, editar y eliminar eventos en su calendario. Solo enviamos a Google la información de las citas gestionadas en la Plataforma. <strong>No leemos ni almacenamos otros eventos</strong> de su calendario con fines distintos a la sincronización.</p>
             <p>El uso de la información obtenida de las APIs de Google se ajusta a la <em>Google API Services User Data Policy</em>, incluidos sus requisitos de uso limitado (<em>Limited Use</em>). El profesional puede revocar este acceso en cualquier momento desde su cuenta de Google o desde la Plataforma.</p>
           </section>
 
           <!-- 10 -->
           <section class="terms-section">
-            <h2>10. Mensajería (WhatsApp)</h2>
+            <h2>11. Mensajería (WhatsApp)</h2>
             <p>Para el envío de confirmaciones y recordatorios compartimos el número de teléfono del destinatario con nuestro proveedor de mensajería (Meta y/o terceros autorizados). Estos datos se usan únicamente para la entrega del mensaje y se rigen también por las políticas de privacidad de dichos proveedores.</p>
+            <p>Estos mensajes son <strong>transaccionales</strong> (relacionados con la gestión de tu cita) y forman parte del servicio. <strong>No enviamos comunicaciones comerciales ni publicidad</strong> por este medio. Si en el futuro quisiéramos hacerlo, te pediríamos previamente tu consentimiento específico y separado, que podrás revocar en cualquier momento.</p>
           </section>
 
           <!-- 11 -->
           <section class="terms-section">
-            <h2>11. Menores de edad</h2>
+            <h2>12. Menores de edad</h2>
             <p>La Plataforma no está dirigida a menores de 18 años. No recopilamos conscientemente datos de menores. Si detectamos que se han recopilado datos de un menor sin autorización, los eliminaremos de inmediato.</p>
           </section>
 
           <!-- 12 -->
           <section class="terms-section">
-            <h2>12. Modificaciones a esta política</h2>
+            <h2>13. Modificaciones a esta política</h2>
             <p>Lets Reserve se reserva el derecho de actualizar esta Política en cualquier momento. Los cambios serán notificados a los usuarios registrados con al menos 15 días de anticipación. El uso continuado de la Plataforma tras la notificación implica la aceptación de la nueva versión.</p>
           </section>
 
           <!-- 13 -->
           <section class="terms-section">
-            <h2>13. Contacto</h2>
+            <h2>14. Contacto</h2>
             <p>Para consultas relacionadas con esta Política de Privacidad o para ejercer tus derechos, puedes contactarnos a través del correo indicado en el panel de la Plataforma.</p>
           </section>
 
