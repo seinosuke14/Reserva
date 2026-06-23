@@ -1,5 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
@@ -43,6 +43,7 @@ export class RegisterComponent implements OnInit {
   private readonly pixel         = inject(MetaPixelService);
   private readonly router        = inject(Router);
   private readonly route         = inject(ActivatedRoute);
+  private readonly platformId    = inject(PLATFORM_ID);
 
   inviteToken = signal<string | null>(null);
 
@@ -76,10 +77,13 @@ export class RegisterComponent implements OnInit {
     const token = this.route.snapshot.queryParamMap.get('invite');
     if (token) this.inviteToken.set(token);
 
-    const state = history.state as { step?: string; email?: string };
-    if (state?.step === 'verify' && state?.email) {
-      this.pendingEmail.set(state.email);
-      this.step.set('verify');
+    // history solo existe en el navegador; en SSR no se evalúa (evita ReferenceError).
+    if (isPlatformBrowser(this.platformId)) {
+      const state = history.state as { step?: string; email?: string };
+      if (state?.step === 'verify' && state?.email) {
+        this.pendingEmail.set(state.email);
+        this.step.set('verify');
+      }
     }
   }
 

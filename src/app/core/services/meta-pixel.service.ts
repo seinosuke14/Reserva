@@ -4,7 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ConsentService } from './consent.service';
-import { isPublicUrl } from '../../helpers/url';
+import { isPublicUrl, pageType } from '../../helpers/url';
 
 declare global {
   interface Window {
@@ -75,7 +75,9 @@ export class MetaPixelService {
   private trackPageView(): void {
     if (!this.consent.analyticsAllowed()) return;
     this.ensureLoaded();
-    window.fbq?.('track', 'PageView');
+    // Enviamos el tipo de página (landing, perfil_reserva, planes, etc.) para
+    // poder segmentar campañas/conversiones por superficie en el panel de Meta.
+    window.fbq?.('track', 'PageView', { page_type: pageType(this.router.url) });
   }
 
   /**
@@ -116,6 +118,11 @@ export class MetaPixelService {
     script.src = 'https://connect.facebook.net/en_US/fbevents.js';
     this.doc.head.appendChild(script);
 
+    // Desactiva el auto-tracking de Meta (clics en botones tipo
+    // 'SubscribedButtonClick', PageView automático en navegaciones SPA, etc.).
+    // Debe ir ANTES del init. Así solo enviamos NUESTROS eventos manuales y nunca
+    // se rastrea fuera de las vistas públicas (p.ej. el dashboard /app).
+    window.fbq?.('set', 'autoConfig', false, this.pixelId);
     window.fbq?.('init', this.pixelId);
   }
 }

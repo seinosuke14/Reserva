@@ -286,6 +286,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.storedCustomerName.set((this.f['name'].value ?? '').trim());
     this.pendingNameChange.set(null);
     this.step.set(3);
+    this._trackStep(3);
   }
 
   /** El cliente prefiere mantener el nombre que suele usar: lo restaura y continúa. */
@@ -294,6 +295,28 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     if (stored) this.f['name'].setValue(stored);
     this.pendingNameChange.set(null);
     this.step.set(3);
+    this._trackStep(3);
+  }
+
+  /**
+   * Embudo (Meta Pixel): dispara el evento al ENTRAR a cada paso, para medir
+   * hasta dónde llega el usuario. Paso 2 = llegó a datos; paso 3 = llegó a pago.
+   */
+  private _trackStep(step: 1 | 2 | 3): void {
+    if (step === 2) {
+      this.pixel.track('AddBookingInfo', {
+        content_name: this.bookingLabel(),
+        value:        this.bookingPrice(),
+        currency:     'CLP',
+      });
+    } else if (step === 3) {
+      this.pixel.track('InitiateCheckout', {
+        content_name:   this.bookingLabel(),
+        value:          this.bookingPrice(),
+        currency:       'CLP',
+        payment_method: this.selectedPayment()?.provider,
+      });
+    }
   }
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────
@@ -334,6 +357,14 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       }
       this.loadState.set('ready');
       this._setMeta(data.professional, slug);
+
+      // Embudo de reserva (Meta Pixel): el visitante llegó al perfil del profesional.
+      this.pixel.track('ViewContent', {
+        content_type: 'professional',
+        content_name: data.professional.name,
+        content_ids:  [slug],
+        specialty:    data.professional.specialty,
+      });
     } catch (err: any) {
       if (err?.status === 404) {
         this.router.navigate(['/app']);
@@ -350,6 +381,16 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
     this.step.set(1);
     this.selectedHour.set(null);
     this.viewMode.set('checkout');
+
+    // Embudo: eligió un servicio (de quién, qué y a qué precio).
+    this.pixel.track('AddToCart', {
+      content_type: 'service',
+      content_name: service.name,
+      content_ids:  [service.id],
+      value:        service.price ?? 0,
+      currency:     'CLP',
+      professional: this.professional()?.name,
+    });
   }
 
   backToProfile(): void {
@@ -362,10 +403,26 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
   selectDate(date: string): void {
     this.selectedDate.set(date);
     this.selectedHour.set(null);
+
+    // Embudo: eligió una fecha.
+    this.pixel.track('SelectBookingDate', {
+      date,
+      content_name: this.bookingLabel(),
+      professional: this.professional()?.name,
+    });
   }
 
   selectHour(time: string): void {
     this.selectedHour.set(time);
+
+    // Embudo: eligió una hora.
+    this.pixel.track('SelectBookingTime', {
+      date:         this.selectedDate(),
+      time,
+      content_name: this.bookingLabel(),
+      value:        this.bookingPrice(),
+      currency:     'CLP',
+    });
   }
 
   selectPayment(method: IPublicPaymentMethod): void {
@@ -395,7 +452,9 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.step.set((current + 1) as 1 | 2 | 3);
+    const next = (current + 1) as 1 | 2 | 3;
+    this.step.set(next);
+    this._trackStep(next);
   }
 
   readonly canProceed = computed(() => {
@@ -488,6 +547,17 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
         this.bookingRef.set(res.bookingRef);
         this.bookedAppointmentId.set(res.appointmentId ?? '');
         this.isBooked.set(true);
+      }
+
+      // Confirmación in-page (transferencia o pago sin redirección): llegó a la
+      // pantalla de agradecimiento. El flujo con redirección lo registra
+      // payment-result al volver. Métrica de embudo "llegó hasta el final".
+      if (this.isBooked()) {
+        this.pixel.track('BookingThankYou', {
+          value:    this.bookingPrice(),
+          currency: 'CLP',
+          payment:  provider,
+        });
       }
     } catch (err: any) {
       alert(err?.error?.message ?? 'No se pudo confirmar la reserva. Intenta de nuevo.');
