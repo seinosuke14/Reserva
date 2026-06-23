@@ -389,6 +389,9 @@ export class PaymentResultComponent implements OnInit {
 
     // Pago confirmado → evento de conversión Purchase (Meta Pixel) con el monto cobrado.
     this.pixel.track('Purchase', { value: this.appointmentAmount(), currency: 'CLP' });
+    // Llegó al final de la reserva (pantalla de agradecimiento). Métrica de embudo
+    // unificada con la confirmación por transferencia.
+    this.pixel.track('BookingThankYou', { value: this.appointmentAmount(), currency: 'CLP', payment: 'online' });
   }
 
   private showError(title: string, message: string): void {
