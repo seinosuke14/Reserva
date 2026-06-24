@@ -23,6 +23,7 @@ export function pageType(url: string): string {
   if (path === '/login')                                        return 'login';
   if (path === '/registro' || path === '/registro-empresa')     return 'registro';
   if (path === '/planes')                                       return 'planes';
+  if (path === '/bienvenida')                                   return 'bienvenida';
   if (path === '/reservar/pago-resultado')                      return 'pago_resultado';
   if (path === '/reservar/encuesta')                            return 'encuesta';
   if (path.startsWith('/reservar/'))                            return 'perfil_reserva';

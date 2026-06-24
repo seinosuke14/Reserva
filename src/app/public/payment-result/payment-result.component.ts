@@ -5,7 +5,6 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MetaPixelService } from '../../core/services/meta-pixel.service';
 import { formatCLP, formatDateLong } from '../../helpers/formatters';
 
 type PaymentState = 'checking' | 'success' | 'error';
@@ -266,7 +265,6 @@ export class PaymentResultComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
-  private readonly pixel = inject(MetaPixelService);
 
   readonly state = signal<PaymentState>('checking');
   readonly formatCLP = formatCLP;
@@ -386,12 +384,6 @@ export class PaymentResultComponent implements OnInit {
     this.appointmentAmount.set(appointment.amountWithVat ?? appointment.amount);
     this.appointmentId = appointment.id;
     this.state.set('success');
-
-    // Pago confirmado → evento de conversión Purchase (Meta Pixel) con el monto cobrado.
-    this.pixel.track('Purchase', { value: this.appointmentAmount(), currency: 'CLP' });
-    // Llegó al final de la reserva (pantalla de agradecimiento). Métrica de embudo
-    // unificada con la confirmación por transferencia.
-    this.pixel.track('BookingThankYou', { value: this.appointmentAmount(), currency: 'CLP', payment: 'online' });
   }
 
   private showError(title: string, message: string): void {
