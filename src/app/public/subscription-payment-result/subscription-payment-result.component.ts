@@ -63,7 +63,9 @@ export class SubscriptionPaymentResultComponent implements OnInit {
         subscriptionEndDate: result.endDate ?? null,
       });
 
-      this.state.set('success');
+      // Vista de bienvenida (captura el plan para el pixel) antes del dashboard.
+      this.router.navigate(['/bienvenida'], { queryParams: { plan: result.plan } });
+      return;
     } else {
       this.state.set('error');
       this.errorMsg.set(result.message ?? 'El pago no pudo ser procesado.');

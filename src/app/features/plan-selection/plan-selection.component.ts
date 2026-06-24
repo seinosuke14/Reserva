@@ -166,7 +166,8 @@ export class PlanSelectionComponent implements OnInit {
           subscriptionStatus: result.subscriptionStatus as any,
           subscriptionEndDate: result.subscriptionEndDate ?? null,
         });
-        this.router.navigate(['/app']);
+        // Vista de bienvenida (captura el plan para el pixel) antes del dashboard.
+        this.router.navigate(['/bienvenida'], { queryParams: { plan: 'free' } });
       } else {
         this.errorMsg.set(result.message ?? 'Error al activar el plan gratuito.');
         this.activating.set(null);

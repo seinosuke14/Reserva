@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MetaPixelService } from '../../core/services/meta-pixel.service';
 
 type SurveyState = 'form' | 'submitted' | 'skipped' | 'already_rated' | 'error';
 
@@ -20,7 +19,6 @@ export class SatisfactionSurveyComponent implements OnInit {
   private readonly route  = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly http   = inject(HttpClient);
-  private readonly pixel  = inject(MetaPixelService);
 
   readonly state          = signal<SurveyState>('form');
   readonly hoveredStar    = signal(0);
@@ -50,8 +48,6 @@ export class SatisfactionSurveyComponent implements OnInit {
         })
       );
       this.state.set('submitted');
-      // Completó la encuesta de satisfacción (con su valoración). Métrica de engagement.
-      this.pixel.track('SubmitSurvey', { rating: this.selectedRating() });
     } catch (err: any) {
       if (err?.error?.message?.includes('Ya valoraste')) {
         this.state.set('already_rated');
