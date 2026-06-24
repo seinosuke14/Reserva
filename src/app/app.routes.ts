@@ -74,6 +74,11 @@ export const routes: Routes = [
     path: 'planes',
     loadComponent: () => import('./features/plan-selection/plan-selection.component').then(m => m.PlanSelectionComponent)
   },
+  // Vista de bienvenida tras registrar un plan (pública para el pixel; no se indexa)
+  {
+    path: 'bienvenida',
+    loadComponent: () => import('./features/welcome/welcome.component').then(m => m.WelcomeComponent)
+  },
   {
     path: 'suscripcion/pago-resultado',
     loadComponent: () => import('./public/subscription-payment-result/subscription-payment-result.component').then(m => m.SubscriptionPaymentResultComponent)

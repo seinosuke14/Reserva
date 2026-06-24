@@ -1,0 +1,62 @@
+<div class="wlc-wrap">
+  <div class="wlc-card" @fadeIn>
+    <div class="wlc-check" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    </div>
+
+    <h1 class="wlc-title">
+      ¡Bienvenido{{ userName() ? ', ' + userName() : '' }}!
+    </h1>
+
+    @if (planLabel()) {
+      <p class="wlc-sub">
+        @if (isFree()) {
+          Tu prueba del plan <strong>{{ planLabel() }}</strong> ya está activa.
+        } @else {
+          Tu plan <strong>{{ planLabel() }}</strong> quedó activado. ¡Gracias por confiar en nosotros!
+        }
+      </p>
+    } @else {
+      <p class="wlc-sub">Tu cuenta está lista para usarse.</p>
+    }
+
+    <p class="wlc-hint">
+      Ya puedes gestionar tu agenda, tus servicios y tu perfil público desde tu panel.
+    </p>
+
+    <div class="wlc-steps">
+      <h2 class="wlc-steps-title">Primeros pasos de modificación</h2>
+
+      <div class="wlc-step">
+        <span class="wlc-step-num">1</span>
+        <span class="wlc-step-text">
+          Recuerda principalmente ordenar tu <strong>horario y bloques de horario</strong>
+          para que la gente pueda agendar.
+        </span>
+      </div>
+
+      <div class="wlc-step">
+        <span class="wlc-step-num">2</span>
+        <span class="wlc-step-text">
+          Recuerda crear tus <strong>servicios y categorías</strong>. Recuerda que tus
+          clientes quieren saber qué servicios ofreces y a cuánto.
+        </span>
+      </div>
+
+      <div class="wlc-step">
+        <span class="wlc-step-num">3</span>
+        <span class="wlc-step-text">
+          Añade tus <strong>medios de pago</strong> o acepta el medio de pago que
+          tenemos disponible para ti.
+        </span>
+      </div>
+    </div>
+
+    <button type="button" class="wlc-btn" (click)="goToDashboard()">
+      Ir a mi panel
+    </button>
+  </div>
+</div>
