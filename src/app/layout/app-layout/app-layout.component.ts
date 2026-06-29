@@ -1,13 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationCenterComponent } from '../notification-center/notification-center.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
+import { OnboardingTourComponent } from '../../components/onboarding-tour/onboarding-tour.component';
+import { TourService, TourStep } from '../../core/services/tour.service';
 
 interface NavItem {
   path: string;
@@ -33,7 +37,7 @@ interface PageMeta {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationCenterComponent],
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, OnboardingTourComponent],
   templateUrl: './app-layout.component.html',
   animations: [
     trigger('sidebarLabel', [
@@ -59,8 +63,34 @@ interface PageMeta {
 export class AppLayoutComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
   private readonly caps = inject(PlanCapabilitiesService);
+  private readonly tour = inject(TourService);
   readonly notifSvc = inject(NotificationService);
+
+  /** Pasos del tutorial de onboarding del profesional. */
+  private readonly tourSteps: TourStep[] = [
+    {
+      route: '/app/horario',
+      title: 'Configura tus horarios',
+      body: 'Define los días y horas en que atiendes, y bloquea los momentos en que no estás disponible. Cuando termines, presiona Continuar.',
+    },
+    {
+      route: '/app/servicios',
+      title: 'Crea tus servicios',
+      body: 'Agrega los servicios que ofreces, organizados por categoría, con su contenido y detalles.',
+    },
+    {
+      route: '/app/pagos',
+      title: 'Configura el medio de pago',
+      body: 'Conecta tu forma de cobro para recibir los pagos de tus reservas.',
+    },
+    {
+      route: '/app/editar',
+      title: 'Personaliza la vista del cliente',
+      body: 'Ajusta cómo verán tu portal los clientes al momento de agendar.',
+    },
+  ];
 
   isSidebarOpen       = signal(window.innerWidth >= 768);
   isNotificationsOpen = signal(false);
@@ -102,6 +132,9 @@ export class AppLayoutComponent {
     },
   ]);
 
+  /** Enlace independiente al pie del nav (fuera de toda categoría). */
+  readonly helpLink: NavGroup = { label: '¿Cómo usar LR?', icon: 'help', path: '/app/como-usar' };
+
   private readonly pageTitles: Record<string, PageMeta> = {
     '/app':              { title: 'Vista rápida',   sub: 'Bienvenido de vuelta' },
     '/app/agenda':        { title: 'Agenda',         sub: 'Gestiona tus citas y disponibilidad' },
@@ -113,6 +146,7 @@ export class AppLayoutComponent {
     '/app/cotizaciones':  { title: 'Cotizaciones',    sub: 'Gestiona las solicitudes de cotización' },
     '/app/perfil':        { title: 'Mi Perfil',      sub: 'Gestiona tu cuenta y configuración personal' },
     '/app/editar':        { title: 'Perfil público', sub: 'Personaliza la apariencia de tu portal de reservas' },
+    '/app/como-usar':     { title: '¿Cómo usar LR?', sub: 'Configura tu cuenta paso a paso' },
   };
 
   private readonly subscriptionSvc = inject(SubscriptionService);
@@ -165,6 +199,21 @@ export class AppLayoutComponent {
     this.currentPath.set(this.router.url);
     this.openActiveGroup();
     window.addEventListener('resize', this._resizeListener);
+
+    // Ofrece el tutorial a las cuentas que aún no lo completaron.
+    this.tour.offerIfPending({
+      steps: this.tourSteps,
+      alreadyCompleted: !!this.user()?.onboardingCompleted,
+      onComplete: () => this.markOnboardingDone(),
+    });
+  }
+
+  /** Marca el onboarding como completado (en memoria y en el backend). */
+  private markOnboardingDone(): void {
+    this.auth.patchUser({ onboardingCompleted: true });
+    this.http.post(`${environment.apiUrl}/professionals/onboarding/complete`, {}).subscribe({
+      error: () => { /* se reintenta en la próxima sesión */ },
+    });
   }
 
   toggleSidebar() { this.isSidebarOpen.update(v => !v); }

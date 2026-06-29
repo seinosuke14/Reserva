@@ -100,6 +100,34 @@
         }
       </button>
       }
+
+      <!-- ── Enlace independiente al pie (¿Cómo usar LR?) ── -->
+      <div class="h-px bg-white/[.07] mx-2 my-2.5"></div>
+      <button (click)="selectTab('guia')"
+        class="group w-full flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
+        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
+        [style.gap]="isSidebarOpen() ? '9px' : '0'"
+        [style.background]="activeTab() === 'guia' ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))' : ''"
+        [style.color]="activeTab() === 'guia' ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [title]="!isSidebarOpen() ? '¿Cómo usar LR?' : ''">
+        @if (activeTab() === 'guia') {
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        }
+        <span class="shrink-0 transition-colors"
+          [style.color]="activeTab() === 'guia' ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </span>
+        @if (isSidebarOpen()) {
+        <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1 text-left"
+          [class.font-semibold]="activeTab() === 'guia'" [class.font-medium]="activeTab() !== 'guia'">
+          ¿Cómo usar LR?
+        </span>
+        }
+      </button>
     </nav>
 
     <!-- Bottom: empresa + logout -->
@@ -159,6 +187,7 @@
             @for (item of navItems; track item.tab) {
               @if (item.tab === activeTab()) { {{ item.label }} }
             }
+            @if (activeTab() === 'guia') { ¿Cómo usar LR? }
           </h1>
         </div>
       </div>
@@ -177,7 +206,7 @@
 
     <!-- Content -->
   <main class="flex-1 overflow-y-auto" style="background:#f8fafc;">
-  <div class="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
+  <div data-tour-target="content" class="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
     @if (isLoading()) {
     <div class="flex-center py-24 text-[13px] text-slate-400 gap-2">
@@ -1405,6 +1434,15 @@
     </div>
     }
 
+    <!-- ══════════ ¿CÓMO USAR LR? ══════════ -->
+    @if (activeTab() === 'guia') {
+    <app-usage-guide
+      [steps]="guideSteps"
+      heading="¿Cómo usar Lets Reserve?"
+      subheading="Sigue estos 5 pasos para dejar tu empresa lista y empezar a recibir reservas."
+      (ctaAction)="selectTab($any($event))" />
+    }
+
     }
   </div><!-- /max-w container -->
   </main><!-- /content -->
@@ -1425,3 +1463,6 @@
     [busy]="confirmBusy()" [error]="confirmError()"
     (confirm)="submitConfirm($event)" (cancel)="closeConfirm()" />
 }
+
+<!-- Tutorial de onboarding (modal de bienvenida + spotlight) -->
+<app-onboarding-tour />

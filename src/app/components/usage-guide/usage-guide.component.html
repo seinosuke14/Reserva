@@ -1,0 +1,123 @@
+<div class="ug-wrap">
+
+  <!-- Encabezado -->
+  <header class="ug-header">
+    <span class="ug-badge">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+      Guía rápida
+    </span>
+    <h2 class="ug-title">{{ heading() }}</h2>
+    <p class="ug-subtitle">{{ subheading() }}</p>
+  </header>
+
+  <!-- Indicador de pasos -->
+  <div class="ug-steps">
+    <div class="ug-steps-line" aria-hidden="true">
+      <span class="ug-steps-line-fill" [style.width.%]="progressPct()"></span>
+    </div>
+    @for (step of steps(); track $index) {
+    <button type="button" class="ug-step-dot"
+      [class.is-active]="$index === current()"
+      [class.is-done]="$index < current()"
+      (click)="goTo($index)"
+      [attr.aria-label]="'Paso ' + ($index + 1) + ': ' + step.title">
+      <span class="ug-step-num">
+        @if ($index < current()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        } @else {
+        {{ $index + 1 }}
+        }
+      </span>
+      <span class="ug-step-label">{{ step.title }}</span>
+    </button>
+    }
+  </div>
+
+  <!-- Contenido del paso activo -->
+  @if (currentStep(); as step) {
+  <article class="ug-card">
+    <div class="ug-card-head">
+      <span class="ug-card-num">Paso {{ current() + 1 }} de {{ steps().length }}</span>
+      <h3 class="ug-card-title">{{ step.title }}</h3>
+    </div>
+
+    @if (step.intro) {
+    <p class="ug-card-intro">{{ step.intro }}</p>
+    }
+
+    @if (step.items?.length) {
+    <ul class="ug-list">
+      @for (item of step.items; track $index) {
+      <li class="ug-list-item">
+        <span class="ug-list-mark" aria-hidden="true">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <span>{{ item }}</span>
+      </li>
+      }
+    </ul>
+    }
+
+    @if (step.tip) {
+    <div class="ug-tip">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z" />
+      </svg>
+      <span>{{ step.tip }}</span>
+    </div>
+    }
+
+    @if (step.cta?.link) {
+    <a [routerLink]="step.cta!.link" class="ug-cta">
+      {{ step.cta!.label }}
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </svg>
+    </a>
+    } @else if (step.cta?.action) {
+    <button type="button" class="ug-cta" (click)="ctaAction.emit(step.cta!.action!)">
+      {{ step.cta!.label }}
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </svg>
+    </button>
+    }
+
+    <!-- Navegación -->
+    <div class="ug-nav">
+      <button type="button" class="ug-nav-btn ug-nav-prev" (click)="prev()" [disabled]="isFirst()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Anterior
+      </button>
+
+      @if (!isLast()) {
+      <button type="button" class="ug-nav-btn ug-nav-next" (click)="next()">
+        Siguiente
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+      } @else {
+      <span class="ug-done">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        ¡Todo listo!
+      </span>
+      }
+    </div>
+  </article>
+  }
+</div>

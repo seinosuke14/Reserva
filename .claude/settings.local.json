@@ -31,7 +31,15 @@
       "Bash(powershell -Command ' *)",
       "Bash(node -e \"require\\('./src/controllers/privacy.controller.js'\\);require\\('./src/routes/company.routes.js'\\);console.log\\('OK empresa rutas+controller'\\)\")",
       "Bash(node -e \"require\\('./src/routes/professional.routes.js'\\);require\\('./src/routes/company.routes.js'\\);console.log\\('OK rutas'\\)\")",
-      "Bash(node -e \"require\\('./src/routes/professional.routes.js'\\);require\\('./src/routes/company.routes.js'\\);const c=require\\('./src/controllers/privacy.controller.js'\\);console.log\\('exports:', Object.keys\\(c\\).join\\(', '\\)\\)\")"
+      "Bash(node -e \"require\\('./src/routes/professional.routes.js'\\);require\\('./src/routes/company.routes.js'\\);const c=require\\('./src/controllers/privacy.controller.js'\\);console.log\\('exports:', Object.keys\\(c\\).join\\(', '\\)\\)\")",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src\" && ls -R . | head -80)",
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src/**)",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src/routes\" && ls)",
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src/routes/**)",
+      "Bash(node --check src/routes/professional.routes.js)",
+      "Bash(node --check src/routes/company.routes.js)",
+      "Bash(node --check src/controllers/auth.controller.js)",
+      "Bash(node --check src/controllers/company.controller.js)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
