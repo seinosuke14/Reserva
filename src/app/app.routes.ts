@@ -135,6 +135,7 @@ export const routes: Routes = [
       { path: 'analytics', canActivate: [capabilityGuard('analyticsFull')], loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'perfil', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
       { path: 'editar', loadComponent: () => import('./features/brand-editor/brand-editor.component').then(m => m.BrandEditorComponent) },
+      { path: 'como-usar', loadComponent: () => import('./features/guide/guide.component').then(m => m.GuideComponent) },
       { path: '**', redirectTo: '' }
     ]
   },

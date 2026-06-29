@@ -105,6 +105,12 @@
           <rect x="10" y="7" width="4" height="14" rx="1" />
           <rect x="17" y="3" width="4" height="18" rx="1" />
         </svg>
+        <svg *ngSwitchCase="'help'" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75"
+          viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
       </ng-container>
     </ng-template>
 
@@ -215,6 +221,30 @@
       }
 
       }
+
+      <!-- ── Enlace independiente al pie (¿Cómo usar LR?) ── -->
+      <div class="h-px bg-white/[.07] mx-2 my-2.5"></div>
+      <a [routerLink]="helpLink.path" [title]="!isSidebarOpen() ? helpLink.label : ''"
+        class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
+        [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
+        [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(helpLink.path!)
+               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
+               : ''" [style.color]="isActive(helpLink.path!) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [class.hover:bg-white]="!isActive(helpLink.path!)" [class.hover:bg-opacity-5]="!isActive(helpLink.path!)">
+        @if (isActive(helpLink.path!)) {
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        }
+        <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(helpLink.path!)"
+          [style.color]="isActive(helpLink.path!) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: helpLink.icon }"></ng-container>
+        </span>
+        @if (isSidebarOpen()) {
+        <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1"
+          [class.font-semibold]="isActive(helpLink.path!)" [class.font-medium]="!isActive(helpLink.path!)">
+          {{ helpLink.label }}
+        </span>
+        }
+      </a>
     </nav>
 
     <!-- Bottom: User + Logout -->
@@ -351,7 +381,7 @@
 
     <!-- Content -->
     <main [class]="isFullHeightRoute() ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto bg-background'">
-      <div [class]="isFullHeightRoute() ? 'h-full' : 'max-w-7xl mx-auto p-4 md:p-6 min-h-full'">
+      <div data-tour-target="content" [class]="isFullHeightRoute() ? 'h-full' : 'max-w-7xl mx-auto p-4 md:p-6 min-h-full'">
         <router-outlet />
       </div>
     </main>
@@ -360,4 +390,7 @@
     <app-notification-center [isOpen]="isNotificationsOpen()" (closed)="isNotificationsOpen.set(false)">
     </app-notification-center>
   </div>
+
+  <!-- Tutorial de onboarding (modal de bienvenida + spotlight) -->
+  <app-onboarding-tour />
 </div>

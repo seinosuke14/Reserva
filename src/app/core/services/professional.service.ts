@@ -38,6 +38,8 @@ export interface IProfessional {
   requiresQuote?: boolean;
   profession?: { requiresQuote: boolean } | null;
   reminderPreference?: '1h_before' | '7h30_same_day' | '24h_before';
+  /** Marca si la cuenta ya pasó (o descartó) el tutorial de onboarding. */
+  onboardingCompleted?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

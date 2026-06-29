@@ -1,0 +1,94 @@
+<!-- ═══════════ Modal de bienvenida ═══════════ -->
+@if (tour.phase() === 'welcome') {
+<div class="ot-welcome-backdrop">
+  <div class="ot-welcome-card" role="dialog" aria-modal="true">
+    <div class="ot-welcome-icon">
+      <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    </div>
+    <h2 class="ot-welcome-title">¿Quieres aprender a configurar tu cuenta?</h2>
+    <p class="ot-welcome-text">
+      Te guiaremos paso a paso para dejar Lets Reserve listo y empezar a recibir
+      reservas. Toma menos de 2 minutos.
+    </p>
+    <div class="ot-welcome-actions">
+      <button type="button" class="ot-btn-ghost" (click)="tour.decline()">Ahora no</button>
+      <button type="button" class="ot-btn-primary" (click)="tour.accept()">
+        Aceptar
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ═══════════ Tour activo (spotlight) ═══════════ -->
+@if (tour.phase() === 'running') {
+
+  @if (spotlight(); as s) {
+  <!-- Paneles que oscurecen/difuminan todo menos el contenido -->
+  <div class="ot-panel" [style.top.px]="0" [style.left.px]="0"
+       [style.width.vw]="100" [style.height.px]="s.top"></div>
+  <div class="ot-panel" [style.top.px]="s.top + s.height" [style.left.px]="0"
+       [style.width.vw]="100" [style.bottom.px]="0"></div>
+  <div class="ot-panel" [style.top.px]="s.top" [style.left.px]="0"
+       [style.width.px]="s.left" [style.height.px]="s.height"></div>
+  <div class="ot-panel" [style.top.px]="s.top" [style.left.px]="s.left + s.width"
+       [style.right.px]="0" [style.height.px]="s.height"></div>
+
+  <!-- Anillo alrededor del área resaltada -->
+  <div class="ot-ring" [style.top.px]="s.top" [style.left.px]="s.left"
+       [style.width.px]="s.width" [style.height.px]="s.height"></div>
+  }
+
+  <!-- Salir de tutorial (arriba a la izquierda) -->
+  <button type="button" class="ot-exit" (click)="tour.exit()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+    Salir de tutorial
+  </button>
+
+  <!-- Tarjeta del paso (abajo, centrada) -->
+  @if (tour.currentStep(); as step) {
+  <div class="ot-step-card">
+    <div class="ot-step-arrow" aria-hidden="true">
+      <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="12" y1="19" x2="12" y2="5" />
+        <polyline points="5 12 12 5 19 12" />
+      </svg>
+    </div>
+
+    <div class="ot-step-progress">Paso {{ tour.index() + 1 }} de {{ tour.total() }}</div>
+    <h3 class="ot-step-title">{{ step.title }}</h3>
+    <p class="ot-step-body">{{ step.body }}</p>
+
+    <div class="ot-step-nav">
+      <button type="button" class="ot-nav-prev" (click)="tour.prev()" [disabled]="tour.isFirst()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Atrás
+      </button>
+      <button type="button" class="ot-nav-next" (click)="tour.next()">
+        {{ tour.isLast() ? 'Finalizar' : 'Continuar' }}
+        @if (!tour.isLast()) {
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+        } @else {
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        }
+      </button>
+    </div>
+  </div>
+  }
+}
