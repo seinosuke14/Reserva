@@ -30,6 +30,8 @@ export interface ICompany {
   bodyFont: string | null;
   reminderPreference?: '1h_before' | '7h30_same_day' | '24h_before';
   paymentRouting?: 'company' | 'professional';
+  /** Marca si la empresa ya pasó (o descartó) el tutorial de onboarding. */
+  onboardingCompleted?: boolean;
 }
 
 export interface ICompanyMember {

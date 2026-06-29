@@ -21,6 +21,9 @@ import { FONT_OPTIONS } from '../brand-editor/brand-editor.component';
 import { environment } from '../../../environments/environment';
 import { GoogleCalendarConnectComponent } from '../../components/google-calendar-connect/google-calendar-connect.component';
 import { ConfirmPasswordModalComponent } from '../../components/confirm-password-modal/confirm-password-modal.component';
+import { UsageGuideComponent, GuideStep } from '../../components/usage-guide/usage-guide.component';
+import { OnboardingTourComponent } from '../../components/onboarding-tour/onboarding-tour.component';
+import { TourService, TourStep } from '../../core/services/tour.service';
 import { planLabel } from '../../helpers/formatters';
 
 const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -30,7 +33,7 @@ const LC_W = 580, LC_H = 150;
 const LC_PLOT_W = LC_W - LC_PAD_LEFT - LC_PAD_RIGHT;
 const LC_PLOT_H = LC_H - LC_PAD_TOP - LC_PAD_BOTTOM;
 
-type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos' | 'categorias';
+type ActiveTab = 'analytics' | 'equipo' | 'invitaciones' | 'planes' | 'agenda' | 'marca' | 'pagos' | 'categorias' | 'guia';
 
 type PaymentProvider = 'flow' | 'transfer' | 'khipu' | 'mercadopago' | 'mercadopago_connect';
 
@@ -115,7 +118,7 @@ const NAV_ITEMS: { tab: ActiveTab; label: string; icon: string }[] = [
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, GoogleCalendarConnectComponent, ConfirmPasswordModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PlanSelectionComponent, GoogleCalendarConnectComponent, ConfirmPasswordModalComponent, UsageGuideComponent, OnboardingTourComponent],
   templateUrl: './company-dashboard.component.html',
   animations: [
     trigger('sidebarLabel', [
@@ -133,8 +136,75 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
   private readonly svc    = inject(CompanyService);
   private readonly router = inject(Router);
   private readonly http   = inject(HttpClient);
+  private readonly tour   = inject(TourService);
+
+  /** Pasos del tutorial de onboarding de la empresa (navega por pestañas). */
+  private readonly tourSteps: TourStep[] = [
+    {
+      tab: 'invitaciones',
+      title: 'Invita a tu equipo',
+      body: 'Invita por correo a los profesionales que formarán parte de tu empresa. Cuando termines, presiona Continuar.',
+    },
+    {
+      tab: 'marca',
+      title: 'Configura la vista del cliente',
+      body: 'Personaliza cómo verán tus clientes el portal de la empresa al agendar.',
+    },
+    {
+      tab: 'categorias',
+      title: 'Crea las categorías',
+      body: 'Define las categorías de servicios que compartirá tu equipo.',
+    },
+    {
+      tab: 'planes',
+      title: 'Configura la mensajería',
+      body: 'Ajusta cuándo se enviarán los recordatorios automáticos a los clientes.',
+    },
+    {
+      tab: 'pagos',
+      title: 'Configura el medio de pago',
+      body: 'Conecta la forma de cobro de la empresa para recibir los pagos.',
+    },
+  ];
+
+  /** Marca el onboarding de la empresa como completado (memoria + backend). */
+  private markOnboardingDone(): void {
+    this.svc.patchCompany({ onboardingCompleted: true });
+    this.http.post(`${environment.apiUrl}/company/onboarding/complete`, {}).subscribe({
+      error: () => { /* se reintenta en la próxima sesión */ },
+    });
+  }
 
   readonly navItems = NAV_ITEMS;
+
+  // ── Guía "¿Cómo usar LR?" (5 pasos para la empresa) ──
+  readonly guideSteps: GuideStep[] = [
+    {
+      title: 'Invita a tu equipo',
+      intro: 'Invita por correo a los profesionales que formarán parte de tu empresa.',
+      cta: { label: 'Ir a Invitaciones', action: 'invitaciones' },
+    },
+    {
+      title: 'Configura la vista del cliente',
+      intro: 'Personaliza cómo verán tus clientes el portal de la empresa al agendar.',
+      cta: { label: 'Ir a Marca', action: 'marca' },
+    },
+    {
+      title: 'Crea las categorías',
+      intro: 'Define las categorías de servicios que compartirá tu equipo.',
+      cta: { label: 'Ir a Categorías', action: 'categorias' },
+    },
+    {
+      title: 'Configura la mensajería',
+      intro: 'Ajusta cuándo se enviarán los recordatorios automáticos a los clientes.',
+      cta: { label: 'Ir a Mensajería', action: 'planes' },
+    },
+    {
+      title: 'Configura el medio de pago',
+      intro: 'Conecta la forma de cobro de la empresa para recibir los pagos.',
+      cta: { label: 'Ir a Pagos', action: 'pagos' },
+    },
+  ];
 
   company          = this.svc.currentCompany;
   activeTab        = signal<ActiveTab>('analytics');
@@ -924,6 +994,14 @@ export class CompanyDashboardComponent implements OnInit, OnDestroy {
       this.brandSlugValue.set(c.slug ?? '');
     }
     this.isLoading.set(false);
+
+    // Ofrece el tutorial a las empresas que aún no lo completaron.
+    this.tour.offerIfPending({
+      steps: this.tourSteps,
+      alreadyCompleted: !!this.company()?.onboardingCompleted,
+      navigate: (step) => { if (step.tab) this.selectTab(step.tab as ActiveTab); },
+      onComplete: () => this.markOnboardingDone(),
+    });
   }
 
   // ── Categorías de servicios (compartidas por el equipo, tope 5) ──
