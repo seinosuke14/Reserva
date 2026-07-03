@@ -39,7 +39,9 @@
       "Bash(node --check src/routes/professional.routes.js)",
       "Bash(node --check src/routes/company.routes.js)",
       "Bash(node --check src/controllers/auth.controller.js)",
-      "Bash(node --check src/controllers/company.controller.js)"
+      "Bash(node --check src/controllers/company.controller.js)",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src\" *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts||{},null,2\\)\\)\")"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
