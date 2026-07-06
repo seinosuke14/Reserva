@@ -41,7 +41,11 @@
       "Bash(node --check src/controllers/auth.controller.js)",
       "Bash(node --check src/controllers/company.controller.js)",
       "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src\" *)",
-      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts||{},null,2\\)\\)\")"
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts||{},null,2\\)\\)\")",
+      "Bash(node -e \"require\\('./src/controllers/auth.controller.js'\\); require\\('./src/controllers/promo.controller.js'\\); require\\('./src/controllers/subscription.controller.js'\\); require\\('./src/routes/promo.routes.js'\\); console.log\\('OK: sintaxis y requires correctos'\\)\")",
+      "Bash(npx ng *)",
+      "Bash(grep -E \"express-validator\" \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\\\\package.json\")",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

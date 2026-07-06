@@ -35,6 +35,8 @@ export interface IProfessional {
   companyEmail?: string | null;
   companySlug?: string | null;
   trialUsed?: boolean;
+  /** Código único para invitar a otros profesionales (sistema de referidos). */
+  referralCode?: string | null;
   requiresQuote?: boolean;
   profession?: { requiresQuote: boolean } | null;
   reminderPreference?: '1h_before' | '7h30_same_day' | '24h_before';
