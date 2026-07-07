@@ -1,0 +1,43 @@
+@if (visible() && info(); as ref) {
+<div class="referral-card">
+  <div class="referral-card__icon">
+    <svg width="22" height="22" fill="none" stroke="#8b5cf6" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M20 12v10H4V12" />
+      <path d="M2 7h20v5H2z" />
+      <path d="M12 22V7" />
+      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+      <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </svg>
+  </div>
+
+  <div class="referral-card__body">
+    <h3 class="referral-card__title">Invita y gana 1 mes Pro</h3>
+    <p class="referral-card__desc">
+      Comparte tu código con otros profesionales. Cuando uno se registre y contrate un plan,
+      ganas <strong>1 mes de plan Pro gratis</strong>.
+    </p>
+
+    <div class="referral-card__row">
+      <span class="referral-card__code">{{ ref.referralCode }}</span>
+      <button type="button" class="referral-card__copy" (click)="copyLink()">
+        @if (copied()) {
+        ✓ Link copiado
+        } @else {
+        Copiar link de invitación
+        }
+      </button>
+    </div>
+
+    @if (ref.total > 0) {
+    <p class="referral-card__stats">
+      {{ ref.total }} {{ ref.total === 1 ? 'profesional invitado' : 'profesionales invitados' }} ·
+      {{ ref.rewarded }} {{ ref.rewarded === 1 ? 'mes Pro ganado' : 'meses Pro ganados' }}
+    </p>
+    }
+
+    <p class="referral-card__note">
+      * Los meses gratuitos solo serán efectivos cuando la persona invitada realice el pago de algún plan.
+    </p>
+  </div>
+</div>
+}

@@ -230,6 +230,36 @@
           }
         </div>
 
+        <!-- Cupón / código de referido (opcional) -->
+        <div class="space-y-3">
+          <button type="button" (click)="showPromoFields.set(!showPromoFields())"
+            class="text-[12px] font-semibold text-[#00C4A7] hover:underline flex items-center gap-1">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+              class="transition-transform" [class.rotate-90]="showPromoFields()">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            ¿Tienes un cupón o código de referido?
+          </button>
+
+          @if (showPromoFields()) {
+          <div @stepAnim class="grid grid-cols-2 gap-3">
+            <div class="space-y-1.5">
+              <label class="form-hint">Cupón promocional</label>
+              <input formControlName="couponCode" type="text" placeholder="LR-XXXXXXXX" maxlength="20"
+                class="form-input uppercase border-primary-200" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="form-hint">Código de referido</label>
+              <input formControlName="referralCode" type="text" placeholder="XXXXXXXX" maxlength="12"
+                class="form-input uppercase border-primary-200" />
+            </div>
+          </div>
+          <p class="text-[10.5px] text-primary-400 ml-0.5">
+            Con un cupón válido obtienes 1 mes de plan Pro gratis adicional a tu prueba de 14 días.
+          </p>
+          }
+        </div>
+
         <!-- Términos y condiciones -->
         <label class="flex items-start gap-2.5 cursor-pointer group">
           <input type="checkbox" [checked]="acceptedTerms()" (change)="acceptedTerms.set(!acceptedTerms())"
