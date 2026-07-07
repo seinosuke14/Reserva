@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
+import { ReferralCardComponent } from '../../components/referral-card/referral-card.component';
 
 interface IAppointment {
   id: string;
@@ -40,7 +41,7 @@ interface IActivity {
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReferralCardComponent],
   templateUrl: './dashboard-home.component.html',
 })
 export class DashboardHomeComponent implements OnInit {

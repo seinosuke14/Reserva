@@ -51,6 +51,7 @@ export class RegisterComponent implements OnInit {
   isSubmitting   = signal(false);
   errorMsg       = signal('');
   acceptedTerms  = signal(false);
+  showPromoFields = signal(false);
 
   // Verification step
   step              = signal<'register' | 'verify'>('register');
@@ -69,6 +70,8 @@ export class RegisterComponent implements OnInit {
     email:        ['', [Validators.required, Validators.maxLength(254), strictEmailValidator]],
     phone:        ['+569', [Validators.required, chileanPhoneValidator]],
     password:     ['', [Validators.required, Validators.maxLength(16), strongPasswordValidator]],
+    couponCode:   ['', [Validators.maxLength(20)]],
+    referralCode: ['', [Validators.maxLength(12)]],
   });
 
   async ngOnInit(): Promise<void> {
@@ -76,6 +79,13 @@ export class RegisterComponent implements OnInit {
 
     const token = this.route.snapshot.queryParamMap.get('invite');
     if (token) this.inviteToken.set(token);
+
+    // Link de referido: /registro?ref=CODIGO precarga el código y muestra la sección
+    const ref = this.route.snapshot.queryParamMap.get('ref');
+    if (ref) {
+      this.f.referralCode.setValue(ref.toUpperCase());
+      this.showPromoFields.set(true);
+    }
 
     // history solo existe en el navegador; en SSR no se evalúa (evita ReferenceError).
     if (isPlatformBrowser(this.platformId)) {
@@ -118,7 +128,7 @@ export class RegisterComponent implements OnInit {
     this.isSubmitting.set(true);
     this.errorMsg.set('');
 
-    const { firstName, lastName, rut, professionId, email, phone, password } = this.form.value;
+    const { firstName, lastName, rut, professionId, email, phone, password, couponCode, referralCode } = this.form.value;
     const payload: Record<string, string> = {
       name: `${(firstName ?? '').trim()} ${(lastName ?? '').trim()}`.trim(),
       rut: rut!,
@@ -129,6 +139,8 @@ export class RegisterComponent implements OnInit {
       termsAcceptedAt: new Date().toISOString(),
     };
     if (this.inviteToken()) payload['inviteToken'] = this.inviteToken()!;
+    if (couponCode?.trim())   payload['couponCode']   = couponCode.trim().toUpperCase();
+    if (referralCode?.trim()) payload['referralCode'] = referralCode.trim().toUpperCase();
 
     const result = await this.svc.register(payload as any);
     this.isSubmitting.set(false);
