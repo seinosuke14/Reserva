@@ -27,6 +27,33 @@
 </div>
 }
 
+<!-- ═══════════ Felicitación final ═══════════ -->
+@if (tour.phase() === 'done') {
+<div class="ot-welcome-backdrop">
+  <div class="ot-welcome-card" role="dialog" aria-modal="true">
+    <div class="ot-welcome-icon ot-done-icon">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </div>
+    <h2 class="ot-welcome-title">¡Felicidades! 🎉</h2>
+    <p class="ot-welcome-text">
+      Hiciste todos los pasos correctamente. Ya puedes empezar a utilizar Lets
+      Reserve sin problemas para que la gente agende contigo.
+    </p>
+    <div class="ot-welcome-actions">
+      <button type="button" class="ot-btn-primary" (click)="tour.dismissCongrats()">
+        Empezar a usar Lets Reserve
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+}
+
 <!-- ═══════════ Tour activo (spotlight) ═══════════ -->
 @if (tour.phase() === 'running') {
 
@@ -55,8 +82,19 @@
     Salir de tutorial
   </button>
 
-  <!-- Tarjeta del paso (abajo, centrada) -->
+  <!-- Pastilla minimizada (mobile): queda a la vista sin tapar botones -->
   @if (tour.currentStep(); as step) {
+  @if (minimized()) {
+  <button type="button" class="ot-pill" (click)="toggleMinimize()">
+    <span class="ot-pill-badge">{{ tour.index() + 1 }}/{{ tour.total() }}</span>
+    <span class="ot-pill-text">{{ step.title }}</span>
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <polyline points="18 15 12 9 6 15" />
+    </svg>
+  </button>
+  } @else {
+
+  <!-- Tarjeta del paso (abajo a la derecha) -->
   <div class="ot-step-card">
     <div class="ot-step-arrow" aria-hidden="true">
       <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -65,7 +103,16 @@
       </svg>
     </div>
 
-    <div class="ot-step-progress">Paso {{ tour.index() + 1 }} de {{ tour.total() }}</div>
+    <div class="ot-step-head">
+      <div class="ot-step-progress">Paso {{ tour.index() + 1 }} de {{ tour.total() }}</div>
+      <button type="button" class="ot-min-btn" (click)="toggleMinimize()"
+        aria-label="Minimizar guía">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+    </div>
+
     <h3 class="ot-step-title">{{ step.title }}</h3>
     <p class="ot-step-body">{{ step.body }}</p>
 
@@ -90,5 +137,6 @@
       </button>
     </div>
   </div>
+  }
   }
 }
