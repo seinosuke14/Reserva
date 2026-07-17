@@ -25,7 +25,7 @@ export interface TourConfig {
   onComplete?: () => void;
 }
 
-type TourPhase = 'idle' | 'welcome' | 'running';
+type TourPhase = 'idle' | 'welcome' | 'running' | 'done';
 
 // Estado central del tutorial de onboarding. La UI (overlay + modal de
 // bienvenida) reacciona a `phase`; este servicio maneja la navegación entre
@@ -45,6 +45,8 @@ export class TourService {
 
   private navigate: (step: TourStep) => void = (step) => this.defaultNavigate(step);
   private onComplete: () => void = () => {};
+  /** Evita persistir el "completado" más de una vez por recorrido. */
+  private persisted = false;
 
   /**
    * Ofrece el tutorial si la cuenta aún no lo completó. Muestra el modal de
@@ -56,6 +58,7 @@ export class TourService {
     this.steps.set(config.steps);
     this.navigate = config.navigate ?? ((step) => this.defaultNavigate(step));
     this.onComplete = config.onComplete ?? (() => {});
+    this.persisted = false;
     this.index.set(0);
     this.phase.set('welcome');
   }
@@ -73,11 +76,22 @@ export class TourService {
     this.complete();
   }
 
-  /** "Continuar": avanza al siguiente paso o finaliza. */
+  /** "Continuar": avanza al siguiente paso o muestra la felicitación final. */
   next(): void {
-    if (this.isLast()) { this.complete(); return; }
+    if (this.isLast()) { this.finish(); return; }
     this.index.update((i) => i + 1);
     this.navigateToCurrent();
+  }
+
+  /** Terminó todos los pasos → tarjeta de felicitación (y persiste). */
+  finish(): void {
+    this.persist();
+    this.phase.set('done');
+  }
+
+  /** Cierra la tarjeta de felicitación. */
+  dismissCongrats(): void {
+    this.phase.set('idle');
   }
 
   /** Retrocede un paso. */
@@ -85,6 +99,20 @@ export class TourService {
     if (this.isFirst()) return;
     this.index.update((i) => i - 1);
     this.navigateToCurrent();
+  }
+
+  /**
+   * Avance automático al guardar dentro de una sección. Con guard temporal para
+   * que, aunque el evento llegue duplicado (varias instancias del overlay o
+   * listeners repetidos), avance un solo paso.
+   */
+  private lastAutoAdvance = 0;
+  autoAdvanceOnSave(): void {
+    if (this.phase() !== 'running') return;
+    const now = Date.now();
+    if (now - this.lastAutoAdvance < 800) return;
+    this.lastAutoAdvance = now;
+    this.next();
   }
 
   /** "Salir de tutorial": cierra y marca como visto. */
@@ -101,9 +129,16 @@ export class TourService {
     if (step) this.navigate(step);
   }
 
-  /** Cierra el tour y delega la persistencia al panel. */
+  /** Cierra el tour (salir/declinar) y delega la persistencia al panel. */
   private complete(): void {
     this.phase.set('idle');
+    this.persist();
+  }
+
+  /** Persiste el "completado" una sola vez por recorrido. */
+  private persist(): void {
+    if (this.persisted) return;
+    this.persisted = true;
     this.onComplete();
   }
 }

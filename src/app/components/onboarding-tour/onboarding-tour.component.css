@@ -41,6 +41,11 @@
   box-shadow: 0 8px 22px rgba(0, 196, 167, 0.4);
 }
 
+.ot-done-icon {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.42);
+}
+
 .ot-welcome-title {
   font-size: 21px;
   font-weight: 800;
@@ -148,7 +153,7 @@
   position: fixed;
   z-index: 95;
   bottom: 26px;
-  right: 26px;
+  left: 26px;
   width: calc(100vw - 32px);
   max-width: 380px;
   background: #fff;
@@ -167,12 +172,83 @@
   animation: ot-bounce 1.4s ease-in-out infinite;
 }
 
+.ot-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .ot-step-progress {
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #00897b;
+}
+
+.ot-min-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: -6px -6px -6px 0;
+  border: none;
+  border-radius: 8px;
+  color: #64748b;
+  background: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ot-min-btn:hover {
+  background: #e2e8f0;
+  color: #0d1b2a;
+}
+
+/* ═══════════ Pastilla minimizada ═══════════ */
+.ot-pill {
+  position: fixed;
+  z-index: 95;
+  bottom: 18px;
+  left: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100vw - 36px);
+  font-family: inherit;
+  padding: 9px 13px;
+  border: none;
+  border-radius: 999px;
+  background: #0d1b2a;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(13, 27, 42, 0.45);
+  animation: ot-fade 0.2s ease;
+}
+
+.ot-pill-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #0d1b2a;
+  background: #00c4a7;
+}
+
+.ot-pill-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ot-pill svg {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .ot-step-title {
@@ -260,4 +336,47 @@
 @keyframes ot-bounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50% { transform: translateX(-50%) translateY(7px); }
+}
+
+/* ═══════════ Mobile ═══════════ */
+@media (max-width: 640px) {
+  .ot-step-card {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+    max-width: none;
+    padding: 15px 16px 14px;
+    border-radius: 16px;
+  }
+
+  /* La flecha decorativa estorba en pantallas chicas. */
+  .ot-step-arrow {
+    display: none;
+  }
+
+  .ot-step-title {
+    font-size: 15.5px;
+  }
+
+  .ot-step-body {
+    font-size: 13px;
+    margin-bottom: 13px;
+  }
+
+  .ot-step-nav {
+    gap: 8px;
+  }
+
+  .ot-nav-prev,
+  .ot-nav-next {
+    flex: 1;
+    justify-content: center;
+    padding: 11px 12px;
+  }
+
+  .ot-exit {
+    font-size: 12px;
+    padding: 8px 11px;
+  }
 }

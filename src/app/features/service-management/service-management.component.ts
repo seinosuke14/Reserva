@@ -9,6 +9,7 @@ import { IService, IServiceCategory } from '../../helpers/models';
 import { environment } from '../../../environments/environment';
 import { WorkScheduleService } from '../../core/services/work-schedule.service';
 import { AuthService } from '../../core/services/auth.service';
+import { TourService } from '../../core/services/tour.service';
 import { CategoryFilterChipsComponent } from '../../components/category-filter-chips/category-filter-chips.component';
 
 @Component({
@@ -36,6 +37,7 @@ export class ServiceManagementComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly scheduleSvc = inject(WorkScheduleService);
   private readonly auth = inject(AuthService);
+  readonly tour = inject(TourService);
   readonly formatCLP    = formatCLP;
   readonly withVat      = withVat;
 
