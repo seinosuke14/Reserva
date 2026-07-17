@@ -1,5 +1,6 @@
 import {
   Component,
+  OnDestroy,
   PLATFORM_ID,
   effect,
   inject,
@@ -21,12 +22,15 @@ interface Rect { top: number; left: number; width: number; height: number; }
   templateUrl: './onboarding-tour.component.html',
   styleUrl: './onboarding-tour.component.css',
 })
-export class OnboardingTourComponent {
+export class OnboardingTourComponent implements OnDestroy {
   readonly tour = inject(TourService);
   private readonly platformId = inject(PLATFORM_ID);
 
   /** Recuadro del área resaltada (el contenido configurable). */
   readonly spotlight = signal<Rect | null>(null);
+
+  /** En mobile la tarjeta puede colapsarse a una pastilla para no tapar botones. */
+  readonly minimized = signal(false);
 
   /** Selector del área que queda interactiva durante el tour. */
   private readonly TARGET = '[data-tour-target="content"]';
@@ -36,18 +40,55 @@ export class OnboardingTourComponent {
     effect(() => {
       this.tour.phase();
       this.tour.index();
-      if (this.tour.phase() === 'running') this.scheduleMeasure();
-      else this.spotlight.set(null);
+      if (this.tour.phase() === 'running') {
+        // Cada nuevo paso se muestra expandido para que se lea la instrucción.
+        this.minimized.set(false);
+        this.scheduleMeasure();
+      } else {
+        this.spotlight.set(null);
+      }
     });
 
     if (isPlatformBrowser(this.platformId)) {
-      const remeasure = () => {
-        if (this.tour.phase() === 'running') this.measure();
-      };
-      window.addEventListener('resize', remeasure);
-      window.addEventListener('scroll', remeasure, true);
+      window.addEventListener('resize', this.onRemeasure);
+      window.addEventListener('scroll', this.onRemeasure, true);
+      document.addEventListener('pointerdown', this.onPointerDown, true);
+      document.addEventListener('click', this.onClick, false);
     }
   }
+
+  ngOnDestroy(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    window.removeEventListener('resize', this.onRemeasure);
+    window.removeEventListener('scroll', this.onRemeasure, true);
+    document.removeEventListener('pointerdown', this.onPointerDown, true);
+    document.removeEventListener('click', this.onClick, false);
+  }
+
+  private readonly onRemeasure = (): void => {
+    if (this.tour.phase() === 'running') this.measure();
+  };
+
+  // Al interactuar dentro del contenido, minimiza la tarjeta para no estorbar
+  // los botones (ej: "Guardar"). Se re-expande con la pastilla o al cambiar de paso.
+  private readonly onPointerDown = (e: Event): void => {
+    if (this.tour.phase() !== 'running' || this.minimized()) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest(this.TARGET)) this.minimized.set(true);
+  };
+
+  // Al presionar "Guardar" dentro del contenido, avanza solo al siguiente paso.
+  // En fase de burbuja el guardado se ejecuta primero; el guard del servicio
+  // (singleton) evita avanzar de más aunque el evento llegue duplicado.
+  private readonly onClick = (e: Event): void => {
+    if (this.tour.phase() !== 'running') return;
+    const target = e.target as HTMLElement | null;
+    if (!target?.closest(this.TARGET)) return;
+    const btn = target.closest('button, a');
+    if (btn && /guardar/i.test(btn.textContent ?? '')) {
+      setTimeout(() => this.tour.autoAdvanceOnSave(), 350);
+    }
+  };
 
   // Espera a que la nueva ruta renderice antes de medir el recuadro.
   private scheduleMeasure(): void {
@@ -62,5 +103,9 @@ export class OnboardingTourComponent {
     if (!el) { this.spotlight.set(null); return; }
     const r = el.getBoundingClientRect();
     this.spotlight.set({ top: r.top, left: r.left, width: r.width, height: r.height });
+  }
+
+  toggleMinimize(): void {
+    this.minimized.update((v) => !v);
   }
 }
