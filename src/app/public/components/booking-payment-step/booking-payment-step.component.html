@@ -67,6 +67,14 @@
                   <polygon points="12 2 20 7 4 7"/>
                 </svg>
               }
+              @case ('presencial') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 20h20"/>
+                  <path d="M4 20V8l8-5 8 5v12"/>
+                  <path d="M9 20v-6h6v6"/>
+                </svg>
+              }
             }
           </div>
           <div class="payment-option-info">
@@ -78,6 +86,7 @@
                 @case ('khipu')       { Khipu (transferencia instantanea) }
                 @case ('mercadopago_connect') { Mercado Pago }
                 @case ('transfer')    { Transferencia Bancaria }
+                @case ('presencial')  { Pago presencial }
               }
             </h4>
             <p>
@@ -88,6 +97,7 @@
                 @case ('khipu')       { Paga desde tu banco, confirmacion automatica }
                 @case ('mercadopago_connect') { Tarjetas, transferencia y más }
                 @case ('transfer')    { Depósito directo a cuenta bancaria }
+                @case ('presencial')  { Pagas en el local el día de tu atención }
               }
             </p>
           </div>

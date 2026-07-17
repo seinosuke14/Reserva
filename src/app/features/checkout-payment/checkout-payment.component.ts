@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
 import { PaymentProvider } from '../../core/config/plan-capabilities';
 
-type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect';
+type Provider = 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect' | 'presencial';
 
 interface IPaymentMethod {
   id: string;
@@ -100,6 +100,13 @@ const PROVIDERS: ProviderConfig[] = [
     oauth: true,
     fields: [],
   },
+  {
+    provider: 'presencial',
+    label: 'Pago presencial',
+    description: 'El cliente paga en el local el día de la atención. Sin pasarela ni comisión.',
+    icon: 'bank',
+    fields: [],
+  },
 ];
 
 @Component({
@@ -131,6 +138,11 @@ export class CheckoutPaymentComponent implements OnInit {
       label: 'Transferencia bancaria',
       subtitle: 'El pago va directamente del cliente al profesional',
       providers: PROVIDERS.filter(p => (['khipu', 'transfer'] as Provider[]).includes(p.provider)),
+    },
+    {
+      label: 'Pago presencial',
+      subtitle: 'El cliente paga en el local — útil para reservas que confirmas sin cobro anticipado',
+      providers: PROVIDERS.filter(p => p.provider === 'presencial'),
     },
   ];
 

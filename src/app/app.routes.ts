@@ -70,6 +70,11 @@ export const routes: Routes = [
     path: 'gestionar-reserva/:token',
     loadComponent: () => import('./public/manage-booking/manage-booking.component').then(m => m.ManageBookingComponent)
   },
+  // Pago diferido de una continuación (pay-by-link, via correo). Privada por token: no se indexa.
+  {
+    path: 'confirmar-reserva/:token',
+    loadComponent: () => import('./public/confirm-booking/confirm-booking.component').then(m => m.ConfirmBookingComponent)
+  },
   {
     path: 'planes',
     loadComponent: () => import('./features/plan-selection/plan-selection.component').then(m => m.PlanSelectionComponent)

@@ -5,6 +5,8 @@
 export interface IServiceCategory {
   id: string;
   name: string;
+  /** Categoría de evaluación/cotización: sus servicios habilitan "Agendar continuación". */
+  isQuoteCategory?: boolean;
 }
 
 /** Servicio interno (dashboard) — incluye estado activo */
@@ -15,6 +17,9 @@ export interface IService {
   duration: number;
   price: number;
   isActive: boolean;
+  /** Servicio de cotización que debe realizarse antes de agendar éste (null = no requiere). */
+  requiredQuoteServiceId?: string | null;
+  requiredQuoteService?: { id: string; name: string } | null;
   serviceImage?: string | null;
   categoryId?: string | null;
   category?: IServiceCategory | null;
@@ -27,6 +32,8 @@ export interface IPublicService {
   description: string;
   duration: number;
   price: number;
+  /** Servicio de cotización que debe realizarse antes de agendar éste (null = no requiere). */
+  requiredQuoteServiceId?: string | null;
   serviceImage?: string | null;
   categoryId?: string | null;
 }
@@ -55,6 +62,6 @@ export interface ITransferInfo {
 
 /** Método de pago público */
 export interface IPublicPaymentMethod {
-  provider: 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect';
+  provider: 'webpay' | 'flow' | 'mercadopago' | 'transfer' | 'khipu' | 'mercadopago_connect' | 'presencial';
   transferInfo?: ITransferInfo;
 }

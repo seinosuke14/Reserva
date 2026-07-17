@@ -1,0 +1,44 @@
+<div class="manage-container">
+
+  @if (state() === 'loading') {
+    <div class="card centered">
+      <div class="spinner"></div>
+      <p>Cargando tu reserva...</p>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="card centered">
+      <div class="icon error">✕</div>
+      <h2>No se pudo abrir el pago</h2>
+      <p class="muted">{{ errorMsg() }}</p>
+      <a routerLink="/" class="btn-secondary">Ir al inicio</a>
+    </div>
+  }
+
+  @if (state() === 'ready' && booking(); as b) {
+    <div class="card">
+      <h2>Confirma tu reserva</h2>
+      <p class="muted intro">Completa el pago para asegurar tu hora. Una vez confirmado, recibirás los detalles por correo.</p>
+
+      <div class="details">
+        <div class="row"><span class="label">Referencia</span><span class="value">{{ b.bookingRef }}</span></div>
+        <div class="row"><span class="label">Servicio</span><span class="value">{{ b.serviceName }}</span></div>
+        @if (b.professionalName) {
+          <div class="row"><span class="label">Profesional</span><span class="value">{{ b.professionalName }}</span></div>
+        }
+        <div class="row"><span class="label">Fecha</span><span class="value">{{ formatDateLong(b.date) }}</span></div>
+        <div class="row"><span class="label">Hora</span><span class="value">{{ b.time }}</span></div>
+        <div class="row total"><span class="label">Total a pagar (IVA inc)</span><span class="value">{{ formatCLP(b.amountWithVat ?? b.amount) }}</span></div>
+      </div>
+
+      @if (errorMsg()) { <p class="error-text">{{ errorMsg() }}</p> }
+
+      <button class="btn-pay full" [disabled]="paying()" (click)="pay()">
+        {{ paying() ? 'Redirigiendo al pago...' : 'Pagar y confirmar reserva' }}
+      </button>
+      <p class="hint muted">Serás redirigido a la pasarela de pago seguro.</p>
+    </div>
+  }
+
+</div>

@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 import { formatCLP, withVat } from '../../helpers/formatters';
 import { RescheduleConfirmComponent } from '../../components/reschedule-confirm/reschedule-confirm.component';
 import { CancelConfirmComponent } from '../../components/cancel-confirm/cancel-confirm.component';
+import { ContinuationModalComponent, IEvaluationAppointment } from '../../components/continuation-modal/continuation-modal.component';
 
 interface IAppointment {
   id: string;
@@ -25,7 +26,7 @@ interface IAppointment {
   refundId?: string | null;
   rated:    boolean;
   customer: { id: string; name: string; email?: string };
-  service:  { id: string; name: string; duration?: number } | null;
+  service:  { id: string; name: string; duration?: number; category?: { id: string; isQuoteCategory?: boolean } | null } | null;
 }
 
 interface IService {
@@ -46,7 +47,7 @@ interface ICustomer {
 @Component({
   selector: 'app-booking-calendar',
   standalone: true,
-  imports: [CommonModule, RescheduleConfirmComponent, CancelConfirmComponent],
+  imports: [CommonModule, RescheduleConfirmComponent, CancelConfirmComponent, ContinuationModalComponent],
   templateUrl: './booking-calendar.component.html',
   animations: [
     trigger('fadeSlide', [
@@ -447,6 +448,25 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   closeDetailPanel(): void {
     this.selectedAppointment.set(null);
     this.isRescheduling.set(false);
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Continuación de una cita de evaluación (categoría cotización) ─────────────
+  readonly continuationFor = signal<IEvaluationAppointment | null>(null);
+
+  // True si el servicio de la cita pertenece a una categoría de cotización.
+  isEvaluationAppointment(apt: IAppointment | null): boolean {
+    return !!apt?.service?.category?.isQuoteCategory;
+  }
+
+  openContinuation(apt: IAppointment): void {
+    this.continuationFor.set({ id: apt.id, customerName: apt.customer.name, date: apt.date });
+  }
+
+  async onContinuationSaved(): Promise<void> {
+    this.continuationFor.set(null);
+    this.closeDetailPanel();
+    await this._loadAppointments();
   }
   // ─────────────────────────────────────────────────────────────
 

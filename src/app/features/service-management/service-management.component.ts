@@ -1,4 +1,5 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -35,6 +36,7 @@ import { CategoryFilterChipsComponent } from '../../components/category-filter-c
 export class ServiceManagementComponent implements OnInit {
   private readonly fb   = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly scheduleSvc = inject(WorkScheduleService);
   private readonly auth = inject(AuthService);
   readonly tour = inject(TourService);
@@ -60,9 +62,11 @@ export class ServiceManagementComponent implements OnInit {
   catSaving        = signal(false);
   catError         = signal<string | null>(null);
   newCatName       = signal('');
+  newCatIsQuote    = signal(false);
   editingCatId     = signal<string | null>(null);
   editingCatName   = signal('');
   deletingCatId    = signal<string | null>(null);
+  togglingQuoteId  = signal<string | null>(null);
 
   readonly filteredServices = computed(() => {
     const filter = this.selectedCategory();
@@ -70,6 +74,16 @@ export class ServiceManagementComponent implements OnInit {
     if (filter === null) return list;
     if (filter === 'none') return list.filter(s => !s.categoryId);
     return list.filter(s => s.categoryId === filter);
+  });
+
+  // Categoría seleccionada en el form (signal para reaccionar de forma reactiva).
+  readonly selectedFormCategoryId = signal<string | null>(null);
+
+  // True cuando la categoría seleccionada es de cotización: el servicio ES una evaluación
+  // (permite precio $0 y no debe pedir "requiere cotización previa").
+  readonly priceForQuote = computed(() => {
+    const id = this.selectedFormCategoryId();
+    return !!id && this.quoteCategoryIds().has(id);
   });
 
   imgPreview     = signal<string | null>(null);
@@ -88,12 +102,38 @@ export class ServiceManagementComponent implements OnInit {
     duration:    [30, [Validators.required, Validators.min(1)]],
     price:       [0,  [Validators.required, Validators.min(1000)]],
     categoryId:  [null as string | null],
+    requiredQuoteServiceId: [null as string | null],
   });
+
+  // IDs de categorías de cotización (fuente fresca: la lista de categorías, no el
+  // objeto embebido en cada servicio, que puede quedar desactualizado tras un toggle).
+  readonly quoteCategoryIds = computed(() =>
+    new Set(this.categories().filter(c => c.isQuoteCategory).map(c => c.id))
+  );
+
+  // Servicios de una categoría de cotización, para elegirlos como cotización requerida.
+  readonly quoteServices = computed(() =>
+    this.services().filter(s => !!s.categoryId && this.quoteCategoryIds().has(s.categoryId))
+  );
 
   get f() { return this.form.controls; }
 
   async ngOnInit(): Promise<void> {
+    // Ajustar el mínimo de precio según la categoría elegida (cotización permite $0).
+    this.form.controls['categoryId'].valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(id => this.applyPriceRules(id ?? null));
     await Promise.all([this.loadServices(), this.loadCategories(), this.loadSlotDuration()]);
+  }
+
+  // Servicios de una categoría de cotización pueden ser gratuitos (evaluación sin costo);
+  // el resto mantiene el mínimo de $1.000 para poder cobrarse por pasarela.
+  private applyPriceRules(categoryId: string | null): void {
+    this.selectedFormCategoryId.set(categoryId);
+    const isQuote = !!categoryId && this.quoteCategoryIds().has(categoryId);
+    const ctrl = this.form.controls['price'];
+    ctrl.setValidators([Validators.required, Validators.min(isQuote ? 0 : 1000)]);
+    ctrl.updateValueAndValidity({ emitEvent: false });
   }
 
   private async loadSlotDuration(): Promise<void> {
@@ -141,6 +181,7 @@ export class ServiceManagementComponent implements OnInit {
   openCatModal(): void {
     this.catError.set(null);
     this.newCatName.set('');
+    this.newCatIsQuote.set(false);
     this.editingCatId.set(null);
     this.deletingCatId.set(null);
     this.isCatModalOpen.set(true);
@@ -151,16 +192,48 @@ export class ServiceManagementComponent implements OnInit {
     if (!name || this.catSaving()) return;
     this.catSaving.set(true);
     this.catError.set(null);
+    const isQuoteCategory = this.newCatIsQuote();
     try {
       const created = await firstValueFrom(
-        this.http.post<IServiceCategory>(`${environment.apiUrl}/service-categories`, { name })
+        this.http.post<IServiceCategory>(`${environment.apiUrl}/service-categories`, { name, isQuoteCategory })
       );
-      this.categories.update(list => [...list, created].sort((a, b) => a.name.localeCompare(b.name)));
+      this.categories.update(list => {
+        // El backend garantiza una sola categoría de cotización: reflejarlo localmente.
+        const next = created.isQuoteCategory ? list.map(c => ({ ...c, isQuoteCategory: false })) : list;
+        return [...next, created].sort((a, b) => a.name.localeCompare(b.name));
+      });
       this.newCatName.set('');
+      this.newCatIsQuote.set(false);
     } catch (err: any) {
       this.catError.set(err?.error?.message ?? 'No se pudo crear la categoría.');
     } finally {
       this.catSaving.set(false);
+    }
+  }
+
+  // Marca/desmarca una categoría como "de cotización" (evaluación presencial).
+  async toggleCatQuote(cat: IServiceCategory): Promise<void> {
+    if (this.catSaving() || this.togglingQuoteId()) return;
+    const nextValue = !cat.isQuoteCategory;
+    this.togglingQuoteId.set(cat.id);
+    this.catError.set(null);
+    try {
+      const updated = await firstValueFrom(
+        this.http.put<IServiceCategory>(`${environment.apiUrl}/service-categories/${cat.id}`, {
+          name: cat.name, isQuoteCategory: nextValue,
+        })
+      );
+      this.categories.update(list =>
+        list.map(c => {
+          if (c.id === updated.id) return updated;
+          // Solo una puede ser de cotización: desmarcar el resto si se activó ésta.
+          return updated.isQuoteCategory ? { ...c, isQuoteCategory: false } : c;
+        })
+      );
+    } catch (err: any) {
+      this.catError.set(err?.error?.message ?? 'No se pudo actualizar la categoría.');
+    } finally {
+      this.togglingQuoteId.set(null);
     }
   }
 
@@ -223,7 +296,7 @@ export class ServiceManagementComponent implements OnInit {
     // Si hay un filtro de categoría activo, el nuevo servicio la hereda por comodidad
     const preselected = this.selectedCategory();
     const categoryId = preselected && preselected !== 'none' ? preselected : null;
-    this.form.reset({ duration: this.slotDuration(), price: 0, categoryId });
+    this.form.reset({ duration: this.slotDuration(), price: 0, categoryId, requiredQuoteServiceId: null });
     this.imgPreview.set(null);
     this.imgFile.set(null);
     this.isFormOpen.set(true);
