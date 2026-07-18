@@ -216,7 +216,11 @@
 
                     @if (config.fields.length === 0) {
                       <p class="text-[12px] text-primary-400 bg-primary-50 rounded-[10px] px-4 py-3">
-                        No requiere credenciales. Al habilitar, los clientes verán el botón de pago de la plataforma al agendar.
+                        @if (config.provider === 'presencial') {
+                          No requiere credenciales. Al habilitar, podrás confirmar reservas para que el cliente pague en el local (por ejemplo, al agendar la continuación de una evaluación).
+                        } @else {
+                          No requiere credenciales. Al habilitar, los clientes verán el botón de pago de la plataforma al agendar.
+                        }
                       </p>
                     }
 

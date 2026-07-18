@@ -53,7 +53,6 @@ export class OnboardingTourComponent implements OnDestroy {
       window.addEventListener('resize', this.onRemeasure);
       window.addEventListener('scroll', this.onRemeasure, true);
       document.addEventListener('pointerdown', this.onPointerDown, true);
-      document.addEventListener('click', this.onClick, false);
     }
   }
 
@@ -62,7 +61,6 @@ export class OnboardingTourComponent implements OnDestroy {
     window.removeEventListener('resize', this.onRemeasure);
     window.removeEventListener('scroll', this.onRemeasure, true);
     document.removeEventListener('pointerdown', this.onPointerDown, true);
-    document.removeEventListener('click', this.onClick, false);
   }
 
   private readonly onRemeasure = (): void => {
@@ -71,23 +69,11 @@ export class OnboardingTourComponent implements OnDestroy {
 
   // Al interactuar dentro del contenido, minimiza la tarjeta para no estorbar
   // los botones (ej: "Guardar"). Se re-expande con la pastilla o al cambiar de paso.
+  // El avance entre pasos es siempre manual con el botón "Continuar".
   private readonly onPointerDown = (e: Event): void => {
     if (this.tour.phase() !== 'running' || this.minimized()) return;
     const target = e.target as HTMLElement | null;
     if (target?.closest(this.TARGET)) this.minimized.set(true);
-  };
-
-  // Al presionar "Guardar" dentro del contenido, avanza solo al siguiente paso.
-  // En fase de burbuja el guardado se ejecuta primero; el guard del servicio
-  // (singleton) evita avanzar de más aunque el evento llegue duplicado.
-  private readonly onClick = (e: Event): void => {
-    if (this.tour.phase() !== 'running') return;
-    const target = e.target as HTMLElement | null;
-    if (!target?.closest(this.TARGET)) return;
-    const btn = target.closest('button, a');
-    if (btn && /guardar/i.test(btn.textContent ?? '')) {
-      setTimeout(() => this.tour.autoAdvanceOnSave(), 350);
-    }
   };
 
   // Espera a que la nueva ruta renderice antes de medir el recuadro.

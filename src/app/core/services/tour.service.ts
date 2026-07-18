@@ -101,20 +101,6 @@ export class TourService {
     this.navigateToCurrent();
   }
 
-  /**
-   * Avance automático al guardar dentro de una sección. Con guard temporal para
-   * que, aunque el evento llegue duplicado (varias instancias del overlay o
-   * listeners repetidos), avance un solo paso.
-   */
-  private lastAutoAdvance = 0;
-  autoAdvanceOnSave(): void {
-    if (this.phase() !== 'running') return;
-    const now = Date.now();
-    if (now - this.lastAutoAdvance < 800) return;
-    this.lastAutoAdvance = now;
-    this.next();
-  }
-
   /** "Salir de tutorial": cierra y marca como visto. */
   exit(): void {
     this.complete();
