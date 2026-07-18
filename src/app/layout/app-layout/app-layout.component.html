@@ -381,7 +381,8 @@
 
     <!-- Content -->
     <main [class]="isFullHeightRoute() ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto bg-background'">
-      <div data-tour-target="content" [class]="isFullHeightRoute() ? 'h-full' : 'max-w-7xl mx-auto p-4 md:p-6 min-h-full'">
+      <div data-tour-target="content" [class]="isFullHeightRoute() ? 'h-full' : 'max-w-7xl mx-auto p-4 md:p-6 min-h-full'"
+           [class.ot-tour-bottom-space]="tour.phase() === 'running'">
         <router-outlet />
       </div>
     </main>

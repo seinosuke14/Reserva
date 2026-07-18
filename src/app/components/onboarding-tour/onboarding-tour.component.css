@@ -228,6 +228,33 @@
   animation: ot-fade 0.2s ease;
 }
 
+/* Continuar flotante (bottom-right) visible mientras la guía está minimizada */
+.ot-next-fab {
+  position: fixed;
+  z-index: 95;
+  bottom: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: #00c4a7;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 196, 167, 0.45);
+  animation: ot-fade 0.2s ease;
+  transition: background 0.15s ease;
+}
+
+.ot-next-fab:hover {
+  background: #00897b;
+}
+
 .ot-pill-badge {
   flex-shrink: 0;
   font-size: 11px;

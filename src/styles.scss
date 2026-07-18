@@ -3,6 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Durante el tutorial (mobile), reserva espacio inferior para que la barra fija
+   de la guía no tape el final del contenido de la página. */
+@media (max-width: 640px) {
+  .ot-tour-bottom-space {
+    padding-bottom: 104px !important;
+  }
+}
+
 @layer components {
   /* Layout */
   .flex-center  { @apply flex items-center justify-center; }

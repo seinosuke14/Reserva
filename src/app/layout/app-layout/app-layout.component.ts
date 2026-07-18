@@ -65,7 +65,7 @@ export class AppLayoutComponent {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly caps = inject(PlanCapabilitiesService);
-  private readonly tour = inject(TourService);
+  readonly tour = inject(TourService);
   readonly notifSvc = inject(NotificationService);
 
   /** Pasos del tutorial de onboarding del profesional. */
@@ -78,7 +78,7 @@ export class AppLayoutComponent {
     {
       route: '/app/servicios',
       title: 'Crea tus servicios',
-      body: 'Agrega los servicios que ofreces, organizados por categoría, con su contenido y detalles.',
+      body: 'Agrega los servicios que ofreces, organizados por categoría, con su contenido y detalles. Si el precio depende del caso, activa la opción de cotización: en vez de pagar al reservar, el cliente te enviará una solicitud y tú le responderás con un precio a la medida.',
     },
     {
       route: '/app/pagos',
