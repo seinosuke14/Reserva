@@ -5,7 +5,7 @@ import { PlanType } from '../services/professional.service';
  * `free` es espejo de `pro` (trial completo). Mantener ambos archivos en sync.
  */
 
-export type PaymentProvider = 'transfer' | 'mercadopago_connect' | 'khipu' | 'flow' | 'mercadopago';
+export type PaymentProvider = 'transfer' | 'mercadopago_connect' | 'khipu' | 'flow' | 'mercadopago' | 'presencial';
 
 export type CapabilityKey =
   | 'analyticsFull'
@@ -30,7 +30,7 @@ export interface PlanCapabilities {
   paymentProviders: PaymentProvider[];
 }
 
-const ALL_PAYMENT_PROVIDERS: PaymentProvider[] = ['transfer', 'mercadopago_connect', 'khipu', 'flow', 'mercadopago'];
+const ALL_PAYMENT_PROVIDERS: PaymentProvider[] = ['transfer', 'mercadopago_connect', 'khipu', 'flow', 'mercadopago', 'presencial'];
 
 const PRO_CAPABILITIES: PlanCapabilities = {
   analyticsFull:        true,
@@ -58,7 +58,7 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     coupons:              false,
     multiProfessional:    false,
     waLimit:              50,
-    paymentProviders:     ['transfer', 'mercadopago_connect'],
+    paymentProviders:     ['transfer', 'mercadopago_connect', 'presencial'],
   },
   team:    { ...PRO_CAPABILITIES, multiProfessional: true, waLimit: 100 },
   pro_max: { ...PRO_CAPABILITIES, multiProfessional: true, waLimit: 200 },

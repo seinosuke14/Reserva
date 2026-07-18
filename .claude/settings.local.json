@@ -45,7 +45,19 @@
       "Bash(node -e \"require\\('./src/controllers/auth.controller.js'\\); require\\('./src/controllers/promo.controller.js'\\); require\\('./src/controllers/subscription.controller.js'\\); require\\('./src/routes/promo.routes.js'\\); console.log\\('OK: sintaxis y requires correctos'\\)\")",
       "Bash(npx ng *)",
       "Bash(grep -E \"express-validator\" \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\\\\package.json\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(ls \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\")",
+      "Bash(ls \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\\\\src\\\\models\" \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\\\\src\\\\controllers\" \"e:\\\\mini-projectos\\\\proyectos_profesionales_desarrollo\\\\agendamiento\\\\Agendamiento-panel\\\\api-crm\\\\src\\\\services\")",
+      "Read(//e/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm/src/models/**)",
+      "Bash(node -c src/controllers/public.controller.js)",
+      "Bash(node -c src/utils/initGatewayPayment.js)",
+      "Bash(node -c src/utils/checkSlotAvailability.js)",
+      "Bash(node -c src/controllers/serviceCategory.controller.js)",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm\" && grep -n \"gcal\\\\.\\\\|module.exports\" src/jobs/payment-cleanup.job.js && echo \"---EXPORTS PUBLIC---\" && grep -n \"module.exports\" src/controllers/public.controller.js && echo \"---GCAL METHODS---\" && grep -n \"^const\\\\|^async function\\\\|module.exports\\\\|^  [a-zA-Z]*:\" src/services/googleCalendar.service.js | head -40)",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm\" && grep -n \"module.exports\" src/controllers/appointment.controller.js && echo \"---ROUTES---\" && cat src/routes/appointment.routes.js)",
+      "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel\" && grep -rn \"allowedPaymentProviders\\\\|khipu\\\\|transfer\" api-crm/src/config/planCapabilities.js && echo \"===FRONT===\" && grep -rn \"allowedPaymentProviders\\\\|PaymentProvider\\\\|khipu\\\\|transfer\\\\|presencial\" professional-dashboard-angular/src/app/core/config/plan-capabilities.ts)",
+      "Bash(node -e \"require\\('./src/models'\\); require\\('./src/controllers/appointment.controller'\\); require\\('./src/controllers/public.controller'\\); require\\('./src/routes/appointment.routes'\\); require\\('./src/routes/public.routes'\\); require\\('./src/jobs/payment-cleanup.job'\\); require\\('./src/utils/initGatewayPayment'\\); require\\('./src/utils/checkSlotAvailability'\\); console.log\\('Backend carga OK'\\);\")",
+      "Bash(node -e \"require\\('./src/models'\\); require\\('./src/controllers/service.controller'\\); require\\('./src/controllers/public.controller'\\); console.log\\('backend OK'\\);\")"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",

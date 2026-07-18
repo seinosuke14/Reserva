@@ -71,3 +71,83 @@
   padding: .375rem .75rem; border-radius: .5rem; transition: background .15s;
   &:hover { background: rgba($accent,.08); }
 }
+
+/* Aviso: servicio que requiere cotización previa */
+.eval-warn-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.eval-warn-card {
+  background: #fff;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+}
+
+.eval-warn-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  background: rgba(245, 158, 11, .12);
+}
+
+.eval-warn-title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 .5rem;
+}
+
+.eval-warn-text {
+  font-size: .875rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.eval-warn-actions {
+  display: flex;
+  gap: .625rem;
+}
+
+.eval-warn-ghost {
+  flex: 1;
+  padding: .75rem;
+  border-radius: .625rem;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  &:hover { background: #f8fafc; }
+}
+
+.eval-warn-btn {
+  flex: 1;
+  padding: .75rem;
+  border-radius: .625rem;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: #fff;
+  background: $accent;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba($accent, .38);
+}

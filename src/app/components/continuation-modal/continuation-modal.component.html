@@ -1,0 +1,119 @@
+<div class="cont-backdrop" @backdrop (click)="close.emit()">
+  <div class="cont-card" @cardAnim (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="cont-head">
+      <div>
+        <h3 class="cont-title">Agendar continuación</h3>
+        <p class="cont-sub">Cliente: <strong>{{ appointment().customerName }}</strong></p>
+      </div>
+      <button class="cont-x" (click)="close.emit()" aria-label="Cerrar">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="cont-body"><p class="cont-muted">Cargando…</p></div>
+    } @else if (noMethods()) {
+      <div class="cont-body">
+        <p class="cont-alert">
+          No tienes medios de pago activos. Activa al menos uno (pago presencial, transferencia o un
+          método online) en <strong>Métodos de pago</strong> para poder agendar la continuación.
+        </p>
+      </div>
+    } @else {
+      <div class="cont-body">
+
+        @if (error()) {
+          <div class="cont-alert">{{ error() }}</div>
+        }
+
+        <!-- Servicio -->
+        <label class="cont-label">Servicio</label>
+        <select class="cont-input" [value]="serviceId()" (change)="onServiceChange($any($event.target).value)">
+          <option value="" disabled>Selecciona el servicio</option>
+          @for (s of services(); track s.id) {
+            <option [value]="s.id">{{ s.name }} — {{ formatCLP(s.price) }} ({{ s.duration }} min)</option>
+          }
+        </select>
+        @if (services().length === 0) {
+          <p class="cont-hint">No tienes servicios reales activos. Crea uno fuera de la categoría de cotización.</p>
+        }
+
+        <!-- Fecha y hora -->
+        <div class="cont-row">
+          <div class="cont-col">
+            <label class="cont-label">Fecha</label>
+            <input type="date" class="cont-input" [min]="todayStr"
+              [value]="date()" (change)="date.set($any($event.target).value); time.set('')" />
+          </div>
+          <div class="cont-col">
+            <label class="cont-label">Hora</label>
+            <select class="cont-input" [value]="time()" (change)="time.set($any($event.target).value)"
+              [disabled]="!date() || availableSlots().length === 0">
+              <option value="" disabled>{{ !date() ? 'Elige fecha' : (availableSlots().length ? 'Selecciona' : 'Sin horario') }}</option>
+              @for (slot of availableSlots(); track slot) {
+                <option [value]="slot">{{ slot }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <label class="cont-label">Precio final acordado (neto)</label>
+        <input type="number" min="0" step="100" class="cont-input"
+          [value]="amount()" (input)="amount.set($any($event.target).valueAsNumber || 0)" />
+        <p class="cont-hint">El cliente paga {{ formatCLP(withVat(netAmount)) }} (IVA incluido).</p>
+
+        <!-- Modalidad -->
+        <label class="cont-label">¿Cómo paga el cliente?</label>
+        <div class="cont-modes">
+          @if (hasPresencial()) {
+            <button type="button" class="cont-mode" [class.active]="bookingMode() === 'presencial'"
+              (click)="selectMode('presencial')">
+              <span class="cont-mode-t">Presencial</span>
+              <span class="cont-mode-d">Paga en el local. La hora queda confirmada.</span>
+            </button>
+          }
+          @if (hasOnline()) {
+            <button type="button" class="cont-mode" [class.active]="bookingMode() === 'online'"
+              (click)="selectMode('online')">
+              <span class="cont-mode-t">Pago online</span>
+              <span class="cont-mode-d">Recibe un enlace de pago para asegurar la hora.</span>
+            </button>
+          }
+          @if (hasTransfer()) {
+            <button type="button" class="cont-mode" [class.active]="bookingMode() === 'transfer'"
+              (click)="selectMode('transfer')">
+              <span class="cont-mode-t">Transferencia</span>
+              <span class="cont-mode-d">Envías los datos y validas el comprobante.</span>
+            </button>
+          }
+        </div>
+
+        <!-- Proveedor online -->
+        @if (bookingMode() === 'online') {
+          <label class="cont-label">Medio de pago online</label>
+          <select class="cont-input" [value]="paymentProvider()" (change)="paymentProvider.set($any($event.target).value)">
+            @for (p of onlineProviders(); track p) {
+              <option [value]="p">{{ providerLabel(p) }}</option>
+            }
+          </select>
+          <p class="cont-hint">Si el cliente no paga en 48 horas, el horario se libera automáticamente.</p>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="cont-foot">
+        <button class="cont-btn-ghost" (click)="close.emit()">Cancelar</button>
+        <button class="cont-btn" (click)="submit()" [disabled]="saving()">
+          {{ saving() ? 'Agendando…' : 'Agendar y notificar' }}
+        </button>
+      </div>
+    }
+
+  </div>
+</div>

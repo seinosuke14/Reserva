@@ -596,6 +596,22 @@
               </button>
             </div>
             }
+
+            @if (isEvaluationAppointment(selectedAppointment()) && selectedAppointment()!.paymentStatus !== 'Cancelado') {
+            <div class="mt-3">
+              <button (click)="openContinuation(selectedAppointment()!)"
+                class="w-full py-2 rounded-[9px] text-[12.5px] font-bold text-white transition-all flex-center gap-1.5"
+                style="background:#6366f1;box-shadow:0 3px 12px rgba(99,102,241,.35);">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Agendar continuación
+              </button>
+              <p class="mt-1.5 text-[11px] text-primary-400 text-center">
+                Define el servicio real, la fecha y el precio acordado tras la evaluación.
+              </p>
+            </div>
+            }
           </div>
         </div>
 
@@ -735,5 +751,14 @@
     (confirmed)="confirmCancel()"
     (cancelled)="dismissCancel()">
   </app-cancel-confirm>
+}
+
+<!-- ── Continuación de evaluación ──────────────────────── -->
+@if (continuationFor()) {
+  <app-continuation-modal
+    [appointment]="continuationFor()!"
+    (close)="continuationFor.set(null)"
+    (saved)="onContinuationSaved()">
+  </app-continuation-modal>
 }
 

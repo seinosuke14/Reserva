@@ -92,6 +92,20 @@
       <polyline points="18 15 12 9 6 15" />
     </svg>
   </button>
+
+  <!-- Continuar siempre visible (abajo a la derecha), incluso minimizado -->
+  <button type="button" class="ot-next-fab" (click)="tour.next()">
+    {{ tour.isLast() ? 'Finalizar' : 'Continuar' }}
+    @if (!tour.isLast()) {
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+    } @else {
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    }
+  </button>
   } @else {
 
   <!-- Tarjeta del paso (abajo a la derecha) -->

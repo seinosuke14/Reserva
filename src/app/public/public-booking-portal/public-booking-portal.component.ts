@@ -343,11 +343,47 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   // ─── Acciones ───────────────────────────────────────────────────────────────
 
+  // Servicio que requiere cotización previa y disparó el aviso (null = sin aviso).
+  readonly evalWarningService = signal<IPublicService | null>(null);
+
+  // Servicio de cotización requerido por el servicio en aviso (si aún existe/está activo).
+  readonly requiredQuoteService = computed(() => {
+    const svc = this.evalWarningService();
+    if (!svc?.requiredQuoteServiceId) return null;
+    return this.services().find(s => s.id === svc.requiredQuoteServiceId) ?? null;
+  });
+
   selectService(service: IPublicService): void {
+    // Si el servicio requiere una cotización previa, avisar antes de entrar al checkout.
+    if (service.requiredQuoteServiceId) {
+      this.evalWarningService.set(service);
+      return;
+    }
+    this._enterCheckout(service);
+  }
+
+  private _enterCheckout(service: IPublicService): void {
     this.selectedService.set(service);
     this.step.set(1);
     this.selectedHour.set(null);
     this.viewMode.set('checkout');
+  }
+
+  continueAfterEvalWarning(): void {
+    const service = this.evalWarningService();
+    this.evalWarningService.set(null);
+    if (service) this._enterCheckout(service);
+  }
+
+  // El cliente elige agendar primero la cotización requerida.
+  goToRequiredQuote(): void {
+    const quote = this.requiredQuoteService();
+    this.evalWarningService.set(null);
+    if (quote) this._enterCheckout(quote);
+  }
+
+  dismissEvalWarning(): void {
+    this.evalWarningService.set(null);
   }
 
   backToProfile(): void {
