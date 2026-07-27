@@ -3,6 +3,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Paleta de marca — FUENTE ÚNICA DE COLOR
+   Cambiar un valor aquí lo cambia en todo el dashboard: lo leen
+   tanto las clases de Tailwind (bg-accent, text-accent-600…)
+   como los estilos inline vía rgb(var(--lr-accent)).
+   Se guardan como canales RGB para permitir opacidad:
+   rgb(var(--lr-accent) / .1)  ·  bg-accent/10
+   ============================================================ */
+:root {
+  --lr-accent:        239 90 36;   /* #EF5A24 naranja de marca */
+  --lr-accent-strong: 214 77 28;   /* #D64D1C hover / énfasis   */
+  --lr-accent-soft:   252 234 225; /* #FCEAE1 tinte claro       */
+  --lr-ink:           13 27 42;    /* #0D1B2A azul marino       */
+  --lr-canvas:        250 249 247; /* #FAF9F7 fondo cálido      */
+  --lr-border:        233 231 226; /* #E9E7E2 borde cálido      */
+}
+
 /* Durante el tutorial (mobile), reserva espacio inferior para que la barra fija
    de la guía no tape el final del contenido de la página. */
 @media (max-width: 640px) {
@@ -12,6 +29,26 @@
 }
 
 @layer components {
+  /* Gráfico a pantalla completa (móvil): ocupa todo el viewport para poder
+     girar el teléfono y tocar cada punto del gráfico con comodidad. */
+  .chart-fs {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    margin: 0;
+    border-radius: 0;
+    border: 0;
+    /* Bloque desplazable: si fuera flex con el gráfico creciendo, este ocuparía
+       toda la altura y la nota y el resumen quedarían fuera de alcance. */
+    display: block;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 14px 40px;
+  }
+  /* Alto mínimo para que el gráfico sea legible; la clase evita afectar a los
+     íconos svg de los botones que viven dentro del contenedor. */
+  .chart-fs .chart-main { min-height: 240px; }
+
   /* Layout */
   .flex-center  { @apply flex items-center justify-center; }
   .flex-between { @apply flex items-center justify-between; }

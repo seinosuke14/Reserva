@@ -124,14 +124,14 @@
         class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
         [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(group.path)
-               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
-               : ''" [style.color]="isActive(group.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+               ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))'
+               : ''" [style.color]="isActive(group.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
         [class.hover:bg-white]="!isActive(group.path)" [class.hover:bg-opacity-5]="!isActive(group.path)">
         @if (isActive(group.path)) {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
         }
         <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(group.path)"
-          [style.color]="isActive(group.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="isActive(group.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: group.icon }"></ng-container>
         </span>
         @if (isSidebarOpen()) {
@@ -151,9 +151,9 @@
         class="group w-full flex items-center rounded-[10px] mb-px cursor-pointer transition-all duration-150 hover:bg-white/[.05]"
         [style.padding]="'9px 12px'" [style.gap]="'9px'"
         [style.margin-top]="gi > 0 ? '8px' : '0'"
-        [style.color]="isGroupActive(group) ? '#00C4A7' : 'rgba(255,255,255,.4)'">
+        [style.color]="isGroupActive(group) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'">
         <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isGroupActive(group)"
-          [style.color]="isGroupActive(group) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="isGroupActive(group) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: group.icon }"></ng-container>
         </span>
         <span @sidebarLabel class="text-[13.5px] whitespace-nowrap tracking-tight flex-1 text-left font-semibold">
@@ -173,14 +173,14 @@
         <a [routerLink]="item.path"
           class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
           style="padding:8px 12px 8px 22px;gap:9px;" [style.background]="isActive(item.path)
-                 ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
-                 : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+                 ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))'
+                 : ''" [style.color]="isActive(item.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
           [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
           @if (isActive(item.path)) {
-          <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+          <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
           }
           <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
-            [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+            [style.color]="isActive(item.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
             <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
           </span>
           <span class="text-[13.5px] whitespace-nowrap tracking-tight flex-1"
@@ -189,7 +189,7 @@
           </span>
           @if (item.badge) {
           <span class="text-[9.5px] font-bold px-[6px] py-px rounded-full text-white tracking-wider"
-            style="background:#00C4A7;">
+            style="background:rgb(var(--lr-accent));">
             {{ item.badge }}
           </span>
           }
@@ -205,14 +205,14 @@
       <a [routerLink]="item.path" [title]="item.label"
         class="group flex items-center justify-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         style="padding:9px 0;" [style.background]="isActive(item.path)
-               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
-               : ''" [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+               ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))'
+               : ''" [style.color]="isActive(item.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
         [class.hover:bg-white]="!isActive(item.path)" [class.hover:bg-opacity-5]="!isActive(item.path)">
         @if (isActive(item.path)) {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
         }
         <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(item.path)"
-          [style.color]="isActive(item.path) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="isActive(item.path) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
         </span>
       </a>
@@ -228,14 +228,14 @@
         class="group flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
         [style.gap]="isSidebarOpen() ? '9px' : '0'" [style.background]="isActive(helpLink.path!)
-               ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))'
-               : ''" [style.color]="isActive(helpLink.path!) ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+               ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))'
+               : ''" [style.color]="isActive(helpLink.path!) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
         [class.hover:bg-white]="!isActive(helpLink.path!)" [class.hover:bg-opacity-5]="!isActive(helpLink.path!)">
         @if (isActive(helpLink.path!)) {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
         }
         <span class="shrink-0 transition-colors" [class.group-hover:text-white]="!isActive(helpLink.path!)"
-          [style.color]="isActive(helpLink.path!) ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="isActive(helpLink.path!) ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <ng-container [ngTemplateOutlet]="iconTpl" [ngTemplateOutletContext]="{ $implicit: helpLink.icon }"></ng-container>
         </span>
         @if (isSidebarOpen()) {
@@ -255,12 +255,12 @@
         @if (user()?.profileImage) {
           <img [src]="user()!.profileImage!" alt="Perfil"
             class="w-[30px] h-[30px] rounded-full object-cover shrink-0"
-            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
         } @else {
           <div
             class="w-[30px] h-[30px] rounded-full flex-center text-white text-[10px] font-bold tracking-tight shrink-0"
-            style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
-                      box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+            style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));
+                      box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
             {{ userInitials() }}
           </div>
         }
@@ -336,11 +336,11 @@
           @if (user()?.profileImage) {
             <img [src]="user()!.profileImage!" alt="Perfil"
               class="w-[34px] h-[34px] rounded-full object-cover"
-              style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+              style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
           } @else {
             <div class="w-[34px] h-[34px] rounded-full flex-center text-white text-[11px] font-bold tracking-tight cursor-pointer"
-              style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
-                        box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+              style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));
+                        box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
               {{ userInitials() }}
             </div>
           }

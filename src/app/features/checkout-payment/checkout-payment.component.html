@@ -55,9 +55,9 @@
                   <!-- Icon -->
                   <div class="w-[42px] h-[42px] rounded-[10px] flex-center shrink-0"
                        [style.background]="isConfigured(config.provider) && isActive(config.provider)
-                         ? 'rgba(0,196,167,.13)' : 'rgba(100,116,139,.08)'"
+                         ? 'rgb(var(--lr-accent) / .13)' : 'rgba(100,116,139,.08)'"
                        [style.color]="isConfigured(config.provider) && isActive(config.provider)
-                         ? '#00C4A7' : '#94a3b8'">
+                         ? 'rgb(var(--lr-accent))' : '#94a3b8'">
                     @switch (config.icon) {
                       @case ('credit-card') {
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -227,7 +227,7 @@
                     <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
                       <button (click)="saveMethod(config)" [disabled]="isSaving()"
                         class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
-                        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+                        style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
                         @if (isSaving()) {
                           <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>

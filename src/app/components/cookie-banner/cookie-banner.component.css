@@ -40,7 +40,7 @@
 }
 
 .cookie-banner__text a {
-  color: #00C4A7;
+  color: rgb(var(--lr-accent));
   font-weight: 600;
   text-decoration: none;
 }
@@ -78,9 +78,9 @@
 }
 
 .cookie-btn--primary {
-  background: #00C4A7;
+  background: rgb(var(--lr-accent));
   color: #0D1B2A;
-  box-shadow: 0 4px 14px rgba(0, 196, 167, .35);
+  box-shadow: 0 4px 14px rgb(var(--lr-accent) / .35);
 }
 
 .cookie-btn--primary:hover {

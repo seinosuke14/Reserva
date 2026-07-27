@@ -32,7 +32,7 @@
       }
       <button (click)="openAddForm()"
         class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white border border-transparent transition-all hover:opacity-90"
-        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+        style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -94,8 +94,8 @@
           <div class="flex-between">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[11.5px] font-bold px-2.5 py-px rounded-full"
-                    [style.background]="service.isActive ? 'rgba(0,196,167,.13)' : 'rgba(100,116,139,.1)'"
-                    [style.color]="service.isActive ? '#00C4A7' : '#64748b'">
+                    [style.background]="service.isActive ? 'rgb(var(--lr-accent) / .13)' : 'rgba(100,116,139,.1)'"
+                    [style.color]="service.isActive ? 'rgb(var(--lr-accent))' : '#64748b'">
                 {{ service.isActive ? 'Activo' : 'Inactivo' }}
               </span>
               @if (service.category) {
@@ -108,7 +108,7 @@
 
             <!-- Toggle switch -->
             <div class="relative w-[38px] h-[21px] rounded-full cursor-pointer transition-colors shrink-0"
-                 [style.background]="service.isActive ? '#00C4A7' : '#e2e8f0'"
+                 [style.background]="service.isActive ? 'rgb(var(--lr-accent))' : '#e2e8f0'"
                  (click)="toggleStatus(service)">
               <div class="absolute top-[2.5px] w-4 h-4 rounded-full bg-white transition-all duration-200 shadow-sm"
                    [style.left]="service.isActive ? '19px' : '2.5px'"></div>
@@ -126,7 +126,7 @@
           <!-- Duration + price -->
           <div class="flex items-center gap-3">
             <span class="text-[12.5px] text-primary-500">{{ service.duration }} min</span>
-            <span class="text-[16px] font-extrabold tracking-tight" style="color:#00C4A7;">
+            <span class="text-[16px] font-extrabold tracking-tight" style="color:rgb(var(--lr-accent));">
               {{ formatCLP(service.price) }}
               <span class="text-[11px] font-medium text-primary-400">sin IVA</span>
             </span>
@@ -189,8 +189,8 @@
              style="background:linear-gradient(120deg,#0D1B2A,#1e293b);border-bottom:1px solid rgba(255,255,255,.07);">
           <div class="flex items-center gap-3">
             <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
-                 style="background:rgba(0,196,167,.18);">
-              <svg width="15" height="15" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
+                 style="background:rgb(var(--lr-accent) / .18);">
+              <svg width="15" height="15" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="1.75" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
                   a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
@@ -248,7 +248,7 @@
                 Duración del servicio
               </label>
               <span class="text-[11.5px] font-bold px-2.5 py-px rounded-full"
-                    style="background:rgba(0,196,167,.12);color:#00C4A7;">
+                    style="background:rgb(var(--lr-accent) / .12);color:rgb(var(--lr-accent));">
                 {{ blocksCount() }} {{ blocksCount() === 1 ? 'bloque' : 'bloques' }} · {{ durationMinutes() }} min
               </span>
             </div>
@@ -256,10 +256,10 @@
               @for (n of blockOptions; track n) {
                 <button type="button" (click)="setBlocks(n)"
                   class="flex flex-col items-center justify-center w-[52px] py-2 rounded-[9px] text-[12px] font-bold transition-all border"
-                  [style.background]="blocksCount() === n ? '#00C4A7' : ''"
+                  [style.background]="blocksCount() === n ? 'rgb(var(--lr-accent))' : ''"
                   [style.color]="blocksCount() === n ? '#fff' : ''"
-                  [style.borderColor]="blocksCount() === n ? '#00C4A7' : '#e2e8f0'"
-                  [style.boxShadow]="blocksCount() === n ? '0 2px 8px rgba(0,196,167,.35)' : ''">
+                  [style.borderColor]="blocksCount() === n ? 'rgb(var(--lr-accent))' : '#e2e8f0'"
+                  [style.boxShadow]="blocksCount() === n ? '0 2px 8px rgb(var(--lr-accent) / .35)' : ''">
                   <span>{{ n }}</span>
                   <span class="text-[9.5px] font-medium opacity-70">{{ n * slotDuration() }}m</span>
                 </button>
@@ -372,7 +372,7 @@
             </button>
             <button type="submit" [disabled]="isSaving()"
               class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all disabled:opacity-70"
-              style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+              style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
               @if (isSaving()) {
                 <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                   <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -407,8 +407,8 @@
              style="background:linear-gradient(120deg,#0D1B2A,#1e293b);border-bottom:1px solid rgba(255,255,255,.07);">
           <div class="flex items-center gap-3">
             <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
-                 style="background:rgba(0,196,167,.18);">
-              <svg width="15" height="15" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
+                 style="background:rgb(var(--lr-accent) / .18);">
+              <svg width="15" height="15" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="1.75" viewBox="0 0 24 24">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                 <line x1="7" y1="7" x2="7.01" y2="7"/>
               </svg>
@@ -445,7 +445,7 @@
                   (keydown.enter)="createCategory()" />
                 <button (click)="createCategory()" [disabled]="catSaving() || !newCatName().trim()"
                   class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-50 shrink-0"
-                  style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+                  style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
                   Crear
                 </button>
               </div>
@@ -477,7 +477,7 @@
                     (keydown.enter)="saveCategoryName()" />
                   <button (click)="saveCategoryName()" [disabled]="catSaving() || !editingCatName().trim()" title="Guardar"
                     class="w-7 h-7 flex-center rounded-[7px] text-white shrink-0 disabled:opacity-50"
-                    style="background:#00C4A7;">
+                    style="background:rgb(var(--lr-accent));">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>

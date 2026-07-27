@@ -78,10 +78,10 @@ export class DashboardHomeComponent implements OnInit {
     if (user?.slug && !user?.companyId) return {
       url:     `${window.location.origin}/reservar/${user.slug}`,
       label:   'Tu link de agendamiento',
-      accent:  '#00C4A7',
-      shadow:  'rgba(0,196,167,.4)',
-      iconBg:  'rgba(0,196,167,.13)',
-      iconColor: '#00C4A7',
+      accent:  'rgb(var(--lr-accent))',
+      shadow:  'rgb(var(--lr-accent) / .4)',
+      iconBg:  'rgb(var(--lr-accent) / .13)',
+      iconColor: 'rgb(var(--lr-accent))',
       isCompany: false,
     };
     if (user?.companyId && user?.companySlug) return {

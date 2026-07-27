@@ -89,12 +89,14 @@ interface IDonutSegment {
 }
 
 // Combo chart layout (barras de ganancia + líneas de reservas)
-const CH_PAD_LEFT   = 54;  // eje Y izquierdo (ingresos)
-const CH_PAD_RIGHT  = 32;  // eje Y derecho (reservas)
-const CH_PAD_TOP    = 18;
-const CH_PAD_BOTTOM = 30;
-const CH_W          = 580;
-const CH_H          = 250;
+const CH_PAD_LEFT   = 74;  // eje Y izquierdo (ingresos)
+const CH_PAD_RIGHT  = 34;  // eje Y derecho (reservas)
+const CH_PAD_TOP    = 16;
+const CH_PAD_BOTTOM = 28;
+// Proporción ancha y baja (~4.3:1): el SVG escala con el ancho del contenedor,
+// así que un viewBox alto hacía que el gráfico creciera demasiado en pantalla.
+const CH_W          = 900;
+const CH_H          = 210;
 const CH_PLOT_W     = CH_W - CH_PAD_LEFT - CH_PAD_RIGHT;
 const CH_PLOT_H     = CH_H - CH_PAD_TOP - CH_PAD_BOTTOM;
 
@@ -387,6 +389,119 @@ export class AnalyticsComponent implements OnInit {
       nuevo:    nuevoList.length,
       total:    custs.length,
     };
+  });
+
+  /**
+   * Gráfico a pantalla completa. Pensado para móvil: el gráfico combinado queda
+   * estrecho en vertical, y así se puede girar el teléfono y tocar cada punto.
+   */
+  readonly chartFullscreen = signal(false);
+  toggleChartFullscreen(): void { this.chartFullscreen.update(v => !v); }
+
+  /** Mes más fuerte del período y cuánto pesa en el total, para la nota del gráfico. */
+  readonly bestMonth = computed(() => {
+    const data  = this.monthlyData();
+    const total = this.totalRevenue12m();
+    if (!data.length || !total) return null;
+    const top = data.reduce((a, b) => (b.revenue > a.revenue ? b : a));
+    if (!top.revenue) return null;
+    return { month: top.month, revenue: top.revenue, pct: Math.round((top.revenue / total) * 100) };
+  });
+
+  // ── Ticket promedio y cancelaciones ─────────────────────────────
+  readonly paidBookings12m = computed(() =>
+    this.monthlyData().reduce((s, m) => s + m.paid, 0)
+  );
+
+  readonly avgTicket = computed(() => {
+    const pagadas = this.paidBookings12m();
+    return pagadas ? Math.round(this.totalRevenue12m() / pagadas) : 0;
+  });
+
+  /** Porcentaje de citas canceladas sobre el total del período. */
+  readonly cancelRate = computed(() => {
+    const total = this.totalBookings12m();
+    if (!total) return 0;
+    const canceladas = this.monthlyData().reduce((s, m) => s + m.cancelled, 0);
+    return Math.round((canceladas / total) * 1000) / 10;
+  });
+
+  // ── Demanda por día y hora ──────────────────────────────────────
+  readonly heatDays  = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  readonly heatBands = [
+    { label: '09–11', from: 9,  to: 11 },
+    { label: '11–13', from: 11, to: 13 },
+    { label: '13–15', from: 13, to: 15 },
+    { label: '15–17', from: 15, to: 17 },
+    { label: '17–19', from: 17, to: 19 },
+    { label: '19–21', from: 19, to: 21 },
+  ];
+
+  /** Matriz banda horaria × día con intensidad 0–5 relativa al máximo. */
+  readonly heatmap = computed(() => {
+    const conteo = this.heatBands.map(() => this.heatDays.map(() => 0));
+
+    for (const a of this.appointments()) {
+      if (a.paymentStatus === 'Cancelado') continue;
+      const [y, m, d] = a.date.substring(0, 10).split('-').map(Number);
+      const js  = new Date(y, m - 1, d).getDay();   // 0 = domingo
+      const col = js === 0 ? -1 : js - 1;           // lun=0 … sáb=5
+      if (col < 0 || col > 5) continue;
+
+      const hora = Number(a.time.split(':')[0]);
+      const fila = this.heatBands.findIndex(b => hora >= b.from && hora < b.to);
+      if (fila < 0) continue;
+      conteo[fila][col]++;
+    }
+
+    const max = Math.max(...conteo.flat(), 1);
+    return conteo.map(fila => fila.map(n => ({
+      n,
+      nivel: n === 0 ? 0 : Math.max(1, Math.round((n / max) * 5)),
+    })));
+  });
+
+  /**
+   * Retención por cohorte: agrupa clientes por el mes de su primera cita y
+   * calcula qué porcentaje volvió en cada uno de los meses siguientes.
+   */
+  readonly cohorts = computed(() => {
+    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const aIndice = (k: string) => { const [y, m] = k.split('-').map(Number); return y * 12 + (m - 1); };
+    const hoy = new Date();
+    const hoyIdx = hoy.getFullYear() * 12 + hoy.getMonth();
+
+    const grupos = new Map<string, Set<number>[]>();
+    for (const c of this.customers()) {
+      const meses = c.appointments
+        .filter(a => a.paymentStatus !== 'Cancelado')
+        .map(a => a.date.substring(0, 7))
+        .sort();
+      if (!meses.length) continue;
+
+      const primeraKey = meses[0];
+      const base = aIndice(primeraKey);
+      const offsets = new Set(meses.map(f => aIndice(f) - base));
+      const arr = grupos.get(primeraKey) ?? [];
+      arr.push(offsets);
+      grupos.set(primeraKey, arr);
+    }
+
+    return [...grupos.keys()].sort().slice(-5).map(k => {
+      const clientes = grupos.get(k)!;
+      const [y, m]   = k.split('-').map(Number);
+      const antiguedad = hoyIdx - (y * 12 + (m - 1));
+
+      const celdas = [1, 2, 3, 4, 5].map(off => {
+        // Sin meses transcurridos suficientes todavía no hay dato que mostrar.
+        if (off > antiguedad) return { pct: null as number | null, nivel: 0 };
+        const vuelven = clientes.filter(o => o.has(off)).length;
+        const pct = Math.round((vuelven / clientes.length) * 100);
+        return { pct, nivel: Math.min(5, Math.floor(pct / 17)) };
+      });
+
+      return { label: `${MESES[m - 1]} · ${clientes.length}`, celdas };
+    });
   });
 
   async ngOnInit(): Promise<void> {

@@ -19,7 +19,9 @@ interface IAppointment {
   time: string;
   notes: string | null;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
-  paymentProvider?: string | null;
+  /** Monto cobrado por la cita. La API lo devuelve; puede venir como string (DECIMAL). */
+  amount?: number | string | null;
+  paymentProvider?: 'mercadopago_connect' | 'webpay' | 'transfer' | 'presencial' | string | null;
   cancellationStatus?: 'none' | 'requested' | 'rejected';
   cancellationReason?: string | null;
   refundStatus?: string | null;
@@ -84,6 +86,8 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const mobile = window.innerWidth < 768;
     this.isMobile.set(mobile);
     if (!mobile) this.isLeftPanelOpen.set(true);
+    // La grilla semanal no cabe en pantallas chicas: pasamos a la vista de día.
+    if (mobile && this.viewMode() === 'week') this.viewMode.set('day');
   };
 
   private appointments = signal<IAppointment[]>([]);
@@ -764,6 +768,192 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       pendientes: apts.filter(a => a.paymentStatus === 'Pendiente').length,
     };
   });
+
+  // ── Vistas de la agenda: semana · día · lista ───────────────────────
+  // En móvil arrancamos en Día: la grilla semanal necesita más ancho del disponible.
+  readonly viewMode = signal<'week' | 'day' | 'list'>(window.innerWidth < 768 ? 'day' : 'week');
+  setViewMode(mode: 'week' | 'day' | 'list'): void { this.viewMode.set(mode); }
+
+  private readonly ALL_VIEWS: { id: 'week' | 'day' | 'list'; label: string }[] = [
+    { id: 'week', label: 'Semana' },
+    { id: 'day',  label: 'Día' },
+    { id: 'list', label: 'Lista' },
+  ];
+
+  /** En móvil no ofrecemos la vista semanal. */
+  readonly viewOptions = computed(() =>
+    this.isMobile() ? this.ALL_VIEWS.filter(v => v.id !== 'week') : this.ALL_VIEWS
+  );
+
+  readonly listTabs: { id: 'proximas' | 'confirmar' | 'pasadas' | 'canceladas'; label: string }[] = [
+    { id: 'proximas',   label: 'Próximas' },
+    { id: 'confirmar',  label: 'Por confirmar' },
+    { id: 'pasadas',    label: 'Pasadas' },
+    { id: 'canceladas', label: 'Canceladas' },
+  ];
+
+  readonly listTab = signal<'proximas' | 'confirmar' | 'pasadas' | 'canceladas'>('proximas');
+  setListTab(tab: 'proximas' | 'confirmar' | 'pasadas' | 'canceladas'): void { this.listTab.set(tab); }
+
+  /** Clave cronológica (fecha + hora) para ordenar el listado. */
+  private _sortKey(a: IAppointment): string {
+    return `${a.date.substring(0, 10)}T${a.time}`;
+  }
+
+  /** Pide atención: el cliente solicitó cancelar, o sigue sin pagar y aún no ocurre. */
+  private _needsAction(a: IAppointment): boolean {
+    return a.cancellationStatus === 'requested'
+        || (a.paymentStatus === 'Pendiente' && !this.isAppointmentPast(a));
+  }
+
+  /**
+   * Color del borde de la tarjeta según el estado de la cita.
+   * Pendiente naranja · confirmada verde claro · finalizada gris · cancelada roja.
+   * Una solicitud de cancelación también se marca en rojo: pide atención.
+   */
+  statusBorderColor(a: IAppointment): string {
+    if (a.paymentStatus === 'Cancelado' || a.cancellationStatus === 'requested') return '#ef4444';
+    switch (a.paymentStatus) {
+      case 'Pagado':     return '#4ade80';
+      case 'Finalizada': return '#A39D96';
+      default:           return 'rgb(var(--lr-accent))';
+    }
+  }
+
+  /**
+   * Mismo color del estado, translúcido. Lo usan los bloques que ocupa una cita
+   * de varias horas, para que se lean como parte de ella.
+   */
+  statusSoftColor(a: IAppointment, alpha = 0.08): string {
+    const hex = this.statusBorderColor(a);
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  readonly listCounts = computed(() => {
+    const all    = this.appointments();
+    const activa = all.filter(a => a.paymentStatus !== 'Cancelado');
+    return {
+      proximas:   activa.filter(a => !this.isAppointmentPast(a)).length,
+      confirmar:  activa.filter(a => this._needsAction(a)).length,
+      pasadas:    activa.filter(a => this.isAppointmentPast(a)).length,
+      canceladas: all.filter(a => a.paymentStatus === 'Cancelado').length,
+    };
+  });
+
+  readonly listAppointments = computed(() => {
+    const all    = this.appointments();
+    const activa = all.filter(a => a.paymentStatus !== 'Cancelado');
+    const tab    = this.listTab();
+
+    let rows: IAppointment[];
+    switch (tab) {
+      case 'confirmar':  rows = activa.filter(a => this._needsAction(a)); break;
+      case 'pasadas':    rows = activa.filter(a => this.isAppointmentPast(a)); break;
+      case 'canceladas': rows = all.filter(a => a.paymentStatus === 'Cancelado'); break;
+      default:           rows = activa.filter(a => !this.isAppointmentPast(a));
+    }
+
+    // Lo ya ocurrido se lee de lo más reciente hacia atrás.
+    const desc = tab === 'pasadas' || tab === 'canceladas';
+    return [...rows].sort((a, b) => desc
+      ? this._sortKey(b).localeCompare(this._sortKey(a))
+      : this._sortKey(a).localeCompare(this._sortKey(b)));
+  });
+
+  /** Etiqueta relativa de fecha para el listado (Hoy / Mañana / lun 28 jul). */
+  listDateLabel(a: IAppointment): string {
+    const fecha  = a.date.substring(0, 10);
+    const hoy    = this._toDateStr(new Date());
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    if (fecha === hoy) return 'Hoy';
+    if (fecha === this._toDateStr(manana)) return 'Mañana';
+
+    const [y, m, d] = fecha.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  readonly dayViewLabel = computed(() =>
+    this.selectedDate().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+  );
+
+  /**
+   * Hora de cierre del día seleccionado. Se muestra al final de la grilla como
+   * referencia: no es un bloque agendable, marca dónde termina la jornada.
+   */
+  readonly dayClosingTime = computed(() =>
+    this.workSvc.getEndTime(jsToDow(this.selectedDate().getDay()))
+  );
+
+  /** Cierre más tardío de la semana, para cerrar la grilla semanal. */
+  readonly weekClosingTime = computed(() => {
+    const horas = this.weekDays()
+      .map(d => this.workSvc.getEndTime(jsToDow(d.getDay())))
+      .filter((t): t is string => !!t)
+      .sort();
+    return horas.length ? horas[horas.length - 1] : null;
+  });
+
+  // ── Panel lateral: caja y ocupación del día ────────────────────────
+  readonly showDayRail = signal(true);
+  toggleDayRail(): void { this.showDayRail.update(v => !v); }
+
+  private _amountOf(a: IAppointment): number {
+    return Number(a.amount ?? 0) || 0;
+  }
+
+  /** Pagos con tarjeta a través de una pasarela (no efectivo ni transferencia). */
+  private _isOnlinePayment(a: IAppointment): boolean {
+    return a.paymentProvider === 'mercadopago_connect' || a.paymentProvider === 'webpay';
+  }
+
+  private _isPaid(a: IAppointment): boolean {
+    return a.paymentStatus === 'Pagado' || a.paymentStatus === 'Finalizada';
+  }
+
+  /** Caja del día calculada sobre las citas reales (excluye canceladas). */
+  readonly dayCash = computed(() => {
+    const apts = this.dayAppointments();
+    const sum  = (list: IAppointment[]) => list.reduce((t, a) => t + this._amountOf(a), 0);
+
+    const pagadas = apts.filter(a => this._isPaid(a));
+    return {
+      total:       sum(apts),
+      reservas:    apts.length,
+      online:      sum(pagadas.filter(a => this._isOnlinePayment(a))),
+      transfer:    sum(pagadas.filter(a => a.paymentProvider === 'transfer')),
+      porCobrar:   sum(apts.filter(a => a.paymentStatus === 'Pendiente')),
+    };
+  });
+
+  /** Ocupación del día: bloques con cita sobre el total de bloques del horario. */
+  readonly dayOccupancy = computed(() => {
+    const slots = this.timeSlots();
+    if (!slots.length) return { ocupados: 0, total: 0, pct: 0 };
+    const ocupados = slots.filter(s => s.isOccupied).length;
+    return { ocupados, total: slots.length, pct: Math.round((ocupados / slots.length) * 100) };
+  });
+
+  /** Citas del día que piden acción: pidió cancelar o sigue sin pagar. */
+  readonly dayNeedsAction = computed(() =>
+    this.dayAppointments().filter(a => this._needsAction(a))
+  );
+
+  prevDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() - 1);
+    this.selectDate(d);
+  }
+
+  nextDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() + 1);
+    this.selectDate(d);
+  }
 
   dayApptCount(day: Date): number {
     const s = this._toDateStr(day);

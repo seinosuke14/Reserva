@@ -1,5 +1,5 @@
 :host {
-  --accent: #00C4A7;
+  --accent: rgb(var(--lr-accent));
   --ink: #1e293b;
   --muted: #64748b;
   --line: #e2e8f0;
@@ -108,7 +108,7 @@
   flex-direction: column;
   gap: 2px;
   &:hover { border-color: #cbd5e1; }
-  &.active { border-color: var(--accent); background: rgba(0, 196, 167, 0.06); }
+  &.active { border-color: var(--accent); background: rgb(var(--lr-accent) / 0.06); }
 }
 
 .cont-mode-t { font-size: 13px; font-weight: 700; color: var(--ink); }
@@ -129,7 +129,7 @@
   font-weight: 700;
   color: #fff;
   background: var(--accent);
-  box-shadow: 0 3px 12px rgba(0, 196, 167, 0.38);
+  box-shadow: 0 3px 12px rgb(var(--lr-accent) / 0.38);
   transition: opacity .15s;
   &:disabled { opacity: 0.6; }
 }

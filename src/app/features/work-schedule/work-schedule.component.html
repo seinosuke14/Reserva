@@ -25,7 +25,7 @@
     <!-- Slot duration -->
     <div class="dash-card">
       <h3 class="text-[12px] font-bold text-primary uppercase tracking-wider flex items-center gap-2">
-        <svg width="14" height="14" fill="none" stroke="#00C4A7" stroke-width="1.75" viewBox="0 0 24 24">
+        <svg width="14" height="14" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="1.75" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         Duración de cada cita
@@ -34,10 +34,10 @@
         @for (dur of durations; track dur) {
           <button (click)="setSlotDuration(dur)"
             class="px-4 py-2 rounded-[9px] text-[12.5px] font-bold transition-all border"
-            [style.background]="slotDuration() === dur ? '#00C4A7' : ''"
+            [style.background]="slotDuration() === dur ? 'rgb(var(--lr-accent))' : ''"
             [style.color]="slotDuration() === dur ? '#fff' : ''"
-            [style.borderColor]="slotDuration() === dur ? '#00C4A7' : ''"
-            [style.boxShadow]="slotDuration() === dur ? '0 2px 8px rgba(0,196,167,.35)' : ''"
+            [style.borderColor]="slotDuration() === dur ? 'rgb(var(--lr-accent))' : ''"
+            [style.boxShadow]="slotDuration() === dur ? '0 2px 8px rgb(var(--lr-accent) / .35)' : ''"
             [class.border-primary-200]="slotDuration() !== dur"
             [class.text-primary-500]="slotDuration() !== dur"
             [class.hover:border-accent]="slotDuration() !== dur">
@@ -122,7 +122,7 @@
 
       <button (click)="saveSchedule()" [disabled]="isSaving()"
         class="inline-flex items-center gap-2 px-5 py-[9px] rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70"
-        style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+        style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
         @if (isSaving()) {
           <svg class="animate-spin" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
