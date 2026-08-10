@@ -27,6 +27,8 @@ interface IAppointment {
   refundStatus?: string | null;
   refundId?: string | null;
   rated:    boolean;
+  /** Momento en que se creó la reserva (lo devuelve la API en el JSON de la cita). */
+  createdAt?: string;
   customer: { id: string; name: string; email?: string };
   service:  { id: string; name: string; duration?: number; category?: { id: string; isQuoteCategory?: boolean } | null } | null;
 }
@@ -43,6 +45,8 @@ interface ICustomer {
   name: string;
   email?: string;
   phone?: string;
+  /** Alta del cliente en el directorio: sirve para saber desde cuándo es cliente. */
+  createdAt?: string;
 }
 
 
@@ -91,6 +95,186 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
   };
 
   private appointments = signal<IAppointment[]>([]);
+
+  // ── Contacto del cliente de la cita abierta ───────────────────
+  /** Ficha completa del cliente: la cita solo trae id/nombre/email, el teléfono vive en el directorio. */
+  readonly selectedCustomer = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return null;
+    const byId = this.customers().find(c => c.id === apt.customer.id);
+    if (byId) return byId;
+    const email = apt.customer.email?.toLowerCase();
+    return email ? this.customers().find(c => c.email?.toLowerCase() === email) ?? null : null;
+  });
+
+  readonly customerEmail = computed(() =>
+    this.selectedCustomer()?.email ?? this.selectedAppointment()?.customer.email ?? null
+  );
+
+  /** Teléfono legible: +56 9 7568 6260 cuando es un móvil chileno, tal cual en cualquier otro caso. */
+  readonly customerPhone = computed(() => {
+    const raw = this.selectedCustomer()?.phone?.trim();
+    if (!raw) return null;
+
+    const d = raw.replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('569')) return `+56 9 ${d.slice(3, 7)} ${d.slice(7)}`;
+    if (d.length === 9  && d.startsWith('9'))   return `+56 9 ${d.slice(1, 5)} ${d.slice(5)}`;
+    return raw;
+  });
+
+  private _customerCreatedAt(): Date | null {
+    const iso = this.selectedCustomer()?.createdAt;
+    if (!iso) return null;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  /** "julio 2026" — desde cuándo está el cliente en el directorio. */
+  readonly customerSince = computed(() => {
+    const d = this._customerCreatedAt();
+    return d ? new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' }).format(d).replace(' de ', ' ') : null;
+  });
+
+  /** "jul 2026" — versión corta para la fila de métricas. */
+  readonly customerSinceShort = computed(() => {
+    const d = this._customerCreatedAt();
+    return d ? new Intl.DateTimeFormat('es-CL', { month: 'short', year: 'numeric' }).format(d).replace(' de ', ' ') : null;
+  });
+
+  /** Historial del cliente de la cita abierta, en orden cronológico. */
+  private readonly selectedCustomerApts = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return [];
+    return this.appointments()
+      .filter(a => a.customer?.id === apt.customer.id)
+      .sort((a, b) => this._sortKey(a).localeCompare(this._sortKey(b)));
+  });
+
+  /** Resumen del cliente para la cabecera: qué visita es, cuánto ha gastado y cuántas canceló. */
+  readonly customerStats = computed(() => {
+    const apt  = this.selectedAppointment();
+    if (!apt) return null;
+    const list = this.selectedCustomerApts();
+
+    const vigentes = list.filter(a => a.paymentStatus !== 'Cancelado');
+    const idx      = vigentes.findIndex(a => a.id === apt.id);
+
+    return {
+      visita:     idx >= 0 ? idx + 1 : vigentes.length + 1,
+      gastado:    list.filter(a => this._isPaid(a)).reduce((s, a) => s + this._amountOf(a), 0),
+      canceladas: list.length - vigentes.length,
+    };
+  });
+
+  readonly isNewCustomer = computed(() => (this.customerStats()?.visita ?? 0) <= 1);
+
+  /** "Hoy, lunes 27 de julio" · "Mañana, martes 28 de julio" · "Lunes 27 de julio". */
+  readonly aptDateLabel = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return '';
+
+    const fecha  = apt.date.substring(0, 10);
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    const [y, m, d] = fecha.split('-').map(Number);
+    const largo = new Date(y, m - 1, d)
+      .toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    if (fecha === this.todayStr)                return `Hoy, ${largo}`;
+    if (fecha === this._toDateStr(manana))      return `Mañana, ${largo}`;
+    return largo.charAt(0).toUpperCase() + largo.slice(1);
+  });
+
+  /** "09:45 – 10:15" cuando se conoce la duración del servicio; si no, solo la hora de inicio. */
+  readonly aptTimeRange = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return '';
+
+    const dur = apt.service?.duration;
+    if (!dur) return apt.time;
+
+    const [h, m] = apt.time.split(':').map(Number);
+    const end    = new Date(2000, 0, 1, h, m + dur);
+    return `${apt.time} – ${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+  });
+
+  /** "26 jul 18:32" — cuándo se creó la reserva. */
+  readonly bookedAtLabel = computed(() => {
+    const iso = this.selectedAppointment()?.createdAt;
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    const fecha = d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+    const hora  = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return `${fecha} ${hora}`;
+  });
+
+  private readonly PROVIDER_LABELS: Record<string, string> = {
+    mercadopago_connect: 'MercadoPago',
+    webpay:              'Webpay',
+    transfer:            'Transferencia',
+    presencial:          'Pago presencial',
+  };
+
+  readonly paymentMethodLabel = computed(() => {
+    const p = this.selectedAppointment()?.paymentProvider;
+    return p ? this.PROVIDER_LABELS[p] ?? p : null;
+  });
+
+  /** Se refresca cada minuto para mantener vivo el "en X minutos" de la cita. */
+  private readonly nowTick = signal(Date.now());
+  private _tickId?: ReturnType<typeof setInterval>;
+
+  /** "En 12 minutos" · "En curso" · "Hace 2 h" — cuenta regresiva de la cita abierta. */
+  readonly startsInLabel = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return null;
+
+    const [y, mo, d] = apt.date.substring(0, 10).split('-').map(Number);
+    const [h, mi]    = apt.time.split(':').map(Number);
+    const start      = new Date(y, mo - 1, d, h, mi);
+    const dur        = apt.service?.duration ?? 0;
+    const diffMin    = Math.round((start.getTime() - this.nowTick()) / 60000);
+
+    if (diffMin > 0) {
+      if (diffMin < 60)   return `En ${diffMin} minuto${diffMin === 1 ? '' : 's'}`;
+      const hrs = Math.round(diffMin / 60);
+      if (hrs < 24)       return `En ${hrs} h`;
+      return null; // más de un día: la fecha de arriba ya lo dice
+    }
+    if (dur && -diffMin < dur) return 'En curso';
+
+    const pasado = -diffMin;
+    if (pasado < 60)  return `Hace ${pasado} minuto${pasado === 1 ? '' : 's'}`;
+    const hrs = Math.round(pasado / 60);
+    if (hrs < 24)     return `Hace ${hrs} h`;
+    return null;
+  });
+
+  /** Abre la ficha del cliente en el directorio. */
+  goToCustomerFile(): void {
+    const id = this.selectedAppointment()?.customer.id;
+    if (!id) return;
+    this.router.navigate(['/app/clientes'], { queryParams: { cliente: id } });
+  }
+
+  /**
+   * Número en formato internacional para wa.me. Los teléfonos se guardan como
+   * los escribe el profesional, así que se normaliza asumiendo Chile (+56).
+   */
+  readonly whatsappLink = computed(() => {
+    const raw = this.customerPhone();
+    if (!raw) return null;
+
+    let digits = raw.replace(/\D/g, '');
+    if (!digits) return null;
+
+    if (!digits.startsWith('56')) {
+      digits = digits.length === 8 ? `569${digits}` : `56${digits}`;
+    }
+    return digits.length >= 11 ? `https://wa.me/${digits}` : null;
+  });
 
   // ── Nueva Cita ────────────────────────────────────────────────
   readonly showNewAppt     = signal(false);
@@ -244,6 +428,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     window.addEventListener('resize', this._resizeListener);
+    this._tickId = setInterval(() => this.nowTick.set(Date.now()), 60_000);
     await Promise.all([
       this._loadAppointments(),
       this._loadServices(),
@@ -256,6 +441,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this._resizeListener);
+    if (this._tickId) clearInterval(this._tickId);
   }
 
   toggleLeftPanel(): void {
@@ -832,29 +1018,40 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  readonly listCounts = computed(() => {
+  /**
+   * Reparto de las citas entre las cuatro pestañas. Contador y listado leen de
+   * aquí para no poder contradecirse: si cada uno filtrara por su cuenta, "pasada"
+   * se evaluaría en instantes distintos (depende de la hora actual) y la pestaña
+   * podría marcar 2 mientras la lista sale vacía. Depende de nowTick para que el
+   * reparto se rehaga cada minuto en vez de quedar congelado al cargar la agenda.
+   */
+  private readonly listBuckets = computed(() => {
+    this.nowTick();
+
     const all    = this.appointments();
     const activa = all.filter(a => a.paymentStatus !== 'Cancelado');
+
     return {
-      proximas:   activa.filter(a => !this.isAppointmentPast(a)).length,
-      confirmar:  activa.filter(a => this._needsAction(a)).length,
-      pasadas:    activa.filter(a => this.isAppointmentPast(a)).length,
-      canceladas: all.filter(a => a.paymentStatus === 'Cancelado').length,
+      proximas:   activa.filter(a => !this.isAppointmentPast(a)),
+      confirmar:  activa.filter(a => this._needsAction(a)),
+      pasadas:    activa.filter(a => this.isAppointmentPast(a)),
+      canceladas: all.filter(a => a.paymentStatus === 'Cancelado'),
+    };
+  });
+
+  readonly listCounts = computed(() => {
+    const b = this.listBuckets();
+    return {
+      proximas:   b.proximas.length,
+      confirmar:  b.confirmar.length,
+      pasadas:    b.pasadas.length,
+      canceladas: b.canceladas.length,
     };
   });
 
   readonly listAppointments = computed(() => {
-    const all    = this.appointments();
-    const activa = all.filter(a => a.paymentStatus !== 'Cancelado');
-    const tab    = this.listTab();
-
-    let rows: IAppointment[];
-    switch (tab) {
-      case 'confirmar':  rows = activa.filter(a => this._needsAction(a)); break;
-      case 'pasadas':    rows = activa.filter(a => this.isAppointmentPast(a)); break;
-      case 'canceladas': rows = all.filter(a => a.paymentStatus === 'Cancelado'); break;
-      default:           rows = activa.filter(a => !this.isAppointmentPast(a));
-    }
+    const tab  = this.listTab();
+    const rows = this.listBuckets()[tab];
 
     // Lo ya ocurrido se lee de lo más reciente hacia atrás.
     const desc = tab === 'pasadas' || tab === 'canceladas';

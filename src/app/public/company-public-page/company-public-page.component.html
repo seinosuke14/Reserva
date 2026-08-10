@@ -219,11 +219,14 @@
               </svg>
               Volver
             </button>
-            <div class="checkout-service-badge">
-              <span class="csb-name">{{ bookingService()?.name }}</span>
-              <span class="csb-sep">·</span>
-              <span class="csb-price">{{ formatCLP(withVat(bookingService()?.price ?? 0)) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
-            </div>
+            <!-- En el paso 1 el servicio ya aparece en la cabecera del selector de fecha. -->
+            @if (step() !== 1) {
+              <div class="checkout-service-badge">
+                <span class="csb-name">{{ bookingService()?.name }}</span>
+                <span class="csb-sep">·</span>
+                <span class="csb-price">{{ formatCLP(withVat(bookingService()?.price ?? 0)) }} <small style="font-weight:500;opacity:.7;">IVA inc</small></span>
+              </div>
+            }
             @if (auth.isAuthenticated()) {
               <button class="btn-text-sm" (click)="auth.logout()" style="display:inline-flex;align-items:center;gap:.375rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor"
@@ -267,8 +270,14 @@
                 [availability]="filteredAvailability()"
                 [selectedDate]="selectedDate()"
                 [selectedHour]="selectedHour()"
+                [serviceName]="bookingService()?.name ?? ''"
+                [serviceDuration]="bookingService()?.duration ?? null"
+                [servicePrice]="bookingService()?.price ?? 0"
+                [canProceed]="canProceed()"
                 (dateSelected)="selectDate($event)"
-                (hourSelected)="selectHour($event)">
+                (hourSelected)="selectHour($event)"
+                (changeService)="backToProfile()"
+                (next)="goNext()">
               </app-booking-datetime-selector>
             }
 
@@ -419,13 +428,16 @@
               </div>
             }
 
-            <app-booking-actions
-              [currentStep]="step()"
-              [canProceed]="canProceed()"
-              (back)="goBack()"
-              (next)="goNext()"
-              (confirm)="confirmBooking()">
-            </app-booking-actions>
+            <!-- El paso 1 lleva su propio botón "Siguiente" en el pie del selector. -->
+            @if (step() !== 1) {
+              <app-booking-actions
+                [currentStep]="step()"
+                [canProceed]="canProceed()"
+                (back)="goBack()"
+                (next)="goNext()"
+                (confirm)="confirmBooking()">
+              </app-booking-actions>
+            }
           }
         }
       }

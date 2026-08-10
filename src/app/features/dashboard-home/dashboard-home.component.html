@@ -1,9 +1,9 @@
-﻿<div class="flex flex-col gap-[18px] animate-fade-up">
+<div class="flex flex-col gap-[14px] animate-fade-up">
 
   <!-- ── Aviso: solicitudes de cancelación pendientes ──────────────────── -->
   @if (cancellationRequests().length > 0) {
     <button type="button" (click)="goToAgenda()"
-      class="w-full text-left rounded-[16px] p-[14px_20px] flex items-center gap-3 border transition-colors hover:bg-red-50"
+      class="w-full text-left rounded-[13px] p-[14px_20px] flex items-center gap-3 border transition-colors hover:bg-red-50"
       style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.3);">
       <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0" style="background:rgba(239,68,68,.14);">
         <svg width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24">
@@ -23,7 +23,7 @@
 
   <!-- ── Aviso: reembolsos pendientes / fallidos ───────────────────────── -->
   @if (pendingRefunds().length > 0) {
-    <div class="rounded-[16px] p-[14px_20px] border"
+    <div class="rounded-[13px] p-[14px_20px] border"
          style="background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.35);">
       <div class="flex items-center gap-2.5 mb-2">
         <svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
@@ -58,416 +58,339 @@
     </div>
   }
 
-  <!-- ── Fila 1: Banner + Nueva Cita ───────────────────────────────────── -->
-  <div class="grid gap-3 grid-cols-1 sm:grid-cols-[1fr_auto]">
+  <!-- ── Panel principal ───────────────────────────────────────────────── -->
+  <div class="rounded-[14px] border overflow-hidden"
+       style="background:rgb(var(--lr-canvas));border-color:rgb(var(--lr-border));">
 
-    <!-- Booking URL banner -->
-    @if (linkBanner(); as b) {
-      <div class="rounded-[16px] p-[14px_20px] flex-between gap-3 border border-white/[.07]"
-           style="background:linear-gradient(120deg,#0D1B2A,#1e293b);
-                  box-shadow:0 4px 20px rgba(0,0,0,.18);">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
-               [style.background]="b.iconBg">
-            @if (b.isCompany) {
-              <svg width="16" height="16" fill="none" [attr.stroke]="b.iconColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
+    <!-- Encabezado: fecha, nombre, link y nueva cita -->
+    <div class="bg-white border-b px-5 md:px-[26px] py-[18px] flex flex-wrap items-center justify-between gap-4"
+         style="border-color:rgb(var(--lr-border));">
+      <div class="min-w-0">
+        <div class="text-[11px] font-bold uppercase tracking-[.12em] text-primary-400">{{ todayLabel }}</div>
+        <div class="font-heading text-[26px] leading-tight tracking-[-.02em] text-primary truncate">{{ ownerName() }}</div>
+      </div>
+
+      <!-- En móvil el link ocupa su propia fila, sobre el botón de nueva cita. -->
+      <div class="flex items-center gap-2.5 flex-wrap justify-end flex-1">
+        @if (bookingLink(); as link) {
+          <div class="w-full sm:w-auto flex items-center gap-2 h-9 pl-3 pr-1.5 rounded-[9px] border transition-colors hover:border-accent/50"
+               style="border-color:rgb(var(--lr-border));background:rgb(var(--lr-canvas));">
+            <a [href]="link.url" target="_blank" rel="noopener"
+               class="flex items-center gap-1.5 group min-w-0 flex-1 sm:flex-none"
+               [title]="link.label + ' — abrir en una pestaña nueva'">
+              <span class="text-[12px] truncate sm:whitespace-nowrap text-primary-400 group-hover:underline">{{ link.base }}<span class="font-semibold text-primary">{{ link.slug }}</span></span>
+              <svg width="13" height="13" fill="none" stroke-width="2" viewBox="0 0 24 24"
+                   class="shrink-0" style="stroke:rgb(var(--lr-accent));">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
               </svg>
-            } @else {
-              <svg width="16" height="16" fill="none" [attr.stroke]="b.iconColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-              </svg>
-            }
+            </a>
+            <button type="button" (click)="copyUrl()" title="Copiar el link"
+              class="shrink-0 h-[26px] px-2.5 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-colors"
+              [style.background]="copied() ? 'rgb(var(--lr-accent) / .14)' : 'rgb(var(--lr-border) / .7)'"
+              [style.color]="copied() ? 'rgb(var(--lr-accent-strong))' : 'rgb(var(--lr-ink) / .65)'">
+              {{ copied() ? '¡Copiado!' : 'Copiar' }}
+            </button>
           </div>
-          <div class="min-w-0">
-            <div class="text-[10px] text-white/40 mb-0.5">{{ b.label }}</div>
-            <div class="text-[13px] font-semibold text-white/85 font-mono truncate">{{ b.url }}</div>
-          </div>
-        </div>
-        <button (click)="copyUrl()"
-          class="shrink-0 flex items-center gap-1.5 px-[15px] py-[7px] rounded-[9px] text-[12.5px] font-semibold text-white transition-all"
-          [style.background]="copied() ? '#10b981' : b.accent"
-          [style.box-shadow]="'0 3px 10px ' + b.shadow">
-          @if (copied()) {
-            <svg width="11" height="11" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-              <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            ¡Copiado!
-          } @else {
-            Copiar link
-          }
+        }
+        <button type="button" (click)="goToAgenda()"
+          class="h-9 px-[15px] rounded-[9px] text-[13px] font-semibold text-white flex items-center gap-1.5 transition-all hover:-translate-y-px"
+          style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .35);">
+          <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Nueva cita
         </button>
       </div>
-    } @else {
-      <div class="rounded-[16px] border border-black/[.06] bg-white p-[14px_20px] flex items-center gap-3">
-        <div class="w-[34px] h-[34px] rounded-[9px] flex-center shrink-0"
-             style="background:rgb(var(--lr-accent) / .1);">
-          <svg width="15" height="15" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-          </svg>
-        </div>
-        <span class="text-[13px] text-primary-400">Sin link de agendamiento configurado</span>
-      </div>
-    }
-
-    <!-- Nueva Cita button -->
-    <button (click)="goToAgenda()"
-      class="w-full sm:w-auto px-[22px] py-3 sm:py-0 rounded-[14px] text-[13.5px] font-bold text-white flex-center gap-2 transition-all hover:-translate-y-px"
-      style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .45);">
-      <svg width="15" height="15" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-      Nueva Cita
-    </button>
-  </div>
-
-  <!-- ── Invita y gana 1 mes Pro ───────────────────────────────────────── -->
-  <app-referral-card />
-
-  <!-- ── Fila 2: 4 KPI cards ───────────────────────────────────────────── -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[13px]">
-
-    <!-- Citas Hoy -->
-    <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
-         style="animation:fadeUp .4s ease 0ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
-             style="background:rgb(var(--lr-accent) / .14);color:rgb(var(--lr-accent));">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
-          </svg>
-        </div>
-        <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full flex items-center gap-1"
-              style="background:rgb(var(--lr-accent) / .1);color:rgb(var(--lr-accent));">
-          Hoy
-        </span>
-      </div>
-      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Citas de Hoy</div>
-      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ stats().totalCitas }}</div>
-      <div class="flex-between mt-2.5">
-        <span class="text-[11.5px] text-primary-400">{{ stats().confirmadas }} confirmadas</span>
-        <svg width="60" height="22" style="overflow:visible">
-          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="1.75"
-                    stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
-        </svg>
-      </div>
     </div>
 
-    <!-- Ingresos Hoy -->
-    <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
-         style="animation:fadeUp .4s ease 60ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
-             style="background:rgba(16,185,129,.12);color:#10b981;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-            <line x1="12" y1="1" x2="12" y2="23"/>
-            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-          </svg>
-        </div>
-        @if (weekTrend() !== 0) {
-          <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full flex items-center gap-1"
-                [style.background]="weekTrend() >= 0 ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)'"
-                [style.color]="weekTrend() >= 0 ? '#16a34a' : '#dc2626'">
-            <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              @if (weekTrend() >= 0) { <path d="M18 15l-6-6-6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
-            </svg>
-            {{ weekTrend() < 0 ? '-' : '' }}{{ weekTrend() | number:'1.0-0' }}%
-          </span>
-        }
-      </div>
-      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Ingresos Hoy</div>
-      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ formatCLP(stats().ingresosHoy) }}</div>
-      <div class="flex-between mt-2.5">
-        <span class="text-[11.5px] text-primary-400">Solo pagos confirmados</span>
-        <svg width="60" height="22" style="overflow:visible">
-          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#10b981" stroke-width="1.75"
-                    stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
-        </svg>
-      </div>
-    </div>
+    <!-- Cuerpo: columna principal + carril lateral -->
+    <div class="grid gap-5 p-5 md:p-[22px_26px_26px] lg:grid-cols-[1.6fr_1fr]">
 
-    <!-- Ingresos del Mes -->
-    <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
-         style="animation:fadeUp .4s ease 120ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
-             style="background:rgba(99,102,241,.12);color:#6366f1;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-            <polyline points="16 7 22 7 22 13"/>
-          </svg>
-        </div>
-        @if (monthTrend() !== 0) {
-          <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full flex items-center gap-1"
-                [style.background]="monthTrend() >= 0 ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)'"
-                [style.color]="monthTrend() >= 0 ? '#16a34a' : '#dc2626'">
-            <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              @if (monthTrend() >= 0) { <path d="M18 15l-6-6-6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
-            </svg>
-            {{ monthTrend() < 0 ? '-' : '' }}{{ monthTrend() | number:'1.0-0' }}%
-          </span>
-        }
-      </div>
-      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Ingresos del Mes</div>
-      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ formatCLP(monthlyIncome()) }}</div>
-      <div class="flex-between mt-2.5">
-        <span class="text-[11.5px] text-primary-400">vs mes anterior</span>
-        <svg width="60" height="22" style="overflow:visible">
-          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#6366f1" stroke-width="1.75"
-                    stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
-        </svg>
-      </div>
-    </div>
+      <!-- ══ Columna principal ══════════════════════════════════════════ -->
+      <div class="flex flex-col gap-4 min-w-0">
 
-    <!-- Clientes Activos -->
-    <div class="bg-white rounded-[16px] p-[18px_20px] border border-black/[.06] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,.09)] hover:-translate-y-0.5"
-         style="animation:fadeUp .4s ease 180ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <div class="flex justify-between items-start mb-3">
-        <div class="w-[38px] h-[38px] rounded-[10px] flex-center"
-             style="background:rgba(245,158,11,.12);color:#f59e0b;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-          </svg>
-        </div>
-        <span class="text-[11.5px] font-bold px-2 py-[2px] rounded-full"
-              style="background:rgba(245,158,11,.1);color:#d97706;">Total</span>
-      </div>
-      <div class="text-[11.5px] font-medium text-primary-400 mb-1">Clientes Registrados</div>
-      <div class="text-[24px] font-extrabold text-primary leading-none tracking-tight">{{ activeClientCount() }}</div>
-      <div class="flex-between mt-2.5">
-        <span class="text-[11.5px] text-primary-400">En tu directorio</span>
-        <svg width="60" height="22" style="overflow:visible">
-          <polyline [attr.points]="sparkline(weeklyRevenue())" fill="none" stroke="#f59e0b" stroke-width="1.75"
-                    stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".85"/>
-        </svg>
-      </div>
-    </div>
-  </div>
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-[13px]">
 
-  <!-- ── Fila 3: Bar chart + Actividad ─────────────────────────────────── -->
-  <div class="grid gap-[13px] grid-cols-1 lg:grid-cols-[1fr_300px]">
+          <!-- Citas de hoy -->
+          <div class="bg-white rounded-[12px] border p-[15px_16px] flex flex-col gap-[7px]"
+               style="border-color:rgb(var(--lr-border));">
+            <span class="text-[10px] font-bold uppercase tracking-[.1em] text-primary-400">Citas de hoy</span>
+            <div class="flex items-baseline gap-[7px]">
+              <span class="font-heading text-[28px] leading-none tracking-[-.03em] text-primary">{{ stats().totalCitas }}</span>
+              @if (stats().pagadas > 0) {
+                <span class="text-[11px] font-bold text-emerald-600">{{ stats().pagadas }} pagada{{ stats().pagadas > 1 ? 's' : '' }}</span>
+              }
+            </div>
+            <span class="text-[11px] text-primary-400">
+              {{ stats().pendientes }} sin pagar
+              @if (busyLabel()) { · {{ busyLabel() }} }
+            </span>
+          </div>
 
-    <!-- Weekly revenue bar chart -->
-    <div class="bg-white rounded-[16px] p-[19px_21px] border border-black/[.06]"
-         style="animation:fadeUp .4s ease 180ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <div class="flex justify-between items-start mb-4">
-        <div class="min-w-0">
-          <h3 class="text-[14.5px] font-bold text-primary tracking-tight">
-            {{ isCurrentWeek() ? 'Ingresos esta semana' : 'Ingresos por semana' }}
-          </h3>
-          <div class="flex items-center gap-1.5 mt-1">
-            <!-- Semana anterior -->
-            <button (click)="prevWeek()" [disabled]="!canPrevWeek()"
-              class="w-[22px] h-[22px] rounded-[7px] flex-center border border-primary-100 transition-colors"
-              [class.text-primary-300]="!canPrevWeek()" [class.cursor-not-allowed]="!canPrevWeek()"
-              [class.text-primary-500]="canPrevWeek()" [class.hover:bg-primary-50]="canPrevWeek()"
-              title="Semana anterior">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <span class="text-[11.5px] font-semibold text-primary-500 tabular-nums whitespace-nowrap">{{ weekRangeLabel() }}</span>
-            <!-- Semana siguiente -->
-            <button (click)="nextWeek()" [disabled]="!canNextWeek()"
-              class="w-[22px] h-[22px] rounded-[7px] flex-center border border-primary-100 transition-colors"
-              [class.text-primary-300]="!canNextWeek()" [class.cursor-not-allowed]="!canNextWeek()"
-              [class.text-primary-500]="canNextWeek()" [class.hover:bg-primary-50]="canNextWeek()"
-              title="Semana siguiente">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
+          <!-- Caja de hoy -->
+          <div class="bg-white rounded-[12px] border p-[15px_16px] flex flex-col gap-[7px]"
+               style="border-color:rgb(var(--lr-border));">
+            <span class="text-[10px] font-bold uppercase tracking-[.1em] text-primary-400">Caja de hoy</span>
+            <div class="flex items-baseline gap-[7px] flex-wrap">
+              <span class="font-heading text-[28px] leading-none tracking-[-.03em] text-primary">{{ formatCLP(stats().ingresosHoy) }}</span>
+              @if (todayTrend() !== 0) {
+                <span class="text-[11px] font-bold"
+                      [class.text-emerald-600]="todayTrend() > 0"
+                      [class.text-red-600]="todayTrend() < 0">
+                  {{ todayTrend() > 0 ? '+' : '' }}{{ todayTrend() }}%
+                </span>
+              }
+            </div>
+            <span class="text-[11px] text-primary-400">
+              @if (stats().porCobrar > 0) { {{ formatCLP(stats().porCobrar) }} por cobrar }
+              @else { Solo pagos confirmados }
+            </span>
+          </div>
+
+          <!-- Ingresos del mes -->
+          <div class="bg-white rounded-[12px] border p-[15px_16px] flex flex-col gap-[7px]"
+               style="border-color:rgb(var(--lr-border));">
+            <span class="text-[10px] font-bold uppercase tracking-[.1em] text-primary-400">Ingresos del mes</span>
+            <div class="flex items-baseline gap-[7px] flex-wrap">
+              <span class="font-heading text-[28px] leading-none tracking-[-.03em] text-primary">{{ formatCLP(monthlyIncome()) }}</span>
+              @if (monthTrend() !== 0) {
+                <span class="text-[11px] font-bold"
+                      [class.text-emerald-600]="monthTrend() > 0"
+                      [class.text-red-600]="monthTrend() < 0">
+                  {{ monthTrend() > 0 ? '+' : '' }}{{ monthTrend() }}%
+                </span>
+              }
+            </div>
+            <span class="text-[11px] text-primary-400">vs {{ formatCLP(prevMonthIncome()) }} el mes anterior</span>
           </div>
         </div>
-        <div class="text-right shrink-0">
-          <div class="text-[21px] font-extrabold text-primary tracking-tight leading-none">{{ formatCLP(weekTotal()) }}</div>
-          @if (weekTrend() !== 0) {
-            <div class="text-[11.5px] font-semibold mt-1"
-                 [style.color]="weekTrend() >= 0 ? '#10b981' : '#dc2626'">
-              {{ weekTrend() >= 0 ? '↑' : '↓' }} {{ weekTrend() < 0 ? '-' : '' }}{{ weekTrend() | number:'1.0-0' }}% vs semana anterior
+
+        <!-- Agenda de hoy -->
+        <div class="bg-white rounded-[13px] border p-[18px_20px_20px] flex flex-col gap-[13px]"
+             style="border-color:rgb(var(--lr-border));">
+
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div class="text-[14px] font-bold text-primary">Agenda de hoy</div>
+              <div class="text-[12px] text-primary-400">
+                {{ todayAppointments().length }} cita{{ todayAppointments().length === 1 ? '' : 's' }}
+                @if (busyLabel()) { · {{ busyLabel() }} }
+              </div>
             </div>
-          }
-        </div>
-      </div>
-
-      <!-- SVG bar chart — viewBox 268×148: 7 bars × (28+12) − 12 = 268w; 110 chart + 28 labels + 10 pad = 148h -->
-      <svg width="100%" height="148" viewBox="0 0 268 148" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
-        @for (bar of barChartBars(); track bar.x; let i = $index) {
-          <g style="cursor:pointer"
-             (mouseenter)="hoveredBar.set(i)"
-             (mouseleave)="hoveredBar.set(null)">
-
-            <!-- Background column -->
-            <rect [attr.x]="bar.x" y="0" width="28" height="120" rx="8"
-                  [attr.fill]="hoveredBar() === i ? 'rgb(var(--lr-accent) / .06)' : 'transparent'"/>
-
-            <!-- Bar -->
-            <rect [attr.x]="bar.x"
-                  [attr.y]="10 + (110 - bar.barH)"
-                  width="28"
-                  [attr.height]="bar.barH"
-                  rx="6"
-                  [attr.fill]="bar.isToday ? 'rgb(var(--lr-accent))' : (hoveredBar() === i ? 'rgb(var(--lr-accent))' : '#e2e8f0')"
-                  style="transition:fill .15s"/>
-
-            <!-- Tooltip value on hover -->
-            @if (hoveredBar() === i && bar.value > 0) {
-              <text [attr.x]="bar.x + 14"
-                    [attr.y]="10 + (110 - bar.barH) - 7"
-                    text-anchor="middle"
-                    style="font-size:9.5px;font-weight:700;fill:#0D1B2A;font-family:inherit">
-                {{ formatCLP(bar.value) }}
-              </text>
-            }
-
-            <!-- Day label -->
-            <text [attr.x]="bar.x + 14" y="143" text-anchor="middle"
-                  [attr.fill]="bar.isToday ? 'rgb(var(--lr-accent))' : '#94a3b8'"
-                  [attr.font-weight]="bar.isToday ? '700' : '500'"
-                  style="font-size:9.5px;font-family:inherit">
-              {{ bar.label }}
-            </text>
-
-            <!-- Today dot -->
-            @if (bar.isToday) {
-              <circle [attr.cx]="bar.x + 14" cy="125" r="2.5" style="fill:rgb(var(--lr-accent))"/>
-            }
-          </g>
-        }
-      </svg>
-    </div>
-
-    <!-- Actividad reciente -->
-    <div class="bg-white rounded-[16px] p-[19px_18px] border border-black/[.06]"
-         style="animation:fadeUp .4s ease 220ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-      <h3 class="text-[14.5px] font-bold text-primary mb-3.5 tracking-tight">Actividad Reciente</h3>
-      @if (isLoading()) {
-        <div class="text-[12.5px] text-primary-400 text-center py-6">Cargando...</div>
-      } @else if (recentActivity().length === 0) {
-        <div class="text-[12.5px] text-primary-400 text-center py-6">Sin actividad reciente</div>
-      } @else {
-        @for (item of recentActivity(); track item.text; let last = $last) {
-          <div class="flex gap-2.5 py-2" [class.border-b]="!last" style="border-color:#f8fafc;">
-            <div class="w-[7px] h-[7px] rounded-full mt-[5px] shrink-0"
-                 [style.background]="item.color"></div>
-            <div class="flex-1 min-w-0">
-              <div class="text-[12.5px] text-slate-600 leading-snug">{{ item.text }}</div>
-              <div class="text-[11px] text-primary-400 mt-[2px]">{{ item.time }}</div>
+            <div class="flex items-center gap-2.5">
+              <div class="inline-flex gap-0.5 p-[3px] rounded-[8px]" style="background:rgb(var(--lr-border) / .55);">
+                @for (tab of [['todos','Todas'],['Pagado','Pagadas'],['Pendiente','Pendientes'],['Cancelado','Canceladas']]; track tab[0]) {
+                  <button type="button" (click)="aptFilter.set($any(tab[0]))"
+                    class="px-[11px] py-1.5 rounded-[6px] text-[11px] transition-all"
+                    [class.font-bold]="aptFilter() === tab[0]"
+                    [class.font-semibold]="aptFilter() !== tab[0]"
+                    [style.background]="aptFilter() === tab[0] ? '#fff' : 'transparent'"
+                    [style.color]="aptFilter() === tab[0] ? 'rgb(var(--lr-ink))' : 'rgb(var(--lr-ink) / .5)'"
+                    [style.box-shadow]="aptFilter() === tab[0] ? '0 1px 2px rgba(20,38,58,.14)' : 'none'">
+                    {{ tab[1] }}
+                  </button>
+                }
+              </div>
+              <button type="button" (click)="goToAgenda()"
+                class="text-[12px] font-semibold transition-colors hover:opacity-75"
+                style="color:rgb(var(--lr-accent-strong));">
+                Ver agenda →
+              </button>
             </div>
           </div>
-        }
-      }
-    </div>
-  </div>
 
-  <!-- ── Fila 4: Tabla citas de hoy ────────────────────────────────────── -->
-  <div class="bg-white rounded-[16px] border border-black/[.06] overflow-hidden"
-       style="animation:fadeUp .4s ease 260ms both;box-shadow:0 1px 4px rgba(0,0,0,.04);">
-
-    <!-- Header + filter tabs -->
-    <div class="p-[16px_21px] border-b border-primary-100 flex-between gap-3">
-      <div>
-        <h3 class="text-[14.5px] font-bold text-primary">Citas de Hoy</h3>
-        <p class="text-[11.5px] text-primary-400 mt-0.5">{{ todayAppointments().length }} citas programadas</p>
-      </div>
-      <div class="flex gap-1 rounded-[10px] p-[3px]" style="background:#f1f5f9;">
-        @for (tab of [['todos','Todos'],['Pagado','Pagado'],['Pendiente','Pendiente'],['Cancelado','Cancelado']]; track tab[0]) {
-          <button (click)="aptFilter.set($any(tab[0]))"
-            class="px-[11px] py-1 rounded-[8px] text-[11.5px] font-medium transition-all"
-            [style.background]="aptFilter() === tab[0] ? '#fff' : 'transparent'"
-            [style.color]="aptFilter() === tab[0] ? '#0D1B2A' : '#94a3b8'"
-            [style.box-shadow]="aptFilter() === tab[0] ? '0 1px 4px rgba(0,0,0,.08)' : 'none'">
-            {{ tab[1] }}
-          </button>
-        }
-      </div>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr style="background:#f8fafc;">
-            @for (h of ['Hora','Cliente','Servicio','Monto','Estado']; track h) {
-              <th class="px-5 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-[.06em] text-primary-400 border-b border-primary-100">
-                {{ h }}
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
           @if (isLoading()) {
-            <tr>
-              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-primary-400">
-                <span class="inline-flex items-center gap-2">
-                  <svg class="animate-spin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-                    <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
-                  </svg>
-                  Cargando...
-                </span>
-              </td>
-            </tr>
-          }
+            <div class="text-[12.5px] text-primary-400 text-center py-10">Cargando…</div>
+          } @else if (agendaItems().length === 0) {
+            <div class="rounded-[9px] border border-dashed py-10 text-center"
+                 style="border-color:rgb(var(--lr-border));">
+              <div class="text-[12.5px] text-primary-400">Sin citas para este filtro.</div>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-[7px]">
+              @for (item of agendaItems(); track item.id) {
+                <div class="grid grid-cols-[46px_1fr] sm:grid-cols-[52px_1fr] gap-3 items-center">
 
-          @for (apt of filteredTodayApts(); track apt.id; let i = $index) {
-            <tr class="border-b border-primary-50 hover:brightness-[.98] transition-all"
-                style="animation:fadeIn .3s ease both;"
-                [style.animation-delay]="(i * 45) + 'ms'">
+                  <span class="text-[11px] text-right tabular-nums"
+                        [class.font-bold]="item.state === 'now' || item.state === 'next'"
+                        [class.font-semibold]="item.state !== 'now' && item.state !== 'next'"
+                        [style.color]="item.state === 'now' || item.state === 'next'
+                                       ? 'rgb(var(--lr-accent-strong))' : 'rgb(var(--lr-ink) / .42)'">
+                    {{ item.time }}
+                  </span>
 
-              <td class="px-5 py-3">
-                <span class="text-[14px] font-bold tabular-nums" style="color:rgb(var(--lr-accent));">{{ apt.time }}</span>
-              </td>
+                  <!-- Cita en curso o próxima: destacada en naranja -->
+                  @if (item.state === 'now' || item.state === 'next') {
+                    <div class="rounded-[0_8px_8px_0] p-[10px_12px] text-[12px] font-bold flex justify-between items-center gap-3"
+                         style="background:rgb(var(--lr-accent-soft));border-left:3px solid rgb(var(--lr-accent));">
+                      <span class="truncate text-primary">{{ item.customer }} · {{ item.service }}</span>
+                      <span class="shrink-0 whitespace-nowrap" style="color:rgb(var(--lr-accent-strong));">
+                        {{ item.state === 'now' ? 'ahora' : 'próxima' }} · {{ item.statusLabel }}
+                      </span>
+                    </div>
+                  }
 
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-[28px] h-[28px] rounded-full flex-center text-white text-[10.5px] font-bold shrink-0"
-                       style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));
-                              box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
-                    {{ apt.customer.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <span class="text-[13.5px] font-medium text-primary">{{ apt.customer.name }}</span>
+                  <!-- Ya pasó o cancelada: apagada -->
+                  @else if (item.state === 'past') {
+                    <div class="rounded-[8px] p-[9px_12px] text-[12px] flex justify-between items-center gap-3 opacity-80"
+                         style="background:rgb(var(--lr-border) / .5);color:rgb(var(--lr-ink) / .62);">
+                      <span class="truncate" [class.line-through]="item.status === 'Cancelado'">{{ item.customer }} · {{ item.service }}</span>
+                      <span class="shrink-0 whitespace-nowrap font-semibold"
+                            [class.text-red-500]="item.status === 'Cancelado'">{{ item.statusLabel }}</span>
+                    </div>
+                  }
+
+                  <!-- Más tarde -->
+                  @else {
+                    <div class="rounded-[0_8px_8px_0] p-[9px_12px] text-[12px] flex justify-between items-center gap-3"
+                         style="background:#fff;border-left:3px solid rgb(var(--lr-ink) / .35);box-shadow:0 1px 2px rgba(0,0,0,.03);">
+                      <span class="truncate text-primary">{{ item.customer }} · {{ item.service }}</span>
+                      <span class="shrink-0 whitespace-nowrap font-semibold"
+                            [class.text-emerald-600]="item.status === 'Pagado' || item.status === 'Finalizada'"
+                            [class.text-amber-600]="item.status === 'Pendiente'">
+                        {{ item.statusLabel }}
+                      </span>
+                    </div>
+                  }
                 </div>
-              </td>
-
-              <td class="px-5 py-3">
-                <span class="text-[13px] text-primary-500">{{ apt.service.name }}</span>
-              </td>
-
-              <td class="px-5 py-3">
-                <span class="text-[13.5px] font-bold text-primary tabular-nums">{{ formatCLP(apt.amount) }}</span>
-              </td>
-
-              <td class="px-5 py-3">
-                <span class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2.5 py-[3px] rounded-full whitespace-nowrap"
-                      [style.background]="apt.paymentStatus === 'Pagado'    ? 'rgba(34,197,94,.1)'
-                                        : apt.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)'
-                                        : 'rgba(239,68,68,.1)'"
-                      [style.color]="apt.paymentStatus === 'Pagado'    ? '#16a34a'
-                                   : apt.paymentStatus === 'Pendiente' ? '#d97706'
-                                   : '#dc2626'">
-                  <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                        [style.background]="apt.paymentStatus === 'Pagado'    ? '#22c55e'
-                                          : apt.paymentStatus === 'Pendiente' ? '#f59e0b'
-                                          : '#ef4444'"
-                        [class.animate-pulse-dot]="apt.paymentStatus === 'Pendiente'"></span>
-                  {{ apt.paymentStatus }}
-                </span>
-              </td>
-            </tr>
+              }
+            </div>
           }
+        </div>
 
-          @if (filteredTodayApts().length === 0 && !isLoading()) {
-            <tr>
-              <td colspan="5" class="px-5 py-14 text-center text-[13px] text-primary-400">
-                Sin citas para este filtro.
-              </td>
-            </tr>
+        <!-- Ingresos por semana -->
+        <div class="bg-white rounded-[13px] border p-[18px_20px]"
+             style="border-color:rgb(var(--lr-border));">
+          <div class="flex justify-between items-start mb-4 gap-3">
+            <div class="min-w-0">
+              <h3 class="text-[14px] font-bold text-primary">
+                {{ isCurrentWeek() ? 'Ingresos esta semana' : 'Ingresos por semana' }}
+              </h3>
+              <div class="flex items-center gap-1.5 mt-1">
+                <!-- Semana anterior -->
+                <button type="button" (click)="prevWeek()" [disabled]="!canPrevWeek()"
+                  class="w-[22px] h-[22px] rounded-[7px] flex-center border transition-colors"
+                  style="border-color:rgb(var(--lr-border));"
+                  [class.text-primary-300]="!canPrevWeek()" [class.cursor-not-allowed]="!canPrevWeek()"
+                  [class.text-primary-500]="canPrevWeek()" [class.hover:bg-primary-50]="canPrevWeek()"
+                  title="Semana anterior">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <span class="text-[11.5px] font-semibold text-primary-500 tabular-nums whitespace-nowrap">{{ weekRangeLabel() }}</span>
+                <!-- Semana siguiente -->
+                <button type="button" (click)="nextWeek()" [disabled]="!canNextWeek()"
+                  class="w-[22px] h-[22px] rounded-[7px] flex-center border transition-colors"
+                  style="border-color:rgb(var(--lr-border));"
+                  [class.text-primary-300]="!canNextWeek()" [class.cursor-not-allowed]="!canNextWeek()"
+                  [class.text-primary-500]="canNextWeek()" [class.hover:bg-primary-50]="canNextWeek()"
+                  title="Semana siguiente">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="font-heading text-[24px] leading-none tracking-[-.03em] text-primary">{{ formatCLP(weekTotal()) }}</div>
+              @if (weekTrend() !== 0) {
+                <div class="text-[11.5px] font-semibold mt-1.5"
+                     [class.text-emerald-600]="weekTrend() > 0"
+                     [class.text-red-600]="weekTrend() < 0">
+                  {{ weekTrend() >= 0 ? '↑' : '↓' }} {{ weekTrend() | number:'1.0-0' }}% vs semana anterior
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- SVG bar chart — viewBox 268×148: 7 bars × (28+12) − 12 = 268w; 110 chart + 28 labels + 10 pad = 148h -->
+          <svg width="100%" height="148" viewBox="0 0 268 148" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+            @for (bar of barChartBars(); track bar.x; let i = $index) {
+              <g style="cursor:pointer"
+                 (mouseenter)="hoveredBar.set(i)"
+                 (mouseleave)="hoveredBar.set(null)">
+
+                <!-- Background column -->
+                <rect [attr.x]="bar.x" y="0" width="28" height="120" rx="8"
+                      [attr.fill]="hoveredBar() === i ? 'rgb(var(--lr-accent) / .06)' : 'transparent'"/>
+
+                <!-- Bar -->
+                <rect [attr.x]="bar.x"
+                      [attr.y]="10 + (110 - bar.barH)"
+                      width="28"
+                      [attr.height]="bar.barH"
+                      rx="6"
+                      [attr.fill]="bar.isToday ? 'rgb(var(--lr-accent))' : (hoveredBar() === i ? 'rgb(var(--lr-accent))' : 'rgb(var(--lr-border))')"
+                      style="transition:fill .15s"/>
+
+                <!-- Tooltip value on hover -->
+                @if (hoveredBar() === i && bar.value > 0) {
+                  <text [attr.x]="bar.x + 14"
+                        [attr.y]="10 + (110 - bar.barH) - 7"
+                        text-anchor="middle"
+                        style="font-size:9.5px;font-weight:700;fill:rgb(var(--lr-ink));font-family:inherit">
+                    {{ formatCLP(bar.value) }}
+                  </text>
+                }
+
+                <!-- Day label -->
+                <text [attr.x]="bar.x + 14" y="143" text-anchor="middle"
+                      [attr.font-weight]="bar.isToday ? '700' : '500'"
+                      [style.fill]="bar.isToday ? 'rgb(var(--lr-accent))' : 'rgb(var(--lr-ink) / .45)'"
+                      style="font-size:9.5px;font-family:inherit">
+                  {{ bar.label }}
+                </text>
+
+                <!-- Today dot -->
+                @if (bar.isToday) {
+                  <circle [attr.cx]="bar.x + 14" cy="125" r="2.5" style="fill:rgb(var(--lr-accent))"/>
+                }
+              </g>
+            }
+          </svg>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="bg-white rounded-[13px] border p-[18px_20px] flex flex-col gap-3"
+             style="border-color:rgb(var(--lr-border));">
+          <div class="text-[14px] font-bold text-primary">Actividad reciente</div>
+          @if (isLoading()) {
+            <div class="text-[12px] text-primary-400 text-center py-5">Cargando…</div>
+          } @else if (recentActivity().length === 0) {
+            <div class="text-[12px] text-primary-400 text-center py-5">Sin actividad reciente</div>
+          } @else {
+            <div class="flex flex-col gap-2.5">
+              @for (item of recentActivity(); track item.text) {
+                <div class="flex justify-between gap-3 text-[12px]">
+                  <span class="flex gap-2 min-w-0" style="color:rgb(var(--lr-ink) / .72);">
+                    <span class="w-[6px] h-[6px] rounded-full mt-[6px] shrink-0" [style.background]="item.color"></span>
+                    <span class="leading-snug">{{ item.text }}</span>
+                  </span>
+                  <span class="shrink-0 whitespace-nowrap text-primary-300">{{ item.time }}</span>
+                </div>
+              }
+            </div>
           }
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      <!-- ══ Carril lateral ═════════════════════════════════════════════ -->
+      <div class="flex flex-col gap-[13px] min-w-0">
+
+        <div class="text-[11px] font-bold uppercase tracking-[.12em] text-primary-400">Tu cuenta</div>
+
+        <!-- Invita y gana (única promoción real del sistema) -->
+        <app-referral-card />
+
+        <!-- Clientes registrados -->
+        <div class="bg-white rounded-[13px] border p-[16px_18px] flex items-center justify-between gap-3"
+             style="border-color:rgb(var(--lr-border));">
+          <div class="min-w-0">
+            <div class="text-[13px] font-bold text-primary">Clientes registrados</div>
+            <div class="text-[11px] text-primary-400">En tu directorio</div>
+          </div>
+          <span class="font-heading text-[24px] leading-none tracking-[-.03em] text-primary shrink-0">{{ activeClientCount() }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

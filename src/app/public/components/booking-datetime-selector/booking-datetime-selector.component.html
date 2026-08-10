@@ -1,0 +1,108 @@
+<div class="dt-card">
+
+  <!-- Cabecera: qué se está reservando -->
+  <header class="dt-head">
+    <div class="dt-head-info">
+      <h3 class="dt-title">Selecciona fecha y hora</h3>
+      <p class="dt-sub">
+        {{ serviceName() }}
+        @if (serviceDuration()) { · {{ serviceDuration() }} min }
+        @if (servicePrice() > 0) { · {{ formatCLP(withVat(servicePrice())) }} <small>IVA inc</small> }
+      </p>
+    </div>
+    <button type="button" class="dt-change" (click)="changeService.emit()">← Cambiar servicio</button>
+  </header>
+
+  <div class="dt-body">
+
+    <!-- ── Calendario ─────────────────────────────────────── -->
+    <section class="dt-cal">
+      <div class="cal-nav">
+        <button type="button" class="cal-nav-btn" (click)="prevCalMonth()" [disabled]="isPrevMonthDisabled()" aria-label="Mes anterior">‹</button>
+        <span class="cal-month-label">{{ calendarMonthLabel() }}</span>
+        <button type="button" class="cal-nav-btn" (click)="nextCalMonth()" aria-label="Mes siguiente">›</button>
+      </div>
+
+      <div class="cal-grid">
+        @for (day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']; track day; let i = $index) {
+          <span class="cal-weekday" [class.weekend]="i > 4">{{ day }}</span>
+        }
+
+        @for (cell of calendarGrid(); track $index) {
+          @if (cell.state === 'empty') {
+            <span class="cal-cell"></span>
+          } @else if (cell.state === 'available') {
+            <button type="button" class="cal-day available"
+              [class.selected]="cell.dateStr === selectedDate()"
+              (click)="selectDate(cell.dateStr)">{{ cell.day }}</button>
+          } @else if (cell.state === 'full') {
+            <span class="cal-cell full" title="Sin horas disponibles">{{ cell.day }}</span>
+          } @else {
+            <span class="cal-cell off">{{ cell.day }}</span>
+          }
+        }
+      </div>
+
+      <div class="cal-legend">
+        <span class="legend-item"><i class="legend-box available"></i>Con horas</span>
+        <span class="legend-item"><i class="legend-box full"></i>Completo</span>
+        <span class="legend-item"><i class="legend-box off"></i>No laboral</span>
+      </div>
+    </section>
+
+    <!-- ── Horarios del día ───────────────────────────────── -->
+    <section class="dt-slots" #slotsSection>
+
+      @if (!selectedDate()) {
+        <p class="dt-empty">Elige un día en el calendario para ver las horas disponibles.</p>
+      } @else {
+        <div class="dt-slots-head">
+          <span class="dt-day">{{ selectedDateLong() }}</span>
+          <span class="dt-free">
+            {{ freeSlotCount() }} {{ freeSlotCount() === 1 ? 'hora libre' : 'horas libres' }}
+          </span>
+        </div>
+
+        @if (slotGroups().length === 0) {
+          <p class="dt-empty">Este día no tiene horarios disponibles.</p>
+        }
+
+        @for (group of slotGroups(); track group.label) {
+          <div class="dt-group">
+            <span class="dt-group-label">{{ group.label }}</span>
+            <div class="dt-group-grid">
+              @for (slot of group.slots; track slot.time) {
+                @if (slot.available) {
+                  <button type="button" class="slot"
+                    [class.selected]="selectedHour() === slot.time"
+                    (click)="selectHour(slot.time)">{{ slot.time }}</button>
+                } @else {
+                  <span class="slot taken" title="Hora ocupada">{{ slot.time }}</span>
+                }
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Resumen y avance -->
+      <footer class="dt-foot">
+        <div class="dt-resume">
+          @if (selectedDate() && selectedHour()) {
+            <span class="dt-resume-main">{{ selectedDateShort() }} · {{ selectedHour() }}</span>
+            <span class="dt-resume-sub">
+              @if (endHour()) { Termina {{ endHour() }} · }
+              {{ formatCLP(withVat(servicePrice())) }}
+            </span>
+          } @else {
+            <span class="dt-resume-main muted">Sin hora seleccionada</span>
+            <span class="dt-resume-sub">Elige un día y una hora para continuar</span>
+          }
+        </div>
+        <button type="button" class="dt-next" [disabled]="!canProceed()" (click)="next.emit()">
+          Siguiente →
+        </button>
+      </footer>
+    </section>
+  </div>
+</div>
