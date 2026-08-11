@@ -110,8 +110,8 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
 
   readonly isQuoteMode = computed(() => !!this.quoteData());
 
-  /** Duración a usar para filtrar slots: del servicio o de la cotización */
-  private readonly _bookingDuration = computed(() => {
+  /** Duración a usar para filtrar slots y calcular la hora de término: del servicio o de la cotización */
+  readonly bookingDuration = computed(() => {
     const q = this.quoteData();
     if (q) return q.estimatedDuration;
     return this.selectedService()?.duration ?? null;
@@ -161,7 +161,7 @@ export class PublicBookingPortalComponent implements OnInit, OnDestroy {
    * Ver helpers/availability-utils.ts.
    */
   readonly filteredAvailability = computed((): IDayAvailability[] =>
-    filterAvailabilityByDuration(this.availability(), this._bookingDuration())
+    filterAvailabilityByDuration(this.availability(), this.bookingDuration())
   );
 
   /** Resumen del horario laboral derivado de la disponibilidad (ej: "Lun - Vie · 09:00 - 18:00") */

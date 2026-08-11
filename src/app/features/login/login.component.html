@@ -69,7 +69,7 @@
 
           <button (click)="onForgotSubmit()" [disabled]="isForgotSending()"
             class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
+            style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .4);">
             @if (isForgotSending()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -211,7 +211,7 @@
 
           <button type="submit" [disabled]="isSubmitting()"
             class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
+            style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .4);">
             @if (isSubmitting()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
               viewBox="0 0 24 24">

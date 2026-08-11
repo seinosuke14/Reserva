@@ -180,7 +180,7 @@ import { RouterModule } from '@angular/router';
     .terms-root {
       min-height: 100dvh;
       background: #f8fafc;
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-family: 'Roboto', system-ui, sans-serif;
       padding: 1.5rem 1rem 3rem;
     }
 
@@ -213,7 +213,7 @@ import { RouterModule } from '@angular/router';
     .terms-brand {
       font-size: .875rem;
       font-weight: 800;
-      color: #00C4A7;
+      color: rgb(var(--lr-accent));
       letter-spacing: -.01em;
     }
 
@@ -242,8 +242,8 @@ import { RouterModule } from '@angular/router';
       width: 56px;
       height: 56px;
       border-radius: .875rem;
-      background: rgba(0,196,167,.1);
-      color: #00C4A7;
+      background: rgb(var(--lr-accent) / .1);
+      color: rgb(var(--lr-accent));
       display: flex;
       align-items: center;
       justify-content: center;

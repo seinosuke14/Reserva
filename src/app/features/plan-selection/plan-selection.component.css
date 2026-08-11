@@ -9,7 +9,7 @@
   align-items: center;
   padding: 48px 16px 64px;
   background: linear-gradient(135deg, #0D1B2A 0%, #0D1B2A 60%, #111827 100%);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -51,7 +51,7 @@
 .ps-auth-links { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 14px; }
 .ps-auth-link { color: rgba(255,255,255,.5); text-decoration: none; transition: color .15s; }
 .ps-auth-link:hover { color: white; }
-.ps-auth-accent { color: #2BB8A6; font-weight: 700; }
+.ps-auth-accent { color: rgb(var(--lr-accent)); font-weight: 700; }
 .ps-auth-muted { color: rgba(255,255,255,.7); font-weight: 600; }
 .ps-dot-sep { color: rgba(255,255,255,.2); }
 
@@ -108,7 +108,7 @@
 }
 .ps-plan-popular {
   position: absolute; top: -12px; left: 24px;
-  background: #2BB8A6; color: #0D1B2A;
+  background: rgb(var(--lr-accent)); color: #0D1B2A;
   font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
   padding: 4px 10px; border-radius: 6px;
 }
@@ -241,7 +241,7 @@
   font-size: 13.5px; line-height: 1.6; margin: 0;
 }
 .ps-company-notice-email {
-  font-size: 13px; font-weight: 700; color: #2BB8A6;
+  font-size: 13px; font-weight: 700; color: rgb(var(--lr-accent));
   text-decoration: none; word-break: break-all;
 }
 .ps-company-notice-email:hover { text-decoration: underline; }

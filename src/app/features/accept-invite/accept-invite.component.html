@@ -29,8 +29,8 @@
       } @else if (step() === 'login') {
       <div @stepAnim>
         <div class="w-14 h-14 mx-auto mb-4 rounded-full flex-center"
-          style="background:rgba(0,196,167,.12);">
-          <svg width="28" height="28" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
+          style="background:rgb(var(--lr-accent) / .12);">
+          <svg width="28" height="28" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="2" viewBox="0 0 24 24">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -84,7 +84,7 @@
 
           <button type="submit" [disabled]="isLoading()"
             class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-1"
-            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
+            style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .4);">
             @if (isLoading()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -133,7 +133,7 @@
         <div class="space-y-2.5">
           <button (click)="confirmAccept()" [disabled]="isAccepting()"
             class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-            style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
+            style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .4);">
             @if (isAccepting()) {
             <svg class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>

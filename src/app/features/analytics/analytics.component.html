@@ -1,4 +1,4 @@
-﻿<div class="p-5 space-y-5" style="background:#f8fafc; min-height:100%;">
+﻿<div class="p-5 space-y-5" style="background:#FAF9F7; min-height:100%;">
 
   <!-- Loading -->
   @if (isLoading()) {
@@ -20,7 +20,7 @@
   @if (!isLoading()) {
 
   <!-- ── KPI cards ─────────────────────────────────────────────── -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 
     <div class="stat-card">
       <div class="flex-between">
@@ -44,6 +44,24 @@
       <div class="text-[11.5px] text-slate-400">ingreso promedio por mes</div>
     </div>
 
+    <!-- Ticket promedio (destacado) -->
+    <div class="stat-card" style="background:rgb(var(--lr-ink));border-color:rgb(var(--lr-ink));">
+      <div class="flex-between">
+        <span class="text-[11px] font-bold uppercase tracking-[.07em]" style="color:rgb(var(--lr-accent) / .85);">Ticket promedio</span>
+      </div>
+      <div class="text-[1.625rem] font-black leading-none tracking-tight text-white">{{ formatCLP(avgTicket()) }}</div>
+      <div class="text-[11.5px]" style="color:rgba(255,255,255,.55);">{{ paidBookings12m() }} citas pagadas</div>
+    </div>
+
+    <!-- Cancelaciones -->
+    <div class="stat-card">
+      <div class="flex-between">
+        <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Cancelaciones</span>
+      </div>
+      <div class="text-[1.625rem] font-black text-slate-900 leading-none tracking-tight">{{ cancelRate() }}%</div>
+      <div class="text-[11.5px] text-slate-400">del total de citas del período</div>
+    </div>
+
     <div class="stat-card">
       <div class="flex-between">
         <span class="text-[11px] font-bold uppercase tracking-[.07em] text-slate-400">Total citas</span>
@@ -61,7 +79,20 @@
   </div>
 
   <!-- ── Combo chart: ganancia (barras) + reservas (puntos) ──────── -->
-  <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+  <div class="bg-white rounded-2xl border border-primary-100 p-5 shadow-sm"
+       [class.chart-fs]="chartFullscreen()">
+
+    @if (chartFullscreen()) {
+      <div class="flex items-center justify-between mb-3 shrink-0">
+        <span class="text-[12px] text-slate-400">Gira el teléfono para verlo más ancho</span>
+        <button (click)="toggleChartFullscreen()"
+          class="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold text-white"
+          style="background:rgb(var(--lr-ink));">
+          Cerrar
+        </button>
+      </div>
+    }
+
     <div class="flex-between mb-3 flex-wrap gap-2">
       <div>
         <div class="text-[13.5px] font-bold text-slate-900">Ganancia por mes y servicio</div>
@@ -70,7 +101,7 @@
       <!-- Leyenda -->
       <div class="flex items-center gap-x-3.5 gap-y-1 flex-wrap text-[10.5px] font-semibold">
         <span class="flex items-center gap-1.5 text-slate-500">
-          <span class="w-2.5 h-2.5 rounded-sm" style="background:#00C4A7;"></span> Ganancia
+          <span class="w-2.5 h-2.5 rounded-sm" style="background:rgb(var(--lr-accent));"></span> Ganancia
         </span>
         @for (s of serviceSeries(); track s.name) {
         <span class="flex items-center gap-1.5 text-slate-500">
@@ -81,22 +112,35 @@
       </div>
     </div>
 
+    <!-- En móvil el gráfico queda estrecho: este botón lo abre a pantalla completa
+         para poder explorarlo con el teléfono en horizontal. -->
+    <button (click)="toggleChartFullscreen()"
+      class="md:hidden w-full mb-2 py-2 rounded-[9px] text-[12px] font-semibold flex items-center justify-center gap-2 transition-colors"
+      style="border:1px solid rgb(var(--lr-accent) / .35); background:rgb(var(--lr-accent) / .07); color:rgb(var(--lr-accent-strong));">
+      <svg width="13" height="13" class="shrink-0" style="width:13px;height:13px;flex:none;"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+      Ver en pantalla completa
+    </button>
+
     <!-- SVG combo chart -->
+    <div>
     <svg width="100%" [attr.viewBox]="'0 0 ' + chW + ' ' + chH"
-         preserveAspectRatio="xMidYMid meet" class="overflow-visible">
+         preserveAspectRatio="xMidYMid meet" class="overflow-visible chart-main">
       <defs>
         <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#00C4A7" stop-opacity=".95"/>
-          <stop offset="100%" stop-color="#00C4A7" stop-opacity=".5"/>
+          <stop offset="0%"   style="stop-color:rgb(var(--lr-accent))" stop-opacity=".95"/>
+          <stop offset="100%" style="stop-color:rgb(var(--lr-accent))" stop-opacity=".5"/>
         </linearGradient>
       </defs>
 
       <!-- Grid + eje izquierdo (ingresos) -->
       @for (tick of revYTicks(); track tick.y) {
       <line [attr.x1]="plotLeft" [attr.y1]="tick.y" [attr.x2]="plotRight" [attr.y2]="tick.y"
-            stroke="#f1f5f9" stroke-width="1"/>
+            stroke="#F3EEE8" stroke-width="1"/>
       <text [attr.x]="plotLeft - 6" [attr.y]="tick.y + 3.5" text-anchor="end"
-            font-size="8" fill="#94a3b8" font-family="inherit">{{ tick.label }}</text>
+            font-size="8" fill="#A39D96" font-family="inherit">{{ tick.label }}</text>
       }
 
       <!-- Barras de ganancia + zona hover por columna -->
@@ -105,9 +149,9 @@
             fill="transparent" style="cursor:pointer;"
             (mouseenter)="hoveredBar.set(b.i); hoveredSeries.set(null)" (mouseleave)="hoveredBar.set(null)"/>
       <rect [attr.x]="b.barX" [attr.y]="b.barY" [attr.width]="b.barW" [attr.height]="b.barH" rx="3"
-            [attr.fill]="hoveredBar() === b.i ? '#00a98e' : 'url(#barGrad)'" style="pointer-events:none;"/>
+            [attr.fill]="hoveredBar() === b.i ? 'rgb(var(--lr-accent-strong))' : 'url(#barGrad)'" style="pointer-events:none;"/>
       <text [attr.x]="b.cx" [attr.y]="chH - 6" text-anchor="middle"
-            font-size="9" fill="#94a3b8" font-family="inherit" style="pointer-events:none;">{{ b.month }}</text>
+            font-size="9" fill="#A39D96" font-family="inherit" style="pointer-events:none;">{{ b.month }}</text>
       }
 
       <!-- Una línea + puntos por servicio -->
@@ -148,7 +192,7 @@
       <g style="pointer-events:none;">
         <rect [attr.x]="tooltipX(b.cx)" y="6" [attr.width]="tipW" height="42" rx="7" fill="#0D1B2A" opacity=".95"/>
         <text [attr.x]="tooltipX(b.cx) + 9" y="22" font-size="9" font-weight="700" fill="#fff" font-family="inherit">{{ b.month }}</text>
-        <text [attr.x]="tooltipX(b.cx) + 9" y="35" font-size="8.5" fill="#00C4A7" font-family="inherit">
+        <text [attr.x]="tooltipX(b.cx) + 9" y="35" font-size="8.5" style="fill:rgb(var(--lr-accent))" font-family="inherit">
           Ganancia: {{ formatCLP(b.revenue) }}
         </text>
       </g>
@@ -164,9 +208,9 @@
         <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 15"
               font-size="9" font-weight="700" [attr.fill]="s.color" font-family="inherit">{{ s.name }}</text>
         <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 26"
-              font-size="7.5" fill="#94a3b8" font-family="inherit">{{ p.month }}</text>
+              font-size="7.5" fill="#A39D96" font-family="inherit">{{ p.month }}</text>
 
-        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 40" font-size="8.5" fill="#e2e8f0" font-family="inherit">Reservadas: {{ p.count }}</text>
+        <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 40" font-size="8.5" fill="#E9E7E2" font-family="inherit">Reservadas: {{ p.count }}</text>
         <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 52" font-size="8.5" fill="#4ade80" font-family="inherit">Pagadas: {{ p.paid }}</text>
         <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 64" font-size="8.5" fill="#f87171" font-family="inherit">Incompletas: {{ p.incomplete }}</text>
         <text [attr.x]="tooltipX(p.cx) + 10" [attr.y]="tipY(p.cy) + 76" font-size="8.5" fill="#fbbf24" font-family="inherit">Pendientes: {{ p.pending }}</text>
@@ -176,9 +220,21 @@
       }
       }
     </svg>
+    </div>
+
+    <!-- Hallazgo del período -->
+    @if (bestMonth(); as top) {
+      <div class="flex items-center gap-4 mt-4 px-4 py-3 rounded-[11px]"
+           style="border:1px solid rgb(var(--lr-accent) / .28); background:rgb(var(--lr-accent) / .07);">
+        <p class="m-0 text-[12.5px] leading-relaxed" style="color:#8A3010;">
+          <b>{{ top.month }} fue tu mes más fuerte: {{ formatCLP(top.revenue) }}.</b>
+          Concentra el {{ top.pct }}% del ingreso de los últimos 12 meses.
+        </p>
+      </div>
+    }
 
     <!-- Resumen mensual -->
-    <div class="mt-4 border-t border-slate-100 pt-3 overflow-x-auto">
+    <div class="mt-4 border-t border-primary-100 pt-3 overflow-x-auto">
       <table class="w-full text-center border-collapse">
         <thead>
           <tr>
@@ -191,7 +247,7 @@
           <tr>
             @for (b of chartBars(); track b.month) {
             <td class="text-[9.5px] font-semibold px-0.5 pb-0.5"
-                [style.color]="b.revenue > 0 ? '#00C4A7' : '#cbd5e1'">
+                [style.color]="b.revenue > 0 ? 'rgb(var(--lr-accent))' : '#C9C1B8'">
               {{ b.revenue > 0 ? formatCLP(b.revenue) : '—' }}
             </td>
             }
@@ -212,7 +268,7 @@
   <!-- ── Top servicios + Donut ──────────────────────────────────── -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+    <div class="bg-white rounded-2xl border border-primary-100 p-5 shadow-sm">
       <div class="text-[13.5px] font-bold text-slate-900 mb-1">Top servicios</div>
       <div class="text-[11.5px] text-slate-400 mb-4">por cantidad total de citas agendadas</div>
       <div class="space-y-3.5">
@@ -222,7 +278,7 @@
             <span class="text-[12.5px] font-semibold text-slate-800 truncate max-w-[180px]">{{ svc.name }}</span>
             <div class="flex items-center gap-2 shrink-0 ml-2">
               <span class="text-[11px] text-slate-400">{{ svc.bookings }} citas</span>
-              <span class="text-[12px] font-bold" style="color:#00C4A7;">{{ formatCLP(svc.revenue) }}</span>
+              <span class="text-[12px] font-bold" style="color:rgb(var(--lr-accent));">{{ formatCLP(svc.revenue) }}</span>
             </div>
           </div>
           <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -239,13 +295,13 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col">
+    <div class="bg-white rounded-2xl border border-primary-100 p-5 shadow-sm flex flex-col">
       <div class="text-[13.5px] font-bold text-slate-900 mb-1">Distribución de citas</div>
       <div class="text-[11.5px] text-slate-400 mb-4">participación por servicio</div>
       @if (donutSegments().length > 0) {
       <div class="flex items-center gap-5 flex-1">
         <svg width="112" height="112" viewBox="0 0 112 112" class="shrink-0">
-          <circle cx="56" cy="56" r="48" fill="none" stroke="#f1f5f9" stroke-width="16"/>
+          <circle cx="56" cy="56" r="48" fill="none" stroke="#F3EEE8" stroke-width="16"/>
           @for (seg of donutSegments(); track seg.name) {
           <circle cx="56" cy="56" r="48" fill="none"
             [attr.stroke]="seg.color" stroke-width="16"
@@ -256,7 +312,7 @@
           <text x="56" y="52" text-anchor="middle" font-size="18" font-weight="800" fill="#0D1B2A" font-family="inherit">
             {{ totalBookings12m() }}
           </text>
-          <text x="56" y="66" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="inherit">citas</text>
+          <text x="56" y="66" text-anchor="middle" font-size="9" fill="#A39D96" font-family="inherit">citas</text>
         </svg>
         <div class="flex flex-col gap-2 flex-1 min-w-0">
           @for (seg of donutSegments(); track seg.name) {
@@ -276,17 +332,17 @@
   </div>
 
   <!-- ── Segmentación de clientes ───────────────────────────────── -->
-  <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+  <div class="bg-white rounded-2xl border border-primary-100 p-5 shadow-sm">
     <div class="text-[13.5px] font-bold text-slate-900 mb-1">Segmentación de clientes</div>
     <div class="text-[11.5px] text-slate-400 mb-4">{{ clientSegments().total }} clientes en total</div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <!-- VIP -->
-      <div class="rounded-xl p-4 border flex flex-col" style="background:rgba(0,196,167,.05);border-color:rgba(0,196,167,.2);">
+      <div class="rounded-xl p-4 border flex flex-col" style="background:rgb(var(--lr-accent) / .05);border-color:rgb(var(--lr-accent) / .2);">
         <div class="flex items-center gap-2 mb-2">
           <span class="text-lg">👑</span>
           <span class="text-[12px] font-bold uppercase tracking-[.05em]" style="color:#b37a2e;">VIP</span>
         </div>
-        <div class="text-[2rem] font-black leading-none" style="color:#00C4A7;">{{ clientSegments().vip }}</div>
+        <div class="text-[2rem] font-black leading-none" style="color:rgb(var(--lr-accent));">{{ clientSegments().vip }}</div>
         <div class="text-[11.5px] mt-1 mb-3" style="color:#b37a2e;">10 o más citas</div>
         @if (clientSegments().vipNames.length > 0) {
         <div class="flex flex-col gap-1 mt-auto">
@@ -294,7 +350,7 @@
           <div class="flex-between">
             <span class="text-[12px] font-semibold text-slate-800 truncate">{{ c.name }}</span>
             <span class="text-[11px] font-bold shrink-0 ml-2 px-1.5 py-px rounded-full"
-                  style="background:rgba(0,196,167,.15);color:#b37a2e;">
+                  style="background:rgb(var(--lr-accent) / .15);color:#b37a2e;">
               {{ c.appointments.length }}
             </span>
           </div>
@@ -324,7 +380,7 @@
         </div>
         }
       </div>
-      <div class="rounded-xl p-4 border border-slate-100" style="background:#f8fafc;">
+      <div class="rounded-xl p-4 border border-primary-100" style="background:#FAF9F7;">
         <div class="flex items-center gap-2 mb-2">
           <span class="text-lg">🌱</span>
           <span class="text-[12px] font-bold uppercase tracking-[.05em] text-slate-500">Nuevo</span>
@@ -332,6 +388,77 @@
         <div class="text-[2rem] font-black text-slate-700 leading-none">{{ clientSegments().nuevo }}</div>
         <div class="text-[11.5px] text-slate-400 mt-1">2 citas o menos</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── Demanda por día/hora + Retención por cohorte ───────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <div class="stat-card">
+      <div class="flex-between">
+        <div>
+          <h2 class="text-[14px] font-bold text-slate-900">Demanda por día y hora</h2>
+          <p class="text-[12px] text-slate-400 mt-0.5">Citas agendadas, sin contar canceladas</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] text-slate-400">baja</span>
+          @for (lvl of [1, 2, 3, 4, 5]; track lvl) {
+            <i class="block w-4 h-2.5 rounded-sm" [style.background]="'rgb(var(--lr-accent) / ' + (lvl * 0.2) + ')'"></i>
+          }
+          <span class="text-[10px] text-slate-400">alta</span>
+        </div>
+      </div>
+
+      <div class="grid gap-1.5 mt-4" style="grid-template-columns:52px repeat(6,1fr);">
+        <span></span>
+        @for (d of heatDays; track d) {
+          <span class="text-center text-[11px] font-semibold text-slate-500">{{ d }}</span>
+        }
+        @for (banda of heatBands; track banda.label; let r = $index) {
+          <span class="text-[11px] text-slate-400 flex items-center">{{ banda.label }}</span>
+          @for (celda of heatmap()[r]; track $index) {
+            <i class="block h-[34px] rounded-[5px]"
+               [title]="celda.n + (celda.n === 1 ? ' cita' : ' citas')"
+               [style.background]="celda.nivel === 0 ? '#F1EEE9' : 'rgb(var(--lr-accent) / ' + (celda.nivel * 0.2) + ')'"></i>
+          }
+        }
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div>
+        <h2 class="text-[14px] font-bold text-slate-900">Retención por cohorte</h2>
+        <p class="text-[12px] text-slate-400 mt-0.5">
+          Clientes agrupados por el mes de su primera cita, y qué porcentaje volvió después
+        </p>
+      </div>
+
+      @if (cohorts().length === 0) {
+        <p class="text-[12.5px] text-slate-400 py-6 text-center">
+          Aún no hay historial suficiente para calcular cohortes.
+        </p>
+      } @else {
+        <div class="grid gap-1 mt-4 items-center" style="grid-template-columns:78px repeat(5,1fr);">
+          <span></span>
+          @for (h of ['+1 mes', '+2', '+3', '+4', '+5']; track h) {
+            <span class="text-center text-[10px] font-bold text-slate-400">{{ h }}</span>
+          }
+          @for (co of cohorts(); track co.label) {
+            <span class="text-[11px] text-slate-500">{{ co.label }}</span>
+            @for (c of co.celdas; track $index) {
+              <span class="h-[30px] rounded-[5px] flex items-center justify-center text-[11px] font-semibold"
+                    [style.background]="c.pct === null ? '#F1EEE9' : 'rgb(var(--lr-accent) / ' + (0.12 + c.nivel * 0.17) + ')'"
+                    [style.color]="c.pct !== null && c.nivel >= 4 ? '#fff' : '#45454B'">
+                {{ c.pct === null ? '—' : c.pct + '%' }}
+              </span>
+            }
+          }
+        </div>
+        <p class="text-[11.5px] text-slate-400 mt-3">
+          El número junto al mes indica cuántos clientes llegaron por primera vez ese mes.
+          Las celdas con “—” aún no tienen tiempo transcurrido suficiente.
+        </p>
+      }
     </div>
   </div>
 

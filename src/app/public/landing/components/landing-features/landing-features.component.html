@@ -1,44 +1,104 @@
-﻿<section id="beneficios" class="section">
+<section id="beneficios" class="section features">
   <div class="container">
-    <div class="section-head">
-      <div class="section-eyebrow">¿Por qué 'Lets Reserve'?</div>
-      <h2 class="h2">Todo lo que tu negocio necesita, <span class="serif">en una sola herramienta.</span></h2>
-      <p class="lead">Agenda, ventas, Analitycs, marketing y clientes — sin malabares entre apps. Pensado para que crezcas, no para que te compliques.</p>
+    <div class="feat-head">
+      <h2 class="h2">Deja de saltar entre apps <span class="serif">para hacer andar tu negocio.</span></h2>
+      <p class="lead">Elige una pieza y mírala en acción.</p>
     </div>
-    <div class="features">
-      @for (f of features; track f.title) {
-        <div [class]="'feat acc-' + f.acc"> 
-          <div [class]="'feat-ic ' + f.color">
-            @if (f.color === 'blue') {
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
-              </svg>
-            }
-            @if (f.color === 'rose') {
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
-              </svg>
-            }
-            @if (f.color === 'gold') {
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M3 12h18M12 3a13 13 0 010 18M12 3a13 13 0 000 18" />
-              </svg>
-            }
-            <!-- @if (f.color === 'primary') {
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12a8 8 0 11-3.2-6.4L21 4l-1 4.5A8 8 0 0121 12z" />
-              </svg>
-            } -->
-          </div>
-          <h3>{{ f.title }}</h3>
-          <p>{{ f.body }}</p>
+
+    <div class="feat-tabs">
+      <div class="feat-list" #featList role="tablist" aria-orientation="vertical" aria-label="Beneficios">
+        @for (f of features; track f.title; let i = $index) {
+          <button [class]="'feat-tab' + (i === active() ? ' active' : '')" role="tab"
+            [attr.aria-selected]="i === active()" (click)="setActive(i, $event)">
+            <span class="feat-dot"></span>
+            <span>{{ f.title }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="feat-panel" role="tabpanel">
+        <div class="feat-media">
+          @if (item().video) {
+            <video class="feat-media-el" [src]="item().video" [poster]="item().image ?? null" controls playsinline></video>
+          } @else if (slides().length === 1) {
+            <img class="feat-media-el zoomable" [src]="slides()[0]" [alt]="item().title"
+                 (click)="openZoom()" />
+          } @else if (slides().length > 1) {
+            <!-- Carrusel: se desliza con el dedo en el teléfono y con las flechas en escritorio. -->
+            <div class="feat-track" #slideTrack (scroll)="onScroll($any($event.target))">
+              @for (src of slides(); track src) {
+                <img class="feat-media-el feat-slide zoomable" [src]="src" [alt]="item().title"
+                     (click)="openZoom()" />
+              }
+            </div>
+
+            <button type="button" class="feat-nav prev" (click)="prevSlide()"
+              [disabled]="slide() === 0" aria-label="Imagen anterior">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button type="button" class="feat-nav next" (click)="nextSlide()"
+              [disabled]="slide() === slides().length - 1" aria-label="Imagen siguiente">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+
+            <div class="feat-slide-dots">
+              @for (src of slides(); track src; let i = $index) {
+                <button type="button" [class]="'feat-slide-dot' + (i === slide() ? ' on' : '')"
+                  (click)="goToSlide(i)" [attr.aria-label]="'Ver imagen ' + (i + 1)"></button>
+              }
+            </div>
+          } @else {
+            <div class="feat-media-ph">
+              <span class="material-symbols-outlined">add_photo_alternate</span>
+              <span class="feat-media-ph-tx">Imagen o video del beneficio</span>
+            </div>
+          }
         </div>
-      }
+        <div class="feat-kicker">{{ item().kicker }}</div>
+        <h3 class="feat-title">{{ item().title }}</h3>
+        <p class="feat-body">{{ item().body }}</p>
+        <div class="feat-chips">
+          @for (c of item().chips; track c) {
+            <span class="feat-chip">{{ c }}</span>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<!-- Visor a pantalla completa: la imagen del beneficio en grande. -->
+@if (zoom()) {
+  <div class="feat-zoom" (click)="closeZoom()">
+    <button type="button" class="feat-zoom-close" (click)="closeZoom()" aria-label="Cerrar">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <!-- Sin stopPropagation: tocar cualquier punto del visor lo cierra. -->
+    <div class="feat-zoom-track" #zoomTrack (scroll)="onScroll($any($event.target))">
+      @for (src of slides(); track src) {
+        <img class="feat-zoom-img" [src]="src" [alt]="item().title" />
+      }
+    </div>
+
+    <span class="feat-zoom-hint">Gira el teléfono para verla más grande</span>
+
+    @if (slides().length > 1) {
+      <button type="button" class="feat-nav zoom prev" (click)="prevSlide(); $event.stopPropagation()"
+        [disabled]="slide() === 0" aria-label="Imagen anterior">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <button type="button" class="feat-nav zoom next" (click)="nextSlide(); $event.stopPropagation()"
+        [disabled]="slide() === slides().length - 1" aria-label="Imagen siguiente">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+
+      <div class="feat-slide-dots zoom">
+        @for (src of slides(); track src; let i = $index) {
+          <button type="button" [class]="'feat-slide-dot' + (i === slide() ? ' on' : '')"
+            (click)="goToSlide(i); $event.stopPropagation()" [attr.aria-label]="'Ver imagen ' + (i + 1)"></button>
+        }
+      </div>
+    }
+  </div>
+}

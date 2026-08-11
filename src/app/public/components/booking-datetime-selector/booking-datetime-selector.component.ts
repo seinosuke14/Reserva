@@ -1,89 +1,27 @@
 import { Component, input, output, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { formatDateLong } from '../../../helpers/formatters';
-import { IDayAvailability } from '../../../helpers/models';
+import { formatCLP, formatDateLong, withVat } from '../../../helpers/formatters';
+import { IDayAvailability, ITimeSlot } from '../../../helpers/models';
+
+/** Celda del calendario ya resuelta para pintar. */
+interface ICalCell {
+  dateStr: string | null;
+  day: number;
+  /** empty = relleno de la grilla · past/unavailable = no seleccionable */
+  state: 'empty' | 'past' | 'unavailable' | 'available' | 'full';
+}
+
+/** Los horarios se muestran partidos en mañana y tarde para no dar un muro de botones. */
+interface ISlotGroup {
+  label: string;
+  slots: ITimeSlot[];
+}
 
 @Component({
   selector: 'app-booking-datetime-selector',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="step-content">
-      <div class="step-header">
-        <h3 class="step-title">Selecciona fecha y hora</h3>
-        <p class="step-desc">Elige el día y horario que mejor te convengan</p>
-      </div>
-
-      <!-- Calendario -->
-      <div class="calendar-section">
-        <label class="section-label">
-          Calendario
-          @if (selectedDate()) {
-            <span class="selected-date-label"> — {{ formatDate(selectedDate()) }}</span>
-          }
-        </label>
-
-        <div class="cal-nav">
-          <button class="cal-nav-btn" (click)="prevCalMonth()" [disabled]="isPrevMonthDisabled()">←</button>
-          <span class="cal-month-label">{{ calendarMonthLabel() }}</span>
-          <button class="cal-nav-btn" (click)="nextCalMonth()">→</button>
-        </div>
-
-        <div class="cal-weekdays">
-          @for (day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']; track day) {
-            <div class="cal-weekday">{{ day }}</div>
-          }
-        </div>
-
-        <div class="cal-grid">
-          @for (cell of calendarGrid(); track $index) {
-            <button class="cal-day"
-              [ngClass]="['cal-' + cell.state, cell.dateStr === selectedDate() ? 'cal-selected' : '']"
-              [disabled]="cell.state === 'past' || cell.state === 'unavailable'"
-              (click)="selectDate(cell.dateStr!)">
-              @if (cell.dateStr) {
-                <span>{{ cell.day }}</span>
-                @if (cell.state === 'available' || cell.state === 'full') {
-                  <span class="cal-dot" [hidden]="cell.state === 'full'"></span>
-                }
-              }
-            </button>
-          }
-        </div>
-
-        <div class="cal-legend">
-          <div class="legend-item">
-            <span class="legend-dot available"></span> Disponible
-          </div>
-          <div class="legend-item">
-            <span class="legend-dot full"></span> Completo
-          </div>
-          <div class="legend-item">
-            <span class="legend-dot unavailable"></span> No laboral
-          </div>
-        </div>
-      </div>
-
-      <!-- Time slots -->
-      <div class="calendar-section" #slotsSection>
-        <label class="section-label">Horarios disponibles</label>
-        <div class="slots-grid">
-          @for (slot of daySlots(); track slot.time) {
-            <button class="slot-btn"
-              [class.selected]="selectedHour() === slot.time"
-              [class.occupied]="!slot.available"
-              [disabled]="!slot.available"
-              (click)="selectHour(slot.time)">
-              {{ slot.time }}
-              @if (!slot.available) {
-                <span class="slot-taken-label">Tomado</span>
-              }
-            </button>
-          }
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './booking-datetime-selector.component.html',
   styleUrl: './booking-datetime-selector.component.scss'
 })
 export class BookingDatetimeSelectorComponent {
@@ -93,15 +31,39 @@ export class BookingDatetimeSelectorComponent {
   readonly selectedDate = input<string>('');
   readonly selectedHour = input<string | null>(null);
 
-  readonly dateSelected = output<string>();
-  readonly hourSelected = output<string>();
-  readonly formatDate = formatDateLong;
+  /** Datos del servicio elegido, para la cabecera y el resumen del pie. */
+  readonly serviceName     = input<string>('');
+  readonly serviceDuration = input<number | null>(null);
+  readonly servicePrice    = input<number>(0);
+  readonly canProceed      = input(false);
+
+  readonly dateSelected  = output<string>();
+  readonly hourSelected  = output<string>();
+  readonly changeService = output<void>();
+  readonly next          = output<void>();
+
+  readonly formatCLP = formatCLP;
+  readonly withVat   = withVat;
+
+  /** Solo la inicial en mayúscula: con text-transform el CSS también subiría el "de". */
+  private _upperFirst(s: string): string {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  /** "Lunes 10 de agosto" — Intl mete una coma tras el día de la semana. */
+  readonly selectedDateLong = computed(() => {
+    const d = this.selectedDate();
+    return d ? this._upperFirst(formatDateLong(d).replace(',', '')) : '';
+  });
 
   readonly calendarMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   readonly today = new Date().toISOString().slice(0, 10);
 
+  /** "Agosto 2026" */
   readonly calendarMonthLabel = computed(() =>
-    this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+    this._upperFirst(
+      this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).replace(' de ', ' ')
+    )
   );
 
   readonly isPrevMonthDisabled = computed(() => {
@@ -117,6 +79,48 @@ export class BookingDatetimeSelectorComponent {
     return day ? day.slots : [];
   });
 
+  readonly freeSlotCount = computed(() => this.daySlots().filter(s => s.available).length);
+
+  /** Mañana (antes de las 13:00) y tarde; se omite el grupo que quede vacío. */
+  readonly slotGroups = computed((): ISlotGroup[] => {
+    const slots = this.daySlots();
+    if (!slots.length) return [];
+
+    const manana = slots.filter(s => this._hour(s.time) < 13);
+    const tarde  = slots.filter(s => this._hour(s.time) >= 13);
+
+    return [
+      { label: 'Mañana', slots: manana },
+      { label: 'Tarde',  slots: tarde  },
+    ].filter(g => g.slots.length > 0);
+  });
+
+  /** "Lun 3 ago" — resumen compacto del pie. */
+  readonly selectedDateShort = computed(() => {
+    const d = this.selectedDate();
+    if (!d) return '';
+    const [y, m, day] = d.split('-').map(Number);
+    const txt = new Date(y, m - 1, day)
+      .toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })
+      .replace(',', '');
+    return this._upperFirst(txt);
+  });
+
+  /** Hora de término según la duración del servicio. */
+  readonly endHour = computed(() => {
+    const hour = this.selectedHour();
+    const dur  = this.serviceDuration();
+    if (!hour || !dur) return null;
+
+    const [h, m] = hour.split(':').map(Number);
+    const end    = new Date(2000, 0, 1, h, m + dur);
+    return `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+  });
+
+  private _hour(time: string): number {
+    return Number(time.split(':')[0]) || 0;
+  }
+
   prevCalMonth(): void {
     if (this.isPrevMonthDisabled()) return;
     const d = this.calendarMonth();
@@ -128,10 +132,14 @@ export class BookingDatetimeSelectorComponent {
     this.calendarMonth.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
 
-  selectDate(date: string): void {
+  selectDate(date: string | null): void {
+    if (!date) return;
     this.dateSelected.emit(date);
+    // En móvil las horas quedan bajo el calendario: hay que llevar la vista hasta ellas.
     setTimeout(() => {
-      this.slotsSection?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.innerWidth < 900) {
+        this.slotsSection?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }, 50);
   }
 
@@ -139,7 +147,7 @@ export class BookingDatetimeSelectorComponent {
     this.hourSelected.emit(time);
   }
 
-  private _buildCalendarGrid() {
+  private _buildCalendarGrid(): ICalCell[] {
     const first       = this.calendarMonth();
     const year        = first.getFullYear();
     const month       = first.getMonth();
@@ -148,13 +156,13 @@ export class BookingDatetimeSelectorComponent {
     startDow = startDow === 0 ? 6 : startDow - 1;
 
     const availMap = new Map(this.availability().map(d => [d.date, d]));
-    const grid: any[] = [];
+    const grid: ICalCell[] = [];
 
     for (let i = 0; i < startDow; i++) grid.push({ dateStr: null, day: 0, state: 'empty' });
 
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      let state: string;
+      let state: ICalCell['state'];
       if (dateStr < this.today) {
         state = 'past';
       } else {

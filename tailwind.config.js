@@ -7,7 +7,7 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0D1B2A',
+          DEFAULT: 'rgb(var(--lr-ink) / <alpha-value>)',
           50:  '#e8edf3',
           100: '#c5d0dd',
           200: '#9fb0c4',
@@ -19,18 +19,19 @@ module.exports = {
           800: '#131f30',
           900: '#0D1B2A',
         },
+        // Los tonos clave leen las variables CSS de src/styles.scss (fuente única).
         accent: {
-          DEFAULT: '#2BB8A6',
-          50:  '#e8f7f5',
-          100: '#c0ece6',
-          200: '#94dfd5',
-          300: '#65d1c3',
-          400: '#41c6b5',
-          500: '#2BB8A6',
-          600: '#22a494',
-          700: '#1a8d7e',
-          800: '#117668',
-          900: '#065e52',
+          DEFAULT: 'rgb(var(--lr-accent) / <alpha-value>)',
+          50:  'rgb(var(--lr-accent-soft) / <alpha-value>)',
+          100: '#fbd9cb',
+          200: '#f8bfa8',
+          300: '#f49c7c',
+          400: '#f2794f',
+          500: 'rgb(var(--lr-accent) / <alpha-value>)',
+          600: 'rgb(var(--lr-accent-strong) / <alpha-value>)',
+          700: '#b23f14',
+          800: '#8a3010',
+          900: '#6b240c',
         },
         label: {
           DEFAULT: '#E8943A',
@@ -45,13 +46,15 @@ module.exports = {
           800: '#824814',
           900: '#60310a',
         },
-        background: '#F8FAFC',
+        background: 'rgb(var(--lr-canvas) / <alpha-value>)',
         surface: '#ffffff',
-        border: '#e2e8f0',
+        border: 'rgb(var(--lr-border) / <alpha-value>)',
       },
       fontFamily: {
-        sans:    ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        heading: ['Fraunces', 'Georgia', 'serif'],
+        sans:    ['Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        // Se mantiene la clase font-heading para no tocar las plantillas: hoy apunta
+        // a la misma familia que el resto (tipografía única de marca).
+        heading: ['Roboto', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },

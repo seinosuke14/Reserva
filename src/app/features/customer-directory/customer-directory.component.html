@@ -87,7 +87,7 @@
 
           @for (c of filteredCustomers(); track c.id; let i = $index) {
           <tr class="cursor-pointer border-b border-primary-50 transition-colors hover:brightness-[.98]"
-            [style.background]="selectedCustomer()?.id === c.id ? 'rgba(0,196,167,.06)' : '#fff'"
+            [style.background]="selectedCustomer()?.id === c.id ? 'rgb(var(--lr-accent) / .06)' : '#fff'"
             (click)="openCustomer(c)">
 
             <!-- Cliente -->
@@ -95,7 +95,7 @@
               <div class="flex items-center gap-2.5">
                 <div
                   class="w-[34px] h-[34px] rounded-full flex-center text-white text-[11px] font-bold shrink-0"
-                  style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
+                  style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));">
                   {{ c.name.charAt(0).toUpperCase() }}
                 </div>
                 <div>
@@ -172,8 +172,8 @@
 
       <!-- Avatar + name -->
       <div class="px-4 py-5 text-center border-b border-primary-100">
-        <div class="w-14 h-14 rounded-full flex-center text-white text-xl font-bold mx-auto" style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
-                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(0,196,167,.4);">
+        <div class="w-14 h-14 rounded-full flex-center text-white text-xl font-bold mx-auto" style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));
+                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgb(var(--lr-accent) / .4);">
           {{ selectedCustomer()!.name.charAt(0).toUpperCase() }}
         </div>
         <div class="text-[15px] font-bold text-primary mt-2.5">{{ selectedCustomer()!.name }}</div>
@@ -184,12 +184,12 @@
 
         <div class="flex gap-2 mt-3.5">
           <button class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold transition-all border"
-            style="border-color:#00C4A7;color:#00C4A7;background:transparent;">
+            style="border-color:rgb(var(--lr-accent));color:rgb(var(--lr-accent));background:transparent;">
             Mensaje
           </button>
           <button (click)="openBookingModal()"
             class="flex-1 py-2 rounded-[9px] text-[12px] font-semibold text-white transition-all"
-            style="background:#00C4A7;box-shadow:0 2px 8px rgba(0,196,167,.35);">
+            style="background:rgb(var(--lr-accent));box-shadow:0 2px 8px rgb(var(--lr-accent) / .35);">
             Agendar
           </button>
         </div>
@@ -230,8 +230,8 @@
             [class.text-primary-400]="aptTab() !== 'todas'">
             Ver todas
             <span class="text-[10px] font-bold px-1.5 py-px rounded-full"
-                  [style.background]="aptTab() === 'todas' ? 'rgba(0,196,167,.15)' : 'rgba(100,116,139,.12)'"
-                  [style.color]="aptTab() === 'todas' ? '#00C4A7' : '#64748b'">
+                  [style.background]="aptTab() === 'todas' ? 'rgb(var(--lr-accent) / .15)' : 'rgba(100,116,139,.12)'"
+                  [style.color]="aptTab() === 'todas' ? 'rgb(var(--lr-accent))' : '#64748b'">
               {{ selectedCustomer()!.appointments.length }}
             </span>
           </button>
@@ -311,7 +311,7 @@
       <!-- Cliente (solo lectura) -->
       <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-primary-50 border border-primary-100">
         <div class="w-9 h-9 rounded-full flex-center text-white text-[12px] font-bold shrink-0"
-             style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
+             style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));">
           {{ selectedCustomer()!.name.charAt(0).toUpperCase() }}
         </div>
         <div class="min-w-0">
@@ -330,7 +330,7 @@
           <select [value]="bk_serviceId()"
                   (change)="onBkServiceChange($any($event.target).value)"
                   class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
-                  style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                  style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
             @for (s of bk_services(); track s.id) {
               <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
             }
@@ -345,7 +345,7 @@
           <input type="date" [value]="bk_date()" [min]="today"
                  (input)="onBkDateChange($any($event.target).value)"
                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none"
-                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                 style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
         </div>
         <div>
           <label class="form-label">Hora *</label>
@@ -355,7 +355,7 @@
             <select [value]="bk_time()"
                     (change)="bk_time.set($any($event.target).value)"
                     class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
-                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                    style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
               <option value="">Selecciona una hora</option>
               @for (slot of bk_availableSlots(); track slot) {
                 <option [value]="slot" [selected]="slot === bk_time()">{{ slot }}</option>
@@ -373,7 +373,7 @@
                   rows="2"
                   placeholder="Observaciones opcionales..."
                   class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300 resize-none"
-                  style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);"></textarea>
+                  style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);"></textarea>
       </div>
 
       <!-- Estado de pago -->
@@ -414,7 +414,7 @@
       </button>
       <button (click)="submitBooking()" [disabled]="bk_submitting()"
         class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-        style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
+        style="background:rgb(var(--lr-accent));box-shadow:0 3px 10px rgb(var(--lr-accent) / .35);">
         {{ bk_submitting() ? 'Guardando...' : 'Crear Cita' }}
       </button>
     </div>

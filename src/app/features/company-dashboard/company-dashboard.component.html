@@ -48,16 +48,16 @@
         class="group w-full flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
         [style.gap]="isSidebarOpen() ? '9px' : '0'"
-        [style.background]="activeTab() === item.tab ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))' : ''"
-        [style.color]="activeTab() === item.tab ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [style.background]="activeTab() === item.tab ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))' : ''"
+        [style.color]="activeTab() === item.tab ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
         [title]="!isSidebarOpen() ? item.label : ''">
 
         @if (activeTab() === item.tab) {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
         }
 
         <span class="shrink-0 transition-colors"
-          [style.color]="activeTab() === item.tab ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="activeTab() === item.tab ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             @switch (item.icon) {
               @case ('bar-chart') {
@@ -107,14 +107,14 @@
         class="group w-full flex items-center rounded-[10px] mb-px relative cursor-pointer transition-all duration-150"
         [class.justify-center]="!isSidebarOpen()" [style.padding]="isSidebarOpen() ? '9px 12px' : '9px 0'"
         [style.gap]="isSidebarOpen() ? '9px' : '0'"
-        [style.background]="activeTab() === 'guia' ? 'linear-gradient(90deg,rgba(0,196,167,.13),rgba(0,196,167,.05))' : ''"
-        [style.color]="activeTab() === 'guia' ? '#00C4A7' : 'rgba(255,255,255,.4)'"
+        [style.background]="activeTab() === 'guia' ? 'linear-gradient(90deg,rgb(var(--lr-accent) / .13),rgb(var(--lr-accent) / .05))' : ''"
+        [style.color]="activeTab() === 'guia' ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.4)'"
         [title]="!isSidebarOpen() ? '¿Cómo usar LR?' : ''">
         @if (activeTab() === 'guia') {
-        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:#00C4A7;"></span>
+        <span class="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-sm" style="background:rgb(var(--lr-accent));"></span>
         }
         <span class="shrink-0 transition-colors"
-          [style.color]="activeTab() === 'guia' ? '#00C4A7' : 'rgba(255,255,255,.55)'">
+          [style.color]="activeTab() === 'guia' ? 'rgb(var(--lr-accent))' : 'rgba(255,255,255,.55)'">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" />
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
@@ -138,10 +138,10 @@
         @if (company()?.profileImage) {
           <img [src]="company()!.profileImage!" alt="Logo"
             class="w-[30px] h-[30px] rounded-full object-cover shrink-0"
-            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+            style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
         } @else {
           <div class="w-[30px] h-[30px] rounded-full flex-center text-white text-[10px] font-bold shrink-0"
-            style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+            style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
             {{ companyInitials() }}
           </div>
         }
@@ -195,10 +195,10 @@
       @if (company()?.profileImage) {
         <img [src]="company()!.profileImage!" alt="Logo"
           class="w-[34px] h-[34px] rounded-full object-cover"
-          style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+          style="box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
       } @else {
         <div class="w-[34px] h-[34px] rounded-full flex-center text-white text-[11px] font-bold tracking-tight"
-          style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,196,167,.4);">
+          style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgb(var(--lr-accent) / .4);">
           {{ companyInitials() }}
         </div>
       }
@@ -245,7 +245,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @for (m of agendaMembers(); track m.id) {
         <button (click)="selectAgendaMember(m)"
-          class="bg-white rounded-[16px] border border-black/[.05] p-4 flex items-center gap-3 text-left hover:shadow-md hover:border-[#00C4A7]/40 transition-all">
+          class="bg-white rounded-[16px] border border-black/[.05] p-4 flex items-center gap-3 text-left hover:shadow-md hover:border-[rgb(var(--lr-accent))]/40 transition-all">
           <div class="w-14 h-14 rounded-full bg-slate-100 shrink-0 flex-center text-[18px] font-bold text-slate-500 overflow-hidden">
             @if (m.profileImage) { <img [src]="m.profileImage" [alt]="m.name" class="w-full h-full object-cover"/> }
             @else { {{ m.name.charAt(0).toUpperCase() }} }
@@ -308,7 +308,7 @@
           <div class="flex flex-col gap-2">
             @for (appt of day.appts; track appt.id) {
             <div class="bg-white rounded-[14px] border border-black/[.05] p-3.5 flex items-start gap-3"
-              [style.border-left]="'4px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : '#00C4A7')">
+              [style.border-left]="'4px solid ' + (appt.paymentStatus === 'Pagado' ? '#10b981' : 'rgb(var(--lr-accent))')">
 
               <!-- Hora -->
               <div class="shrink-0 text-center">
@@ -324,13 +324,13 @@
 
                 <div class="flex flex-col gap-0.5">
                   @if (appt.customer.phone) {
-                  <a [href]="'tel:' + appt.customer.phone" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#00C4A7] transition-colors w-fit">
+                  <a [href]="'tel:' + appt.customer.phone" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[rgb(var(--lr-accent))] transition-colors w-fit">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     {{ appt.customer.phone }}
                   </a>
                   }
                   @if (appt.customer.email) {
-                  <a [href]="'mailto:' + appt.customer.email" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#00C4A7] transition-colors w-fit">
+                  <a [href]="'mailto:' + appt.customer.email" class="inline-flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[rgb(var(--lr-accent))] transition-colors w-fit">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
                     <span class="truncate">{{ appt.customer.email }}</span>
                   </a>
@@ -402,8 +402,8 @@
         <svg [attr.viewBox]="'0 0 ' + lcW + ' ' + lcH" class="w-full" style="min-width:320px;">
           <defs>
             <linearGradient id="cmpAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#00C4A7" stop-opacity="0.18"/>
-              <stop offset="100%" stop-color="#00C4A7" stop-opacity="0"/>
+              <stop offset="0%" style="stop-color:rgb(var(--lr-accent))" stop-opacity="0.18"/>
+              <stop offset="100%" style="stop-color:rgb(var(--lr-accent))" stop-opacity="0"/>
             </linearGradient>
           </defs>
           <!-- Grid -->
@@ -416,10 +416,10 @@
           <!-- Área -->
           <path [attr.d]="lineArea()" fill="url(#cmpAreaGrad)"/>
           <!-- Línea -->
-          <path [attr.d]="linePath()" fill="none" stroke="#00C4A7" stroke-width="2" stroke-linejoin="round"/>
+          <path [attr.d]="linePath()" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="2" stroke-linejoin="round"/>
           <!-- Puntos + labels -->
           @for (p of linePoints(); track p.key; let last = $last) {
-          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="#00C4A7"/>
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" style="fill:rgb(var(--lr-accent))"/>
           @if (last || p.revenue > 0) {
           <text [attr.x]="p.x" [attr.y]="lcH - 4" text-anchor="middle"
             style="font-size:9px;fill:#94a3b8;font-family:sans-serif;">{{ p.month }}</text>
@@ -455,7 +455,7 @@
               </div>
               <div class="flex items-center gap-2 mt-1.5">
                 <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full" style="background:#00C4A7;"
+                  <div class="h-full rounded-full" style="background:rgb(var(--lr-accent));"
                     [style.width.%]="(m.revenue / maxMemberRev()) * 100"></div>
                 </div>
                 <span class="text-[11px] text-slate-400 shrink-0">{{ m.appointments }} citas</span>
@@ -518,7 +518,7 @@
           class="flex-1 px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none transition-colors text-[13.5px] text-primary bg-white placeholder:text-primary-400 focus:border-accent"/>
         <button (click)="onInvite()" [disabled]="isSending() || !inviteEmail()"
           class="px-5 py-2.5 rounded-[10px] font-bold text-[13px] text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          style="background:#00C4A7;">
+          style="background:rgb(var(--lr-accent));">
           {{ isSending() ? 'Enviando...' : 'Enviar' }}
         </button>
       </div>
@@ -791,7 +791,7 @@
           </div>
           <button (click)="saveBrandSlug()" [disabled]="brandSlugSaving()"
             class="px-4 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-70 whitespace-nowrap"
-            style="background:#00C4A7;">
+            style="background:rgb(var(--lr-accent));">
             {{ brandSlugSaving() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
@@ -1014,7 +1014,7 @@
       @if (brandError()) { <p class="text-[13px] text-red-500 font-medium">{{ brandError() }}</p> }
       <button (click)="saveBrand()" [disabled]="brandSaving()"
         class="self-start px-6 py-3 rounded-[12px] font-bold text-[13.5px] text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-        style="background:#00C4A7;">
+        style="background:rgb(var(--lr-accent));">
         {{ brandSaving() ? 'Guardando...' : 'Guardar cambios' }}
       </button>
 
@@ -1089,7 +1089,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button (click)="savePaymentRouting('company')" [disabled]="paymentRoutingSaving()"
             class="text-left rounded-[14px] border-[1.5px] p-4 transition-all disabled:opacity-60"
-            [class]="paymentRouting() === 'company' ? 'border-accent bg-[rgba(0,196,167,.06)]' : 'border-primary-100 hover:border-primary-200'">
+            [class]="paymentRouting() === 'company' ? 'border-accent bg-[rgb(var(--lr-accent) / .06)]' : 'border-primary-100 hover:border-primary-200'">
             <div class="flex items-center gap-2 mb-1">
               <span class="w-4 h-4 rounded-full border-[2px] flex-center shrink-0"
                 [class]="paymentRouting() === 'company' ? 'border-accent' : 'border-primary-300'">
@@ -1102,7 +1102,7 @@
 
           <button (click)="savePaymentRouting('professional')" [disabled]="paymentRoutingSaving()"
             class="text-left rounded-[14px] border-[1.5px] p-4 transition-all disabled:opacity-60"
-            [class]="paymentRouting() === 'professional' ? 'border-accent bg-[rgba(0,196,167,.06)]' : 'border-primary-100 hover:border-primary-200'">
+            [class]="paymentRouting() === 'professional' ? 'border-accent bg-[rgb(var(--lr-accent) / .06)]' : 'border-primary-100 hover:border-primary-200'">
             <div class="flex items-center gap-2 mb-1">
               <span class="w-4 h-4 rounded-full border-[2px] flex-center shrink-0"
                 [class]="paymentRouting() === 'professional' ? 'border-accent' : 'border-primary-300'">
@@ -1295,7 +1295,7 @@
                 <div class="flex items-center gap-3 pt-1">
                   <button (click)="savePaymentMethod(config)" [disabled]="paymentSaving()"
                     class="px-5 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-60"
-                    style="background:#00C4A7;">
+                    style="background:rgb(var(--lr-accent));">
                     @if (paymentSaving()) { Guardando... }
                     @else if (config.fields.length === 0) { {{ isPaymentConfigured(config.provider) ? 'Ya habilitado' : 'Habilitar' }} }
                     @else { Guardar }
@@ -1351,13 +1351,13 @@
         @if (svcCategories().length < maxCategories) {
           <div class="flex gap-2">
             <input type="text" maxlength="60" placeholder="Ej: Cortes, Coloración, Tratamientos..."
-              class="flex-1 px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none transition-colors text-[13.5px] text-primary bg-white focus:border-[#00C4A7]"
+              class="flex-1 px-3 py-2.5 rounded-[10px] border-[1.5px] border-primary-200 outline-none transition-colors text-[13.5px] text-primary bg-white focus:border-[rgb(var(--lr-accent))]"
               [ngModel]="newSvcCatName()"
               (ngModelChange)="newSvcCatName.set($event)"
               (keydown.enter)="onCreateServiceCategory()" />
             <button (click)="onCreateServiceCategory()" [disabled]="svcCatSaving() || !newSvcCatName().trim()"
               class="px-4 py-2 rounded-[10px] text-[13px] font-bold text-white transition-all disabled:opacity-50 shrink-0"
-              style="background:#00C4A7;box-shadow:0 3px 12px rgba(0,196,167,.38);">
+              style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .38);">
               Crear
             </button>
           </div>
@@ -1373,13 +1373,13 @@
             <div class="flex items-center gap-2 border border-primary-100 rounded-[10px] px-3 py-2">
               @if (svcCatEditingId() === cat.id) {
                 <input type="text" maxlength="60"
-                  class="flex-1 px-3 py-1.5 rounded-[8px] border-[1.5px] border-primary-200 outline-none text-[13px] text-primary bg-white focus:border-[#00C4A7]"
+                  class="flex-1 px-3 py-1.5 rounded-[8px] border-[1.5px] border-primary-200 outline-none text-[13px] text-primary bg-white focus:border-[rgb(var(--lr-accent))]"
                   [ngModel]="svcCatEditingName()"
                   (ngModelChange)="svcCatEditingName.set($event)"
                   (keydown.enter)="onSaveServiceCategory()" />
                 <button (click)="onSaveServiceCategory()" [disabled]="svcCatSaving() || !svcCatEditingName().trim()" title="Guardar"
                   class="w-7 h-7 flex-center rounded-[7px] text-white shrink-0 disabled:opacity-50"
-                  style="background:#00C4A7;">
+                  style="background:rgb(var(--lr-accent));">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
