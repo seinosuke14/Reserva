@@ -1,7 +1,9 @@
 // ─── Design tokens ───────────────────────────────────────
 $primary:      #0D1B2A;
-$accent:       #2BB8A6;
-$accent-hover: #22a494;
+// Sass no puede operar con variables CSS dentro de rgba()/darken(), así que
+// aquí el color va literal. Debe coincidir con --lr-accent de src/styles.scss.
+$accent:       #EF5A24;
+$accent-hover: #D64D1C;
 $label:        #E8943A;
 $text:         #0D1B2A;
 $muted:        #64748b;

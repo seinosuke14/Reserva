@@ -19,12 +19,16 @@ interface IAppointment {
   time: string;
   notes: string | null;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado' | 'Finalizada';
-  paymentProvider?: string | null;
+  /** Monto cobrado por la cita. La API lo devuelve; puede venir como string (DECIMAL). */
+  amount?: number | string | null;
+  paymentProvider?: 'mercadopago_connect' | 'webpay' | 'transfer' | 'presencial' | string | null;
   cancellationStatus?: 'none' | 'requested' | 'rejected';
   cancellationReason?: string | null;
   refundStatus?: string | null;
   refundId?: string | null;
   rated:    boolean;
+  /** Momento en que se creó la reserva (lo devuelve la API en el JSON de la cita). */
+  createdAt?: string;
   customer: { id: string; name: string; email?: string };
   service:  { id: string; name: string; duration?: number; category?: { id: string; isQuoteCategory?: boolean } | null } | null;
 }
@@ -41,6 +45,8 @@ interface ICustomer {
   name: string;
   email?: string;
   phone?: string;
+  /** Alta del cliente en el directorio: sirve para saber desde cuándo es cliente. */
+  createdAt?: string;
 }
 
 
@@ -84,9 +90,191 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     const mobile = window.innerWidth < 768;
     this.isMobile.set(mobile);
     if (!mobile) this.isLeftPanelOpen.set(true);
+    // La grilla semanal no cabe en pantallas chicas: pasamos a la vista de día.
+    if (mobile && this.viewMode() === 'week') this.viewMode.set('day');
   };
 
   private appointments = signal<IAppointment[]>([]);
+
+  // ── Contacto del cliente de la cita abierta ───────────────────
+  /** Ficha completa del cliente: la cita solo trae id/nombre/email, el teléfono vive en el directorio. */
+  readonly selectedCustomer = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return null;
+    const byId = this.customers().find(c => c.id === apt.customer.id);
+    if (byId) return byId;
+    const email = apt.customer.email?.toLowerCase();
+    return email ? this.customers().find(c => c.email?.toLowerCase() === email) ?? null : null;
+  });
+
+  readonly customerEmail = computed(() =>
+    this.selectedCustomer()?.email ?? this.selectedAppointment()?.customer.email ?? null
+  );
+
+  /** Teléfono legible: +56 9 7568 6260 cuando es un móvil chileno, tal cual en cualquier otro caso. */
+  readonly customerPhone = computed(() => {
+    const raw = this.selectedCustomer()?.phone?.trim();
+    if (!raw) return null;
+
+    const d = raw.replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('569')) return `+56 9 ${d.slice(3, 7)} ${d.slice(7)}`;
+    if (d.length === 9  && d.startsWith('9'))   return `+56 9 ${d.slice(1, 5)} ${d.slice(5)}`;
+    return raw;
+  });
+
+  private _customerCreatedAt(): Date | null {
+    const iso = this.selectedCustomer()?.createdAt;
+    if (!iso) return null;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  /** "julio 2026" — desde cuándo está el cliente en el directorio. */
+  readonly customerSince = computed(() => {
+    const d = this._customerCreatedAt();
+    return d ? new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' }).format(d).replace(' de ', ' ') : null;
+  });
+
+  /** "jul 2026" — versión corta para la fila de métricas. */
+  readonly customerSinceShort = computed(() => {
+    const d = this._customerCreatedAt();
+    return d ? new Intl.DateTimeFormat('es-CL', { month: 'short', year: 'numeric' }).format(d).replace(' de ', ' ') : null;
+  });
+
+  /** Historial del cliente de la cita abierta, en orden cronológico. */
+  private readonly selectedCustomerApts = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return [];
+    return this.appointments()
+      .filter(a => a.customer?.id === apt.customer.id)
+      .sort((a, b) => this._sortKey(a).localeCompare(this._sortKey(b)));
+  });
+
+  /** Resumen del cliente para la cabecera: qué visita es, cuánto ha gastado y cuántas canceló. */
+  readonly customerStats = computed(() => {
+    const apt  = this.selectedAppointment();
+    if (!apt) return null;
+    const list = this.selectedCustomerApts();
+
+    const vigentes = list.filter(a => a.paymentStatus !== 'Cancelado');
+    const idx      = vigentes.findIndex(a => a.id === apt.id);
+
+    return {
+      visita:     idx >= 0 ? idx + 1 : vigentes.length + 1,
+      gastado:    list.filter(a => this._isPaid(a)).reduce((s, a) => s + this._amountOf(a), 0),
+      canceladas: list.length - vigentes.length,
+    };
+  });
+
+  readonly isNewCustomer = computed(() => (this.customerStats()?.visita ?? 0) <= 1);
+
+  /** "Hoy, lunes 27 de julio" · "Mañana, martes 28 de julio" · "Lunes 27 de julio". */
+  readonly aptDateLabel = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return '';
+
+    const fecha  = apt.date.substring(0, 10);
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    const [y, m, d] = fecha.split('-').map(Number);
+    const largo = new Date(y, m - 1, d)
+      .toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    if (fecha === this.todayStr)                return `Hoy, ${largo}`;
+    if (fecha === this._toDateStr(manana))      return `Mañana, ${largo}`;
+    return largo.charAt(0).toUpperCase() + largo.slice(1);
+  });
+
+  /** "09:45 – 10:15" cuando se conoce la duración del servicio; si no, solo la hora de inicio. */
+  readonly aptTimeRange = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return '';
+
+    const dur = apt.service?.duration;
+    if (!dur) return apt.time;
+
+    const [h, m] = apt.time.split(':').map(Number);
+    const end    = new Date(2000, 0, 1, h, m + dur);
+    return `${apt.time} – ${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+  });
+
+  /** "26 jul 18:32" — cuándo se creó la reserva. */
+  readonly bookedAtLabel = computed(() => {
+    const iso = this.selectedAppointment()?.createdAt;
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    const fecha = d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+    const hora  = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return `${fecha} ${hora}`;
+  });
+
+  private readonly PROVIDER_LABELS: Record<string, string> = {
+    mercadopago_connect: 'MercadoPago',
+    webpay:              'Webpay',
+    transfer:            'Transferencia',
+    presencial:          'Pago presencial',
+  };
+
+  readonly paymentMethodLabel = computed(() => {
+    const p = this.selectedAppointment()?.paymentProvider;
+    return p ? this.PROVIDER_LABELS[p] ?? p : null;
+  });
+
+  /** Se refresca cada minuto para mantener vivo el "en X minutos" de la cita. */
+  private readonly nowTick = signal(Date.now());
+  private _tickId?: ReturnType<typeof setInterval>;
+
+  /** "En 12 minutos" · "En curso" · "Hace 2 h" — cuenta regresiva de la cita abierta. */
+  readonly startsInLabel = computed(() => {
+    const apt = this.selectedAppointment();
+    if (!apt) return null;
+
+    const [y, mo, d] = apt.date.substring(0, 10).split('-').map(Number);
+    const [h, mi]    = apt.time.split(':').map(Number);
+    const start      = new Date(y, mo - 1, d, h, mi);
+    const dur        = apt.service?.duration ?? 0;
+    const diffMin    = Math.round((start.getTime() - this.nowTick()) / 60000);
+
+    if (diffMin > 0) {
+      if (diffMin < 60)   return `En ${diffMin} minuto${diffMin === 1 ? '' : 's'}`;
+      const hrs = Math.round(diffMin / 60);
+      if (hrs < 24)       return `En ${hrs} h`;
+      return null; // más de un día: la fecha de arriba ya lo dice
+    }
+    if (dur && -diffMin < dur) return 'En curso';
+
+    const pasado = -diffMin;
+    if (pasado < 60)  return `Hace ${pasado} minuto${pasado === 1 ? '' : 's'}`;
+    const hrs = Math.round(pasado / 60);
+    if (hrs < 24)     return `Hace ${hrs} h`;
+    return null;
+  });
+
+  /** Abre la ficha del cliente en el directorio. */
+  goToCustomerFile(): void {
+    const id = this.selectedAppointment()?.customer.id;
+    if (!id) return;
+    this.router.navigate(['/app/clientes'], { queryParams: { cliente: id } });
+  }
+
+  /**
+   * Número en formato internacional para wa.me. Los teléfonos se guardan como
+   * los escribe el profesional, así que se normaliza asumiendo Chile (+56).
+   */
+  readonly whatsappLink = computed(() => {
+    const raw = this.customerPhone();
+    if (!raw) return null;
+
+    let digits = raw.replace(/\D/g, '');
+    if (!digits) return null;
+
+    if (!digits.startsWith('56')) {
+      digits = digits.length === 8 ? `569${digits}` : `56${digits}`;
+    }
+    return digits.length >= 11 ? `https://wa.me/${digits}` : null;
+  });
 
   // ── Nueva Cita ────────────────────────────────────────────────
   readonly showNewAppt     = signal(false);
@@ -240,6 +428,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     window.addEventListener('resize', this._resizeListener);
+    this._tickId = setInterval(() => this.nowTick.set(Date.now()), 60_000);
     await Promise.all([
       this._loadAppointments(),
       this._loadServices(),
@@ -252,6 +441,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this._resizeListener);
+    if (this._tickId) clearInterval(this._tickId);
   }
 
   toggleLeftPanel(): void {
@@ -764,6 +954,203 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
       pendientes: apts.filter(a => a.paymentStatus === 'Pendiente').length,
     };
   });
+
+  // ── Vistas de la agenda: semana · día · lista ───────────────────────
+  // En móvil arrancamos en Día: la grilla semanal necesita más ancho del disponible.
+  readonly viewMode = signal<'week' | 'day' | 'list'>(window.innerWidth < 768 ? 'day' : 'week');
+  setViewMode(mode: 'week' | 'day' | 'list'): void { this.viewMode.set(mode); }
+
+  private readonly ALL_VIEWS: { id: 'week' | 'day' | 'list'; label: string }[] = [
+    { id: 'week', label: 'Semana' },
+    { id: 'day',  label: 'Día' },
+    { id: 'list', label: 'Lista' },
+  ];
+
+  /** En móvil no ofrecemos la vista semanal. */
+  readonly viewOptions = computed(() =>
+    this.isMobile() ? this.ALL_VIEWS.filter(v => v.id !== 'week') : this.ALL_VIEWS
+  );
+
+  readonly listTabs: { id: 'proximas' | 'confirmar' | 'pasadas' | 'canceladas'; label: string }[] = [
+    { id: 'proximas',   label: 'Próximas' },
+    { id: 'confirmar',  label: 'Por confirmar' },
+    { id: 'pasadas',    label: 'Pasadas' },
+    { id: 'canceladas', label: 'Canceladas' },
+  ];
+
+  readonly listTab = signal<'proximas' | 'confirmar' | 'pasadas' | 'canceladas'>('proximas');
+  setListTab(tab: 'proximas' | 'confirmar' | 'pasadas' | 'canceladas'): void { this.listTab.set(tab); }
+
+  /** Clave cronológica (fecha + hora) para ordenar el listado. */
+  private _sortKey(a: IAppointment): string {
+    return `${a.date.substring(0, 10)}T${a.time}`;
+  }
+
+  /** Pide atención: el cliente solicitó cancelar, o sigue sin pagar y aún no ocurre. */
+  private _needsAction(a: IAppointment): boolean {
+    return a.cancellationStatus === 'requested'
+        || (a.paymentStatus === 'Pendiente' && !this.isAppointmentPast(a));
+  }
+
+  /**
+   * Color del borde de la tarjeta según el estado de la cita.
+   * Pendiente naranja · confirmada verde claro · finalizada gris · cancelada roja.
+   * Una solicitud de cancelación también se marca en rojo: pide atención.
+   */
+  statusBorderColor(a: IAppointment): string {
+    if (a.paymentStatus === 'Cancelado' || a.cancellationStatus === 'requested') return '#ef4444';
+    switch (a.paymentStatus) {
+      case 'Pagado':     return '#4ade80';
+      case 'Finalizada': return '#A39D96';
+      default:           return 'rgb(var(--lr-accent))';
+    }
+  }
+
+  /**
+   * Mismo color del estado, translúcido. Lo usan los bloques que ocupa una cita
+   * de varias horas, para que se lean como parte de ella.
+   */
+  statusSoftColor(a: IAppointment, alpha = 0.08): string {
+    const hex = this.statusBorderColor(a);
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  /**
+   * Reparto de las citas entre las cuatro pestañas. Contador y listado leen de
+   * aquí para no poder contradecirse: si cada uno filtrara por su cuenta, "pasada"
+   * se evaluaría en instantes distintos (depende de la hora actual) y la pestaña
+   * podría marcar 2 mientras la lista sale vacía. Depende de nowTick para que el
+   * reparto se rehaga cada minuto en vez de quedar congelado al cargar la agenda.
+   */
+  private readonly listBuckets = computed(() => {
+    this.nowTick();
+
+    const all    = this.appointments();
+    const activa = all.filter(a => a.paymentStatus !== 'Cancelado');
+
+    return {
+      proximas:   activa.filter(a => !this.isAppointmentPast(a)),
+      confirmar:  activa.filter(a => this._needsAction(a)),
+      pasadas:    activa.filter(a => this.isAppointmentPast(a)),
+      canceladas: all.filter(a => a.paymentStatus === 'Cancelado'),
+    };
+  });
+
+  readonly listCounts = computed(() => {
+    const b = this.listBuckets();
+    return {
+      proximas:   b.proximas.length,
+      confirmar:  b.confirmar.length,
+      pasadas:    b.pasadas.length,
+      canceladas: b.canceladas.length,
+    };
+  });
+
+  readonly listAppointments = computed(() => {
+    const tab  = this.listTab();
+    const rows = this.listBuckets()[tab];
+
+    // Lo ya ocurrido se lee de lo más reciente hacia atrás.
+    const desc = tab === 'pasadas' || tab === 'canceladas';
+    return [...rows].sort((a, b) => desc
+      ? this._sortKey(b).localeCompare(this._sortKey(a))
+      : this._sortKey(a).localeCompare(this._sortKey(b)));
+  });
+
+  /** Etiqueta relativa de fecha para el listado (Hoy / Mañana / lun 28 jul). */
+  listDateLabel(a: IAppointment): string {
+    const fecha  = a.date.substring(0, 10);
+    const hoy    = this._toDateStr(new Date());
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    if (fecha === hoy) return 'Hoy';
+    if (fecha === this._toDateStr(manana)) return 'Mañana';
+
+    const [y, m, d] = fecha.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  readonly dayViewLabel = computed(() =>
+    this.selectedDate().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+  );
+
+  /**
+   * Hora de cierre del día seleccionado. Se muestra al final de la grilla como
+   * referencia: no es un bloque agendable, marca dónde termina la jornada.
+   */
+  readonly dayClosingTime = computed(() =>
+    this.workSvc.getEndTime(jsToDow(this.selectedDate().getDay()))
+  );
+
+  /** Cierre más tardío de la semana, para cerrar la grilla semanal. */
+  readonly weekClosingTime = computed(() => {
+    const horas = this.weekDays()
+      .map(d => this.workSvc.getEndTime(jsToDow(d.getDay())))
+      .filter((t): t is string => !!t)
+      .sort();
+    return horas.length ? horas[horas.length - 1] : null;
+  });
+
+  // ── Panel lateral: caja y ocupación del día ────────────────────────
+  readonly showDayRail = signal(true);
+  toggleDayRail(): void { this.showDayRail.update(v => !v); }
+
+  private _amountOf(a: IAppointment): number {
+    return Number(a.amount ?? 0) || 0;
+  }
+
+  /** Pagos con tarjeta a través de una pasarela (no efectivo ni transferencia). */
+  private _isOnlinePayment(a: IAppointment): boolean {
+    return a.paymentProvider === 'mercadopago_connect' || a.paymentProvider === 'webpay';
+  }
+
+  private _isPaid(a: IAppointment): boolean {
+    return a.paymentStatus === 'Pagado' || a.paymentStatus === 'Finalizada';
+  }
+
+  /** Caja del día calculada sobre las citas reales (excluye canceladas). */
+  readonly dayCash = computed(() => {
+    const apts = this.dayAppointments();
+    const sum  = (list: IAppointment[]) => list.reduce((t, a) => t + this._amountOf(a), 0);
+
+    const pagadas = apts.filter(a => this._isPaid(a));
+    return {
+      total:       sum(apts),
+      reservas:    apts.length,
+      online:      sum(pagadas.filter(a => this._isOnlinePayment(a))),
+      transfer:    sum(pagadas.filter(a => a.paymentProvider === 'transfer')),
+      porCobrar:   sum(apts.filter(a => a.paymentStatus === 'Pendiente')),
+    };
+  });
+
+  /** Ocupación del día: bloques con cita sobre el total de bloques del horario. */
+  readonly dayOccupancy = computed(() => {
+    const slots = this.timeSlots();
+    if (!slots.length) return { ocupados: 0, total: 0, pct: 0 };
+    const ocupados = slots.filter(s => s.isOccupied).length;
+    return { ocupados, total: slots.length, pct: Math.round((ocupados / slots.length) * 100) };
+  });
+
+  /** Citas del día que piden acción: pidió cancelar o sigue sin pagar. */
+  readonly dayNeedsAction = computed(() =>
+    this.dayAppointments().filter(a => this._needsAction(a))
+  );
+
+  prevDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() - 1);
+    this.selectDate(d);
+  }
+
+  nextDay(): void {
+    const d = new Date(this.selectedDate());
+    d.setDate(d.getDate() + 1);
+    this.selectDate(d);
+  }
 
   dayApptCount(day: Date): number {
     const s = this._toDateStr(day);

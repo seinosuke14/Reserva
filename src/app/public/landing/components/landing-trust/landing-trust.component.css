@@ -1,5 +1,9 @@
-app-landing .trust { border-bottom: 1px solid var(--lp-border-soft); padding: 28px 0; background: white; }
-app-landing .trust-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-app-landing .trust-label { font-size: 12.5px; color: var(--lp-gray-medium); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-app-landing .trust-logos { display: flex; gap: 36px; flex-wrap: wrap; color: var(--lp-gray-dark); font-weight: 600; font-size: 17px; }
-app-landing .trust-logos span { opacity: .7; }
+/* ---- Franja de ventajas (bajo el hero) ---- */
+app-landing .trust { background: #fff; border-top: 1px solid var(--lp-border); border-bottom: 1px solid var(--lp-border); }
+app-landing .adv-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 40px; padding-top: 30px; padding-bottom: 30px; }
+@media (min-width: 760px) { app-landing .adv-strip { grid-template-columns: repeat(4, 1fr); gap: 40px; } }
+app-landing .adv-cell { padding: 0; display: flex; flex-direction: column; gap: 8px; }
+app-landing .adv-cell .ci { font-size: 28px; color: var(--lp-ink); }
+app-landing .adv-cell b { font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--lp-ink); }
+app-landing .adv-cell b.big { font-size: 20px; }
+app-landing .adv-cell span { font-size: 12.5px; color: var(--lp-gray-medium); line-height: 1.45; }

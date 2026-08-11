@@ -8,7 +8,6 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationCenterComponent } from '../notification-center/notification-center.component';
 import { NotificationService } from '../../core/services/notification.service';
-import { SubscriptionService } from '../../core/services/subscription.service';
 import { PlanCapabilitiesService } from '../../core/services/plan-capabilities.service';
 import { OnboardingTourComponent } from '../../components/onboarding-tour/onboarding-tour.component';
 import { TourService, TourStep } from '../../core/services/tour.service';
@@ -149,25 +148,7 @@ export class AppLayoutComponent {
     '/app/como-usar':     { title: '¿Cómo usar LR?', sub: 'Configura tu cuenta paso a paso' },
   };
 
-  private readonly subscriptionSvc = inject(SubscriptionService);
-
   readonly user = this.auth.currentUser;
-
-  readonly subscriptionBanner = computed(() => {
-    const user = this.user();
-    if (!user?.plan || !user.subscriptionStatus) return null;
-    if (user.subscriptionStatus !== 'active') return null;
-
-    const days = this.subscriptionSvc.daysLeft(user.subscriptionEndDate);
-
-    if (user.plan === 'free' && days <= 14) {
-      return { type: 'free' as const, days };
-    }
-    if (user.plan !== 'free' && days <= 5) {
-      return { type: 'expiring' as const, days };
-    }
-    return null;
-  });
 
   readonly userInitials = computed(() => {
     const name = this.user()?.name ?? '';

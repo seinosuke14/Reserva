@@ -74,4 +74,10 @@ export class WorkScheduleService {
   getSlotDuration(dayOfWeek: number): number {
     return this.schedule().find(d => d.dayOfWeek === dayOfWeek)?.slotDuration ?? 30;
   }
+
+  /** Hora de cierre ('HH:mm') de un día laboral; null si ese día no se atiende. */
+  getEndTime(dayOfWeek: number): string | null {
+    const day = this.schedule().find(d => d.dayOfWeek === dayOfWeek);
+    return day?.isWorking ? (day.endTime || null) : null;
+  }
 }

@@ -2,6 +2,7 @@ import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
 import { formatCLP } from '../../helpers/formatters';
@@ -80,6 +81,7 @@ export class CustomerDirectoryComponent implements OnInit, OnDestroy {
   private readonly http     = inject(HttpClient);
   private readonly workSvc  = inject(WorkScheduleService);
   private readonly blockSvc = inject(ScheduleBlockService);
+  private readonly route    = inject(ActivatedRoute);
   readonly formatCLP = formatCLP;
   readonly toNumber  = Number;
 
@@ -312,6 +314,11 @@ export class CustomerDirectoryComponent implements OnInit, OnDestroy {
       ]);
       this.customers.set(customers);
       this.services.set(services);
+
+      // ?cliente=<id> — se llega así desde el detalle de una cita en la agenda.
+      const id = this.route.snapshot.queryParamMap.get('cliente');
+      const target = id ? customers.find(c => c.id === id) : null;
+      if (target) this.openCustomer(target);
     } catch {
       this.errorMsg.set('No se pudieron cargar los clientes.');
     } finally {

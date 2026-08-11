@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -19,7 +19,7 @@ interface IAppointment {
   mpPaymentId?: string | null;
   refundStatus?: string | null;
   customer: { id: string; name: string };
-  service:  { id: string; name: string };
+  service:  { id: string; name: string; duration?: number };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -38,13 +38,26 @@ interface IActivity {
   time: string;
 }
 
+/** Una fila de la agenda de hoy, ya resuelta para pintar (sin lógica en el template). */
+interface IAgendaItem {
+  id: string;
+  time: string;
+  customer: string;
+  service: string;
+  amount: number;
+  status: IAppointment['paymentStatus'];
+  /** past = ya terminó · now = en curso · next = la próxima · upcoming = más tarde */
+  state: 'past' | 'now' | 'next' | 'upcoming';
+  statusLabel: string;
+}
+
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
   imports: [CommonModule, ReferralCardComponent],
   templateUrl: './dashboard-home.component.html',
 })
-export class DashboardHomeComponent implements OnInit {
+export class DashboardHomeComponent implements OnInit, OnDestroy {
   private readonly http   = inject(HttpClient);
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
@@ -60,6 +73,16 @@ export class DashboardHomeComponent implements OnInit {
 
   readonly today = this._localDateStr(new Date());
 
+  /** "Lunes 27 de julio" — encabezado del panel. */
+  readonly todayLabel = (() => {
+    const s = new Intl.DateTimeFormat('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
+      .format(new Date())
+      .replace(',', '');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  })();
+
+  readonly ownerName = computed(() => this.auth.currentUser()?.name ?? 'Tu agenda');
+
   /** Una cita cuenta como ingreso real si está Pagada o Finalizada. */
   private readonly isPaid = (status: string): boolean => status === 'Pagado' || status === 'Finalizada';
 
@@ -73,27 +96,40 @@ export class DashboardHomeComponent implements OnInit {
   /** Semana mostrada en el gráfico: 0 = actual, -1 = anterior, … (acotado al mes actual). */
   weekOffset        = signal(0);
 
+  /** Minuto actual del día: marca qué cita está en curso en la agenda. */
+  private readonly nowMinutes = signal(this._minutesNow());
+  private _clock?: ReturnType<typeof setInterval>;
+
+  private _minutesNow(): number {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  }
+
+  private _toMinutes(hhmm: string): number {
+    const [h, m] = hhmm.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
   readonly linkBanner = computed(() => {
     const user = this.auth.currentUser();
     if (user?.slug && !user?.companyId) return {
-      url:     `${window.location.origin}/reservar/${user.slug}`,
-      label:   'Tu link de agendamiento',
-      accent:  '#00C4A7',
-      shadow:  'rgba(0,196,167,.4)',
-      iconBg:  'rgba(0,196,167,.13)',
-      iconColor: '#00C4A7',
-      isCompany: false,
+      url:   `${window.location.origin}/reservar/${user.slug}`,
+      label: 'Tu link de agendamiento',
     };
     if (user?.companyId && user?.companySlug) return {
-      url:     `${window.location.origin}/empresa/${user.companySlug}`,
-      label:   'Link de agendamiento (vía empresa)',
-      accent:  '#6366f1',
-      shadow:  'rgba(99,102,241,.4)',
-      iconBg:  'rgba(99,102,241,.18)',
-      iconColor: '#818cf8',
-      isCompany: true,
+      url:   `${window.location.origin}/empresa/${user.companySlug}`,
+      label: 'Link de agendamiento (vía empresa)',
     };
     return null;
+  });
+
+  /** El link completo, partido en dominio + identificador para destacar el slug. */
+  readonly bookingLink = computed(() => {
+    const b = this.linkBanner();
+    if (!b) return null;
+    const bare = b.url.replace(/^https?:\/\//, '');
+    const cut  = bare.lastIndexOf('/');
+    return { url: b.url, base: bare.slice(0, cut + 1), slug: bare.slice(cut + 1), label: b.label };
   });
 
   // Solicitudes de cancelación pendientes de revisar (cliente solicitó, aún vigente).
@@ -155,14 +191,87 @@ export class DashboardHomeComponent implements OnInit {
     return f === 'todos' ? apts : apts.filter(a => a.paymentStatus === f);
   });
 
+  /** Agenda de hoy ordenada por hora, con el estado temporal ya resuelto. */
+  readonly agendaItems = computed((): IAgendaItem[] => {
+    const now  = this.nowMinutes();
+    const rows = [...this.filteredTodayApts()].sort((a, b) => a.time.localeCompare(b.time));
+
+    // La primera cita que aún no termina es la "próxima" (o la que está en curso).
+    let nextTaken = false;
+
+    return rows.map(a => {
+      const start = this._toMinutes(a.time);
+      const end   = start + (a.service?.duration ?? 30);
+      const paid  = this.isPaid(a.paymentStatus);
+
+      let state: IAgendaItem['state'];
+      if (a.paymentStatus === 'Cancelado' || end <= now) {
+        state = 'past';
+      } else if (start <= now && now < end) {
+        state = 'now';
+        nextTaken = true;
+      } else if (!nextTaken) {
+        state = 'next';
+        nextTaken = true;
+      } else {
+        state = 'upcoming';
+      }
+
+      return {
+        id:       a.id,
+        time:     a.time,
+        customer: a.customer?.name ?? '—',
+        service:  a.service?.name ?? '—',
+        amount:   Number(a.amount),
+        status:   a.paymentStatus,
+        state,
+        statusLabel: a.paymentStatus === 'Cancelado' ? 'cancelada'
+                   : paid                            ? `pagada · ${formatCLP(Number(a.amount))}`
+                   :                                   `por cobrar ${formatCLP(Number(a.amount))}`,
+      };
+    });
+  });
+
+  /** Minutos agendados hoy (citas no canceladas), según la duración del servicio. */
+  readonly busyMinutes = computed(() =>
+    this.todayAppointments()
+      .filter(a => a.paymentStatus !== 'Cancelado')
+      .reduce((s, a) => s + (a.service?.duration ?? 0), 0)
+  );
+
+  readonly busyLabel = computed(() => {
+    const total = this.busyMinutes();
+    if (!total) return '';
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return h ? `${h}h${m ? ` ${m}min` : ''} agendadas` : `${m}min agendadas`;
+  });
+
   readonly stats = computed(() => {
     const apts = this.todayAppointments();
     return {
       totalCitas:  apts.length,
       confirmadas: apts.filter(a => a.paymentStatus !== 'Cancelado').length,
+      pagadas:     apts.filter(a => this.isPaid(a.paymentStatus)).length,
       ingresosHoy: apts.filter(a => this.isPaid(a.paymentStatus)).reduce((s, a) => s + Number(a.amount), 0),
       pendientes:  apts.filter(a => a.paymentStatus === 'Pendiente').length,
+      porCobrar:   apts.filter(a => a.paymentStatus === 'Pendiente').reduce((s, a) => s + Number(a.amount), 0),
     };
+  });
+
+  private _dayRevenue(dateStr: string): number {
+    return this.allAppointments()
+      .filter(a => a.date === dateStr && this.isPaid(a.paymentStatus))
+      .reduce((s, a) => s + Number(a.amount), 0);
+  }
+
+  /** Variación de la caja de hoy respecto de ayer. */
+  readonly todayTrend = computed(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const prev = this._dayRevenue(this._localDateStr(yesterday));
+    if (!prev) return 0;
+    return Math.round(((this.stats().ingresosHoy - prev) / prev) * 100);
   });
 
   private _getMondayOf(weekOffset = 0): Date {
@@ -254,34 +363,25 @@ export class DashboardHomeComponent implements OnInit {
   prevWeek(): void { if (this.canPrevWeek()) this.weekOffset.update(v => v - 1); }
   nextWeek(): void { if (this.canNextWeek()) this.weekOffset.update(v => v + 1); }
 
-  readonly monthlyIncome = computed(() => {
-    const now    = new Date();
-    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  private _monthIncome(d: Date): number {
+    const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     return this.allAppointments()
       .filter(a => this.isPaid(a.paymentStatus) && a.date.startsWith(prefix))
       .reduce((s, a) => s + Number(a.amount), 0);
+  }
+
+  readonly monthlyIncome = computed(() => this._monthIncome(new Date()));
+
+  readonly prevMonthIncome = computed(() => {
+    const now = new Date();
+    return this._monthIncome(new Date(now.getFullYear(), now.getMonth() - 1, 1));
   });
 
   readonly monthTrend = computed(() => {
-    const now  = new Date();
-    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const prefix = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
-    const prevIncome = this.allAppointments()
-      .filter(a => this.isPaid(a.paymentStatus) && a.date.startsWith(prefix))
-      .reduce((s, a) => s + Number(a.amount), 0);
-    if (!prevIncome) return 0;
-    return Math.round(((this.monthlyIncome() - prevIncome) / prevIncome) * 100);
+    const prev = this.prevMonthIncome();
+    if (!prev) return 0;
+    return Math.round(((this.monthlyIncome() - prev) / prev) * 100);
   });
-
-  sparkline(data: number[], w = 60, h = 22): string {
-    if (data.every(v => v === 0)) return `0,${h} ${w},${h}`;
-    const max   = Math.max(...data);
-    const min   = Math.min(...data);
-    const range = max - min || 1;
-    return data.map((v, i) =>
-      `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 2) - 1}`
-    ).join(' ');
-  }
 
   readonly recentActivity = computed((): IActivity[] =>
     [...this.allAppointments()]
@@ -315,6 +415,7 @@ export class DashboardHomeComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    this._clock = setInterval(() => this.nowMinutes.set(this._minutesNow()), 60_000);
     try {
       const [today, all, customers] = await Promise.all([
         firstValueFrom(this.http.get<IAppointment[]>(`${environment.apiUrl}/appointments`, { params: { date: this.today } })),
@@ -327,5 +428,9 @@ export class DashboardHomeComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this._clock) clearInterval(this._clock);
   }
 }

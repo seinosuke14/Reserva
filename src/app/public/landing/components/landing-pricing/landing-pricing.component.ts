@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, inject, signal, computed, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, computed, ViewChild, ElementRef, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IPlan } from '../../../../core/services/subscription.service';
 import { LandingPlan, PlanMeta } from '../../landing.models';
@@ -41,6 +42,51 @@ export class LandingPricingComponent {
 
   proMaxUsers = signal(5);
   teamUsers   = signal(2);
+
+  /** Plan elegido en la lista. Si es null, se resuelve el destacado (o el primero). */
+  private readonly selectedId = signal<string | null>(null);
+
+  @ViewChild('resumen') private resumenRef?: ElementRef<HTMLElement>;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  selectPlan(p: LandingPlan): void {
+    if (p.comingSoon && !this.companyMode) return;
+    this.selectedId.set(p.id);
+    this.revealResumenOnMobile();
+  }
+
+  /**
+   * En móvil el resumen queda debajo del listado, así que al elegir un plan
+   * llevamos la vista hasta él para que se vean sus características.
+   */
+  private revealResumenOnMobile(): void {
+    if (!this.isBrowser) return;
+    if (!window.matchMedia('(max-width: 1024px)').matches) return;
+
+    requestAnimationFrame(() => {
+      const el = this.resumenRef?.nativeElement;
+      if (!el) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const top = el.getBoundingClientRect().top + window.scrollY - 80; // deja aire bajo el nav fijo
+      window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  }
+
+  isSelected(p: LandingPlan): boolean {
+    return p.id === this.selected?.id;
+  }
+
+  /**
+   * Plan mostrado en la tarjeta resumen: el elegido por el visitante o, si aún
+   * no eligió (primera carga), el destacado del listado.
+   */
+  get selected(): LandingPlan | undefined {
+    const list = this.mergedPlans.filter(p => !(p.comingSoon && !this.companyMode));
+    if (!list.length) return undefined;
+    return list.find(p => p.id === this.selectedId())
+        ?? list.find(p => p.primary)
+        ?? list[0];
+  }
 
   // Precios con IVA incluido (base + extras por persona). El IVA se aplica al total neto.
   proMaxPrice = computed(() => {

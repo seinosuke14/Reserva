@@ -50,7 +50,7 @@
 
         <button type="submit" [disabled]="isSubmitting()"
           class="w-full py-3 rounded-[12px] font-bold text-[14px] text-white flex-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-          style="background:#00C4A7;box-shadow:0 4px 16px rgba(0,196,167,.4);">
+          style="background:rgb(var(--lr-accent));box-shadow:0 4px 16px rgb(var(--lr-accent) / .4);">
           @if (isSubmitting()) { Ingresando... } @else { Ingresar }
         </button>
 

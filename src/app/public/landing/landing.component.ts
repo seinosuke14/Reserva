@@ -10,7 +10,6 @@ import { LandingTrustComponent }      from './components/landing-trust/landing-t
 import { LandingFeaturesComponent }   from './components/landing-features/landing-features.component';
 import { LandingDemoComponent }       from './components/landing-demo/landing-demo.component';
 import { LandingPricingComponent }    from './components/landing-pricing/landing-pricing.component';
-import { LandingDestacadosComponent } from './components/landing-destacados/landing-destacados.component';
 import { LandingFaqComponent }        from './components/landing-faq/landing-faq.component';
 import { LandingCtaComponent }        from './components/landing-cta/landing-cta.component';
 import { LandingFooterComponent }     from './components/landing-footer/landing-footer.component';
@@ -25,7 +24,6 @@ import { LandingFooterComponent }     from './components/landing-footer/landing-
     LandingFeaturesComponent,
     LandingDemoComponent,
     LandingPricingComponent,
-    LandingDestacadosComponent,
     LandingFaqComponent,
     LandingCtaComponent,
     LandingFooterComponent,

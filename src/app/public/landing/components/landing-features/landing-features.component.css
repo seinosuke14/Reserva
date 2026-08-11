@@ -1,17 +1,149 @@
-﻿app-landing .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-@media (max-width: 980px) { app-landing .features { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { app-landing .features { grid-template-columns: 1fr; } }
-app-landing .feat { padding: 28px; border: 1px solid var(--lp-border); border-radius: 16px; background: white; transition: border-color .2s, transform .2s, box-shadow .2s; position: relative; overflow: hidden; }
-app-landing .feat::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: var(--lp-accent, var(--lp-blue-500)); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
-app-landing .feat:hover { border-color: var(--lp-ink); transform: translateY(-2px); box-shadow: 0 18px 30px -20px rgba(13,27,42,.15); }
-app-landing .feat:hover::before { transform: scaleX(1); }
-app-landing .feat.acc-blue { --lp-accent: var(--lp-blue-500); }
-app-landing .feat.acc-gold { --lp-accent: var(--lp-gold); }
-app-landing .feat.acc-rose { --lp-accent: #c33b6c; }
-app-landing .feat.acc-ink  { --lp-accent: var(--lp-ink); }
-app-landing .feat-ic { width: 44px; height: 44px; border-radius: 11px; background: var(--lp-gold-soft); color: var(--lp-gold); display: grid; place-items: center; margin-bottom: 18px; border: 1px solid #f3e2c4; }
-app-landing .feat-ic.blue { background: #eff6ff; color: var(--lp-blue-600); border-color: #dbeafe; }
-app-landing .feat-ic.ink  { background: var(--lp-ink); color: var(--lp-gold); border-color: var(--lp-ink); }
-app-landing .feat-ic.rose { background: #fdf1f5; color: #c33b6c; border-color: #fad7e3; }
-app-landing .feat h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.01em; font-weight: 700; }
-app-landing .feat p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--lp-gray-medium); }
+/* ---- Beneficios (tabs interactivos) ---- */
+app-landing .features { background: var(--lp-canvas); }
+app-landing .feat-head { max-width: 600px; margin: 0 0 40px; }
+app-landing .feat-head .lead { font-size: 16px; }
+
+app-landing .feat-tabs { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+@media (max-width: 820px) { app-landing .feat-tabs { grid-template-columns: 1fr; gap: 16px; } }
+
+/* Lista de tabs */
+app-landing .feat-list { display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 820px) {
+  app-landing .feat-list { flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; scrollbar-width: none; }
+  app-landing .feat-list::-webkit-scrollbar { display: none; }
+}
+app-landing .feat-tab {
+  display: flex; align-items: center; gap: 12px; padding: 15px 18px;
+  border: 1px solid transparent; background: transparent; border-radius: 14px;
+  cursor: pointer; color: var(--lp-gray-medium); font-size: 14.5px; font-weight: 500;
+  text-align: left; white-space: nowrap; transition: background .15s, border-color .15s, color .15s;
+}
+app-landing .feat-tab:hover { color: var(--lp-ink); }
+app-landing .feat-tab.active {
+  border-color: var(--lp-border); background: #fff; color: var(--lp-ink);
+  box-shadow: 0 1px 3px rgba(11,11,12,.05);
+}
+app-landing .feat-dot { width: 7px; height: 7px; border-radius: 99px; flex: none; background: #cfcabf; transition: background .15s; }
+app-landing .feat-tab.active .feat-dot { background: var(--lp-accent); }
+
+/* Panel de detalle */
+app-landing .feat-panel {
+  background: #fff; border: 1px solid var(--lp-border); border-radius: 20px;
+  padding: 34px 36px; min-height: 330px; display: flex; flex-direction: column; gap: 14px;
+}
+/* Slot de media (imagen o video) */
+app-landing .feat-media { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: var(--lp-canvas); }
+/* contain, no cover: la imagen se ve completa dentro del contenedor, sin recortes. */
+app-landing .feat-media-el { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--lp-canvas); }
+
+/* ---- Carrusel de imágenes ----
+   El desplazamiento es scroll nativo con snap: en el teléfono se arrastra con el
+   dedo y en escritorio lo mueven las flechas. */
+app-landing .feat-track {
+  display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+app-landing .feat-track::-webkit-scrollbar { display: none; }
+app-landing .feat-slide { flex: 0 0 100%; scroll-snap-align: center; }
+
+app-landing .feat-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.92); border: 1px solid var(--lp-border);
+  box-shadow: 0 2px 8px rgba(11,11,12,.14); color: var(--lp-ink);
+  cursor: pointer; transition: opacity .15s ease, background .15s ease;
+}
+app-landing .feat-nav.prev { left: 10px; }
+app-landing .feat-nav.next { right: 10px; }
+app-landing .feat-nav:hover:not(:disabled) { background: #fff; }
+app-landing .feat-nav:disabled { opacity: .35; cursor: default; }
+app-landing .feat-nav .material-symbols-outlined { font-size: 20px; }
+
+/* Nombre propio: .feat-dot ya es la viñeta de los tabs y este CSS es global. */
+app-landing .feat-slide-dots {
+  position: absolute; left: 0; right: 0; bottom: 10px;
+  display: flex; justify-content: center; gap: 6px;
+}
+app-landing .feat-slide-dot {
+  width: 7px; height: 7px; padding: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(11,11,12,.22); border: 0; transition: background .15s ease, width .15s ease;
+}
+app-landing .feat-slide-dot.on { width: 18px; border-radius: 999px; background: var(--lp-accent); }
+
+@media (max-width: 520px) {
+  app-landing .feat-nav { width: 30px; height: 30px; }
+  app-landing .feat-nav.prev { left: 6px; }
+  app-landing .feat-nav.next { right: 6px; }
+}
+
+/* ---- Visor a pantalla completa ---- */
+app-landing .zoomable { cursor: zoom-in; }
+
+/* Difuminado en vez de fondo opaco: la página sigue reconociéndose detrás. */
+.feat-zoom {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(28,26,24,.34);
+  backdrop-filter: blur(14px) saturate(.9);
+  -webkit-backdrop-filter: blur(14px) saturate(.9);
+  display: flex; align-items: center; justify-content: center;
+  animation: featZoomIn .18s ease;
+}
+@keyframes featZoomIn { from { opacity: 0; } to { opacity: 1; } }
+
+.feat-zoom-track {
+  display: flex; width: 100%; height: 100%;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior: contain;
+}
+.feat-zoom-track::-webkit-scrollbar { display: none; }
+
+/* Padding mínimo: en el teléfono cada píxel cuenta para que la captura se lea. */
+.feat-zoom-img {
+  flex: 0 0 100%; scroll-snap-align: center;
+  width: 100%; height: 100%; object-fit: contain;
+  padding: 46px 4px 38px; cursor: zoom-out;
+}
+
+/* Las capturas son apaisadas: en un teléfono vertical rinden mucho más girando. */
+.feat-zoom-hint {
+  display: none;
+  position: absolute; left: 0; right: 0; bottom: 38px;
+  text-align: center; font-size: 12px; color: rgba(255,255,255,.6);
+}
+@media (max-width: 640px) and (orientation: portrait) {
+  .feat-zoom-hint { display: block; }
+}
+
+.feat-zoom-close {
+  position: absolute; top: 14px; right: 14px; z-index: 1;
+  width: 38px; height: 38px; border-radius: 50%; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.14); color: #fff; cursor: pointer;
+  transition: background .15s ease;
+}
+.feat-zoom-close:hover { background: rgba(255,255,255,.26); }
+
+/* Flechas y puntos sobre fondo oscuro */
+.feat-nav.zoom {
+  background: rgba(255,255,255,.14); border-color: transparent; color: #fff;
+  width: 40px; height: 40px;
+}
+.feat-nav.zoom:hover:not(:disabled) { background: rgba(255,255,255,.26); }
+.feat-slide-dots.zoom { bottom: 18px; }
+.feat-slide-dots.zoom .feat-slide-dot { background: rgba(255,255,255,.35); }
+.feat-slide-dots.zoom .feat-slide-dot.on { background: var(--lp-accent); }
+app-landing .feat-media-ph {
+  width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  background: var(--lp-canvas); border: 1px dashed #cbc6bc; border-radius: 14px; color: var(--lp-gray-medium);
+}
+app-landing .feat-media-ph .material-symbols-outlined { font-size: 30px; }
+app-landing .feat-media-ph-tx { font-size: 12.5px; font-weight: 500; }
+
+app-landing .feat-kicker { font-size: 10.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--lp-accent); }
+app-landing .feat-title { margin: 0; font-family: var(--lp-serif); font-weight: 400; font-size: 30px; line-height: 1.15; letter-spacing: -.01em; color: var(--lp-ink); }
+app-landing .feat-body { margin: 0; max-width: 460px; font-size: 15.5px; line-height: 1.65; color: var(--lp-gray-dark); text-wrap: pretty; }
+app-landing .feat-chips { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--lp-border-soft); display: flex; flex-wrap: wrap; gap: 8px; }
+app-landing .feat-chip { padding: 8px 14px; background: var(--lp-canvas); border: 1px solid var(--lp-border); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--lp-ink); }

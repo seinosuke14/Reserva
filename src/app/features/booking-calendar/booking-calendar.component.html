@@ -1,4 +1,4 @@
-﻿<div class="flex h-full overflow-hidden" style="background:#f8fafc;">
+﻿<div class="flex h-full overflow-hidden" style="background:#FAF9F7;">
 
   <!-- ── Left panel ─────────────────────────────────────── -->
   @if (isMobile() && isLeftPanelOpen()) {
@@ -44,14 +44,14 @@
               (dragleave)="onCalendarDayDragLeave()"
               (drop)="onCalendarDayDrop($event, day)"
               class="aspect-square flex-center rounded-full text-[12px] font-medium transition-all relative"
-              [style.background]="isSameDay(day, selectedDate()) ? '#00C4A7' : (dragOverDate() === _toDateStr(day) ? 'rgba(0,196,167,.25)' : '')"
-              [style.outline]="dragOverDate() === _toDateStr(day) ? '2px solid #00C4A7' : ''"
-              [style.color]="isSameDay(day, selectedDate()) ? '#fff' : isSameDay(day, today) ? '#00C4A7' : '#334155'"
+              [style.background]="isSameDay(day, selectedDate()) ? 'rgb(var(--lr-accent))' : (dragOverDate() === _toDateStr(day) ? 'rgb(var(--lr-accent) / .25)' : '')"
+              [style.outline]="dragOverDate() === _toDateStr(day) ? '2px solid rgb(var(--lr-accent))' : ''"
+              [style.color]="isSameDay(day, selectedDate()) ? '#fff' : isSameDay(day, today) ? 'rgb(var(--lr-accent))' : '#45454B'"
               [style.fontWeight]="isSameDay(day, today) ? '700' : '500'">
               {{ day.getDate() }}
               @if (hasAppointment(day) && !isSameDay(day, selectedDate())) {
                 <span class="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
-                      style="background:#00C4A7;"></span>
+                      style="background:rgb(var(--lr-accent));"></span>
               }
             </button>
           } @else {
@@ -65,7 +65,7 @@
     <div class="px-4 py-3 border-b border-primary-100">
       <button (click)="openNewAppt()"
         class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all hover:opacity-90"
-        style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
+        style="background:rgb(var(--lr-accent));box-shadow:0 3px 10px rgb(var(--lr-accent) / .35);">
         <svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -85,10 +85,10 @@
 
       @for (apt of dayAppointments(); track apt.id) {
         <div class="mb-2 px-2.5 py-2 rounded-[9px] bg-primary-50 border-l-[3px] cursor-pointer hover:bg-primary-100 transition-colors"
-             [style.border-left-color]="apt.cancellationStatus === 'requested' ? '#ef4444' : '#00C4A7'"
+             [style.border-left-color]="apt.cancellationStatus === 'requested' ? '#ef4444' : 'rgb(var(--lr-accent))'"
              (click)="selectedAppointment.set(apt)">
           <div class="flex items-center justify-between gap-1">
-            <div class="text-[11.5px] font-bold mb-0.5" style="color:#00C4A7;">{{ apt.time }}</div>
+            <div class="text-[11.5px] font-bold mb-0.5" style="color:rgb(var(--lr-accent));">{{ apt.time }}</div>
             @if (apt.cancellationStatus === 'requested') {
               <span class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
                     style="background:rgba(239,68,68,.12);color:#dc2626;">Solicitó cancelar</span>
@@ -117,33 +117,64 @@
           </button>
         }
         <div class="min-w-0">
-          <h2 class="text-[15px] font-bold text-primary tracking-tight truncate">{{ weekLabel() }}</h2>
+          <h2 class="text-[15px] font-bold text-primary tracking-tight truncate capitalize">
+            {{ viewMode() === 'day' ? dayViewLabel() : (viewMode() === 'list' ? 'Reservas' : weekLabel()) }}
+          </h2>
           <p class="text-[11.5px] text-primary-400 mt-0.5">
-            {{ weekStats().pagadas }} pagadas · {{ weekStats().pendientes }} pendientes esta semana
+            @if (viewMode() === 'day') {
+              {{ dayStats().total }} cita{{ dayStats().total !== 1 ? 's' : '' }} · {{ dayStats().pagadas }} pagadas · {{ dayStats().pendientes }} pendientes
+            } @else if (viewMode() === 'list') {
+              {{ listCounts().confirmar }} requieren tu atención · {{ listCounts().proximas }} próximas
+            } @else {
+              {{ weekStats().pagadas }} pagadas · {{ weekStats().pendientes }} pendientes esta semana
+            }
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <button (click)="prevWeek()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
-          <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button (click)="goToToday()"
-          class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors whitespace-nowrap"
-          style="border:1.5px solid #00C4A7;background:rgba(0,196,167,.08);color:#00C4A7;">
-          Esta semana
-        </button>
-        <button (click)="nextWeek()"
-          class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
-          <svg width="11" height="11" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+        <!-- Selector de vista -->
+        <div class="inline-flex gap-0.5 p-[3px] rounded-[9px] shrink-0" style="background:#F1EEE9;">
+          @for (v of viewOptions(); track v.id) {
+            <button (click)="setViewMode(v.id)"
+              class="px-2.5 py-1.5 rounded-[7px] text-[11.5px] font-semibold transition-all whitespace-nowrap"
+              [style.background]="viewMode() === v.id ? '#fff' : 'transparent'"
+              [style.color]="viewMode() === v.id ? '#0D1B2A' : '#8A857F'"
+              [style.box-shadow]="viewMode() === v.id ? '0 1px 2px rgba(13,27,42,.14)' : 'none'">
+              {{ v.label }}
+            </button>
+          }
+        </div>
+
+        @if (viewMode() !== 'list') {
+          <button (click)="viewMode() === 'day' ? prevDay() : prevWeek()"
+            class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
+            <svg width="11" height="11" fill="none" stroke="#4A5560" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button (click)="goToToday()"
+            class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-colors whitespace-nowrap"
+            style="border:1.5px solid rgb(var(--lr-accent));background:rgb(var(--lr-accent) / .08);color:rgb(var(--lr-accent));">
+            {{ viewMode() === 'day' ? 'Hoy' : 'Esta semana' }}
+          </button>
+          <button (click)="viewMode() === 'day' ? nextDay() : nextWeek()"
+            class="w-[30px] h-[30px] rounded-[8px] border border-primary-200 bg-white hover:bg-primary-50 flex-center transition-colors shrink-0">
+            <svg width="11" height="11" fill="none" stroke="#4A5560" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        }
+
+        @if (viewMode() === 'day' && !isMobile()) {
+          <button (click)="toggleDayRail()"
+            class="px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold border border-primary-200 bg-white hover:bg-primary-50 transition-colors whitespace-nowrap shrink-0"
+            style="color:#4A5560;">
+            {{ showDayRail() ? 'Ocultar resumen' : 'Ver resumen' }}
+          </button>
+        }
 
         @if (isProfessional()) {
           <button (click)="toggleBlockingMode()"
             class="md:ml-2 px-3 py-1.5 rounded-[8px] text-[11.5px] font-semibold transition-all whitespace-nowrap"
             [style.background]="isBlockingMode() ? '#c2410c' : 'rgba(100,116,139,.1)'"
-            [style.color]="isBlockingMode() ? '#fff' : '#64748b'">
+            [style.color]="isBlockingMode() ? '#fff' : '#787670'">
             {{ isBlockingMode() ? 'Salir' : 'Bloquear' }}
           </button>
         }
@@ -166,25 +197,27 @@
     }
 
     <!-- Week grid -->
-    @if (!isLoading()) {
-      <div class="flex-1 overflow-hidden flex flex-col">
+    @if (!isLoading() && viewMode() === 'week') {
+      <div class="flex-1 min-h-0 flex flex-col p-3 md:p-5" style="background:#FAF9F7;">
+        <div class="flex-1 min-h-0 flex flex-col rounded-[14px] border border-primary-100 bg-white overflow-hidden">
+        <div class="flex-1 overflow-y-auto">
 
         <!-- ── Cabecera días de la semana (sticky) ── -->
-        <div class="flex shrink-0 border-b border-primary-100 bg-white z-10" style="min-width:max-content;">
+        <div class="flex sticky top-0 z-10 border-b border-primary-100 bg-white">
           <div class="w-[68px] shrink-0"></div>
           @for (day of weekDays(); track $index) {
-            <div class="w-[130px] shrink-0 border-l border-primary-100 px-2 py-2 flex flex-col items-center gap-0.5 transition-colors"
-                 [style.background]="isSameDay(day, today) ? 'rgba(0,196,167,.04)' : ''">
+            <div class="flex-1 min-w-0 border-l border-primary-100 px-1.5 py-2 flex flex-col items-center gap-0.5 transition-colors"
+                 [style.background]="isSameDay(day, today) ? 'rgb(var(--lr-accent) / .04)' : ''">
               <div class="text-[9.5px] font-bold Uppercase tracking-wider text-primary-400 capitalize">
                 {{ day.toLocaleDateString('es-ES', { weekday: 'short' }) }}
               </div>
               <div class="text-[20px] font-black leading-none"
-                   [style.color]="isSameDay(day, today) ? '#00C4A7' : '#334155'">
+                   [style.color]="isSameDay(day, today) ? 'rgb(var(--lr-accent))' : '#45454B'">
                 {{ day.getDate() }}
               </div>
               @if (dayApptCount(day) > 0) {
                 <div class="text-[9px] font-bold px-1.5 py-px rounded-full"
-                     style="background:rgba(0,196,167,.1);color:#00C4A7;">
+                     style="background:rgb(var(--lr-accent) / .1);color:rgb(var(--lr-accent));">
                   {{ dayApptCount(day) }} cita{{ dayApptCount(day) !== 1 ? 's' : '' }}
                 </div>
               }
@@ -192,18 +225,17 @@
           }
         </div>
 
-        <!-- ── Grilla semanal scrolleable ── -->
-        <div class="flex-1 overflow-y-auto overflow-x-auto" style="background:#f8fafc;">
-          <div style="min-width:max-content;">
+        <!-- ── Grilla semanal ── -->
+          <div>
           @for (slot of allWeekSlots(); track slot) {
             <div class="flex border-b border-primary-50 last:border-b-0" style="min-height:58px;">
 
               <!-- Gutter hora -->
               <div class="w-[68px] shrink-0 flex flex-col items-end justify-start pt-2 pr-3"
-                   [style.color]="isCurrentTimeSlot(slot) ? '#00C4A7' : '#94a3b8'">
+                   [style.color]="isCurrentTimeSlot(slot) ? 'rgb(var(--lr-accent))' : '#8A857F'">
                 <div class="text-[11px] font-semibold tabular-nums">{{ slot }}</div>
                 @if (isCurrentTimeSlot(slot)) {
-                  <div class="w-[5px] h-[5px] rounded-full mt-1" style="background:#00C4A7;"></div>
+                  <div class="w-[5px] h-[5px] rounded-full mt-1" style="background:rgb(var(--lr-accent));"></div>
                 }
               </div>
 
@@ -216,9 +248,9 @@
                 @let working = isWorkingSlot(day, slot);
                 @let blocked = isBlockedForDay(day, slot);
 
-                <div class="w-[130px] shrink-0 border-l border-primary-100 p-1 transition-colors relative"
-                     [style.background]="isDragOver ? 'rgba(0,196,167,.1)' : (!working && !appt && !cont ? 'rgba(0,0,0,.015)' : '')"
-                     [style.outline]="isDragOver ? '2px solid #00C4A7' : ''"
+                <div class="flex-1 min-w-0 border-l border-primary-100 p-1 transition-colors relative"
+                     [style.background]="isDragOver ? 'rgb(var(--lr-accent) / .1)' : (!working && !appt && !cont ? 'rgba(0,0,0,.015)' : '')"
+                     [style.outline]="isDragOver ? '2px solid rgb(var(--lr-accent))' : ''"
                      (dragover)="onSlotDragOver($event, dateStr, slot)"
                      (dragleave)="onSlotDragLeave()"
                      (drop)="onSlotDrop($event, dateStr, slot)"
@@ -235,13 +267,13 @@
                       class="rounded-[9px] p-[5px_7px] flex flex-col gap-0.5 h-full transition-all hover:opacity-90 select-none"
                       [class.cursor-grab]="appt.paymentStatus === 'Pagado' || appt.paymentStatus === 'Pendiente'"
                       [class.cursor-pointer]="appt.paymentStatus !== 'Pagado' && appt.paymentStatus !== 'Pendiente'"
-                      style="border:1.5px solid rgba(0,196,167,.25);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);"
-                      [style.border-top]="appt.cancellationStatus === 'requested' ? '3px solid #ef4444' : '3px solid #00C4A7'">
-                      <span class="text-[9.5px] font-bold tabular-nums leading-none" style="color:#00C4A7;">
+                      style="background:#fff;box-shadow:0 4px 10px -8px rgba(13,27,42,.45);"
+                      [style.border]="'1.5px solid ' + statusBorderColor(appt)">
+                      <span class="text-[9.5px] font-bold tabular-nums leading-none" style="color:rgb(var(--lr-accent));">
                         {{ appt.time }}
                         <span class="ml-1 px-1 rounded text-[8.5px] font-semibold"
-                              [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : appt.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : 'rgba(245,158,11,.1)'"
-                              [style.color]="appt.paymentStatus === 'Pagado' ? '#16a34a' : appt.paymentStatus === 'Finalizada' ? '#2BB8A6' : '#d97706'">
+                              [style.background]="appt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : appt.paymentStatus === 'Finalizada' ? 'rgba(42,65,96,.1)' : 'rgba(245,158,11,.1)'"
+                              [style.color]="appt.paymentStatus === 'Pagado' ? '#16a34a' : appt.paymentStatus === 'Finalizada' ? '#2a4160' : '#d97706'">
                           {{ appt.paymentStatus }}
                         </span>
                       </span>
@@ -254,9 +286,10 @@
                     </div>
 
                   } @else if (cont) {
-                    <!-- Continuación de cita multi-bloque -->
+                    <!-- Continuación de cita multi-bloque: hereda el color del estado -->
                     <div class="rounded-[9px] h-full"
-                         style="background:rgba(0,196,167,.06);border-left:3px solid rgba(0,196,167,.3);"></div>
+                         [style.background]="statusSoftColor(cont)"
+                         [style.border-left]="'3px solid ' + statusSoftColor(cont, .45)"></div>
 
                   } @else if (blocked) {
                     <!-- Bloqueado -->
@@ -284,7 +317,7 @@
                       </div>
                     } @else {
                       <div class="h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                        <svg width="10" height="10" fill="none" stroke="#00C4A7" stroke-width="2" viewBox="0 0 24 24">
+                        <svg width="10" height="10" fill="none" style="stroke:rgb(var(--lr-accent))" stroke-width="2" viewBox="0 0 24 24">
                           <path d="M12 5v14M5 12h14"/>
                         </svg>
                       </div>
@@ -294,7 +327,331 @@
               }
             </div>
           }
+
+          <!-- Cierre de jornada: referencia visual, no es un bloque agendable -->
+          @if (weekClosingTime(); as cierre) {
+            <div class="flex items-start" style="min-height:42px;">
+              <div class="w-[68px] shrink-0 pt-2 pr-3 text-right">
+                <div class="text-[11px] font-semibold tabular-nums" style="color:#8A857F;">{{ cierre }}</div>
+              </div>
+              <div class="flex-1 min-w-0 border-l border-primary-100 pt-2 px-2">
+                <span class="text-[9.5px] font-bold uppercase tracking-[.12em]" style="color:#A39D96;">
+                  Cierre de jornada
+                </span>
+              </div>
+            </div>
+          }
           </div>
+        </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Vista Día ─────────────────────────────────────────────── -->
+    @if (!isLoading() && viewMode() === 'day') {
+      <div class="flex-1 min-h-0 flex overflow-hidden">
+
+        <!-- Columna principal: agenda del día -->
+        <div class="flex-1 min-w-0 overflow-y-auto" style="background:#FAF9F7;">
+        <div class="max-w-[820px] mx-auto px-4 md:px-6 py-5">
+
+          @if (!isWorkingDay()) {
+            <div class="rounded-[14px] border border-primary-100 bg-white px-6 py-10 text-center">
+              <div class="text-[13px] font-semibold text-primary">No atiendes este día</div>
+              <div class="text-[12px] text-primary-400 mt-1">Elige otro día en el calendario o ajusta tus horarios.</div>
+            </div>
+          } @else {
+            <div class="rounded-[14px] border border-primary-100 bg-white overflow-hidden">
+              @for (s of timeSlots(); track s.time) {
+                @let dAppt   = getApptAtDay(selectedDate(), s.time);
+                @let dCont   = getContinuationForDay(selectedDate(), s.time);
+                @let dBlock  = isBlockedForDay(selectedDate(), s.time);
+                @let dWork   = isWorkingSlot(selectedDate(), s.time);
+
+                <div class="flex border-b border-primary-50 last:border-b-0" style="min-height:62px;">
+
+                  <!-- Hora -->
+                  <div class="w-[66px] shrink-0 pt-3 pr-3 text-right"
+                       [style.color]="isCurrentTimeSlot(s.time) ? 'rgb(var(--lr-accent))' : '#8A857F'">
+                    <div class="text-[11.5px] font-semibold tabular-nums">{{ s.time }}</div>
+                    @if (isCurrentTimeSlot(s.time)) {
+                      <div class="ml-auto mt-1 w-[5px] h-[5px] rounded-full" style="background:rgb(var(--lr-accent));"></div>
+                    }
+                  </div>
+
+                  <!-- Contenido del bloque -->
+                  <div class="flex-1 min-w-0 border-l border-primary-100 p-1.5"
+                       (click)="!dAppt && !dCont && dWork && !dBlock && !isBlockingMode() && openNewApptForDay(selectedDate(), s.time)">
+
+                    @if (dAppt) {
+                      <div (click)="selectedAppointment.set(dAppt)"
+                        class="rounded-[10px] px-3 py-2 flex flex-col gap-1 cursor-pointer transition-all hover:shadow-md"
+                        style="background:#fff;box-shadow:0 4px 10px -8px rgba(13,27,42,.45);"
+                        [style.border]="'1.5px solid ' + statusBorderColor(dAppt)">
+
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="text-[11px] font-bold tabular-nums" style="color:#4A5560;">
+                            {{ dAppt.time }} – {{ getAppointmentEndTime(dAppt) }}
+                          </span>
+                          <span class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                                [style.background]="dAppt.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : (dAppt.paymentStatus === 'Finalizada' ? 'rgba(42,65,96,.1)' : 'rgba(245,158,11,.12)')"
+                                [style.color]="dAppt.paymentStatus === 'Pagado' ? '#16a34a' : (dAppt.paymentStatus === 'Finalizada' ? '#2a4160' : '#d97706')">
+                            {{ dAppt.paymentStatus }}
+                          </span>
+                        </div>
+
+                        <span class="text-[13.5px] font-bold text-primary truncate">{{ dAppt.customer.name }}</span>
+                        <span class="text-[11.5px] text-primary-400 truncate">
+                          {{ dAppt.service?.name ?? 'Sin servicio' }}
+                          @if (dAppt.service?.duration) { · {{ dAppt.service?.duration }} min }
+                        </span>
+
+                        @if (dAppt.cancellationStatus === 'requested') {
+                          <span class="self-start text-[9.5px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                                style="background:rgba(239,68,68,.12);color:#dc2626;">⚠ Solicitó cancelar</span>
+                        }
+                      </div>
+
+                    } @else if (dCont) {
+                      <div class="rounded-[10px] h-full min-h-[46px]"
+                           [style.background]="statusSoftColor(dCont)"
+                           [style.border-left]="'3px solid ' + statusSoftColor(dCont, .45)"></div>
+
+                    } @else if (dBlock) {
+                      <div class="h-full min-h-[46px] flex items-center px-3 rounded-[10px]"
+                           style="background:repeating-linear-gradient(135deg,#F3EEE8 0 6px,#E9E3DB 6px 12px);border:1px solid #DCD5CC;">
+                        <span class="text-[11px] font-semibold" style="color:#6B6560;">Bloqueado</span>
+                      </div>
+
+                    } @else if (dWork) {
+                      <div class="h-full min-h-[46px] flex items-center px-3 rounded-[10px] cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+                           style="border:1px dashed #C9C1B8;">
+                        <span class="text-[11px] font-semibold" style="color:#8A857F;">+ Agendar {{ s.time }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Cierre de jornada: referencia visual, no es un bloque agendable -->
+              @if (dayClosingTime(); as cierre) {
+                <div class="flex items-start" style="min-height:44px;">
+                  <div class="w-[66px] shrink-0 pt-3 pr-3 text-right">
+                    <div class="text-[11.5px] font-semibold tabular-nums" style="color:#8A857F;">{{ cierre }}</div>
+                  </div>
+                  <div class="flex-1 min-w-0 border-l border-primary-100 pt-3 px-3">
+                    <span class="text-[9.5px] font-bold uppercase tracking-[.12em]" style="color:#A39D96;">
+                      Cierre de jornada
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        </div>
+
+        <!-- Panel lateral: caja y ocupación del día -->
+        @if (showDayRail() && !isMobile()) {
+          <aside class="w-[300px] shrink-0 border-l border-primary-100 overflow-y-auto" style="background:#FAF9F7;">
+
+            <!-- Caja del día -->
+            <div class="px-5 py-4 flex flex-col gap-3" style="background:#0D1B2A;">
+              <span class="text-[10.5px] font-bold uppercase tracking-[.12em]" style="color:#F09270;">Caja del día</span>
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <b class="text-[30px] font-semibold tracking-tight" style="color:#fff;">
+                  {{ formatCLP(dayCash().total) }}
+                </b>
+                <span class="text-[11.5px]" style="color:#A9B6C4;">
+                  {{ dayCash().reservas }} reserva{{ dayCash().reservas !== 1 ? 's' : '' }}
+                </span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-[11.5px]">
+                  <span style="color:#A9B6C4;">Pagado online</span>
+                  <span class="font-semibold" style="color:#fff;">{{ formatCLP(dayCash().online) }}</span>
+                </div>
+                <div class="flex items-center justify-between text-[11.5px]">
+                  <span style="color:#A9B6C4;">Transferencias</span>
+                  <span class="font-semibold" style="color:#fff;">{{ formatCLP(dayCash().transfer) }}</span>
+                </div>
+                <div class="flex items-center justify-between text-[11.5px]">
+                  <span style="color:#F09270;">Por cobrar</span>
+                  <span class="font-bold" style="color:#F09270;">{{ formatCLP(dayCash().porCobrar) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Requieren atención -->
+            <div class="px-5 py-4 border-b border-primary-100 bg-white flex flex-col gap-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10.5px] font-bold uppercase tracking-[.12em]" style="color:#8A857F;">Requieren atención</span>
+                @if (dayNeedsAction().length > 0) {
+                  <span class="text-[10.5px] font-bold text-white px-2 py-px rounded-full" style="background:rgb(var(--lr-accent));">
+                    {{ dayNeedsAction().length }}
+                  </span>
+                }
+              </div>
+
+              @if (dayNeedsAction().length === 0) {
+                <span class="text-[12px]" style="color:#8A857F;">Todo en orden por hoy.</span>
+              }
+
+              @for (a of dayNeedsAction(); track a.id) {
+                <div (click)="selectedAppointment.set(a)"
+                  class="rounded-[10px] px-3 py-2.5 cursor-pointer transition-all hover:shadow-sm flex flex-col gap-0.5"
+                  [style.border]="a.cancellationStatus === 'requested' ? '1px solid #F3C4AF' : '1px solid #E9E7E2'"
+                  [style.background]="a.cancellationStatus === 'requested' ? '#FDF1EC' : '#fff'">
+                  <span class="text-[12.5px] font-bold text-primary truncate">{{ a.customer.name }} · {{ a.time }}</span>
+                  <span class="text-[11px] truncate"
+                        [style.color]="a.cancellationStatus === 'requested' ? '#8A3010' : '#8A857F'">
+                    {{ a.cancellationStatus === 'requested' ? 'Solicitó cancelar' : 'Pago pendiente' }}
+                    @if (a.service?.name) { · {{ a.service?.name }} }
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- Ocupación del día -->
+            <div class="px-5 py-4 flex flex-col gap-2.5">
+              <span class="text-[10.5px] font-bold uppercase tracking-[.12em]" style="color:#8A857F;">Ocupación del día</span>
+              <div class="grid items-center gap-2.5" style="grid-template-columns:1fr 38px;">
+                <div class="h-[6px] rounded-full overflow-hidden" style="background:#E9E7E2;">
+                  <div class="h-full rounded-full" style="background:rgb(var(--lr-accent));"
+                       [style.width]="dayOccupancy().pct + '%'"></div>
+                </div>
+                <span class="text-[11px] text-right" style="color:#8A857F;">{{ dayOccupancy().pct }}%</span>
+              </div>
+              <span class="text-[11px]" style="color:#8A857F;">
+                {{ dayOccupancy().ocupados }} de {{ dayOccupancy().total }} bloques con cita
+              </span>
+            </div>
+          </aside>
+        }
+      </div>
+    }
+
+    <!-- ── Vista Lista ───────────────────────────────────────────── -->
+    @if (!isLoading() && viewMode() === 'list') {
+      <div class="flex-1 overflow-y-auto" style="background:#FAF9F7;">
+        <div class="max-w-[980px] mx-auto px-4 md:px-6 py-5">
+
+          <!-- Pestañas -->
+          <div class="flex items-center gap-5 border-b border-primary-100 mb-4 overflow-x-auto">
+            @for (t of listTabs; track t.id) {
+              <button (click)="setListTab(t.id)"
+                class="pb-3 pt-1 text-[13.5px] font-semibold whitespace-nowrap transition-colors flex items-center gap-2"
+                [style.color]="listTab() === t.id ? '#0D1B2A' : '#8A857F'"
+                [style.box-shadow]="listTab() === t.id ? 'inset 0 -2px 0 rgb(var(--lr-accent))' : 'none'">
+                {{ t.label }}
+                @if (t.id === 'confirmar' && listCounts().confirmar > 0) {
+                  <span class="text-[10.5px] font-bold text-white px-1.5 py-px rounded-full" style="background:rgb(var(--lr-accent));">
+                    {{ listCounts().confirmar }}
+                  </span>
+                } @else {
+                  <span class="text-[11.5px]" style="color:#A39D96;">{{ listCounts()[t.id] }}</span>
+                }
+              </button>
+            }
+          </div>
+
+          @if (listAppointments().length === 0) {
+            <div class="rounded-[14px] border border-primary-100 bg-white px-6 py-12 text-center">
+              <div class="text-[13px] font-semibold text-primary">Nada por aquí</div>
+              <div class="text-[12px] text-primary-400 mt-1">No hay reservas en esta pestaña.</div>
+            </div>
+          } @else {
+            <div class="rounded-[14px] border border-primary-100 bg-white overflow-hidden">
+              @for (a of listAppointments(); track a.id) {
+                <div (click)="selectedAppointment.set(a)"
+                  class="grid items-center gap-3 md:gap-5 px-4 md:px-5 py-3.5 border-b border-primary-50 last:border-b-0 cursor-pointer transition-colors hover:bg-primary-50"
+                  style="grid-template-columns:96px 1fr auto;"
+                  [style.border-left]="a.cancellationStatus === 'requested' ? '3px solid #ef4444' : (a.paymentStatus === 'Cancelado' ? '3px solid #E9E7E2' : '3px solid transparent')">
+
+                  <!-- Fecha y hora -->
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[10.5px] font-bold uppercase tracking-wide truncate"
+                          [style.color]="listDateLabel(a) === 'Hoy' ? 'rgb(var(--lr-accent))' : '#8A857F'">
+                      {{ listDateLabel(a) }}
+                    </span>
+                    <span class="text-[15px] font-bold text-primary tabular-nums">{{ a.time }}</span>
+                  </div>
+
+                  <!-- Cliente y servicio -->
+                  <div class="flex flex-col min-w-0 gap-0.5">
+                    <span class="text-[13.5px] font-bold text-primary truncate">
+                      {{ a.customer.name }} — {{ a.service?.name ?? 'Sin servicio' }}
+                    </span>
+                    <span class="text-[11.5px] truncate" style="color:#8A857F;">
+                      @if (a.service?.duration) { {{ a.service?.duration }} min · }
+                      {{ a.paymentStatus }}
+                      @if (a.cancellationStatus === 'requested') { · solicitó cancelar }
+                    </span>
+                  </div>
+
+                  <!-- Estado y acciones -->
+                  <div class="flex items-center justify-end gap-2 flex-wrap">
+
+                    <span class="text-[9.5px] font-bold uppercase tracking-wide px-2 py-1 rounded whitespace-nowrap"
+                          [style.background]="a.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : (a.paymentStatus === 'Finalizada' ? 'rgba(42,65,96,.1)' : (a.paymentStatus === 'Cancelado' ? 'rgba(239,68,68,.1)' : 'rgba(245,158,11,.12)'))"
+                          [style.color]="a.paymentStatus === 'Pagado' ? '#16a34a' : (a.paymentStatus === 'Finalizada' ? '#2a4160' : (a.paymentStatus === 'Cancelado' ? '#dc2626' : '#d97706'))">
+                      {{ a.paymentStatus }}
+                    </span>
+
+                    <!-- Solicitud de cancelación -->
+                    @if (a.cancellationStatus === 'requested') {
+                      <button (click)="$event.stopPropagation(); acceptCancellationRequest(a)"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-bold text-white whitespace-nowrap transition-all hover:opacity-90"
+                        style="background:#ef4444;">
+                        Aceptar cancelación
+                      </button>
+                      <button (click)="$event.stopPropagation(); rejectCancellationRequest(a)"
+                        [disabled]="rejectingId() === a.id"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-semibold whitespace-nowrap border border-primary-200 text-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-40">
+                        {{ rejectingId() === a.id ? 'Rechazando...' : 'Rechazar' }}
+                      </button>
+                    }
+
+                    <!-- Pago pendiente -->
+                    @if (a.paymentStatus === 'Pendiente') {
+                      <button (click)="$event.stopPropagation(); updateAppointmentStatus(a.id, 'Pagado')"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-semibold text-white whitespace-nowrap transition-all hover:opacity-90"
+                        style="background:#10b981;">
+                        ✓ Aprobar pago
+                      </button>
+                      <button (click)="$event.stopPropagation(); updateAppointmentStatus(a.id, 'Cancelado')"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-semibold whitespace-nowrap border transition-all hover:opacity-80"
+                        style="border-color:#ef4444;color:#ef4444;background:transparent;">
+                        ✕ Rechazar
+                      </button>
+                    }
+
+                    <!-- Cita pagada y ya ocurrida -->
+                    @if (a.paymentStatus === 'Pagado' && isAppointmentPast(a)) {
+                      <button (click)="$event.stopPropagation(); markAsFinalized(a.id)"
+                        [disabled]="finalizingId() === a.id"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-semibold whitespace-nowrap transition-all disabled:opacity-40"
+                        style="background:rgba(42,65,96,.12);color:#2a4160;border:1.5px solid rgba(42,65,96,.35);">
+                        {{ finalizingId() === a.id ? 'Procesando...' : '✓ Marcar finalizada' }}
+                      </button>
+                    }
+
+                    <!-- Cotización: agendar continuación -->
+                    @if (isEvaluationAppointment(a) && a.paymentStatus !== 'Cancelado') {
+                      <button (click)="$event.stopPropagation(); openContinuation(a)"
+                        class="px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-bold text-white whitespace-nowrap transition-all hover:opacity-90 flex items-center gap-1"
+                        style="background:#6366f1;">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Agendar continuación
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     }
@@ -335,7 +692,7 @@
             <select [value]="na_serviceId()"
                     (change)="onServiceChange($any($event.target).value)"
                     class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
-                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                    style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
               @for (s of services(); track s.id) {
                 <option [value]="s.id">{{ s.name }} · {{ s.duration }} min</option>
               }
@@ -360,7 +717,7 @@
             <input type="date" [value]="na_date()" [min]="todayStr"
                    (input)="onModalDateChange($any($event.target).value)"
                    class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none"
-                   style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                   style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
           </div>
           <div>
             <label class="form-label">Hora *</label>
@@ -372,7 +729,7 @@
               <select [value]="na_time()"
                       (change)="na_time.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 bg-white text-[13px] text-primary focus:outline-none"
-                      style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                      style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
                 @for (slot of na_availableSlots(); track slot) {
                   <option [value]="slot" [selected]="slot === na_time()">{{ slot }}</option>
                 }
@@ -395,7 +752,7 @@
                  autocomplete="off"
                  placeholder="Busca o escribe el nombre"
                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
-                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                 style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
           <!-- Sugerencias de clientes existentes -->
           @if (na_showSuggestions() && na_suggestions().length > 0) {
             <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-200 rounded-[10px] shadow-lg z-10 overflow-hidden">
@@ -405,7 +762,7 @@
                         (click)="selectSuggestedCustomer(c)"
                         class="w-full px-3 py-2 text-left hover:bg-primary-50 transition-colors flex items-center gap-2.5">
                   <div class="w-7 h-7 rounded-full flex-center text-white text-[10px] font-bold shrink-0"
-                       style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);">
+                       style="background:linear-gradient(135deg,rgb(var(--lr-accent) / .93),rgb(var(--lr-accent) / .47));">
                     {{ c.name.charAt(0).toUpperCase() }}
                   </div>
                   <div>
@@ -427,7 +784,7 @@
                  (input)="na_email.set($any($event.target).value)"
                  placeholder="cliente@email.com"
                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
-                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                 style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
           <p class="text-[10.5px] text-primary-400 mt-1">Si el cliente ya existe con este email, se vincula automáticamente</p>
         </div>
 
@@ -438,7 +795,7 @@
                  (input)="na_phone.set($any($event.target).value)"
                  placeholder="+56 9 1234 5678"
                  class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300"
-                 style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
+                 style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
         </div>
 
         <!-- Notas -->
@@ -449,7 +806,7 @@
                     rows="2"
                     placeholder="Observaciones opcionales..."
                     class="w-full px-3 py-2.5 rounded-[10px] border border-primary-200 text-[13px] text-primary focus:outline-none placeholder:text-primary-300 resize-none"
-                    style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);"></textarea>
+                    style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);"></textarea>
         </div>
 
         <!-- Estado de pago -->
@@ -459,15 +816,15 @@
             <button type="button" (click)="na_status.set('Pendiente')"
               class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
               [style.background]="na_status() === 'Pendiente' ? 'rgba(245,158,11,.12)' : 'transparent'"
-              [style.color]="na_status() === 'Pendiente' ? '#d97706' : '#94a3b8'"
-              [style.border-color]="na_status() === 'Pendiente' ? '#f59e0b' : '#e2e8f0'">
+              [style.color]="na_status() === 'Pendiente' ? '#d97706' : '#8A857F'"
+              [style.border-color]="na_status() === 'Pendiente' ? '#f59e0b' : '#E9E7E2'">
               Pendiente
             </button>
             <button type="button" (click)="na_status.set('Pagado')"
               class="flex-1 py-2 rounded-[9px] text-[12.5px] font-semibold transition-all border"
               [style.background]="na_status() === 'Pagado' ? 'rgba(34,197,94,.12)' : 'transparent'"
-              [style.color]="na_status() === 'Pagado' ? '#16a34a' : '#94a3b8'"
-              [style.border-color]="na_status() === 'Pagado' ? '#22c55e' : '#e2e8f0'">
+              [style.color]="na_status() === 'Pagado' ? '#16a34a' : '#8A857F'"
+              [style.border-color]="na_status() === 'Pagado' ? '#22c55e' : '#E9E7E2'">
               Pagado
             </button>
           </div>
@@ -490,7 +847,7 @@
         </button>
         <button (click)="submitNewAppt()" [disabled]="na_submitting()"
           class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-          style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
+          style="background:rgb(var(--lr-accent));box-shadow:0 3px 10px rgb(var(--lr-accent) / .35);">
           {{ na_submitting() ? 'Guardando...' : 'Crear Cita' }}
         </button>
       </div>
@@ -518,106 +875,312 @@
     <div @slidePanel class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
          style="box-shadow:-20px 0 60px rgba(0,0,0,.18);">
 
-      <div class="px-6 py-5 border-b border-primary-100 flex-between">
-        <h3 class="text-[16px] font-bold text-primary tracking-tight">Detalle de la cita</h3>
-        <button (click)="closeDetailPanel()"
-          class="w-8 h-8 rounded-[9px] border border-primary-200 bg-primary-50 hover:bg-primary-100 flex-center text-primary-500 transition-colors">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
+      <!-- ── Cabecera oscura: quién es el cliente y cómo contactarlo ── -->
+      <div class="shrink-0 px-[18px] py-[17px] flex flex-col gap-3" style="background:rgb(var(--lr-ink));">
 
-      <div class="flex-1 overflow-y-auto p-6 space-y-5">
-        <!-- Customer -->
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-full flex-center text-white text-xl font-bold shrink-0"
-               style="background:linear-gradient(135deg,#00C4A7ee,#00C4A777);
-                      box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 14px rgba(0,196,167,.4);">
+        <div class="flex items-start gap-3">
+          <div class="w-[46px] h-[46px] rounded-full flex-center text-white text-[18px] font-bold shrink-0"
+               style="background:rgb(var(--lr-accent));">
             {{ selectedAppointment()!.customer.name.charAt(0).toUpperCase() }}
           </div>
-          <div>
-            <div class="text-[16px] font-bold text-primary">{{ selectedAppointment()!.customer.name }}</div>
-            <div class="text-[12.5px] text-primary-400 mt-0.5">{{ selectedAppointment()!.service?.name ?? 'Sin servicio' }}</div>
+
+          <div class="flex-1 min-w-0 flex flex-col gap-[3px]">
+            <span class="text-[17px] font-bold text-white truncate">{{ selectedAppointment()!.customer.name }}</span>
+
+            @if (customerEmail(); as email) {
+              <a [href]="'mailto:' + email"
+                 class="text-[12px] text-white/55 hover:text-white transition-colors truncate">{{ email }}</a>
+            } @else {
+              <span class="text-[12px] text-white/35">Sin correo registrado</span>
+            }
+
+            <span class="text-[12px] text-white/55">
+              @if (customerPhone(); as phone) {
+                <a [href]="'tel:' + phone" class="hover:text-white transition-colors">{{ phone }}</a>
+              } @else {
+                <span class="text-white/35">Sin teléfono registrado</span>
+              }
+              @if (customerSince(); as since) { · cliente desde {{ since }} }
+            </span>
           </div>
+
+          <button (click)="closeDetailPanel()" title="Cerrar"
+            class="w-[30px] h-[30px] rounded-[8px] flex-center shrink-0 transition-colors hover:brightness-125"
+            style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
 
-        <!-- Info cards -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-primary-50 rounded-[12px] p-3.5">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Hora</div>
-            <div class="text-[15px] font-bold text-primary">{{ selectedAppointment()!.time }}</div>
-          </div>
-          <div class="bg-primary-50 rounded-[12px] p-3.5">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-1">Estado</div>
-            <span class="text-[12.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                  [style.background]="selectedAppointment()!.paymentStatus === 'Pagado' ? 'rgba(34,197,94,.1)' : selectedAppointment()!.paymentStatus === 'Finalizada' ? 'rgba(43,184,166,.1)' : selectedAppointment()!.paymentStatus === 'Pendiente' ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)'"
-                  [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' ? '#16a34a' : selectedAppointment()!.paymentStatus === 'Finalizada' ? '#2BB8A6' : selectedAppointment()!.paymentStatus === 'Pendiente' ? '#d97706' : '#dc2626'">
-              {{ selectedAppointment()!.paymentStatus }}
-            </span>
-            @if (refundDisplay(selectedAppointment()); as r) {
-              <div class="mt-2 text-[11.5px] font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                   [style.background]="r.bg" [style.color]="r.color">
-                {{ r.label }}
+        <!-- WhatsApp -->
+        @if (whatsappLink(); as wa) {
+          <a [href]="wa" target="_blank" rel="noopener"
+             class="h-[38px] rounded-[10px] text-[13px] font-bold text-white flex-center gap-2 transition-all hover:opacity-90"
+             style="background:#1FA855;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" class="shrink-0">
+              <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35z"/>
+              <path d="M20.52 3.45A11.87 11.87 0 0 0 12.05 0C5.5 0 .17 5.33.17 11.88c0 2.09.55 4.14 1.59 5.94L.07 24l6.33-1.66a11.85 11.85 0 0 0 5.65 1.44h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.42-8.45zm-8.47 18.28h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.75.98 1-3.66-.24-.38a9.83 9.83 0 0 1-1.51-5.25c0-5.44 4.43-9.87 9.88-9.87 2.64 0 5.12 1.03 6.98 2.9a9.8 9.8 0 0 1 2.89 6.98c0 5.45-4.43 9.89-9.85 9.89z"/>
+            </svg>
+            Escribir por WhatsApp
+          </a>
+        }
+
+        <!-- Historial del cliente contigo -->
+        @if (customerStats(); as cs) {
+          <div class="flex gap-[18px] pt-3 border-t" style="border-color:rgba(255,255,255,.12);">
+            <div class="flex flex-col gap-px">
+              <span class="text-[15px] font-bold text-white">{{ cs.visita }}ª</span>
+              <span class="text-[10px] text-white/45">visita</span>
+            </div>
+            <div class="flex flex-col gap-px">
+              <span class="text-[15px] font-bold text-white">{{ formatCLP(cs.gastado) }}</span>
+              <span class="text-[10px] text-white/45">gasto total</span>
+            </div>
+            <div class="flex flex-col gap-px">
+              <span class="text-[15px] font-bold" [class.text-white]="cs.canceladas === 0" [class.text-red-300]="cs.canceladas > 0">{{ cs.canceladas }}</span>
+              <span class="text-[10px] text-white/45">canceladas</span>
+            </div>
+            @if (customerSinceShort(); as since) {
+              <div class="flex flex-col gap-px ml-auto text-right">
+                <span class="text-[15px] font-bold whitespace-nowrap" style="color:rgb(var(--lr-accent));">{{ since }}</span>
+                <span class="text-[10px] text-white/45">cliente desde</span>
               </div>
             }
-            @if (canRetryRefund(selectedAppointment())) {
-              <button (click)="retryRefund(selectedAppointment()!)"
-                [disabled]="retryingRefundId() === selectedAppointment()!.id"
-                class="mt-2 w-full py-2 rounded-[9px] text-[12px] font-semibold transition-all disabled:opacity-50"
-                style="background:rgba(0,196,167,.1);color:#00A88F;border:1.5px solid rgba(0,196,167,.35);">
-                {{ retryingRefundId() === selectedAppointment()!.id ? 'Reintentando…' : '↻ Reintentar reembolso' }}
-              </button>
-              @if (retryRefundMsg()) {
-                <p class="mt-1.5 text-[11.5px] text-primary-500">{{ retryRefundMsg() }}</p>
-              }
-            }
-            @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
-            <div class="flex gap-2 mt-3">
-              <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
-                class="flex-1 py-1.5 rounded-[9px] text-[12px] font-semibold text-white transition-all"
-                style="background:#10b981;">
-                ✓ Aprobar pago
-              </button>
-              <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Cancelado')"
-                class="flex-1 py-1.5 rounded-[9px] text-[12px] font-semibold transition-all border"
-                style="border-color:#ef4444;color:#ef4444;background:transparent;">
-                ✕ Rechazar
-              </button>
-            </div>
-            }
-            @if (selectedAppointment()!.paymentStatus === 'Pagado' && isAppointmentPast(selectedAppointment()!)) {
-            <div class="mt-3">
-              <button (click)="markAsFinalized(selectedAppointment()!.id)"
-                class="w-full py-1.5 rounded-[9px] text-[12px] font-semibold transition-all"
-                style="background:rgba(43,184,166,.12);color:#2BB8A6;border:1.5px solid rgba(43,184,166,.35);"
-                [disabled]="finalizingId() === selectedAppointment()!.id">
-                {{ finalizingId() === selectedAppointment()!.id ? 'Procesando...' : '✓ Marcar como finalizada' }}
-              </button>
-            </div>
-            }
+          </div>
+        }
+      </div>
 
-            @if (isEvaluationAppointment(selectedAppointment()) && selectedAppointment()!.paymentStatus !== 'Cancelado') {
-            <div class="mt-3">
-              <button (click)="openContinuation(selectedAppointment()!)"
-                class="w-full py-2 rounded-[9px] text-[12.5px] font-bold text-white transition-all flex-center gap-1.5"
-                style="background:#6366f1;box-shadow:0 3px 12px rgba(99,102,241,.35);">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Agendar continuación
-              </button>
-              <p class="mt-1.5 text-[11px] text-primary-400 text-center">
-                Define el servicio real, la fecha y el precio acordado tras la evaluación.
-              </p>
+      <div class="flex-1 overflow-y-auto">
+
+        <!-- ── Fecha y horario ── -->
+        <div class="px-[18px] py-[15px] border-b" style="background:rgb(var(--lr-canvas));border-color:rgb(var(--lr-border));">
+          <div class="flex items-center justify-between gap-3.5">
+            <div class="min-w-0 flex flex-col gap-0.5">
+              <span class="text-[10px] font-bold uppercase tracking-[.1em] text-primary-400">{{ aptDateLabel() }}</span>
+              <span class="font-heading text-[25px] leading-none tracking-[-.03em] text-primary">{{ aptTimeRange() }}</span>
+              <span class="text-[12px] text-primary-400 truncate">
+                {{ selectedAppointment()!.service?.name ?? 'Sin servicio' }}
+                @if (startsInLabel(); as pronto) {
+                  · <b style="color:rgb(var(--lr-accent-strong));">{{ pronto }}</b>
+                }
+              </span>
             </div>
+
+            @if (selectedAppointment()!.paymentStatus === 'Pagado' || selectedAppointment()!.paymentStatus === 'Pendiente') {
+              <button (click)="isRescheduling() ? isRescheduling.set(false) : openRescheduleEdit()"
+                class="shrink-0 h-8 px-3 rounded-[9px] border bg-white text-[12px] font-semibold text-primary-500 transition-colors hover:bg-primary-50"
+                style="border-color:rgb(var(--lr-border));">
+                {{ isRescheduling() ? 'Cancelar' : 'Cambiar horario' }}
+              </button>
             }
           </div>
+
+          <!-- Reagendar -->
+          @if (isRescheduling()) {
+            <div class="space-y-3 mt-4">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-primary-400">Nuevo horario</p>
+
+              <div>
+                <label class="form-label">Fecha</label>
+                <input type="date" [value]="rs_date()" [min]="todayStr"
+                       (input)="rs_date.set($any($event.target).value); rs_time.set('')"
+                       class="w-full px-3 py-2.5 rounded-[10px] border bg-white text-[13px] text-primary focus:outline-none"
+                       style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
+              </div>
+
+              <div>
+                <label class="form-label">Hora</label>
+                @if (rs_availableSlots().length === 0) {
+                  <p class="text-[12px] text-primary-400 italic pt-1">Sin horarios disponibles para esa fecha</p>
+                } @else {
+                  <select [value]="rs_time()"
+                          (change)="rs_time.set($any($event.target).value)"
+                          class="w-full px-3 py-2.5 rounded-[10px] border bg-white text-[13px] text-primary focus:outline-none"
+                          style="border-color:rgb(var(--lr-accent) / .4);box-shadow:0 0 0 3px rgb(var(--lr-accent) / .08);">
+                    <option value="">Selecciona hora</option>
+                    @for (slot of rs_availableSlots(); track slot) {
+                      <option [value]="slot" [selected]="slot === rs_time()">{{ slot }}</option>
+                    }
+                  </select>
+                }
+              </div>
+
+              <button (click)="submitRescheduleFromPanel()"
+                [disabled]="!rs_time() || (rs_date() === selectedAppointment()!.date && rs_time() === selectedAppointment()!.time)"
+                class="w-full py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-40"
+                style="background:rgb(var(--lr-accent));box-shadow:0 3px 10px rgb(var(--lr-accent) / .35);">
+                Confirmar nuevo horario
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- ── Línea de tiempo de la cita ── -->
+        <div class="px-[18px] py-[17px] border-b flex flex-col" style="border-color:rgb(var(--lr-border));">
+
+          <!-- Reservada -->
+          <div class="grid grid-cols-[22px_1fr] gap-3">
+            <div class="flex flex-col items-center">
+              <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-emerald-500 shrink-0"></i>
+              <i class="w-[2px] flex-1 bg-emerald-500"></i>
+            </div>
+            <div class="pb-4 flex flex-col gap-px">
+              <span class="text-[13px] font-semibold text-primary">Reservada</span>
+              <span class="text-[11px] text-primary-400">
+                {{ isNewCustomer() ? 'Cliente nuevo' : customerStats()!.visita + 'ª visita de este cliente' }}
+                @if (bookedAtLabel(); as cuando) { · {{ cuando }} }
+              </span>
+            </div>
+          </div>
+
+          <!-- Pago -->
+          <div class="grid grid-cols-[22px_1fr] gap-3">
+            <div class="flex flex-col items-center">
+              @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-white border-2 shrink-0" style="border-color:#d97706;"></i>
+              } @else if (selectedAppointment()!.paymentStatus === 'Cancelado') {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-red-500 shrink-0"></i>
+              } @else {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-emerald-500 shrink-0"></i>
+              }
+              <i class="w-[2px] flex-1" [class.bg-emerald-500]="selectedAppointment()!.paymentStatus === 'Finalizada'"
+                 [style.background]="selectedAppointment()!.paymentStatus === 'Finalizada' ? null : 'rgb(var(--lr-border))'"></i>
+            </div>
+
+            <div class="pb-4 flex flex-col gap-2.5">
+              <div class="flex justify-between gap-3">
+                <div class="flex flex-col gap-px min-w-0">
+                  <span class="text-[13px] font-semibold text-primary">
+                    {{ selectedAppointment()!.paymentStatus === 'Pendiente' ? 'Pago pendiente'
+                     : selectedAppointment()!.paymentStatus === 'Cancelado' ? 'Cita cancelada' : 'Pagada' }}
+                  </span>
+                  <span class="text-[11px] text-primary-400">
+                    @if (paymentMethodLabel(); as metodo) { {{ metodo }} · }
+                    {{ formatCLP(+(selectedAppointment()!.amount ?? 0)) }}
+                  </span>
+                </div>
+
+                <span class="shrink-0 inline-flex items-center h-[22px] px-2.5 rounded-[6px] text-[11px] font-bold"
+                      [class]="selectedAppointment()!.paymentStatus === 'Pendiente' ? 'bg-amber-50 text-amber-700'
+                             : selectedAppointment()!.paymentStatus === 'Cancelado' ? 'bg-red-50 text-red-600'
+                             : 'bg-emerald-50 text-emerald-700'">
+                  {{ selectedAppointment()!.paymentStatus === 'Pendiente' ? 'Por cobrar'
+                   : selectedAppointment()!.paymentStatus === 'Cancelado' ? 'Cancelada' : 'Confirmado' }}
+                </span>
+              </div>
+
+              @if (refundDisplay(selectedAppointment()); as r) {
+                <div class="text-[11.5px] font-semibold inline-flex w-fit items-center px-2.5 py-1 rounded-full"
+                     [style.background]="r.bg" [style.color]="r.color">
+                  {{ r.label }}
+                </div>
+              }
+
+              @if (canRetryRefund(selectedAppointment())) {
+                <div>
+                  <button (click)="retryRefund(selectedAppointment()!)"
+                    [disabled]="retryingRefundId() === selectedAppointment()!.id"
+                    class="h-8 px-3 rounded-[8px] text-[12px] font-semibold transition-all disabled:opacity-50"
+                    style="background:rgb(var(--lr-accent) / .1);color:rgb(var(--lr-accent-strong));border:1.5px solid rgb(var(--lr-accent) / .35);">
+                    {{ retryingRefundId() === selectedAppointment()!.id ? 'Reintentando…' : '↻ Reintentar reembolso' }}
+                  </button>
+                  @if (retryRefundMsg()) {
+                    <p class="mt-1.5 text-[11.5px] text-primary-500">{{ retryRefundMsg() }}</p>
+                  }
+                </div>
+              }
+
+              @if (selectedAppointment()!.paymentStatus === 'Pendiente') {
+                <div class="flex gap-2">
+                  <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Pagado')"
+                    class="h-8 px-3 rounded-[8px] text-[12px] font-semibold text-white transition-all"
+                    style="background:#10b981;">
+                    ✓ Aprobar pago
+                  </button>
+                  <button (click)="updateAppointmentStatus(selectedAppointment()!.id, 'Cancelado')"
+                    class="h-8 px-3 rounded-[8px] text-[12px] font-semibold transition-all border"
+                    style="border-color:#ef4444;color:#ef4444;">
+                    ✕ Rechazar
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Atención de la cita -->
+          <div class="grid grid-cols-[22px_1fr] gap-3">
+            <div class="flex flex-col items-center">
+              @if (selectedAppointment()!.paymentStatus === 'Finalizada') {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-emerald-500 shrink-0"></i>
+              } @else if (selectedAppointment()!.paymentStatus === 'Cancelado') {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-white border-2 border-dashed shrink-0" style="border-color:rgb(var(--lr-ink) / .25);"></i>
+              } @else {
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-white border-2 shrink-0" style="border-color:rgb(var(--lr-accent));"></i>
+              }
+              @if (isEvaluationAppointment(selectedAppointment()) && selectedAppointment()!.paymentStatus !== 'Cancelado') {
+                <i class="w-[2px] flex-1" style="background:rgb(var(--lr-border));"></i>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2.5" [class.pb-4]="isEvaluationAppointment(selectedAppointment()) && selectedAppointment()!.paymentStatus !== 'Cancelado'">
+              <div class="flex flex-col gap-px">
+                <span class="text-[13px] font-bold"
+                      [class.text-primary]="selectedAppointment()!.paymentStatus === 'Finalizada'"
+                      [class.text-primary-400]="selectedAppointment()!.paymentStatus === 'Cancelado'"
+                      [style.color]="selectedAppointment()!.paymentStatus === 'Pagado' || selectedAppointment()!.paymentStatus === 'Pendiente' ? 'rgb(var(--lr-accent-strong))' : null">
+                  {{ selectedAppointment()!.paymentStatus === 'Finalizada' ? 'Cita finalizada'
+                   : selectedAppointment()!.paymentStatus === 'Cancelado' ? 'No se realizó'
+                   : isAppointmentPast(selectedAppointment()!) ? 'Cita ya pasada' : 'Atender la cita' }}
+                </span>
+                <span class="text-[11px] text-primary-400">
+                  @if (selectedAppointment()!.paymentStatus === 'Cancelado') {
+                    La cita quedó cancelada
+                  } @else {
+                    @if (startsInLabel(); as pronto) { {{ pronto }} · }
+                    {{ aptTimeRange() }}
+                  }
+                </span>
+              </div>
+
+              @if (selectedAppointment()!.paymentStatus === 'Pagado' && isAppointmentPast(selectedAppointment()!)) {
+                <button (click)="markAsFinalized(selectedAppointment()!.id)"
+                  [disabled]="finalizingId() === selectedAppointment()!.id"
+                  class="h-8 px-3 w-fit rounded-[8px] text-[12px] font-semibold text-white transition-all disabled:opacity-50"
+                  style="background:rgb(var(--lr-ink));">
+                  {{ finalizingId() === selectedAppointment()!.id ? 'Procesando…' : '✓ Marcar como finalizada' }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Continuación tras la evaluación -->
+          @if (isEvaluationAppointment(selectedAppointment()) && selectedAppointment()!.paymentStatus !== 'Cancelado') {
+            <div class="grid grid-cols-[22px_1fr] gap-3">
+              <div class="flex flex-col items-center">
+                <i class="w-[11px] h-[11px] rounded-full mt-[3px] bg-white border-2 border-dashed shrink-0" style="border-color:rgb(var(--lr-ink) / .25);"></i>
+              </div>
+              <div class="flex flex-col gap-2.5">
+                <div class="flex flex-col gap-px">
+                  <span class="text-[13px] font-semibold text-primary-400">Agendar continuación</span>
+                  <span class="text-[11px] text-primary-300 leading-relaxed">Define el servicio real, la fecha y el precio acordado tras la evaluación.</span>
+                </div>
+                <button (click)="openContinuation(selectedAppointment()!)"
+                  class="h-[38px] rounded-[10px] text-[13px] font-bold text-white flex-center gap-1.5 transition-all hover:opacity-90"
+                  style="background:rgb(var(--lr-accent));">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Agendar continuación
+                </button>
+              </div>
+            </div>
+          }
         </div>
 
         <!-- Solicitud de cancelación del cliente -->
         @if (hasCancellationRequest(selectedAppointment())) {
-          <div class="rounded-[12px] p-4" style="border:1.5px solid rgba(239,68,68,.35);background:rgba(239,68,68,.06);">
+          <div class="px-[18px] py-4 border-b" style="border-color:rgb(var(--lr-border));background:rgba(239,68,68,.06);">
             <div class="flex items-center gap-2 mb-2">
               <span class="text-[16px]">⏳</span>
               <span class="text-[12px] font-bold uppercase tracking-wider text-red-500">Solicitud de cancelación</span>
@@ -649,92 +1212,33 @@
           </div>
         }
 
+        <!-- Nota del cliente -->
         @if (selectedAppointment()!.notes) {
-          <div class="bg-primary-50 rounded-[12px] p-4">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-400 mb-2">Notas</div>
+          <div class="px-[18px] py-3.5 border-b flex flex-col gap-1.5 bg-white"
+               style="border-color:rgb(var(--lr-border));">
+            <span class="text-[10px] font-bold uppercase tracking-[.1em] text-primary-400">Nota del cliente</span>
             <p class="text-[13px] text-primary-600 leading-relaxed break-words whitespace-pre-wrap">{{ selectedAppointment()!.notes }}</p>
           </div>
         }
 
-        <!-- Cambiar horario -->
-        @if (selectedAppointment()!.paymentStatus === 'Pagado' || selectedAppointment()!.paymentStatus === 'Pendiente') {
-        <div class="border-t border-primary-100 pt-4">
-          @if (!isRescheduling()) {
-            <button (click)="openRescheduleEdit()"
-              class="w-full py-2.5 rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
-              style="border:1.5px solid rgba(0,196,167,.4);color:#00C4A7;background:rgba(0,196,167,.06);">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>
-              </svg>
-              Cambiar horario
-            </button>
-          } @else {
-            <div class="space-y-3">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-primary-400">Nuevo horario</p>
-
-              <!-- Fecha -->
-              <div>
-                <label class="form-label">Fecha</label>
-                <input type="date" [value]="rs_date()" [min]="todayStr"
-                       (input)="rs_date.set($any($event.target).value); rs_time.set('')"
-                       class="w-full px-3 py-2.5 rounded-[10px] border text-[13px] text-primary focus:outline-none"
-                       style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
-              </div>
-
-              <!-- Hora -->
-              <div>
-                <label class="form-label">Hora</label>
-                @if (rs_availableSlots().length === 0) {
-                  <p class="text-[12px] text-primary-400 italic pt-1">Sin horarios disponibles para esa fecha</p>
-                } @else {
-                  <select [value]="rs_time()"
-                          (change)="rs_time.set($any($event.target).value)"
-                          class="w-full px-3 py-2.5 rounded-[10px] border bg-white text-[13px] text-primary focus:outline-none"
-                          style="border-color:rgba(0,196,167,.4);box-shadow:0 0 0 3px rgba(0,196,167,.08);">
-                    <option value="">Selecciona hora</option>
-                    @for (slot of rs_availableSlots(); track slot) {
-                      <option [value]="slot" [selected]="slot === rs_time()">{{ slot }}</option>
-                    }
-                  </select>
-                }
-              </div>
-
-              <!-- Acciones -->
-              <div class="flex gap-2 pt-1">
-                <button (click)="isRescheduling.set(false)"
-                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-primary-200 text-primary-500 hover:bg-primary-50 transition-colors">
-                  Cancelar
-                </button>
-                <button (click)="submitRescheduleFromPanel()"
-                  [disabled]="!rs_time() || (rs_date() === selectedAppointment()!.date && rs_time() === selectedAppointment()!.time)"
-                  class="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-40"
-                  style="background:#00C4A7;box-shadow:0 3px 10px rgba(0,196,167,.35);">
-                  Confirmar
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-        }
-
-        <!-- Cancelar cita (solo Pagado/Pendiente con más de 24h de antelación) -->
-        @if (canCancelAppointment(selectedAppointment()!)) {
-        <div class="border-t border-primary-100 pt-4">
+        <!-- Pie: accesos secundarios -->
+        <div class="px-[18px] pt-3 pb-4">
           @if (cancelError()) {
             <p class="text-[11.5px] text-red-500 text-center mb-2">{{ cancelError() }}</p>
           }
-          <button (click)="requestCancel(selectedAppointment()!)"
-            class="w-full py-2.5 rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
-            style="border:1.5px solid rgba(239,68,68,.35);color:#ef4444;background:rgba(239,68,68,.05);">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="8" y1="8" x2="16" y2="16"/>
-              <line x1="16" y1="8" x2="8" y2="16"/>
-            </svg>
-            Cancelar cita
-          </button>
+          <div class="flex items-center justify-between gap-3">
+            <button (click)="goToCustomerFile()"
+              class="text-[12px] font-semibold text-primary-400 hover:text-primary transition-colors">
+              Ver ficha del cliente
+            </button>
+            @if (canCancelAppointment(selectedAppointment()!)) {
+              <button (click)="requestCancel(selectedAppointment()!)"
+                class="text-[12px] font-semibold text-primary-400 hover:text-red-500 transition-colors">
+                Cancelar cita
+              </button>
+            }
+          </div>
         </div>
-        }
       </div>
     </div>
   }

@@ -57,7 +57,8 @@
       "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel/api-crm\" && grep -n \"module.exports\" src/controllers/appointment.controller.js && echo \"---ROUTES---\" && cat src/routes/appointment.routes.js)",
       "Bash(cd \"e:/mini-projectos/proyectos_profesionales_desarrollo/agendamiento/Agendamiento-panel\" && grep -rn \"allowedPaymentProviders\\\\|khipu\\\\|transfer\" api-crm/src/config/planCapabilities.js && echo \"===FRONT===\" && grep -rn \"allowedPaymentProviders\\\\|PaymentProvider\\\\|khipu\\\\|transfer\\\\|presencial\" professional-dashboard-angular/src/app/core/config/plan-capabilities.ts)",
       "Bash(node -e \"require\\('./src/models'\\); require\\('./src/controllers/appointment.controller'\\); require\\('./src/controllers/public.controller'\\); require\\('./src/routes/appointment.routes'\\); require\\('./src/routes/public.routes'\\); require\\('./src/jobs/payment-cleanup.job'\\); require\\('./src/utils/initGatewayPayment'\\); require\\('./src/utils/checkSlotAvailability'\\); console.log\\('Backend carga OK'\\);\")",
-      "Bash(node -e \"require\\('./src/models'\\); require\\('./src/controllers/service.controller'\\); require\\('./src/controllers/public.controller'\\); console.log\\('backend OK'\\);\")"
+      "Bash(node -e \"require\\('./src/models'\\); require\\('./src/controllers/service.controller'\\); require\\('./src/controllers/public.controller'\\); console.log\\('backend OK'\\);\")",
+      "Bash(curl -s -o /dev/null -w \"front:%{http_code}\\\\n\" http://localhost:4200/ --max-time 5)"
     ],
     "additionalDirectories": [
       "e:\\mini-projectos\\proyectos_profesionales_desarrollo\\agendamiento\\Agendamiento-panel\\api-crm\\src\\routes",
