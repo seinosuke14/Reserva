@@ -88,6 +88,32 @@ app-landing .media-float.invert .mf-tx b { color: #fff; font-size: 14px; }
 
 /* Responsive */
 @media (max-width: 900px) { app-landing .hero { padding: 108px 0 56px; } }
+
+/* En el teléfono el orden cambia: primero se elige el rubro y se ve la foto,
+   y recién después viene el titular. .hero-copy se vuelve transparente al
+   layout (display:contents) para poder intercalar la foto entre sus hijos. */
+@media (max-width: 899px) {
+  app-landing .hero-grid { gap: 0; }
+  app-landing .hero-copy { display: contents; }
+
+  app-landing .hero .eyebrow   { order: 1; }
+  app-landing .vertical-switch { order: 2; margin-top: 20px; }
+  app-landing .vsw-progress    { order: 3; }
+  app-landing .hero-media      { order: 4; margin-top: 26px; }
+  app-landing .h-hero          { order: 5; margin-top: 28px; }
+  app-landing .hero-sub        { order: 6; }
+  app-landing .hero-cta        { order: 7; }
+  app-landing .hero-meta       { order: 8; }
+
+  /* El globo sobre la foto va a 3/4 de su tamaño: en pantalla chica competía
+     con la imagen. Se escalan padding, ícono y texto por igual. */
+  app-landing .media-float { padding: 8px 10px; gap: 8px; border-radius: 9px; }
+  app-landing .media-float.invert { padding: 9px 12px; }
+  app-landing .mf-ic { width: 26px; height: 26px; border-radius: 7px; }
+  app-landing .mf-ic .material-symbols-outlined { font-size: 15px; }
+  app-landing .mf-tx b { font-size: 10px; }
+  app-landing .media-float.invert .mf-tx b { font-size: 10.5px; }
+}
 @media (max-width: 520px) {
   app-landing .media-float.mf-a { right: 6px; }
 }
