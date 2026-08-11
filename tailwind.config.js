@@ -51,8 +51,10 @@ module.exports = {
         border: 'rgb(var(--lr-border) / <alpha-value>)',
       },
       fontFamily: {
-        sans:    ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        heading: ['Fraunces', 'Georgia', 'serif'],
+        sans:    ['Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        // Se mantiene la clase font-heading para no tocar las plantillas: hoy apunta
+        // a la misma familia que el resto (tipografía única de marca).
+        heading: ['Roboto', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },

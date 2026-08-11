@@ -32,8 +32,109 @@ app-landing .feat-panel {
   padding: 34px 36px; min-height: 330px; display: flex; flex-direction: column; gap: 14px;
 }
 /* Slot de media (imagen o video) */
-app-landing .feat-media { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; }
-app-landing .feat-media-el { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--lp-canvas); }
+app-landing .feat-media { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: var(--lp-canvas); }
+/* contain, no cover: la imagen se ve completa dentro del contenedor, sin recortes. */
+app-landing .feat-media-el { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--lp-canvas); }
+
+/* ---- Carrusel de imágenes ----
+   El desplazamiento es scroll nativo con snap: en el teléfono se arrastra con el
+   dedo y en escritorio lo mueven las flechas. */
+app-landing .feat-track {
+  display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+app-landing .feat-track::-webkit-scrollbar { display: none; }
+app-landing .feat-slide { flex: 0 0 100%; scroll-snap-align: center; }
+
+app-landing .feat-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.92); border: 1px solid var(--lp-border);
+  box-shadow: 0 2px 8px rgba(11,11,12,.14); color: var(--lp-ink);
+  cursor: pointer; transition: opacity .15s ease, background .15s ease;
+}
+app-landing .feat-nav.prev { left: 10px; }
+app-landing .feat-nav.next { right: 10px; }
+app-landing .feat-nav:hover:not(:disabled) { background: #fff; }
+app-landing .feat-nav:disabled { opacity: .35; cursor: default; }
+app-landing .feat-nav .material-symbols-outlined { font-size: 20px; }
+
+/* Nombre propio: .feat-dot ya es la viñeta de los tabs y este CSS es global. */
+app-landing .feat-slide-dots {
+  position: absolute; left: 0; right: 0; bottom: 10px;
+  display: flex; justify-content: center; gap: 6px;
+}
+app-landing .feat-slide-dot {
+  width: 7px; height: 7px; padding: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(11,11,12,.22); border: 0; transition: background .15s ease, width .15s ease;
+}
+app-landing .feat-slide-dot.on { width: 18px; border-radius: 999px; background: var(--lp-accent); }
+
+@media (max-width: 520px) {
+  app-landing .feat-nav { width: 30px; height: 30px; }
+  app-landing .feat-nav.prev { left: 6px; }
+  app-landing .feat-nav.next { right: 6px; }
+}
+
+/* ---- Visor a pantalla completa ---- */
+app-landing .zoomable { cursor: zoom-in; }
+
+/* Difuminado en vez de fondo opaco: la página sigue reconociéndose detrás. */
+.feat-zoom {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(28,26,24,.34);
+  backdrop-filter: blur(14px) saturate(.9);
+  -webkit-backdrop-filter: blur(14px) saturate(.9);
+  display: flex; align-items: center; justify-content: center;
+  animation: featZoomIn .18s ease;
+}
+@keyframes featZoomIn { from { opacity: 0; } to { opacity: 1; } }
+
+.feat-zoom-track {
+  display: flex; width: 100%; height: 100%;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior: contain;
+}
+.feat-zoom-track::-webkit-scrollbar { display: none; }
+
+/* Padding mínimo: en el teléfono cada píxel cuenta para que la captura se lea. */
+.feat-zoom-img {
+  flex: 0 0 100%; scroll-snap-align: center;
+  width: 100%; height: 100%; object-fit: contain;
+  padding: 46px 4px 38px; cursor: zoom-out;
+}
+
+/* Las capturas son apaisadas: en un teléfono vertical rinden mucho más girando. */
+.feat-zoom-hint {
+  display: none;
+  position: absolute; left: 0; right: 0; bottom: 38px;
+  text-align: center; font-size: 12px; color: rgba(255,255,255,.6);
+}
+@media (max-width: 640px) and (orientation: portrait) {
+  .feat-zoom-hint { display: block; }
+}
+
+.feat-zoom-close {
+  position: absolute; top: 14px; right: 14px; z-index: 1;
+  width: 38px; height: 38px; border-radius: 50%; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.14); color: #fff; cursor: pointer;
+  transition: background .15s ease;
+}
+.feat-zoom-close:hover { background: rgba(255,255,255,.26); }
+
+/* Flechas y puntos sobre fondo oscuro */
+.feat-nav.zoom {
+  background: rgba(255,255,255,.14); border-color: transparent; color: #fff;
+  width: 40px; height: 40px;
+}
+.feat-nav.zoom:hover:not(:disabled) { background: rgba(255,255,255,.26); }
+.feat-slide-dots.zoom { bottom: 18px; }
+.feat-slide-dots.zoom .feat-slide-dot { background: rgba(255,255,255,.35); }
+.feat-slide-dots.zoom .feat-slide-dot.on { background: var(--lp-accent); }
 app-landing .feat-media-ph {
   width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
   background: var(--lp-canvas); border: 1px dashed #cbc6bc; border-radius: 14px; color: var(--lp-gray-medium);

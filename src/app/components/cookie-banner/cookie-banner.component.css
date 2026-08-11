@@ -15,7 +15,7 @@
   border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 1rem;
   box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Roboto', system-ui, sans-serif;
   animation: cookie-up .25s ease;
 }
 

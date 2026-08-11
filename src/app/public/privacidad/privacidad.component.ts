@@ -180,7 +180,7 @@ import { RouterModule } from '@angular/router';
     .terms-root {
       min-height: 100dvh;
       background: #f8fafc;
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-family: 'Roboto', system-ui, sans-serif;
       padding: 1.5rem 1rem 3rem;
     }
 

@@ -78,22 +78,18 @@ app-landing .media-float {
   padding: 11px 13px; display: flex; align-items: center; gap: 11px;
 }
 app-landing .media-float.mf-a { top: 26px; right: -14px; }
-app-landing .media-float.mf-b { bottom: 40px; left: -16px; }
 app-landing .media-float.invert { background: var(--lp-ink); border-color: var(--lp-ink); padding: 12px 16px; }
 
 app-landing .mf-ic { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-app-landing .mf-ic.dk { background: var(--lp-canvas); border: 1px solid var(--lp-border); color: var(--lp-ink); }
 app-landing .mf-ic .material-symbols-outlined { font-size: 20px; }
 app-landing .media-float.invert .mf-ic { color: var(--lp-accent); }
 app-landing .mf-tx b { display: block; font-size: 13px; font-weight: 700; letter-spacing: -.01em; color: var(--lp-ink); }
-app-landing .mf-tx span { font-size: 11px; color: var(--lp-gray-medium); }
 app-landing .media-float.invert .mf-tx b { color: #fff; font-size: 14px; }
 
 /* Responsive */
 @media (max-width: 900px) { app-landing .hero { padding: 108px 0 56px; } }
 @media (max-width: 520px) {
   app-landing .media-float.mf-a { right: 6px; }
-  app-landing .media-float.mf-b { left: 6px; }
 }
 @media (prefers-reduced-motion: reduce) {
   app-landing .hero-demo .arw, app-landing .vsw, app-landing .vsw-bar-fill { transition: none; }

@@ -101,8 +101,8 @@
 }
 
 .referral-card__stat-value {
-  font-family: Fraunces, Georgia, serif;
   font-size: 18px;
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -.02em;
   color: #fff;
