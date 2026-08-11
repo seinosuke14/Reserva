@@ -1,15 +1,18 @@
 <header class="nav">
   <div class="container nav-inner">
-    <div class="brand">
+    <!-- El logo vuelve al inicio de la landing -->
+    <a routerLink="/" class="brand" (click)="goHome()" aria-label="Ir al inicio">
       <img src="IconoLetsReserve.png" alt="Lets Reserve" class="brand-mark" />
       <span class="brand-text">Lets <span class="accent">Reserve</span></span>
-    </div>
+    </a>
+
     <nav class="nav-links">
       <a routerLink="." fragment="beneficios">Beneficios</a>
       <a routerLink="." fragment="producto">Producto</a>
       <a routerLink="." fragment="precios">Precios</a>
       <a routerLink="." fragment="faq">Preguntas</a>
     </nav>
+
     <div class="nav-cta">
       @if (isAuthenticated()) {
         <a [routerLink]="dashboardRoute()" class="btn btn-ghost btn-sm">Ir a dashboard</a>
@@ -24,5 +27,41 @@
         </a>
       }
     </div>
+
+    <!-- Menú del teléfono: guarda secciones y accesos de cuenta -->
+    <button type="button" class="nav-burger" (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()" aria-label="Menú">
+      <span class="material-symbols-outlined">{{ menuOpen() ? 'close' : 'menu' }}</span>
+    </button>
   </div>
+
+  @if (menuOpen()) {
+    <div class="nav-sheet">
+      <nav class="nav-sheet-links">
+        <a routerLink="." fragment="beneficios" (click)="closeMenu()">Beneficios</a>
+        <a routerLink="." fragment="producto" (click)="closeMenu()">Producto</a>
+        <a routerLink="." fragment="precios" (click)="closeMenu()">Precios</a>
+        <a routerLink="." fragment="faq" (click)="closeMenu()">Preguntas</a>
+      </nav>
+
+      <div class="nav-sheet-cta">
+        @if (isAuthenticated()) {
+          <a [routerLink]="dashboardRoute()" class="btn btn-primary" (click)="closeMenu()">Ir a dashboard</a>
+        } @else {
+          <a routerLink="/login" class="btn btn-outline" (click)="closeMenu()">Iniciar sesión</a>
+          <a routerLink="/registro" class="btn btn-primary" (click)="closeMenu()">
+            Prueba gratis
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        }
+      </div>
+    </div>
+  }
 </header>
+
+@if (menuOpen()) {
+  <div class="nav-backdrop" (click)="closeMenu()"></div>
+}
