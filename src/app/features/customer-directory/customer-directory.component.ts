@@ -30,6 +30,8 @@ interface IAppointment {
   date: string;
   time: string;
   paymentStatus: 'Pagado' | 'Pendiente' | 'Cancelado';
+  /** La API lo devuelve; puede venir como string (DECIMAL). */
+  amount?: number | string | null;
   notes: string | null;
   service: { id: string; name: string; duration?: number } | null;
 }
@@ -83,14 +85,13 @@ export class CustomerDirectoryComponent implements OnInit, OnDestroy {
   private readonly blockSvc = inject(ScheduleBlockService);
   private readonly route    = inject(ActivatedRoute);
   readonly formatCLP = formatCLP;
-  readonly toNumber  = Number;
 
   readonly today = new Date().toISOString().slice(0, 10);
 
   customers        = signal<ICustomer[]>([]);
   searchTerm       = signal('');
-  statusFilter     = signal<'todos' | 'paid' | 'debt'>('todos');
-  sortBy           = signal<'name' | 'sessions' | 'debt'>('name');
+  statusFilter     = signal<'todos' | 'pendiente' | 'aldia'>('todos');
+  sortBy           = signal<'name' | 'sessions' | 'pendiente'>('name');
   selectedCustomer = signal<ICustomer | null>(null);
   isLoading        = signal(true);
   errorMsg         = signal<string | null>(null);
@@ -188,13 +189,41 @@ export class CustomerDirectoryComponent implements OnInit, OnDestroy {
     this.historyTo.set('');
   }
 
+  // ── Pendiente de pago ───────────────────────────────────────────────
+  // No se usa customers.status: ese campo solo se recalcula cuando se carga un
+  // pago a mano, así que una reserva sin aprobar no lo mueve. Aquí el estado se
+  // deriva de las citas, que es lo que el profesional aprueba o rechaza.
+
+  /** Citas del cliente esperando que apruebes el pago. */
+  pendingAppointments(customer: ICustomer): IAppointment[] {
+    return (customer.appointments ?? []).filter(a => a.paymentStatus === 'Pendiente');
+  }
+
+  /** Cargos cargados a mano que siguen sin pagarse y no cuelgan de una cita. */
+  private _pendingManualCharges(customer: ICustomer): IPaymentHistory[] {
+    return (customer.paymentHistory ?? []).filter(p => p.status === 'pending' && !p.appointmentId);
+  }
+
+  /** Monto total por cobrarle al cliente. */
+  pendingAmount(customer: ICustomer): number {
+    const citas   = this.pendingAppointments(customer).reduce((s, a) => s + (Number(a.amount) || 0), 0);
+    const manuales = this._pendingManualCharges(customer).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    return citas + manuales;
+  }
+
+  hasPending(customer: ICustomer): boolean {
+    return this.pendingAppointments(customer).length > 0
+        || this._pendingManualCharges(customer).length > 0;
+  }
+
   readonly filteredCustomers = computed(() => {
     const term   = this.searchTerm().toLowerCase();
     const filter = this.statusFilter();
     const sort   = this.sortBy();
 
     let result = this.customers().filter(c => {
-      if (filter !== 'todos' && c.status !== filter) return false;
+      if (filter === 'pendiente' && !this.hasPending(c)) return false;
+      if (filter === 'aldia'     &&  this.hasPending(c)) return false;
       if (!term) return true;
       return c.name.toLowerCase().includes(term) || (c.email ?? '').toLowerCase().includes(term);
     });
@@ -203,12 +232,15 @@ export class CustomerDirectoryComponent implements OnInit, OnDestroy {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     } else if (sort === 'sessions') {
       result = [...result].sort((a, b) => (b.appointments?.length ?? 0) - (a.appointments?.length ?? 0));
-    } else if (sort === 'debt') {
-      result = [...result].sort((a, b) => Number(b.debtAmount ?? 0) - Number(a.debtAmount ?? 0));
+    } else if (sort === 'pendiente') {
+      result = [...result].sort((a, b) => this.pendingAmount(b) - this.pendingAmount(a));
     }
 
     return result;
   });
+
+  /** Cuántos clientes tienen algo por cobrar: se muestra junto al filtro. */
+  readonly pendingCount = computed(() => this.customers().filter(c => this.hasPending(c)).length);
 
   totalPaid(customer: ICustomer): number {
     return (customer.paymentHistory ?? [])
