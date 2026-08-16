@@ -65,20 +65,27 @@
     <!-- Encabezado: fecha, nombre, link y nueva cita -->
     <div class="bg-white border-b px-5 md:px-[26px] py-[18px] flex flex-wrap items-center justify-between gap-4"
          style="border-color:rgb(var(--lr-border));">
-      <div class="min-w-0">
+      <div class="min-w-0 w-full sm:w-auto">
         <div class="text-[11px] font-bold uppercase tracking-[.12em] text-primary-400">{{ todayLabel }}</div>
         <div class="font-heading text-[26px] leading-tight tracking-[-.02em] text-primary truncate">{{ ownerName() }}</div>
       </div>
 
-      <!-- En móvil el link ocupa su propia fila, sobre el botón de nueva cita. -->
-      <div class="flex items-center gap-2.5 flex-wrap justify-end flex-1">
+      <!-- En móvil el link ocupa su propia fila, sobre el botón de nueva cita.
+           min-w-0 es imprescindible: sin él, el ancho mínimo de este bloque es
+           el de la URL entera y empuja el panel fuera de la pantalla. -->
+      <div class="flex items-center gap-2.5 flex-wrap justify-end flex-1 min-w-0 w-full sm:w-auto">
         @if (bookingLink(); as link) {
-          <div class="w-full sm:w-auto flex items-center gap-2 h-9 pl-3 pr-1.5 rounded-[9px] border transition-colors hover:border-accent/50"
+          <div class="w-full sm:w-auto max-w-full min-w-0 flex items-center gap-2 py-1.5 sm:py-0 sm:h-9 pl-3 pr-1.5 rounded-[9px] border transition-colors hover:border-accent/50"
                style="border-color:rgb(var(--lr-border));background:rgb(var(--lr-canvas));">
             <a [href]="link.url" target="_blank" rel="noopener"
                class="flex items-center gap-1.5 group min-w-0 flex-1 sm:flex-none"
                [title]="link.label + ' — abrir en una pestaña nueva'">
-              <span class="text-[12px] truncate sm:whitespace-nowrap text-primary-400 group-hover:underline">{{ link.base }}<span class="font-semibold text-primary">{{ link.slug }}</span></span>
+              <!-- En el teléfono el dominio y el identificador se apilan: en una
+                   sola línea la URL se recorta y deja de reconocerse. -->
+              <span class="min-w-0 flex flex-col sm:flex-row text-[12px] leading-tight group-hover:underline">
+                <span class="text-primary-400 truncate">{{ link.base }}</span>
+                <span class="font-semibold text-primary truncate">{{ link.slug }}</span>
+              </span>
               <svg width="13" height="13" fill="none" stroke-width="2" viewBox="0 0 24 24"
                    class="shrink-0" style="stroke:rgb(var(--lr-accent));">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -94,7 +101,7 @@
           </div>
         }
         <button type="button" (click)="goToAgenda()"
-          class="h-9 px-[15px] rounded-[9px] text-[13px] font-semibold text-white flex items-center gap-1.5 transition-all hover:-translate-y-px"
+          class="w-full sm:w-auto shrink-0 h-9 px-[15px] rounded-[9px] text-[13px] font-semibold text-white flex items-center justify-center gap-1.5 transition-all hover:-translate-y-px"
           style="background:rgb(var(--lr-accent));box-shadow:0 3px 12px rgb(var(--lr-accent) / .35);">
           <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M12 5v14M5 12h14"/>
